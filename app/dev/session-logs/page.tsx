@@ -15,6 +15,7 @@ import type {
   CleanedAndErroredResult,
 } from "@/lib/session-logs";
 import { dateToCampusWeek, campusWeekToDateRange } from "@/lib/time";
+import { SessionHeatMap } from "./session-heat-map";
 import {
   Card,
   CardContent,
@@ -170,6 +171,9 @@ export default async function SessionLogsTestPage({ searchParams }: PageProps) {
           )}
         </CardContent>
       </Card>
+
+      {/* Session Heat Map */}
+      <SessionHeatMap completedStudy={completedStudy} completedFd={completedFd} />
 
       {/* Scholars Currently in Room */}
       <Card>
