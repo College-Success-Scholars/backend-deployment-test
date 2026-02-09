@@ -14,6 +14,7 @@ import type {
   ScholarWithCompletedSession,
   CleanedAndErroredResult,
 } from "@/lib/session-logs";
+import { dateToCampusWeek, campusWeekToDateRange } from "@/lib/time";
 import {
   Card,
   CardContent,
@@ -22,6 +23,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 export const metadata = {
   title: "Session Logs Test | Dev Tools",
@@ -48,7 +51,29 @@ function formatDate(iso: string): string {
   });
 }
 
-export default async function SessionLogsTestPage() {
+type PageProps = {
+  searchParams: Promise<{ week?: string }>;
+};
+
+export default async function SessionLogsTestPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const weekParam = params.week;
+  const weekNum =
+    weekParam != null && weekParam !== ""
+      ? Math.max(1, Math.min(30, parseInt(weekParam, 10) || 1))
+      : null;
+
+  const range =
+    weekNum != null ? campusWeekToDateRange(weekNum) : null;
+
+  // For DB queries: include full last day (end of Sunday)
+  const startDate = range?.startDate ?? undefined;
+  const endDate = range
+    ? new Date(range.endDate.getTime() + ONE_DAY_MS - 1)
+    : undefined;
+
+  const dateRangeOpts = { startDate, endDate };
+
   const [
     cleanedStudy,
     cleanedFd,
@@ -57,13 +82,15 @@ export default async function SessionLogsTestPage() {
     completedStudy,
     completedFd,
   ] = await Promise.all([
-    getStudySessionCleanedAndErrored(),
-    getFrontDeskCleanedAndErrored(),
-    getStudySessionScholarsInRoom(),
-    getFrontDeskScholarsInRoom(),
-    getStudySessionCompletedSessions(),
-    getFrontDeskCompletedSessions(),
+    getStudySessionCleanedAndErrored(dateRangeOpts),
+    getFrontDeskCleanedAndErrored(dateRangeOpts),
+    getStudySessionScholarsInRoom(dateRangeOpts),
+    getFrontDeskScholarsInRoom(dateRangeOpts),
+    getStudySessionCompletedSessions(dateRangeOpts),
+    getFrontDeskCompletedSessions(dateRangeOpts),
   ]);
+
+  const currentCampusWeek = dateToCampusWeek(new Date());
 
   return (
     <div className="container mx-auto max-w-5xl space-y-8 py-12">
@@ -82,6 +109,67 @@ export default async function SessionLogsTestPage() {
           Study session: study_session_logs. Front desk: front_desk_logs table.
         </p>
       </div>
+
+      {/* Time utilities */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Time utilities</CardTitle>
+          <CardDescription>
+            Filter sessions by campus week. Uses academic calendar from lib/time.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="text-muted-foreground">
+              Current campus week:
+            </span>
+            <Badge variant="secondary">
+              {currentCampusWeek ?? "—"}
+            </Badge>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-sm mb-2">
+              View sessions for a specific week:
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {Array.from({ length: 25 }, (_, i) => i + 1).map((w) => (
+                <Link
+                  key={w}
+                  href={`/dev/session-logs?week=${w}`}
+                  className={`inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-sm font-medium transition-colors ${
+                    weekNum === w
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                  }`}
+                >
+                  {w}
+                </Link>
+              ))}
+            </div>
+          </div>
+          {range && (
+            <div className="rounded-md border bg-muted/50 p-3 text-sm">
+              <span className="font-medium">Week {range.weekNumber}:</span>{" "}
+              <span className="text-muted-foreground">
+                {range.startDate.toLocaleDateString("en-US", {
+                  timeZone: "America/New_York",
+                })}{" "}
+                -{" "}
+                {range.endDate.toLocaleDateString("en-US", {
+                  timeZone: "America/New_York",
+                })}{" "}
+                (ET)
+              </span>
+              <Link
+                href="/dev/session-logs"
+                className="ml-3 text-sm text-muted-foreground hover:text-foreground underline"
+              >
+                Clear filter
+              </Link>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Scholars Currently in Room */}
       <Card>
