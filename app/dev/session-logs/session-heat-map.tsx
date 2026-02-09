@@ -149,28 +149,45 @@ export function SessionHeatMap({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Session Heat Map</CardTitle>
-          <CardDescription>
-            Activity by day and time (Mon–Fri, 8am–8pm)
-          </CardDescription>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle>Session Heat Map</CardTitle>
+              <CardDescription>
+                Activity by day and time (Mon–Fri, 8am–8pm)
+              </CardDescription>
+            </div>
+            <div className="inline-flex h-9 w-64 rounded-lg border bg-muted/50 p-0.5">
+              <Skeleton className="m-1 h-7 flex-1 rounded-md animate-pulse" />
+              <Skeleton className="m-1 h-7 flex-1 rounded-md animate-pulse" />
+              <Skeleton className="m-1 h-7 flex-1 rounded-md animate-pulse" />
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col gap-3">
-            <div className="h-9 w-64 rounded-md">
-              <Skeleton className="h-full w-full animate-pulse" />
-            </div>
-            <div className="grid grid-cols-[auto_1fr] gap-2">
-              {Array.from({ length: 13 }, (_, i) => (
-                <div key={i} className="flex gap-1">
-                  {Array.from({ length: 6 }, (_, j) => (
+          <div className="h-[min(400px,50vh)] w-full">
+            <div className="grid h-full w-full grid-cols-[auto_repeat(5,1fr)] grid-rows-[auto_repeat(12,minmax(0,1fr))] gap-1">
+              <div className="col-start-1 row-start-1" aria-hidden />
+              {DAYS.map((day) => (
+                <Skeleton
+                  key={day}
+                  className="min-h-0 min-w-0 animate-pulse rounded"
+                />
+              ))}
+              {Array.from({ length: 12 }, (_, h) => (
+                <div key={h} className="contents">
+                  <Skeleton className="min-h-0 min-w-0 animate-pulse rounded" />
+                  {Array.from({ length: 5 }, (_, d) => (
                     <Skeleton
-                      key={j}
-                      className="h-8 flex-1 min-w-[24px] animate-pulse"
+                      key={d}
+                      className="min-h-0 min-w-0 animate-pulse rounded"
                     />
                   ))}
                 </div>
               ))}
             </div>
+          </div>
+          <div className="mt-3 flex items-center gap-2 text-xs">
+            <Skeleton className="h-4 w-48 animate-pulse rounded" />
           </div>
         </CardContent>
       </Card>
