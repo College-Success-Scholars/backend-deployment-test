@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useMemo, useState } from "react";
 
 /**
@@ -101,6 +102,8 @@ function getSortValue<T>(row: T, col: ScholarDataTableColumn<T>): string | numbe
 
 type SortDirection = "asc" | "desc";
 
+type SortState = { columnId: string | null; direction: SortDirection };
+
 export function ScholarDataTable<T>({
   data,
   rowKeyField,
@@ -110,8 +113,8 @@ export function ScholarDataTable<T>({
   emptyMessage = "No records",
   className,
 }: ScholarDataTableProps<T>) {
-  const [sortColumnId, setSortColumnId] = useState<string | null>(null);
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [sortState, setSortState] = useState<SortState>({ columnId: null, direction: "asc" });
+  const { columnId: sortColumnId, direction: sortDirection } = sortState;
 
   const hasNameUid = nameColumn != null || uidColumn != null;
   const resolvedColumns: ScholarDataTableColumn<T>[] = hasNameUid
@@ -148,13 +151,12 @@ export function ScholarDataTable<T>({
   const handleSort = (columnId: string) => {
     const col = resolvedColumns.find((c) => c.id === columnId);
     if (!col?.sortable) return;
-    setSortColumnId((prev) => {
-      if (prev === columnId) {
-        setSortDirection((d) => (d === "asc" ? "desc" : "asc"));
-        return columnId;
+    setSortState((prev) => {
+      if (prev.columnId === columnId) {
+        if (prev.direction === "asc") return { columnId, direction: "desc" };
+        return { columnId: null, direction: "asc" };
       }
-      setSortDirection("asc");
-      return columnId;
+      return { columnId, direction: "asc" };
     });
   };
 
@@ -197,18 +199,18 @@ export function ScholarDataTable<T>({
                   <button
                     type="button"
                     onClick={() => handleSort(col.id)}
-                    className="inline-flex items-center gap-1 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded px-1 -mx-1"
+                    className="inline-flex items-center gap-1.5 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded px-1 -mx-1 text-left"
                   >
-                    {col.header}
                     {sortColumnId === col.id ? (
                       sortDirection === "asc" ? (
-                        <span className="text-muted-foreground" aria-label="Sorted ascending">↑</span>
+                        <ArrowUp className="size-4 shrink-0 text-muted-foreground" aria-label="Sorted ascending" />
                       ) : (
-                        <span className="text-muted-foreground" aria-label="Sorted descending">↓</span>
+                        <ArrowDown className="size-4 shrink-0 text-muted-foreground" aria-label="Sorted descending" />
                       )
                     ) : (
-                      <span className="text-muted-foreground/50" aria-hidden>↕</span>
+                      <ArrowUpDown className="size-4 shrink-0 text-muted-foreground/50" aria-hidden />
                     )}
+                    {col.header}
                   </button>
                 ) : (
                   col.header
