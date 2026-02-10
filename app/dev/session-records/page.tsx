@@ -164,7 +164,7 @@ export default function SessionRecordsTestPage() {
           <div>
             <p className="text-muted-foreground text-sm mb-2">Quick week links:</p>
             <div className="flex flex-wrap gap-1">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((w) => (
+              {Array.from({ length: 25 }, (_, i) => i + 1).map((w) => (
                 <Link
                   key={w}
                   href={`/dev/session-records?week=${w}${uidParam ? `&uid=${uidParam}` : ""}`}
