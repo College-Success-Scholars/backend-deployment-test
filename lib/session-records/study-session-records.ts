@@ -2,28 +2,26 @@
 
 import { createClient } from "@/lib/supabase/server";
 import {
-  fetchFrontDeskLogs,
+  fetchStudySessionLogs,
   getScholarsWithValidEntryExit,
-  SESSION_TYPE_FRONT_DESK,
+  SESSION_TYPE_STUDY,
 } from "@/lib/session-logs";
 import { campusWeekToDateRange } from "@/lib/time";
 import { EMPTY_WEEKLY_MINUTES, fetchAllUserUids, getWeekFetchEnd } from "./utils";
 import { computeWeeklyMinutesByUid } from "./weekly-minutes";
 
 /**
- * Front desk records: sync and read public.front_desk_records from ticket data.
+ * Study session records: sync and read public.study_session_records from ticket data.
  *
- * Reusable pattern for study_session_records: mirror this file with
- * fetchStudySessionLogs, getScholarsWithValidEntryExit (study session config),
- * computeWeeklyMinutesByUid, and a study_session_records table with the same
- * column shape (uid, week_num, mon_min .. fri_min, excuse_min, excuse).
+ * Same pattern as front_desk_records: minutes from study_session_logs (entry/exit pairs),
+ * same column shape (uid, week_num, mon_min .. fri_min, excuse_min, excuse).
  */
 
 /**
- * Row shape for public.front_desk_records.
+ * Row shape for public.study_session_records.
  * uid/week_num define the row; day columns are minutes for that week.
  */
-export interface FrontDeskRecordRow {
+export interface StudySessionRecordRow {
   id: number;
   uid: number | null;
   week_num: number | null;
@@ -37,45 +35,45 @@ export interface FrontDeskRecordRow {
 }
 
 /**
- * Get a single front_desk_record by scholar uid and campus week number.
+ * Get a single study_session_record by scholar uid and campus week number.
  * Returns null if no row exists.
  */
-export async function getFrontDeskRecord(
+export async function getStudySessionRecord(
   uid: number,
   weekNum: number
-): Promise<FrontDeskRecordRow | null> {
+): Promise<StudySessionRecordRow | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("front_desk_records")
+    .from("study_session_records")
     .select("*")
     .eq("uid", uid)
     .eq("week_num", weekNum)
     .maybeSingle();
 
   if (error) throw error;
-  return data as FrontDeskRecordRow | null;
+  return data as StudySessionRecordRow | null;
 }
 
 /**
- * Get a single front_desk_record by scholar uid (string, as in users.uid) and campus week number.
+ * Get a single study_session_record by scholar uid (string, as in users.uid) and campus week number.
  * Returns null if no row exists. Use when you have uid from UserProfile.
  */
-export async function getFrontDeskRecordByUidString(
+export async function getStudySessionRecordByUidString(
   uid: string,
   weekNum: number
-): Promise<FrontDeskRecordRow | null> {
+): Promise<StudySessionRecordRow | null> {
   const n = parseInt(uid, 10);
   if (Number.isNaN(n)) return null;
-  return getFrontDeskRecord(n, weekNum);
+  return getStudySessionRecord(n, weekNum);
 }
 
 /**
- * Sync front_desk_records for a given campus week and optional single uid.
- * Computes minutes from front_desk_logs (entry/exit pairs) and upserts one row per uid.
+ * Sync study_session_records for a given campus week and optional single uid.
+ * Computes minutes from study_session_logs (entry/exit pairs) and upserts one row per uid.
  * - If uid is provided, only that scholar is synced.
  * - If uid is omitted, all uids present in the logs for that week are synced (no empty rows for users with no tickets).
  */
-export async function syncFrontDeskRecordsForWeek(
+export async function syncStudySessionRecordsForWeek(
   weekNum: number,
   uid?: number
 ): Promise<{ upserted: number }> {
@@ -83,12 +81,12 @@ export async function syncFrontDeskRecordsForWeek(
   if (!range) throw new Error(`Invalid week number: ${weekNum}`);
 
   const fetchEnd = getWeekFetchEnd(range);
-  const rows = await fetchFrontDeskLogs({
+  const rows = await fetchStudySessionLogs({
     startDate: range.startDate,
     endDate: fetchEnd,
   });
   const sessions = getScholarsWithValidEntryExit(rows, undefined, {
-    sessionType: SESSION_TYPE_FRONT_DESK,
+    sessionType: SESSION_TYPE_STUDY,
   });
   const minutesByUid = computeWeeklyMinutesByUid(sessions, {
     startDate: range.startDate,
@@ -114,11 +112,11 @@ export async function syncFrontDeskRecordsForWeek(
     if (Number.isNaN(uidNum)) continue;
 
     const mins = minutesByUid.get(uidStr)!;
-    const existing = await getFrontDeskRecord(uidNum, weekNum);
+    const existing = await getStudySessionRecord(uidNum, weekNum);
 
     if (existing) {
       const { error } = await supabase
-        .from("front_desk_records")
+        .from("study_session_records")
         .update({
           mon_min: mins.mon_min,
           tues_min: mins.tues_min,
@@ -129,7 +127,7 @@ export async function syncFrontDeskRecordsForWeek(
         .eq("id", existing.id);
       if (error) throw error;
     } else {
-      const { error } = await supabase.from("front_desk_records").insert({
+      const { error } = await supabase.from("study_session_records").insert({
         uid: uidNum,
         week_num: weekNum,
         mon_min: mins.mon_min,
@@ -149,11 +147,11 @@ export async function syncFrontDeskRecordsForWeek(
 }
 
 /**
- * Sync front_desk_records for a given campus week for all uids in public.users.
- * For each user, computes minutes from front_desk_logs for that week and upserts.
+ * Sync study_session_records for a given campus week for all uids in public.users.
+ * For each user, computes minutes from study_session_logs for that week and upserts.
  * Users with no tickets in that week get a row with zero minutes (so they appear in records).
  */
-export async function syncFrontDeskRecordsForWeekAllUids(
+export async function syncStudySessionRecordsForWeekAllUids(
   weekNum: number
 ): Promise<{ upserted: number }> {
   const range = campusWeekToDateRange(weekNum);
@@ -161,12 +159,12 @@ export async function syncFrontDeskRecordsForWeekAllUids(
 
   const fetchEnd = getWeekFetchEnd(range);
   const allUids = await fetchAllUserUids();
-  const rows = await fetchFrontDeskLogs({
+  const rows = await fetchStudySessionLogs({
     startDate: range.startDate,
     endDate: fetchEnd,
   });
   const sessions = getScholarsWithValidEntryExit(rows, undefined, {
-    sessionType: SESSION_TYPE_FRONT_DESK,
+    sessionType: SESSION_TYPE_STUDY,
   });
   const minutesByUid = computeWeeklyMinutesByUid(sessions, {
     startDate: range.startDate,
@@ -182,11 +180,11 @@ export async function syncFrontDeskRecordsForWeekAllUids(
 
     const mins = minutesByUid.get(uidStr) ?? EMPTY_WEEKLY_MINUTES;
 
-    const existing = await getFrontDeskRecord(uidNum, weekNum);
+    const existing = await getStudySessionRecord(uidNum, weekNum);
 
     if (existing) {
       const { error } = await supabase
-        .from("front_desk_records")
+        .from("study_session_records")
         .update({
           mon_min: mins.mon_min,
           tues_min: mins.tues_min,
@@ -197,7 +195,7 @@ export async function syncFrontDeskRecordsForWeekAllUids(
         .eq("id", existing.id);
       if (error) throw error;
     } else {
-      const { error } = await supabase.from("front_desk_records").insert({
+      const { error } = await supabase.from("study_session_records").insert({
         uid: uidNum,
         week_num: weekNum,
         mon_min: mins.mon_min,
