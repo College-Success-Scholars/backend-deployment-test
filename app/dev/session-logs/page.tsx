@@ -24,6 +24,7 @@ import {
 import { SessionHeatMap } from "./session-heat-map";
 import {
   ScholarDataTable,
+  CollapsibleTableSection,
   type ScholarDataTableColumn,
 } from "@/components/scholar-data-table";
 import {
@@ -69,9 +70,9 @@ export default async function SessionLogsTestPage({ searchParams }: PageProps) {
   const scholarUids =
     params.uids != null && params.uids !== ""
       ? params.uids
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
       : undefined;
 
   const hasLimit =
@@ -87,7 +88,7 @@ export default async function SessionLogsTestPage({ searchParams }: PageProps) {
     completedStudy,
     completedFd,
   ] = hasLimit
-    ? await Promise.all([
+      ? await Promise.all([
         getStudySessionCleanedAndErrored(dateRangeOpts),
         getFrontDeskCleanedAndErrored(dateRangeOpts),
         getStudySessionScholarsInRoom(dateRangeOpts),
@@ -95,7 +96,7 @@ export default async function SessionLogsTestPage({ searchParams }: PageProps) {
         getStudySessionCompletedSessions(dateRangeOpts),
         getFrontDeskCompletedSessions(dateRangeOpts),
       ])
-    : [
+      : [
         { allCleaned: [], allErrored: [], byScholarUid: new Map() },
         { allCleaned: [], allErrored: [], byScholarUid: new Map() },
         [],
@@ -336,10 +337,7 @@ function ScholarsInRoomTableSection({
     },
   ];
   return (
-    <div>
-      <h3 className="font-medium text-sm text-muted-foreground mb-2">
-        {title} ({data.length})
-      </h3>
+    <CollapsibleTableSection title={`${title} (${data.length})`}>
       <ScholarDataTable<Row>
         data={tableData}
         rowKeyField="scholarUid"
@@ -362,7 +360,7 @@ function ScholarsInRoomTableSection({
         }}
         columns={extraColumns}
       />
-    </div>
+    </CollapsibleTableSection>
   );
 }
 
@@ -412,10 +410,7 @@ function CompletedSessionsTableSection({
     },
   ];
   return (
-    <div>
-      <h3 className="font-medium text-sm text-muted-foreground mb-2">
-        {title} ({data.length})
-      </h3>
+    <CollapsibleTableSection title={`${title} (${data.length})`}>
       <ScholarDataTable<Row>
         data={tableData}
         rowKeyField="scholarUid"
@@ -438,7 +433,7 @@ function CompletedSessionsTableSection({
         }}
         columns={extraColumns}
       />
-    </div>
+    </CollapsibleTableSection>
   );
 }
 
@@ -454,11 +449,9 @@ function CleanedErroredSection({
   const scholars = Array.from(result.byScholarUid.entries());
 
   return (
-    <div>
-      <h3 className="font-medium text-sm text-muted-foreground mb-2">
-        {title} — {result.allCleaned.length} cleaned, {result.allErrored.length}{" "}
-        errored
-      </h3>
+    <CollapsibleTableSection
+      title={`${title} — ${result.allCleaned.length} cleaned, ${result.allErrored.length} errored`}
+    >
       {scholars.length === 0 ? (
         <p className="text-muted-foreground text-sm">No records</p>
       ) : (
@@ -506,6 +499,6 @@ function CleanedErroredSection({
           ))}
         </ul>
       )}
-    </div>
+    </CollapsibleTableSection>
   );
 }
