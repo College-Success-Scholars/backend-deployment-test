@@ -1,3 +1,4 @@
+import { getStartOfDayEastern } from "@/lib/time";
 import {
   type SessionLogRow,
   type SessionLogConfig,
@@ -175,8 +176,7 @@ export interface ScholarsInRoomOptions {
 
 /**
  * Get scholars currently in the room (valid entry without exit).
- * Uses getCleanedAndErroredTickets - pass only the cleaned tickets that are entries
- * and have no following exit in the same scholar's sequence.
+ * Only considers tickets from today (since 12am Eastern); tickets from prior dates are disregarded.
  */
 export function getScholarsCurrentlyInRoom(
   rows: SessionLogRow[],
@@ -184,7 +184,11 @@ export function getScholarsCurrentlyInRoom(
   options: ScholarsInRoomOptions = {}
 ): ScholarInRoom[] {
   const { sessionType, asOf = new Date() } = options;
-  const { byScholarUid } = getCleanedAndErroredTickets(rows, config, {
+  const startOfTodayEastern = getStartOfDayEastern(asOf).getTime();
+  const rowsFromToday = rows.filter(
+    (r) => new Date(r.created_at).getTime() >= startOfTodayEastern
+  );
+  const { byScholarUid } = getCleanedAndErroredTickets(rowsFromToday, config, {
     sessionType,
   });
   const result: ScholarInRoom[] = [];

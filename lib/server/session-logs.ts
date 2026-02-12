@@ -42,6 +42,21 @@ function toSessionLogRowStudy(row: StudySessionLogRow): SessionLogRow {
   };
 }
 
+const LOG_FETCH_REQUIRED_OPTIONS_MSG =
+  "At least one of startDate, endDate, or scholarUids (non-empty) is required to limit the search.";
+
+function requireLogFetchLimit(options: {
+  startDate?: Date;
+  endDate?: Date;
+  scholarUids?: string[];
+} | undefined): void {
+  const hasDateRange = options?.startDate != null || options?.endDate != null;
+  const hasUids = (options?.scholarUids?.length ?? 0) > 0;
+  if (!hasDateRange && !hasUids) {
+    throw new Error(LOG_FETCH_REQUIRED_OPTIONS_MSG);
+  }
+}
+
 /**
  * Fetch scholar names from public.users by uid. Server-only.
  */
@@ -67,8 +82,10 @@ export async function fetchScholarNamesByUids(
 export async function fetchFrontDeskLogs(options?: {
   startDate?: Date;
   endDate?: Date;
+  scholarUids?: string[];
   sessionType?: SessionType | string;
 }): Promise<SessionLogRow[]> {
+  requireLogFetchLimit(options);
   const supabase = await createClient();
   let query = supabase
     .from("front_desk_logs")
@@ -76,6 +93,7 @@ export async function fetchFrontDeskLogs(options?: {
     .order("created_at", { ascending: true });
   if (options?.startDate) query = query.gte("created_at", options.startDate.toISOString());
   if (options?.endDate) query = query.lte("created_at", options.endDate.toISOString());
+  if (options?.scholarUids?.length) query = query.in("scholar_uid", options.scholarUids);
   const { data, error } = await query;
   if (error) throw error;
   return (data ?? []).map((row) => toSessionLogRowFrontDesk(row as FrontDeskLogRow));
@@ -84,8 +102,10 @@ export async function fetchFrontDeskLogs(options?: {
 export async function fetchStudySessionLogs(options?: {
   startDate?: Date;
   endDate?: Date;
+  scholarUids?: string[];
   sessionType?: SessionType | string;
 }): Promise<SessionLogRow[]> {
+  requireLogFetchLimit(options);
   const supabase = await createClient();
   let query = supabase
     .from("study_session_logs")
@@ -93,6 +113,7 @@ export async function fetchStudySessionLogs(options?: {
     .order("created_at", { ascending: true });
   if (options?.startDate) query = query.gte("created_at", options.startDate.toISOString());
   if (options?.endDate) query = query.lte("created_at", options.endDate.toISOString());
+  if (options?.scholarUids?.length) query = query.in("scholar_uid", options.scholarUids);
   if (options?.sessionType) query = query.eq("session_type", options.sessionType);
   const { data, error } = await query;
   if (error) throw error;
@@ -103,6 +124,7 @@ export async function getFrontDeskCleanedAndErrored(
   options?: {
     startDate?: Date;
     endDate?: Date;
+    scholarUids?: string[];
     sessionType?: SessionType | string;
   } & CleanedAndErroredOptions
 ) {
@@ -117,7 +139,7 @@ export async function getFrontDeskCleanedAndErrored(
 }
 
 export async function getFrontDeskScholarsInRoom(
-  options?: ScholarsInRoomOptions & { startDate?: Date; endDate?: Date }
+  options?: ScholarsInRoomOptions & { startDate?: Date; endDate?: Date; scholarUids?: string[] }
 ) {
   const rows = await fetchFrontDeskLogs(options);
   const result = getScholarsCurrentlyInRoom(rows, undefined, {
@@ -131,6 +153,7 @@ export async function getFrontDeskScholarsInRoom(
 export async function getFrontDeskCompletedSessions(options?: {
   startDate?: Date;
   endDate?: Date;
+  scholarUids?: string[];
   sessionType?: SessionType | string;
 }) {
   const rows = await fetchFrontDeskLogs(options);
@@ -146,6 +169,7 @@ export async function getStudySessionCleanedAndErrored(
   options?: {
     startDate?: Date;
     endDate?: Date;
+    scholarUids?: string[];
     sessionType?: SessionType | string;
   } & CleanedAndErroredOptions
 ) {
@@ -160,7 +184,7 @@ export async function getStudySessionCleanedAndErrored(
 }
 
 export async function getStudySessionScholarsInRoom(
-  options?: ScholarsInRoomOptions & { startDate?: Date; endDate?: Date }
+  options?: ScholarsInRoomOptions & { startDate?: Date; endDate?: Date; scholarUids?: string[] }
 ) {
   const rows = await fetchStudySessionLogs(options);
   const result = getScholarsCurrentlyInRoom(rows, undefined, options ?? {});
@@ -171,6 +195,7 @@ export async function getStudySessionScholarsInRoom(
 export async function getStudySessionCompletedSessions(options?: {
   startDate?: Date;
   endDate?: Date;
+  scholarUids?: string[];
   sessionType?: SessionType | string;
 }) {
   const rows = await fetchStudySessionLogs(options);

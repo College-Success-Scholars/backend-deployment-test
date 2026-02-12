@@ -1,7 +1,12 @@
 "use client";
 
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 /**
  * ScholarDataTable – table for scholar-like and other tabular data.
@@ -236,5 +241,41 @@ export function ScholarDataTable<T>({
         </tbody>
       </table>
     </div>
+  );
+}
+
+/**
+ * Wraps a table section (title + content) so it can be collapsed/expanded in height.
+ * Width is unchanged; only vertical space is toggled.
+ */
+export function CollapsibleTableSection({
+  title,
+  children,
+  defaultOpen = false,
+}: {
+  title: React.ReactNode;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <div className="min-w-0">
+        <CollapsibleTrigger className="flex w-full items-center gap-2 rounded-md py-1 pr-2 text-left hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          {open ? (
+            <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
+          ) : (
+            <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+          )}
+          <span className="font-medium text-sm text-muted-foreground">
+            {title}
+          </span>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="pt-2">{children}</div>
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
   );
 }

@@ -55,7 +55,11 @@ export async function syncFrontDeskRecordsForWeek(
   const range = campusWeekToDateRange(weekNum);
   if (!range) throw new Error(`Invalid week number: ${weekNum}`);
   const fetchEnd = getWeekFetchEnd(range);
-  const rows = await fetchFrontDeskLogs({ startDate: range.startDate, endDate: fetchEnd });
+  const rows = await fetchFrontDeskLogs({
+    startDate: range.startDate,
+    endDate: fetchEnd,
+    scholarUids: uid !== undefined ? [String(uid)] : undefined,
+  });
   const sessions = getScholarsWithValidEntryExit(rows, undefined, {
     sessionType: SESSION_TYPE_FRONT_DESK,
   });
@@ -116,7 +120,10 @@ export async function syncFrontDeskRecordsForWeekAllUids(
   if (!range) throw new Error(`Invalid week number: ${weekNum}`);
   const fetchEnd = getWeekFetchEnd(range);
   const allUids = await fetchAllUserUids();
-  const rows = await fetchFrontDeskLogs({ startDate: range.startDate, endDate: fetchEnd });
+  const rows = await fetchFrontDeskLogs({
+    startDate: range.startDate,
+    endDate: fetchEnd,
+  });
   const sessions = getScholarsWithValidEntryExit(rows, undefined, {
     sessionType: SESSION_TYPE_FRONT_DESK,
   });
@@ -169,7 +176,11 @@ export async function syncStudySessionRecordsForWeek(
   const range = campusWeekToDateRange(weekNum);
   if (!range) throw new Error(`Invalid week number: ${weekNum}`);
   const fetchEnd = getWeekFetchEnd(range);
-  const rows = await fetchStudySessionLogs({ startDate: range.startDate, endDate: fetchEnd });
+  const rows = await fetchStudySessionLogs({
+    startDate: range.startDate,
+    endDate: fetchEnd,
+    scholarUids: uid !== undefined ? [String(uid)] : undefined,
+  });
   const sessions = getScholarsWithValidEntryExit(rows, undefined, {
     sessionType: SESSION_TYPE_STUDY,
   });
@@ -230,7 +241,10 @@ export async function syncStudySessionRecordsForWeekAllUids(
   if (!range) throw new Error(`Invalid week number: ${weekNum}`);
   const fetchEnd = getWeekFetchEnd(range);
   const allUids = await fetchAllUserUids();
-  const rows = await fetchStudySessionLogs({ startDate: range.startDate, endDate: fetchEnd });
+  const rows = await fetchStudySessionLogs({
+    startDate: range.startDate,
+    endDate: fetchEnd,
+  });
   const sessions = getScholarsWithValidEntryExit(rows, undefined, {
     sessionType: SESSION_TYPE_STUDY,
   });

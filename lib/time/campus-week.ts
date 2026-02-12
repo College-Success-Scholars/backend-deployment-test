@@ -59,8 +59,11 @@ function getEasternDayOfWeek(d: Date): number {
   return map[day] ?? 0;
 }
 
-/** Truncate a Date to its Eastern calendar day (midnight Eastern). */
-function toEasternDay(d: Date): Date {
+/**
+ * Truncate a Date to its Eastern calendar day (midnight Eastern).
+ * Exported as getStartOfDayEastern for use by callers that need "today since 12am" in Eastern.
+ */
+export function getStartOfDayEastern(d: Date): Date {
   const formatter = new Intl.DateTimeFormat("en-US", {
     timeZone: EASTERN_TIMEZONE,
     year: "numeric",
@@ -74,6 +77,11 @@ function toEasternDay(d: Date): Date {
   return parseEasternDate(
     `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
   );
+}
+
+/** Internal alias for use in this file. */
+function toEasternDay(d: Date): Date {
+  return getStartOfDayEastern(d);
 }
 
 /** Days back to reach Monday from a given Eastern day (Monday=1). */
