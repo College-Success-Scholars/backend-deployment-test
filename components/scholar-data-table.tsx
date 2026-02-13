@@ -38,6 +38,8 @@ export interface ScholarDataTableColumn<T> {
   width?: string;
   cellClassName?: string;
   sortable?: boolean;
+  /** When set, render this instead of the field value (e.g. button, combined content). */
+  renderCell?: (row: T) => React.ReactNode;
 }
 
 /**
@@ -124,19 +126,19 @@ export function ScholarDataTable<T>({
   const hasNameUid = nameColumn != null || uidColumn != null;
   const resolvedColumns: ScholarDataTableColumn<T>[] = hasNameUid
     ? [
-        ...(nameColumn
-          ? [
-              toColumn<T>("name", nameColumn.header ?? "Scholar", {
-                ...nameColumn,
-                colSpan: nameColumn.colSpan ?? 2,
-              }),
-            ]
-          : []),
-        ...(uidColumn
-          ? [toColumn<T>("uid", uidColumn.header ?? "UID", uidColumn)]
-          : []),
-        ...columns,
-      ]
+      ...(nameColumn
+        ? [
+          toColumn<T>("name", nameColumn.header ?? "Scholar", {
+            ...nameColumn,
+            colSpan: nameColumn.colSpan ?? 2,
+          }),
+        ]
+        : []),
+      ...(uidColumn
+        ? [toColumn<T>("uid", uidColumn.header ?? "UID", uidColumn)]
+        : []),
+      ...columns,
+    ]
     : columns;
 
   const sortedData = useMemo(() => {
@@ -233,7 +235,7 @@ export function ScholarDataTable<T>({
                   className={`${cellClass} ${col.cellClassName ?? ""}`}
                   colSpan={col.colSpan ?? 1}
                 >
-                  {getCellDisplay(row, col)}
+                  {col.renderCell ? col.renderCell(row) : getCellDisplay(row, col)}
                 </td>
               ))}
             </tr>

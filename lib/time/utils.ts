@@ -85,3 +85,15 @@ export function getDurationMs(item: {
 }): number {
   return item.durationMs ?? item.timeInRoomMs ?? 0;
 }
+
+/**
+ * Convert a number of minutes to "Xh" and "Ym" with a newline between (e.g. 90 → "1h\n30m").
+ * Always includes both hours and minutes for consistent formatting. Use with white-space: pre-line
+ * (or similar) when rendering so the newline shows as a line break.
+ */
+export function formatMinutesToHoursAndMinutes(totalMinutes: number): string {
+  const mins = Math.round(Number(totalMinutes)) || 0;
+  const hours = Math.floor(mins / 60);
+  const minutes = mins % 60;
+  return `${hours}h\n${minutes}m`;
+}

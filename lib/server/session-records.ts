@@ -1,8 +1,10 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import { fetchFrontDeskLogs, fetchStudySessionLogs } from "@/lib/server/session-logs";
-import { getScholarsWithValidEntryExit } from "@/lib/session-logs/session-ticket-utils";
-import { SESSION_TYPE_FRONT_DESK, SESSION_TYPE_STUDY } from "@/lib/session-logs/types";
+import {
+  fetchScholarNamesByUids,
+  getFrontDeskCompletedSessions,
+  getStudySessionCompletedSessions,
+} from "@/lib/server/session-logs";
 import { campusWeekToDateRange } from "@/lib/time";
 import { EMPTY_WEEKLY_MINUTES, getWeekFetchEnd } from "@/lib/session-records/utils";
 import { computeWeeklyMinutesByUid } from "@/lib/session-records/weekly-minutes";
@@ -55,13 +57,10 @@ export async function syncFrontDeskRecordsForWeek(
   const range = campusWeekToDateRange(weekNum);
   if (!range) throw new Error(`Invalid week number: ${weekNum}`);
   const fetchEnd = getWeekFetchEnd(range);
-  const rows = await fetchFrontDeskLogs({
+  const sessions = await getFrontDeskCompletedSessions({
     startDate: range.startDate,
     endDate: fetchEnd,
     scholarUids: uid !== undefined ? [String(uid)] : undefined,
-  });
-  const sessions = getScholarsWithValidEntryExit(rows, undefined, {
-    sessionType: SESSION_TYPE_FRONT_DESK,
   });
   const minutesByUid = computeWeeklyMinutesByUid(sessions, {
     startDate: range.startDate,
@@ -120,12 +119,9 @@ export async function syncFrontDeskRecordsForWeekAllUids(
   if (!range) throw new Error(`Invalid week number: ${weekNum}`);
   const fetchEnd = getWeekFetchEnd(range);
   const allUids = await fetchAllUserUids();
-  const rows = await fetchFrontDeskLogs({
+  const sessions = await getFrontDeskCompletedSessions({
     startDate: range.startDate,
     endDate: fetchEnd,
-  });
-  const sessions = getScholarsWithValidEntryExit(rows, undefined, {
-    sessionType: SESSION_TYPE_FRONT_DESK,
   });
   const minutesByUid = computeWeeklyMinutesByUid(sessions, {
     startDate: range.startDate,
@@ -169,6 +165,62 @@ export async function syncFrontDeskRecordsForWeekAllUids(
   return { upserted };
 }
 
+/** Study session record with optional scholar display name (from public.users). */
+export type StudySessionRecordWithName = StudySessionRecordRow & {
+  scholar_name?: string | null;
+};
+
+/** Fetch all study_session_records for a week, with scholar names when available. */
+export async function getStudySessionRecordsForWeek(
+  weekNum: number
+): Promise<StudySessionRecordWithName[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("study_session_records")
+    .select("*")
+    .eq("week_num", weekNum)
+    .order("uid", { ascending: true });
+  if (error) throw error;
+  const rows = (data ?? []) as StudySessionRecordRow[];
+  if (rows.length === 0) return [];
+  const uids = [...new Set(rows.map((r) => r.uid).filter((u): u is number => u != null))].map(
+    String
+  );
+  const nameMap = await fetchScholarNamesByUids(uids);
+  return rows.map((r) => ({
+    ...r,
+    scholar_name: r.uid != null ? nameMap.get(String(r.uid)) ?? null : null,
+  }));
+}
+
+/** Front desk record with optional scholar display name (from public.users). */
+export type FrontDeskRecordWithName = FrontDeskRecordRow & {
+  scholar_name?: string | null;
+};
+
+/** Fetch all front_desk_records for a week, with scholar names when available. */
+export async function getFrontDeskRecordsForWeek(
+  weekNum: number
+): Promise<FrontDeskRecordWithName[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("front_desk_records")
+    .select("*")
+    .eq("week_num", weekNum)
+    .order("uid", { ascending: true });
+  if (error) throw error;
+  const rows = (data ?? []) as FrontDeskRecordRow[];
+  if (rows.length === 0) return [];
+  const uids = [...new Set(rows.map((r) => r.uid).filter((u): u is number => u != null))].map(
+    String
+  );
+  const nameMap = await fetchScholarNamesByUids(uids);
+  return rows.map((r) => ({
+    ...r,
+    scholar_name: r.uid != null ? nameMap.get(String(r.uid)) ?? null : null,
+  }));
+}
+
 export async function syncStudySessionRecordsForWeek(
   weekNum: number,
   uid?: number
@@ -176,13 +228,10 @@ export async function syncStudySessionRecordsForWeek(
   const range = campusWeekToDateRange(weekNum);
   if (!range) throw new Error(`Invalid week number: ${weekNum}`);
   const fetchEnd = getWeekFetchEnd(range);
-  const rows = await fetchStudySessionLogs({
+  const sessions = await getStudySessionCompletedSessions({
     startDate: range.startDate,
     endDate: fetchEnd,
     scholarUids: uid !== undefined ? [String(uid)] : undefined,
-  });
-  const sessions = getScholarsWithValidEntryExit(rows, undefined, {
-    sessionType: SESSION_TYPE_STUDY,
   });
   const minutesByUid = computeWeeklyMinutesByUid(sessions, {
     startDate: range.startDate,
@@ -241,12 +290,9 @@ export async function syncStudySessionRecordsForWeekAllUids(
   if (!range) throw new Error(`Invalid week number: ${weekNum}`);
   const fetchEnd = getWeekFetchEnd(range);
   const allUids = await fetchAllUserUids();
-  const rows = await fetchStudySessionLogs({
+  const sessions = await getStudySessionCompletedSessions({
     startDate: range.startDate,
     endDate: fetchEnd,
-  });
-  const sessions = getScholarsWithValidEntryExit(rows, undefined, {
-    sessionType: SESSION_TYPE_STUDY,
   });
   const minutesByUid = computeWeeklyMinutesByUid(sessions, {
     startDate: range.startDate,

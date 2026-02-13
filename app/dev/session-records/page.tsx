@@ -7,7 +7,16 @@ import type {
   FrontDeskRecordRow,
   StudySessionRecordRow,
 } from "@/lib/session-records";
-import { dateToCampusWeek, campusWeekToDateRange } from "@/lib/time";
+import {
+  ScholarDataTable,
+  CollapsibleTableSection,
+  type ScholarDataTableColumn,
+} from "@/components/scholar-data-table";
+import {
+  dateToCampusWeek,
+  campusWeekToDateRange,
+  formatMinutesToHoursAndMinutes,
+} from "@/lib/time";
 import {
   Card,
   CardContent,
@@ -20,14 +29,145 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+type StudyRecordRow = StudySessionRecordRow & { scholar_name?: string | null };
+type FrontDeskRecordRowWithName = FrontDeskRecordRow & {
+  scholar_name?: string | null;
+};
+
+type StudyRecordRowWithTotal = StudyRecordRow & { total: number };
+type FrontDeskRecordRowWithTotal = FrontDeskRecordRowWithName & { total: number };
+
+function addTotalStudy(row: StudyRecordRow): StudyRecordRowWithTotal {
+  const total =
+    (row.mon_min ?? 0) +
+    (row.tues_min ?? 0) +
+    (row.wed_min ?? 0) +
+    (row.thurs_min ?? 0) +
+    (row.fri_min ?? 0);
+  return { ...row, total };
+}
+
+function addTotalFrontDesk(row: FrontDeskRecordRowWithName): FrontDeskRecordRowWithTotal {
+  const total =
+    (row.mon_min ?? 0) +
+    (row.tues_min ?? 0) +
+    (row.wed_min ?? 0) +
+    (row.thurs_min ?? 0) +
+    (row.fri_min ?? 0);
+  return { ...row, total };
+}
+
+const sharedMinutesColumns: ScholarDataTableColumn<
+  StudyRecordRowWithTotal
+>[] = [
+    {
+      id: "mon",
+      header: "Mon",
+      field: "mon_min",
+      sortable: true,
+      renderCell: (row) => (
+        <span className="whitespace-pre-line">
+          {formatMinutesToHoursAndMinutes(row.mon_min ?? 0)}
+        </span>
+      ),
+    },
+    {
+      id: "tues",
+      header: "Tue",
+      field: "tues_min",
+      sortable: true,
+      renderCell: (row) => (
+        <span className="whitespace-pre-line">
+          {formatMinutesToHoursAndMinutes(row.tues_min ?? 0)}
+        </span>
+      ),
+    },
+    {
+      id: "wed",
+      header: "Wed",
+      field: "wed_min",
+      sortable: true,
+      renderCell: (row) => (
+        <span className="whitespace-pre-line">
+          {formatMinutesToHoursAndMinutes(row.wed_min ?? 0)}
+        </span>
+      ),
+    },
+    {
+      id: "thurs",
+      header: "Thu",
+      field: "thurs_min",
+      sortable: true,
+      renderCell: (row) => (
+        <span className="whitespace-pre-line">
+          {formatMinutesToHoursAndMinutes(row.thurs_min ?? 0)}
+        </span>
+      ),
+    },
+    {
+      id: "fri",
+      header: "Fri",
+      field: "fri_min",
+      sortable: true,
+      renderCell: (row) => (
+        <span className="whitespace-pre-line">
+          {formatMinutesToHoursAndMinutes(row.fri_min ?? 0)}
+        </span>
+      ),
+    },
+    {
+      id: "excuses",
+      header: "Excuses",
+      field: "excuse",
+      sortable: true,
+      renderCell: (row) => (
+        <div className="flex flex-col gap-1">
+          <span className="text-muted-foreground text-xs">
+            {row.excuse ?? "—"}
+            {row.excuse_min != null ? ` (${row.excuse_min} min excused)` : ""}
+          </span>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              /* TODO: open add-excuse flow for row.uid, row.week_num */
+            }}
+          >
+            Add excuse
+          </Button>
+        </div>
+      ),
+    },
+    {
+      id: "total",
+      header: "Total",
+      field: "total",
+      sortable: true,
+      renderCell: (row) => (
+        <span className="whitespace-pre-line">
+          {formatMinutesToHoursAndMinutes(row.total)}
+        </span>
+      ),
+    },
+  ];
+
 export default function SessionRecordsTestPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const weekParam = searchParams.get("week") ?? "";
   const uidParam = searchParams.get("uid") ?? "";
 
+  const currentCampusWeek = dateToCampusWeek(new Date());
+  const effectiveWeek =
+    weekParam !== ""
+      ? weekParam
+      : currentCampusWeek != null
+        ? String(currentCampusWeek)
+        : "";
+
   const [getUid, setGetUid] = useState(uidParam);
-  const [getWeek, setGetWeek] = useState(weekParam || "");
+  const [getWeek, setGetWeek] = useState(weekParam || String(currentCampusWeek ?? ""));
   const [record, setRecord] = useState<FrontDeskRecordRow | null | "loading">(null);
   const [recordRequested, setRecordRequested] = useState(false);
 
@@ -36,7 +176,7 @@ export default function SessionRecordsTestPage() {
   >(null);
   const [studyRecordRequested, setStudyRecordRequested] = useState(false);
 
-  const [syncWeek, setSyncWeek] = useState(weekParam || "");
+  const [syncWeek, setSyncWeek] = useState(weekParam || String(currentCampusWeek ?? ""));
   const [syncUid, setSyncUid] = useState(uidParam);
   const [syncing, setSyncing] = useState<"one" | "all" | null>(null);
   const [syncMessage, setSyncMessage] = useState<{ type: "ok" | "err"; text: string } | null>(null);
@@ -47,9 +187,17 @@ export default function SessionRecordsTestPage() {
     text: string;
   } | null>(null);
 
-  const currentCampusWeek = dateToCampusWeek(new Date());
+  const [allScholarsRecords, setAllScholarsRecords] = useState<
+    StudyRecordRow[] | "loading" | null
+  >(null);
+  const [allFrontDeskRecords, setAllFrontDeskRecords] = useState<
+    FrontDeskRecordRowWithName[] | "loading" | null
+  >(null);
+
   const weekNumForRange =
-    weekParam !== "" ? Math.max(1, Math.min(99, parseInt(weekParam, 10) || 1)) : null;
+    effectiveWeek !== ""
+      ? Math.max(1, Math.min(99, parseInt(effectiveWeek, 10) || 1))
+      : null;
   const range = weekNumForRange != null ? campusWeekToDateRange(weekNumForRange) : null;
 
   const fetchRecord = useCallback(async (uid: number, week: number) => {
@@ -96,6 +244,72 @@ export default function SessionRecordsTestPage() {
     fetchRecord(uidNum, weekNum);
     fetchStudyRecord(uidNum, weekNum);
   }, [weekParam, uidParam, fetchRecord, fetchStudyRecord]);
+
+  useEffect(() => {
+    if (!effectiveWeek) {
+      setAllScholarsRecords(null);
+      return;
+    }
+    const weekNum = parseInt(effectiveWeek, 10);
+    if (Number.isNaN(weekNum) || weekNum < 1) {
+      setAllScholarsRecords(null);
+      return;
+    }
+    let cancelled = false;
+    setAllScholarsRecords("loading");
+    fetch(`/api/dev/session-records/study?week=${weekNum}`)
+      .then((res) => {
+        if (!res.ok) return null;
+        return res.json();
+      })
+      .then((json) => {
+        if (cancelled) return;
+        if (json == null) {
+          setAllScholarsRecords(null);
+          return;
+        }
+        setAllScholarsRecords((json.data ?? []) as StudyRecordRow[]);
+      })
+      .catch(() => {
+        if (!cancelled) setAllScholarsRecords(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [effectiveWeek]);
+
+  useEffect(() => {
+    if (!effectiveWeek) {
+      setAllFrontDeskRecords(null);
+      return;
+    }
+    const weekNum = parseInt(effectiveWeek, 10);
+    if (Number.isNaN(weekNum) || weekNum < 1) {
+      setAllFrontDeskRecords(null);
+      return;
+    }
+    let cancelled = false;
+    setAllFrontDeskRecords("loading");
+    fetch(`/api/dev/session-records/front-desk?week=${weekNum}`)
+      .then((res) => {
+        if (!res.ok) return null;
+        return res.json();
+      })
+      .then((json) => {
+        if (cancelled) return;
+        if (json == null) {
+          setAllFrontDeskRecords(null);
+          return;
+        }
+        setAllFrontDeskRecords((json.data ?? []) as FrontDeskRecordRowWithName[]);
+      })
+      .catch(() => {
+        if (!cancelled) setAllFrontDeskRecords(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [effectiveWeek]);
 
   function handleGetRecord(e: React.FormEvent) {
     e.preventDefault();
@@ -494,6 +708,73 @@ export default function SessionRecordsTestPage() {
                 </div>
               )}
             </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>All scholars&apos; records</CardTitle>
+          <CardDescription>
+            Study session and front desk records for the selected week. Select a week via the links
+            above or the form, then view or add excuses below.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {!effectiveWeek ? (
+            <p className="text-muted-foreground text-sm">
+              Select a week using the quick week links or the form above to load all scholars&apos;
+              records.
+            </p>
+          ) : (
+            <>
+              <CollapsibleTableSection title="Study session records" defaultOpen={true}>
+                {allScholarsRecords === "loading" ? (
+                  <p className="text-muted-foreground text-sm">Loading…</p>
+                ) : allScholarsRecords === null || allScholarsRecords.length === 0 ? (
+                  <p className="text-muted-foreground text-sm">
+                    No study session records for week {effectiveWeek}.
+                  </p>
+                ) : (
+                  <ScholarDataTable<StudyRecordRowWithTotal>
+                    data={allScholarsRecords.map(addTotalStudy)}
+                    rowKeyField="id"
+                    nameColumn={{
+                      field: "scholar_name",
+                      fallbackField: "uid",
+                      header: "Scholar",
+                      sortable: true,
+                    }}
+                    uidColumn={{ field: "uid", sortable: true }}
+                    columns={sharedMinutesColumns}
+                    emptyMessage="No records"
+                  />
+                )}
+              </CollapsibleTableSection>
+              <CollapsibleTableSection title="Front desk records" defaultOpen={true}>
+                {allFrontDeskRecords === "loading" ? (
+                  <p className="text-muted-foreground text-sm">Loading…</p>
+                ) : allFrontDeskRecords === null || allFrontDeskRecords.length === 0 ? (
+                  <p className="text-muted-foreground text-sm">
+                    No front desk records for week {effectiveWeek}.
+                  </p>
+                ) : (
+                  <ScholarDataTable<FrontDeskRecordRowWithTotal>
+                    data={allFrontDeskRecords.map(addTotalFrontDesk)}
+                    rowKeyField="id"
+                    nameColumn={{
+                      field: "scholar_name",
+                      fallbackField: "uid",
+                      header: "Scholar",
+                      sortable: true,
+                    }}
+                    uidColumn={{ field: "uid", sortable: true }}
+                    columns={sharedMinutesColumns}
+                    emptyMessage="No records"
+                  />
+                )}
+              </CollapsibleTableSection>
+            </>
           )}
         </CardContent>
       </Card>
