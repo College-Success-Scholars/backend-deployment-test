@@ -34,3 +34,9 @@ export type {
 } from "./types";
 
 export { enrichCleanedAndErroredWithNames, enrichWithScholarNames } from "./utils";
+
+export {
+  getDoubleEntries,
+  type DoubleEntryOptions,
+  type DoubleEntry,
+} from "./double-entry";

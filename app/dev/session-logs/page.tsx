@@ -22,6 +22,7 @@ import {
   getDurationMs,
 } from "@/lib/time";
 import { SessionHeatMap } from "./session-heat-map";
+import { DoubleEntryChecker } from "@/components/double-entry-checker";
 import {
   ScholarDataTable,
   CollapsibleTableSection,
@@ -220,6 +221,15 @@ export default async function SessionLogsTestPage({ searchParams }: PageProps) {
       {/* Session Heat Map */}
       <SessionHeatMap completedStudy={completedStudy} completedFd={completedFd} />
 
+      {/* Double entries: signed into both front desk and study at same time */}
+      {hasLimit && (
+        <DoubleEntryChecker
+          completedStudy={completedStudy}
+          completedFrontDesk={completedFd}
+          defaultToleranceMinutes={5}
+        />
+      )}
+
       {/* Scholars Currently in Room */}
       <Card>
         <CardHeader>
@@ -257,13 +267,13 @@ export default async function SessionLogsTestPage({ searchParams }: PageProps) {
             title={SESSION_TYPE_STUDY}
             data={completedStudy}
             formatDuration={formatDuration}
-            formatDate={formatDate}
+            formatEntryDate={(iso) => formatEntryDate(iso, true)}
           />
           <CompletedSessionsTableSection
             title={SESSION_TYPE_FRONT_DESK}
             data={completedFd}
             formatDuration={formatDuration}
-            formatDate={formatDate}
+            formatEntryDate={(iso) => formatEntryDate(iso, true)}
           />
         </CardContent>
       </Card>
@@ -368,12 +378,12 @@ function CompletedSessionsTableSection({
   title,
   data,
   formatDuration,
-  formatDate,
+  formatEntryDate,
 }: {
   title: string;
   data: ScholarWithCompletedSession[];
   formatDuration: (ms: number) => string;
-  formatDate: (iso: string) => string;
+  formatEntryDate: (iso: string) => string;
 }) {
   type Row = ScholarWithCompletedSession & {
     enteredDisplay: string;
@@ -383,7 +393,7 @@ function CompletedSessionsTableSection({
   };
   const tableData: Row[] = data.map((row) => ({
     ...row,
-    enteredDisplay: formatDate(row.entryAt),
+    enteredDisplay: formatEntryDate(row.entryAt),
     durationDisplay: formatDuration(getDurationMs(row)),
     durationMs: getDurationMs(row),
     nameSort: (row.scholarName ?? row.scholarUid).toLowerCase(),
@@ -446,7 +456,9 @@ function CleanedErroredSection({
   title: string;
   formatDate: (iso: string) => string;
 }) {
-  const scholars = Array.from(result.byScholarUid.entries());
+  const scholars = Array.from(result.byScholarUid.entries()).filter(
+    ([_, { errored }]) => errored.length > 0
+  );
 
   return (
     <CollapsibleTableSection
