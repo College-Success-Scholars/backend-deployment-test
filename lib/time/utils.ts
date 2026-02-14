@@ -54,6 +54,7 @@ export function formatEntryDate(iso: string, showTime = false): string {
 
 /**
  * Format a duration in milliseconds as "Xh Ym Zs" (omits zero segments).
+ * Use for displaying session or overlap durations in the UI.
  */
 export function formatDuration(ms: number): string {
   const totalSeconds = Math.floor(ms / 1000);
@@ -69,6 +70,7 @@ export function formatDuration(ms: number): string {
 
 /**
  * Format an ISO date string as short date + short time in Eastern time.
+ * Use for display in tables or detail views.
  */
 export function formatDate(iso: string): string {
   return new Date(iso).toLocaleString("en-US", {
@@ -80,7 +82,8 @@ export function formatDate(iso: string): string {
 
 /**
  * Get duration in milliseconds from a session record (in-room or completed).
- * Uses durationMs for completed sessions, timeInRoomMs for in-room.
+ * Uses durationMs for completed sessions, timeInRoomMs for in-room. Use when displaying
+ * or aggregating session length from either record type.
  */
 export function getDurationMs(item: {
   timeInRoomMs?: number;

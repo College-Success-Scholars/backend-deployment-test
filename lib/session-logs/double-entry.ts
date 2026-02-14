@@ -49,11 +49,11 @@ function overlapMs(
 
 /**
  * Find scholars who were signed into both front desk and study session at the same time
- * for more than the given tolerance (default 5 minutes).
+ * for more than the given tolerance (default 5 minutes). Pass arrays from
+ * getScholarsWithValidEntryExit for study and front desk; optional toleranceMinutes.
  *
  * Uses completed entry-exit sessions only; compares every study session with every
- * front desk session for the same scholar and reports each overlapping pair that
- * meets the minimum overlap.
+ * front desk session for the same scholar and reports each overlapping pair.
  */
 export function getDoubleEntries(
   completedStudy: ScholarWithCompletedSession[],

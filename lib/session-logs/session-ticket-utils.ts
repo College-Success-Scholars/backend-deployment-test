@@ -60,10 +60,12 @@ export interface CleanedAndErroredOptions {
 }
 
 /**
- * Core utility: Categorize all tickets by scholar as cleaned or errored.
+ * Categorize all tickets by scholar as cleaned or errored. Use after fetching log rows;
+ * pass treatUnclosedEntryAsError: true for closed-period analysis, and optional sessionType
+ * to filter (e.g. SESSION_TYPE_STUDY or SESSION_TYPE_FRONT_DESK).
+ *
  * Handles: double exit, double enter, exit before enter, exit without enter,
  * and entry without same-day exit (when treatUnclosedEntryAsError is true).
- *
  * Table-agnostic: works on any array of rows matching SessionLogRow.
  */
 function filterBySessionType(
@@ -211,8 +213,8 @@ export interface ScholarsInRoomOptions {
 }
 
 /**
- * Get scholars currently in the room (valid entry without exit).
- * Only considers tickets from today (since 12am Eastern); tickets from prior dates are disregarded.
+ * Get scholars currently in the room (valid entry without exit). Pass rows and optional
+ * asOf (default now) and sessionType. Only considers tickets from the asOf day (since 12am Eastern).
  */
 export function getScholarsCurrentlyInRoom(
   rows: SessionLogRow[],
@@ -294,7 +296,8 @@ export interface ValidEntryExitOptions {
 }
 
 /**
- * Get scholars with valid entry-exit pairs and their session duration.
+ * Get scholars with valid entry-exit pairs and their session duration. Use for tables or
+ * as input to getDoubleEntries or computeWeeklyMinutesByUid. Pass optional sessionType to filter.
  */
 export function getScholarsWithValidEntryExit(
   rows: SessionLogRow[],

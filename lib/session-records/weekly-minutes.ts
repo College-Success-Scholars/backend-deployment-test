@@ -42,11 +42,10 @@ export interface WeekDateRange {
 }
 
 /**
- * Aggregate completed sessions into minutes per weekday (Mon–Fri) per scholar.
- * Sessions are attributed to the day of the entry (Eastern). Weekend sessions
- * are not counted in mon_min..fri_min (no sat/sun columns in records tables).
- *
- * Reusable for front_desk_records and study_session_records.
+ * Aggregate completed sessions into minutes per weekday (Mon–Fri) per scholar. Use with
+ * completed sessions from getScholarsWithValidEntryExit and a week range from
+ * campusWeekToDateRange. Sessions are attributed to the day of entry (Eastern);
+ * weekend sessions are not counted (no sat/sun in records tables).
  */
 export function computeWeeklyMinutesByUid(
   sessions: ScholarWithCompletedSession[],

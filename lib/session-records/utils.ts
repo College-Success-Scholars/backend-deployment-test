@@ -6,14 +6,16 @@ import type { WeeklyMinutesByDay } from "./weekly-minutes";
 
 /**
  * End of the last day of a week range (inclusive), for use as endDate when fetching logs.
- * campusWeekToDateRange returns endDate as midnight of the last day; this gives end of that day.
+ * Use with the range from campusWeekToDateRange(weekNum): campusWeekToDateRange returns
+ * endDate as midnight of the last day; getWeekFetchEnd gives end-of-day for inclusive queries.
  */
 export function getWeekFetchEnd(range: { endDate: Date }): Date {
   return new Date(range.endDate.getTime() + 24 * 60 * 60 * 1000 - 1);
 }
 
 /**
- * Zero minutes for each weekday. Use when a scholar has no tickets for the week.
+ * Zero minutes for each weekday (mon_min..fri_min). Use as the default when a scholar
+ * has no sessions for the week (e.g. when syncing records for all users).
  */
 export const EMPTY_WEEKLY_MINUTES: WeeklyMinutesByDay = {
   mon_min: 0,

@@ -1,8 +1,8 @@
 import type { CleanedAndErroredResult } from "./types";
 
 /**
- * Pure enrichment: add scholar names to a cleaned-and-errored result using a pre-fetched name map.
- * Safe to call from client or server. The name map is typically fetched server-side (e.g. in API routes).
+ * Add scholar names to a cleaned-and-errored result using a pre-fetched name map (e.g. from
+ * fetchScholarNamesByUids in lib/server/session-logs). Safe to call from client or server.
  */
 export function enrichCleanedAndErroredWithNames(
   result: CleanedAndErroredResult,
@@ -19,8 +19,8 @@ export function enrichCleanedAndErroredWithNames(
 }
 
 /**
- * Pure enrichment: add scholar names to items using a pre-fetched name map.
- * Safe to call from client or server.
+ * Add scholar names to items (e.g. ScholarInRoom[] or ScholarWithCompletedSession[]) using a
+ * pre-fetched Map<uid, name>. Safe to call from client or server.
  */
 export function enrichWithScholarNames<
   T extends { scholarUid: string; scholarName?: string | null },
