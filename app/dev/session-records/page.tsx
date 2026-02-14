@@ -173,11 +173,6 @@ function CombinedTotalProgressCell({ row }: { row: RecordRowWithProgress }) {
             <span className="whitespace-pre-line font-semibold">
               {formatMinutesToHoursAndMinutes(effectiveTotal)}
             </span>
-            {excused > 0 && (
-              <span className="text-muted-foreground text-[10px]">
-                {" "}({excused}m excused)
-              </span>
-            )}
             <span className="text-muted-foreground"> / </span>
             <span className="text-xs">{formatRequiredAsHours(req)}</span>
           </span>
