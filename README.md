@@ -126,6 +126,8 @@ Each route:
 |--------|------|--------|
 | GET | `/api/dev/session-records/front-desk?uid=&week=` | Get one front_desk_record by uid and week |
 | GET | `/api/dev/session-records/study?uid=&week=` | Get one study_session_record by uid and week |
+| PATCH | `/api/dev/session-records/front-desk/excuse` | Update excuse on a front_desk record (body: `{ uid, weekNum, excuse?, excuse_min? }`) |
+| PATCH | `/api/dev/session-records/study/excuse` | Update excuse on a study_session record (body: `{ uid, weekNum, excuse?, excuse_min? }`) |
 | POST | `/api/dev/session-records/front-desk/sync` | Sync front_desk_records for a week (body: `{ weekNum, uid? }`) |
 | POST | `/api/dev/session-records/front-desk/sync-all` | Sync all UIDs for front_desk (body: `{ weekNum }`) |
 | POST | `/api/dev/session-records/study/sync` | Sync study_session_records for a week (body: `{ weekNum, uid? }`) |
