@@ -3,10 +3,12 @@ import { EASTERN_TIMEZONE } from "./campus-week";
 /**
  * Format an ISO date string for display in the Entered column.
  * Same day (Eastern) → time only (e.g. 11:06am);
- * within last 6 days → weekday (e.g. Monday);
+ * within last 6 days → weekday (e.g. Monday), or "Weekday, 11:06am" when showTime;
  * else "Month Day, Time" (e.g. January 6th, 9:30pm).
+ *
+ * @param showTime - When true, include time for the "within 6 days" case (default false).
  */
-export function formatEntryDate(iso: string): string {
+export function formatEntryDate(iso: string, showTime = false): string {
   const d = new Date(iso);
   const todayET = new Date().toLocaleDateString("en-CA", {
     timeZone: EASTERN_TIMEZONE,
@@ -28,10 +30,11 @@ export function formatEntryDate(iso: string): string {
   const [y2, m2, d2] = entryET.split("-").map(Number);
   const daysAgo = (y1 - y2) * 372 + (m1 - m2) * 31 + (d1 - d2);
   if (daysAgo >= 1 && daysAgo <= 6) {
-    return d.toLocaleDateString("en-US", {
+    const weekday = d.toLocaleDateString("en-US", {
       timeZone: EASTERN_TIMEZONE,
       weekday: "long",
     });
+    return showTime ? `${weekday}, ${timeOnly}` : weekday;
   }
   const month = d.toLocaleDateString("en-US", {
     timeZone: EASTERN_TIMEZONE,
