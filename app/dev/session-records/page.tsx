@@ -160,7 +160,7 @@ function CombinedTotalProgressCell({ row }: { row: RecordRowWithProgress }) {
             <span className="text-muted-foreground"> / </span>
             <span className="text-xs">{formatRequiredAsHours(req)}</span>
           </span>
-          <span className="text-muted-foreground text-xs">{pct}%</span>
+          <span className="text-xs font-bold text-white">{pct}%</span>
         </>
       ) : (
         <span className="text-muted-foreground">—</span>

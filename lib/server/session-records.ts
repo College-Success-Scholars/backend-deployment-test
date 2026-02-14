@@ -249,12 +249,15 @@ export async function getStudySessionRecordsForWeek(
   );
   const nameMap = await fetchScholarNamesByUids(uids);
   const requiredMap = await fetchRequiredHoursByUids(uids);
-  return rows.map((r) => ({
-    ...r,
-    scholar_name: r.uid != null ? nameMap.get(String(r.uid)) ?? null : null,
-    fd_required: r.uid != null ? requiredMap.get(String(r.uid))?.fd_required ?? null : null,
-    ss_required: r.uid != null ? requiredMap.get(String(r.uid))?.ss_required ?? null : null,
-  }));
+  const eligibleUids = await fetchEligibleScholarUids(uids);
+  return rows
+    .filter((r) => r.uid != null && eligibleUids.has(String(r.uid)))
+    .map((r) => ({
+      ...r,
+      scholar_name: r.uid != null ? nameMap.get(String(r.uid)) ?? null : null,
+      fd_required: r.uid != null ? requiredMap.get(String(r.uid))?.fd_required ?? null : null,
+      ss_required: r.uid != null ? requiredMap.get(String(r.uid))?.ss_required ?? null : null,
+    }));
 }
 
 /** Fetch fd_required and ss_required (minutes) from public.users by uid. Server-only. */
@@ -278,6 +281,35 @@ export async function fetchRequiredHoursByUids(
     }
   }
   return map;
+}
+
+/**
+ * Returns UIDs of users who are scholars (program_role = 'scholar') and have at least one
+ * of fd_required or ss_required set and > 0. Used to filter session records for display.
+ */
+export async function fetchEligibleScholarUids(
+  uids: string[]
+): Promise<Set<string>> {
+  if (uids.length === 0) return new Set();
+  const supabase = await createClient();
+  const uniqueUids = [...new Set(uids)].filter(Boolean);
+  const { data, error } = await supabase
+    .from("users")
+    .select("uid, program_role, fd_required, ss_required")
+    .in("uid", uniqueUids);
+  if (error) throw error;
+  const eligible = new Set<string>();
+  for (const row of data ?? []) {
+    if (row.uid == null) continue;
+    const role = (row.program_role ?? "").toString().toLowerCase();
+    const fd = row.fd_required != null ? Number(row.fd_required) : 0;
+    const ss = row.ss_required != null ? Number(row.ss_required) : 0;
+    const hasRequired = fd > 0 || ss > 0;
+    if (role === "scholar" && hasRequired) {
+      eligible.add(String(row.uid));
+    }
+  }
+  return eligible;
 }
 
 /** Front desk record with optional scholar display name and required hours (from public.users). */
@@ -305,12 +337,15 @@ export async function getFrontDeskRecordsForWeek(
   );
   const nameMap = await fetchScholarNamesByUids(uids);
   const requiredMap = await fetchRequiredHoursByUids(uids);
-  return rows.map((r) => ({
-    ...r,
-    scholar_name: r.uid != null ? nameMap.get(String(r.uid)) ?? null : null,
-    fd_required: r.uid != null ? requiredMap.get(String(r.uid))?.fd_required ?? null : null,
-    ss_required: r.uid != null ? requiredMap.get(String(r.uid))?.ss_required ?? null : null,
-  }));
+  const eligibleUids = await fetchEligibleScholarUids(uids);
+  return rows
+    .filter((r) => r.uid != null && eligibleUids.has(String(r.uid)))
+    .map((r) => ({
+      ...r,
+      scholar_name: r.uid != null ? nameMap.get(String(r.uid)) ?? null : null,
+      fd_required: r.uid != null ? requiredMap.get(String(r.uid))?.fd_required ?? null : null,
+      ss_required: r.uid != null ? requiredMap.get(String(r.uid))?.ss_required ?? null : null,
+    }));
 }
 
 export async function syncStudySessionRecordsForWeek(
