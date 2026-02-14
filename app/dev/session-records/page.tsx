@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type {
   FrontDeskRecordRow,
   StudySessionRecordRow,
@@ -24,6 +24,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,7 +101,9 @@ function mergeWithOtherTable(
     const fd = r.uid != null ? fdByUid.get(r.uid) : undefined;
     const ssReq = r.ss_required ?? 0;
     const ssTotal = r.total;
-    const pct = ssReq > 0 ? (ssTotal / ssReq) * 100 : -1;
+    const excused = r.excuse_min ?? 0;
+    const effectiveTotal = ssTotal + excused;
+    const pct = ssReq > 0 ? (effectiveTotal / ssReq) * 100 : -1;
     return {
       ...r,
       fd_total: fd?.total ?? 0,
@@ -108,7 +118,9 @@ function mergeWithOtherTable(
     const study = r.uid != null ? studyByUid.get(r.uid) : undefined;
     const fdReq = r.fd_required ?? 0;
     const fdTotal = r.total;
-    const pct = fdReq > 0 ? (fdTotal / fdReq) * 100 : -1;
+    const excused = r.excuse_min ?? 0;
+    const effectiveTotal = fdTotal + excused;
+    const pct = fdReq > 0 ? (effectiveTotal / fdReq) * 100 : -1;
     return {
       ...r,
       fd_total: r.total,
@@ -126,8 +138,10 @@ function getRequiredBgClass(row: RecordRowWithProgress): string {
   const isFd = row._tableType === "fd";
   const req = isFd ? (row.fd_required ?? 0) : (row.ss_required ?? 0);
   const total = isFd ? row.fd_total : row.ss_total;
+  const excused = row.excuse_min ?? 0;
+  const effectiveTotal = total + excused;
   if (req <= 0) return "bg-muted/50";
-  const pct = (total / req) * 100;
+  const pct = (effectiveTotal / req) * 100;
   if (pct >= 90) return "bg-green-500/20";
   if (pct >= 75) return "bg-yellow-500/20";
   return "bg-red-500/20";
@@ -142,21 +156,28 @@ function CombinedTotalProgressCell({ row }: { row: RecordRowWithProgress }) {
   const isFd = row._tableType === "fd";
   const req = isFd ? row.fd_required : row.ss_required;
   const total = isFd ? row.fd_total : row.ss_total;
+  const excused = row.excuse_min ?? 0;
+  const effectiveTotal = total + excused;
   const label = isFd ? "FD" : "SS";
   const bgClass = getRequiredBgClass(row);
   const hasReq = req != null && req > 0;
-  const pct = hasReq ? Math.round((total / req) * 100) : null;
+  const pct = hasReq ? Math.round((effectiveTotal / req) * 100) : null;
   return (
     <div
       className={`flex items-center gap-3 rounded px-2 py-1 text-xs ${bgClass}`}
-      title={`${label}. Green: ≥90%, Yellow: 75–90%, Red: <75%`}
+      title={`${label}. Green: ≥90%, Yellow: 75–90%, Red: <75%.${excused > 0 ? ` Includes ${excused} min excused.` : ""}`}
     >
       {hasReq ? (
         <>
           <span>
             <span className="whitespace-pre-line font-semibold">
-              {formatMinutesToHoursAndMinutes(total)}
+              {formatMinutesToHoursAndMinutes(effectiveTotal)}
             </span>
+            {excused > 0 && (
+              <span className="text-muted-foreground text-[10px]">
+                {" "}({excused}m excused)
+              </span>
+            )}
             <span className="text-muted-foreground"> / </span>
             <span className="text-xs">{formatRequiredAsHours(req)}</span>
           </span>
@@ -169,7 +190,10 @@ function CombinedTotalProgressCell({ row }: { row: RecordRowWithProgress }) {
   );
 }
 
-const sharedMinutesColumns: ScholarDataTableColumn<RecordRowWithProgress>[] = [
+function getSharedMinutesColumns(
+  onAddExcuse: (row: RecordRowWithProgress) => void
+): ScholarDataTableColumn<RecordRowWithProgress>[] {
+  return [
     {
       id: "mon",
       header: "Mon",
@@ -240,9 +264,7 @@ const sharedMinutesColumns: ScholarDataTableColumn<RecordRowWithProgress>[] = [
             type="button"
             size="sm"
             variant="outline"
-            onClick={() => {
-              /* TODO: open add-excuse flow for row.uid, row.week_num */
-            }}
+            onClick={() => onAddExcuse(row)}
           >
             Add excuse
           </Button>
@@ -259,6 +281,129 @@ const sharedMinutesColumns: ScholarDataTableColumn<RecordRowWithProgress>[] = [
       renderCell: (row) => <CombinedTotalProgressCell row={row} />,
     },
   ];
+}
+
+function ExcuseModal({
+  open,
+  onOpenChange,
+  row,
+  onSuccess,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  row: RecordRowWithProgress | null;
+  onSuccess: () => void;
+}) {
+  const [excuse, setExcuse] = useState("");
+  const [excuseMin, setExcuseMin] = useState<string>("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Reset form when modal opens with a row
+  useEffect(() => {
+    if (open && row) {
+      setExcuse(row.excuse ?? "");
+      setExcuseMin(row.excuse_min != null ? String(row.excuse_min) : "");
+      setError(null);
+    }
+  }, [open, row]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!row || row.uid == null || row.week_num == null) return;
+    setSubmitting(true);
+    setError(null);
+    const weekNum = row.week_num;
+    const uid = row.uid;
+    const excuseMinNum = excuseMin.trim() === "" ? null : parseInt(excuseMin, 10);
+    const payload = {
+      uid,
+      weekNum,
+      excuse: excuse.trim() || null,
+      excuse_min: excuseMinNum != null && !Number.isNaN(excuseMinNum) ? excuseMinNum : null,
+    };
+    const endpoint =
+      row._tableType === "fd"
+        ? "/api/dev/session-records/front-desk/excuse"
+        : "/api/dev/session-records/study/excuse";
+    try {
+      const res = await fetch(endpoint, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setError(json.error ?? "Failed to update excuse");
+        return;
+      }
+      onSuccess();
+      onOpenChange(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Request failed");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (!row) return null;
+
+  const tableLabel = row._tableType === "fd" ? "Front desk" : "Study session";
+  const scholarLabel = row.scholar_name ?? `UID ${row.uid}`;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {row.excuse ? "Edit excuse" : "Add excuse"}
+          </DialogTitle>
+          <DialogDescription>
+            {tableLabel} · Week {row.week_num} · {scholarLabel}
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="excuse-modal-excuse">Excuse (reason)</Label>
+            <Input
+              id="excuse-modal-excuse"
+              value={excuse}
+              onChange={(e) => setExcuse(e.target.value)}
+              placeholder="e.g. Sick day, family event"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="excuse-modal-min">Minutes excused (optional)</Label>
+            <Input
+              id="excuse-modal-min"
+              type="number"
+              min={0}
+              value={excuseMin}
+              onChange={(e) => setExcuseMin(e.target.value)}
+              placeholder="e.g. 60"
+            />
+          </div>
+          {error && (
+            <p className="text-destructive text-sm">{error}</p>
+          )}
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={submitting}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={submitting}>
+              {submitting ? "Saving…" : "Save excuse"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function SessionRecordsTestPage() {
   const router = useRouter();
@@ -301,6 +446,38 @@ export default function SessionRecordsTestPage() {
   const [allFrontDeskRecords, setAllFrontDeskRecords] = useState<
     FrontDeskRecordRowWithName[] | "loading" | null
   >(null);
+
+  const [excuseModalOpen, setExcuseModalOpen] = useState(false);
+  const [excuseModalRow, setExcuseModalRow] = useState<RecordRowWithProgress | null>(null);
+
+  const refetchAllRecords = useCallback(() => {
+    if (!effectiveWeek) return;
+    const weekNum = parseInt(effectiveWeek, 10);
+    if (Number.isNaN(weekNum) || weekNum < 1) return;
+    setAllScholarsRecords("loading");
+    setAllFrontDeskRecords("loading");
+    fetch(`/api/dev/session-records/study?week=${weekNum}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        setAllScholarsRecords((json?.data ?? []) as StudyRecordRow[]);
+      })
+      .catch(() => setAllScholarsRecords(null));
+    fetch(`/api/dev/session-records/front-desk?week=${weekNum}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        setAllFrontDeskRecords((json?.data ?? []) as FrontDeskRecordRowWithName[]);
+      })
+      .catch(() => setAllFrontDeskRecords(null));
+  }, [effectiveWeek]);
+
+  const sharedMinutesColumns = useMemo(
+    () =>
+      getSharedMinutesColumns((row) => {
+        setExcuseModalRow(row);
+        setExcuseModalOpen(true);
+      }),
+    []
+  );
 
   const weekNumForRange =
     effectiveWeek !== ""
@@ -607,6 +784,12 @@ export default function SessionRecordsTestPage() {
 
   return (
     <div className="container mx-auto max-w-5xl space-y-8 py-12">
+      <ExcuseModal
+        open={excuseModalOpen}
+        onOpenChange={setExcuseModalOpen}
+        row={excuseModalRow}
+        onSuccess={refetchAllRecords}
+      />
       <div className="flex items-center gap-4">
         <Link
           href="/dev"
@@ -838,7 +1021,7 @@ export default function SessionRecordsTestPage() {
             <>
               <CollapsibleTableSection title="Study session records" defaultOpen={true}>
                 {allScholarsRecords === "loading" ||
-                allFrontDeskRecords === "loading" ? (
+                  allFrontDeskRecords === "loading" ? (
                   <p className="text-muted-foreground text-sm">Loading…</p>
                 ) : allScholarsRecords === null ||
                   allScholarsRecords.length === 0 ? (
@@ -868,7 +1051,7 @@ export default function SessionRecordsTestPage() {
               </CollapsibleTableSection>
               <CollapsibleTableSection title="Front desk records" defaultOpen={true}>
                 {allScholarsRecords === "loading" ||
-                allFrontDeskRecords === "loading" ? (
+                  allFrontDeskRecords === "loading" ? (
                   <p className="text-muted-foreground text-sm">Loading…</p>
                 ) : allFrontDeskRecords === null ||
                   allFrontDeskRecords.length === 0 ? (
