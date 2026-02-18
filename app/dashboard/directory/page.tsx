@@ -16,12 +16,9 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { UserRole } from "@/lib/auth";
+import { DirectoryDashboard } from "@/components/dashboard/directory-dashboard";
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default async function DirectoryPage() {
   const supabase = await createClient();
 
   const { data, error } = await supabase.auth.getClaims();
@@ -35,7 +32,7 @@ export default async function DashboardLayout({
   // Get user role
   // const userRole = await getUserRole(); 
   // REMEMBER TO UNCOMMENT THIS WHEN DONE TESTING and add import
-  const userRole = 'team-leader' as UserRole;
+  const userRole = 'scholar' as UserRole;
 
   return (
     <SidebarProvider>
@@ -57,14 +54,14 @@ export default async function DashboardLayout({
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Team Leader</BreadcrumbPage>
+                  <BreadcrumbPage>Directory</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          {children}
+          <DirectoryDashboard />
         </div>
       </SidebarInset>
     </SidebarProvider>

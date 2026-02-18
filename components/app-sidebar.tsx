@@ -1,9 +1,10 @@
 "use client"
 
 import * as React from "react"
-import {
+import { 
   BookOpen,
   Bot,
+  Building,
   Command,
   Frame,
   LifeBuoy,
@@ -12,6 +13,15 @@ import {
   Send,
   Settings2,
   SquareTerminal,
+  Users,
+  FileText,
+  BarChart3,
+  Shield,
+  GraduationCap,
+  UserCheck,
+  Briefcase,
+  Calendar,
+  User,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -27,15 +37,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { UserRole } from "@/lib/auth"
 
-const defaultUser = {
-  name: "User",
-  email: "",
-  avatar: "",
-};
-
-const data = {
-  user: defaultUser,
+const defaultData = {
+  user: {
+    name: "CSS",
+    email: "m@example.com",
+    avatar: "/avatars/shadcn.jpg",
+  },
   navMain: [
     {
       title: "Playground",
@@ -137,30 +146,265 @@ const data = {
   ],
   projects: [
     {
-      name: "Design Engineering",
+      name: "Internship Board",
       url: "#",
-      icon: Frame,
+      icon: Briefcase, // Internship Board: Briefcase icon
     },
     {
-      name: "Sales & Marketing",
+      name: "Events",
       url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
+      icon: Calendar, // Events: Calendar icon
     },
   ],
 }
 
-export function AppSidebar({
-  user: userProp,
-  ...props
-}: React.ComponentProps<typeof Sidebar> & {
-  user?: { name: string; email: string; avatar: string };
-}) {
-  const user = userProp ?? data.user;
+// Role-specific navigation data
+const getRoleBasedNav = (role: UserRole) => {
+  switch (role) {
+    case 'scholar':
+      return [
+        {
+          title: "Home",
+          url: "/dashboard",
+          icon: GraduationCap,
+          isActive: true,
+        },
+        {
+          title: "Directory",
+          url: "/dashboard/directory",
+          icon: User,
+          isActive: false,
+        },
+      ]
+    
+    case 'team-leader':
+      return [
+        {
+          title: "Personal Monitoring",
+          url: "/dashboard/personal",
+          icon: User,
+          isActive: true,
+        },
+        {
+          title: "Mentee Monitoring",
+          url: "/dashboard/mentee",
+          icon: Users,
+          isActive: true,
+          items: [
+            {
+              title: "Weekly Report",
+              url: "/dashboard/mentee",
+            },
+            {
+              title: "Trends (Coming Soon)",
+              url: "/dashboard/mentee/reports",
+            },
+          ],
+        },
+        {
+          title: "Room Monitoring",
+          url: "/dashboard/room",
+          icon: Building,
+          isActive: true,
+        }
+      ]
+    
+    case 'exec':
+      return [
+        {
+          title: "Executive Dashboard",
+          url: "/dashboard/exec",
+          icon: BarChart3,
+          isActive: true,
+          items: [
+            {
+              title: "Overview",
+              url: "/dashboard/exec",
+            },
+            {
+              title: "Performance",
+              url: "/dashboard/exec/performance",
+            },
+          ],
+        },
+        {
+          title: "Reports",
+          url: "/dashboard/exec/reports",
+          icon: FileText,
+          items: [
+            {
+              title: "Monthly Reports",
+              url: "/dashboard/exec/reports/monthly",
+            },
+            {
+              title: "Quarterly Reports",
+              url: "/dashboard/exec/reports/quarterly",
+            },
+          ],
+        },
+        {
+          title: "Team Overview",
+          url: "/dashboard/exec/teams",
+          icon: Users,
+          items: [
+            {
+              title: "All Teams",
+              url: "/dashboard/exec/teams",
+            },
+            {
+              title: "Team Leaders",
+              url: "/dashboard/exec/team-leaders",
+            },
+          ],
+        },
+      ]
+    
+    case 'admin':
+      return [
+        {
+          title: "Dashboard",
+          url: "/dashboard/admin",
+          icon: BarChart3,
+          isActive: true,
+          items: [
+            {
+              title: "Overview",
+              url: "/dashboard/admin",
+            },
+            {
+              title: "Analytics",
+              url: "/dashboard/admin/analytics",
+            },
+          ],
+        },
+        {
+          title: "User Management",
+          url: "/dashboard/admin/users",
+          icon: Users,
+          items: [
+            {
+              title: "All Users",
+              url: "/dashboard/admin/users",
+            },
+            {
+              title: "Roles & Permissions",
+              url: "/dashboard/admin/roles",
+            },
+          ],
+        },
+        {
+          title: "System Settings",
+          url: "/dashboard/admin/settings",
+          icon: Settings2,
+          items: [
+            {
+              title: "General",
+              url: "/dashboard/admin/settings",
+            },
+            {
+              title: "Security",
+              url: "/dashboard/admin/security",
+            },
+          ],
+        },
+      ]
+    
+    default:
+      return defaultData.navMain
+  }
+}
+
+const getRoleBasedResources = (role: UserRole) => {
+  switch (role) {
+    case 'scholar':
+      return [
+        {
+          name: "Internship Board",
+          url: "/dashboard/internship-board",
+          icon: Briefcase,
+        },
+        {
+          name: "Events",
+          url: "/dashboard/events",
+          icon: Calendar,
+        },
+      ]
+    
+    case 'team-leader':
+      return [
+        {
+          name: "Internship Board",
+          url: "/dashboard/internship-board",
+          icon: Briefcase,
+        },
+        {
+          name: "Events",
+          url: "/dashboard/events",
+          icon: Calendar,
+        }
+      ]
+    
+    case 'exec':
+      return [
+        {
+          name: "Strategic Documents",
+          url: "/dashboard/exec/documents",
+          icon: FileText,
+        },
+        {
+          name: "Board Reports",
+          url: "/dashboard/exec/reports",
+          icon: BarChart3,
+        },
+      ]
+    
+    case 'admin':
+      return [
+        {
+          name: "System Tools",
+          url: "/dashboard/admin/tools",
+          icon: Settings2,
+        },
+        {
+          name: "User Directory",
+          url: "/dashboard/admin/users",
+          icon: Users,
+        },
+      ]
+
+    default:
+      return defaultData.projects
+  }
+}
+
+const getRoleBasedSecondaryNav = (role: UserRole) => {
+  switch (role) {
+    case 'scholar':
+    case 'team-leader':
+    case 'exec':
+    case 'admin':
+      return [
+        {
+          title: "Support",
+          url: "#",
+          icon: LifeBuoy,
+        },
+      ]
+    
+    default:
+      return defaultData.navSecondary
+  }
+}
+
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  userRole?: UserRole
+}
+
+export function AppSidebar({ userRole = 'default', ...props }: AppSidebarProps) {
+  const roleNavMain = getRoleBasedNav(userRole)
+  const roleNavSecondary = getRoleBasedSecondaryNav(userRole)
+  const roleNavResources = getRoleBasedResources(userRole)
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -172,8 +416,8 @@ export function AppSidebar({
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-medium">CSS Atlas</span>
+                  <span className="truncate text-xs">{userRole.charAt(0).toUpperCase() + userRole.slice(1)}</span>
                 </div>
               </a>
             </SidebarMenuButton>
@@ -181,12 +425,12 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={roleNavMain} />
+        <NavProjects projects={roleNavResources} />
+        <NavSecondary items={roleNavSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} />
+        <NavUser user={defaultData.user} />
       </SidebarFooter>
     </Sidebar>
   )
