@@ -85,3 +85,33 @@ export async function fetchAllUserUids(): Promise<string[]> {
   if (error) throw error;
   return [...new Set((data ?? []).map((r) => String(r.uid)).filter(Boolean))];
 }
+
+/** Row shape for memo overview: all users with cohort and role for scholars vs TLs and pie chart. */
+export type MemoUserRow = {
+  uid: string;
+  first_name: string | null;
+  last_name: string | null;
+  cohort: number | null;
+  program_role: string | null;
+  fd_required: number | null;
+  ss_required: number | null;
+};
+
+/** Fetch all users with fields needed for memo (scholars table, TLs table, cohort pie). */
+export async function fetchAllUsersForMemo(): Promise<MemoUserRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("users")
+    .select("uid, first_name, last_name, cohort, program_role, fd_required, ss_required")
+    .not("uid", "is", null);
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    uid: String(r.uid),
+    first_name: r.first_name ?? null,
+    last_name: r.last_name ?? null,
+    cohort: r.cohort != null ? Number(r.cohort) : null,
+    program_role: r.program_role ?? null,
+    fd_required: r.fd_required != null ? Number(r.fd_required) : null,
+    ss_required: r.ss_required != null ? Number(r.ss_required) : null,
+  }));
+}

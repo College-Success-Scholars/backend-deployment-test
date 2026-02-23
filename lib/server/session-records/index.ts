@@ -7,6 +7,8 @@ export {
   getStudySessionRecord,
   getStudySessionRecordsForWeek,
   getFrontDeskRecordsForWeek,
+  getStudySessionRecordsForWeekAll,
+  getFrontDeskRecordsForWeekAll,
   type RecordKind,
   type StudySessionRecordWithName,
   type FrontDeskRecordWithName,

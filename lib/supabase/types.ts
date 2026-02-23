@@ -31,3 +31,8 @@ export type UserWithProfile = {
   user: User;
   profile: UserProfile | null;
 };
+
+/** app_role hierarchy (lowest to highest): null -> team_leader -> developer */
+export const APP_ROLE_ORDER = [null, "team_leader", "developer"] as const;
+
+export type AppRole = (typeof APP_ROLE_ORDER)[number];
