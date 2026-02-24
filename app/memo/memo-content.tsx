@@ -21,7 +21,7 @@ import {
 import { SessionHeatMap } from "@/app/dev/session-logs/session-heat-map";
 import type { ScholarWithCompletedSession } from "@/lib/session-logs";
 import {
-  TrafficWeeklyLineChart,
+  TrafficWeeklyLineChartBySemester,
   type WeekEntryCount,
 } from "@/app/dev/traffic/traffic-weekly-line-chart";
 import { CohortPieChart } from "./cohort-pie-chart";
@@ -254,6 +254,9 @@ export function MemoContent({
   weekLabel,
   currentCampusWeek,
   selectedWeekNum,
+  trafficCardSpan = "full",
+  trafficCardTitle,
+  trafficCardDescription,
 }: {
   scholars: MemoScholarRow[];
   teamLeaders: MemoTLRow[];
@@ -264,6 +267,12 @@ export function MemoContent({
   weekLabel: string;
   currentCampusWeek: number | null;
   selectedWeekNum: number;
+  /** "full" = single card full width; "half" = card at half width with placeholder beside it */
+  trafficCardSpan?: "full" | "half";
+  /** Traffic card header. Omit for chart default. */
+  trafficCardTitle?: string;
+  /** Traffic card description. Pass null to hide. Omit for chart default. */
+  trafficCardDescription?: string | null;
 }) {
   const router = useRouter();
   const scholarColumns = getScholarColumns();
@@ -288,8 +297,34 @@ export function MemoContent({
         />
       </div>
 
-      {/* Traffic: entry count by week */}
-      <TrafficWeeklyLineChart data={trafficWeeklyData} />
+      {/* Traffic: entry count by week (fall and spring semesters) */}
+      {trafficCardSpan === "half" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <TrafficWeeklyLineChartBySemester
+            data={trafficWeeklyData}
+            cardSpan={trafficCardSpan}
+            title={trafficCardTitle}
+            description={trafficCardDescription}
+          />
+          <Card className="flex min-h-[200px] items-center justify-center border-dashed">
+            <CardContent className="flex flex-col items-center justify-center gap-1 p-6 text-center">
+              <span className="text-sm font-medium text-muted-foreground">
+                Placeholder
+              </span>
+              <span className="text-xs text-muted-foreground">
+                Another card can go here
+              </span>
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        <TrafficWeeklyLineChartBySemester
+          data={trafficWeeklyData}
+          cardSpan={trafficCardSpan}
+          title={trafficCardTitle}
+          description={trafficCardDescription}
+        />
+      )}
 
       {/* Pie: cohort completion – FD and SS per cohort */}
       <Card className="gap-2 border-0 py-2 shadow-none">

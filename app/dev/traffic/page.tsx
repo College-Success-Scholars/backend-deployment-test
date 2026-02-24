@@ -6,7 +6,7 @@ import {
 } from "@/lib/server/traffic";
 import { dateToCampusWeek, campusWeekToDateRange } from "@/lib/time";
 import { TrafficHeatMapSection } from "./traffic-heat-map-section";
-import { TrafficWeeklyLineChart } from "./traffic-weekly-line-chart";
+import { TrafficWeeklyLineChartBySemester } from "./traffic-weekly-line-chart";
 import {
   Card,
   CardContent,
@@ -134,7 +134,7 @@ export default async function DevTrafficPage({ searchParams }: PageProps) {
         </CardContent>
       </Card>
 
-      <TrafficWeeklyLineChart data={weeklyData} />
+      <TrafficWeeklyLineChartBySemester data={weeklyData} />
 
       <Card>
         <CardHeader>

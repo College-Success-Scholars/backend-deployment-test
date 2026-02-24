@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as d3 from "d3";
 import {
   Card,
@@ -9,31 +9,83 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { WINTER_BREAK_CAMPUS_WEEK_NUMBER } from "@/lib/time";
 
 export type WeekEntryCount = { weekNumber: number; entryCount: number };
 
 interface TrafficWeeklyLineChartProps {
   data: WeekEntryCount[];
+  /** When set, x-axis shows all these weeks and missing weeks are plotted as 0. */
+  allWeekNumbers?: number[];
+  /** Label shown underneath the chart (e.g. "Fall semester"). */
+  semesterLabel?: string;
+  /** "full" = default width (600px); "half" = half width for side-by-side layout */
+  cardSpan?: "full" | "half";
+  /** Card header title. Default: "Entry count by week" */
+  title?: string;
+  /** Card description. Omit or pass null to hide. */
+  description?: string | null;
+  /** When true, render only the chart and semester label (no Card wrapper). */
+  hideCard?: boolean;
+  /** Override chart width (e.g. for side-by-side layout so two fit with gap). */
+  width?: number;
+  /** Override chart height (e.g. for half view to keep card profile square). */
+  height?: number;
 }
 
 const MARGIN = { top: 24, right: 24, bottom: 32, left: 40 };
 const DEFAULT_WIDTH = 600;
 const DEFAULT_HEIGHT = 280;
+/** Width per chart when two are shown side by side (fits in max-w-5xl with gap). */
+const SIDE_BY_SIDE_WIDTH = 460;
+/** Height per chart in half view so card profile is roughly square. */
+const HALF_VIEW_CHART_HEIGHT = 180;
 /** Same green as the traffic heat map */
 const TRAFFIC_COLOR = "#16a34a";
 
-export function TrafficWeeklyLineChart({ data }: TrafficWeeklyLineChartProps) {
+const DEFAULT_TITLE = "Entry count by week";
+const DEFAULT_DESCRIPTION = "Line graph of entry tickets per campus week (aggregate).";
+
+export function TrafficWeeklyLineChart({
+  data,
+  allWeekNumbers,
+  semesterLabel,
+  cardSpan = "full",
+  title = DEFAULT_TITLE,
+  description = DEFAULT_DESCRIPTION,
+  hideCard = false,
+  width: widthOverride,
+  height: heightOverride,
+}: TrafficWeeklyLineChartProps) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const dataWithPoints = data.filter((d) => d.entryCount > 0);
+
+  const chartData = useMemo(
+    () =>
+      allWeekNumbers != null && allWeekNumbers.length > 0
+        ? allWeekNumbers.map((weekNumber) => ({
+            weekNumber,
+            entryCount: data.find((d) => d.weekNumber === weekNumber)?.entryCount ?? 0,
+          }))
+        : data.filter((d) => d.entryCount > 0),
+    [data, allWeekNumbers]
+  );
+
+  const hasAnyData = chartData.some((d) => d.entryCount > 0);
+  const showChart = chartData.length > 0 && (allWeekNumbers != null || hasAnyData);
+
+  const totalWidth =
+    widthOverride ??
+    (cardSpan === "half" ? DEFAULT_WIDTH / 2 : DEFAULT_WIDTH);
+  const totalHeight = heightOverride ?? DEFAULT_HEIGHT;
 
   useEffect(() => {
-    if (!svgRef.current || dataWithPoints.length === 0) return;
+    if (!svgRef.current || !showChart) return;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const width = DEFAULT_WIDTH - MARGIN.left - MARGIN.right;
-    const height = DEFAULT_HEIGHT - MARGIN.top - MARGIN.bottom;
+    const width = totalWidth - MARGIN.left - MARGIN.right;
+    const height = totalHeight - MARGIN.top - MARGIN.bottom;
 
     const g = svg
       .append("g")
@@ -41,18 +93,18 @@ export function TrafficWeeklyLineChart({ data }: TrafficWeeklyLineChartProps) {
 
     const x = d3
       .scaleLinear()
-      .domain(d3.extent(dataWithPoints, (d) => d.weekNumber) as [number, number])
+      .domain(d3.extent(chartData, (d) => d.weekNumber) as [number, number])
       .range([0, width])
       .nice();
 
-    const yMax = d3.max(dataWithPoints, (d) => d.entryCount) ?? 1;
+    const yMax = d3.max(chartData, (d) => d.entryCount) ?? 1;
     const y = d3
       .scaleLinear()
       .domain([0, yMax])
       .range([height, 0])
       .nice();
 
-    const sortedData = [...dataWithPoints].sort((a, b) => a.weekNumber - b.weekNumber);
+    const sortedData = [...chartData].sort((a, b) => a.weekNumber - b.weekNumber);
 
     const line = d3
       .line<WeekEntryCount>()
@@ -78,7 +130,7 @@ export function TrafficWeeklyLineChart({ data }: TrafficWeeklyLineChartProps) {
       .attr("r", 3)
       .attr("fill", TRAFFIC_COLOR);
 
-    const xAxis = d3.axisBottom(x).ticks(dataWithPoints.length).tickFormat((v) => String(v));
+    const xAxis = d3.axisBottom(x).ticks(chartData.length).tickFormat((v) => String(v));
     g.append("g")
       .attr("transform", `translate(0,${height})`)
       .call(xAxis)
@@ -95,13 +147,30 @@ export function TrafficWeeklyLineChart({ data }: TrafficWeeklyLineChartProps) {
     return () => {
       svg.selectAll("*").remove();
     };
-  }, [data]);
+  }, [chartData, totalWidth, totalHeight, showChart]);
 
-  if (dataWithPoints.length === 0) {
+  const chartBlock = (
+    <div className="flex flex-col items-center">
+      <svg
+        ref={svgRef}
+        width={totalWidth}
+        height={totalHeight}
+        className="overflow-visible shrink-0"
+      />
+      {semesterLabel != null && semesterLabel !== "" && (
+        <p className="text-sm font-medium text-muted-foreground pt-2">
+          {semesterLabel}
+        </p>
+      )}
+    </div>
+  );
+
+  if (!showChart) {
+    if (hideCard) return null;
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Entry count by week</CardTitle>
+          <CardTitle>{title}</CardTitle>
           <CardDescription>
             No traffic data for the selected weeks.
           </CardDescription>
@@ -110,21 +179,95 @@ export function TrafficWeeklyLineChart({ data }: TrafficWeeklyLineChartProps) {
     );
   }
 
+  if (hideCard) return chartBlock;
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Entry count by week</CardTitle>
-        <CardDescription>
-          Line graph of entry tickets per campus week (aggregate).
-        </CardDescription>
+        <CardTitle>{title}</CardTitle>
+        {description != null && description !== "" && (
+          <CardDescription>{description}</CardDescription>
+        )}
       </CardHeader>
       <CardContent className="flex justify-center pt-6">
-        <svg
-          ref={svgRef}
-          width={DEFAULT_WIDTH + MARGIN.left + MARGIN.right}
-          height={DEFAULT_HEIGHT}
-          className="overflow-visible shrink-0"
-        />
+        {chartBlock}
+      </CardContent>
+    </Card>
+  );
+}
+
+interface TrafficWeeklyLineChartBySemesterProps {
+  data: WeekEntryCount[];
+  /** Max campus week to include in spring (e.g. 25). */
+  maxWeek?: number;
+  /** "full" = stacked; "half" = two charts side by side in a grid. */
+  cardSpan?: "full" | "half";
+  title?: string;
+  description?: string | null;
+}
+
+export function TrafficWeeklyLineChartBySemester({
+  data,
+  maxWeek = 25,
+  cardSpan = "full",
+  title = DEFAULT_TITLE,
+  description = DEFAULT_DESCRIPTION,
+}: TrafficWeeklyLineChartBySemesterProps) {
+  const fallWeekNumbers = useMemo(() => {
+    const list: number[] = [];
+    for (let w = 1; w < WINTER_BREAK_CAMPUS_WEEK_NUMBER; w++) list.push(w);
+    return list;
+  }, []);
+  const springWeekNumbers = useMemo(() => {
+    const list: number[] = [];
+    for (let w = WINTER_BREAK_CAMPUS_WEEK_NUMBER + 1; w <= maxWeek; w++) list.push(w);
+    return list;
+  }, [maxWeek]);
+
+  const chartSpan = cardSpan === "half" ? "half" : "full";
+  /* Full view: side by side with padding; half view: stacked, no top space. */
+  const contentClass =
+    cardSpan === "full"
+      ? "pt-6 grid grid-cols-1 md:grid-cols-2 gap-6"
+      : "pt-0 pb-0 space-y-6";
+  /* When full and side-by-side, use smaller width so two charts fit with gap. */
+  const chartWidth = cardSpan === "full" ? SIDE_BY_SIDE_WIDTH : undefined;
+  /* Half view: shorter charts so card profile is roughly square. */
+  const chartHeight = cardSpan === "half" ? HALF_VIEW_CHART_HEIGHT : undefined;
+
+  return (
+    <Card>
+      {cardSpan === "full" && (
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+          {description != null && description !== "" && (
+            <CardDescription>{description}</CardDescription>
+          )}
+        </CardHeader>
+      )}
+      <CardContent className={contentClass}>
+        {fallWeekNumbers.length > 0 && (
+          <TrafficWeeklyLineChart
+            data={data}
+            allWeekNumbers={fallWeekNumbers}
+            semesterLabel="Fall semester"
+            cardSpan={chartSpan}
+            width={chartWidth}
+            height={chartHeight}
+            hideCard
+          />
+        )}
+        {springWeekNumbers.length > 0 && (
+          <TrafficWeeklyLineChart
+            data={data}
+            allWeekNumbers={springWeekNumbers}
+            semesterLabel="Spring semester"
+            cardSpan={chartSpan}
+            width={chartWidth}
+            height={chartHeight}
+            hideCard
+          />
+        )}
       </CardContent>
     </Card>
   );
