@@ -14,6 +14,7 @@ import {
   getStudySessionCompletedSessions,
   getFrontDeskCompletedSessions,
 } from "@/lib/server/session-logs";
+import { getTrafficEntryCountsForWeeks } from "@/lib/server/traffic";
 import { MemoContent } from "./memo-content";
 import type { MemoScholarRow, MemoTLRow, MemoPieData } from "./memo-content";
 import type { ScholarWithCompletedSession } from "@/lib/session-logs";
@@ -58,18 +59,21 @@ export default async function MemoPage({ searchParams }: PageProps) {
 
   const dateRangeOpts = { startDate, endDate };
 
+  const weekNumbers = Array.from({ length: 25 }, (_, i) => i + 1);
   const [
     allUsers,
     studyRecords,
     fdRecords,
     completedStudy,
     completedFd,
+    trafficWeeklyData,
   ] = await Promise.all([
     fetchAllUsersForMemo(),
     getStudySessionRecordsForWeekAll(weekNum),
     getFrontDeskRecordsForWeekAll(weekNum),
     getStudySessionCompletedSessions(dateRangeOpts),
     getFrontDeskCompletedSessions(dateRangeOpts),
+    getTrafficEntryCountsForWeeks(weekNumbers),
   ]);
 
   const studyByUid = new Map(
@@ -223,6 +227,7 @@ export default async function MemoPage({ searchParams }: PageProps) {
       pieData={pieData}
       completedStudy={completedStudy as ScholarWithCompletedSession[]}
       completedFd={completedFd as ScholarWithCompletedSession[]}
+      trafficWeeklyData={trafficWeeklyData}
       weekLabel={weekLabel}
       currentCampusWeek={currentCampusWeek ?? null}
       selectedWeekNum={weekNum}

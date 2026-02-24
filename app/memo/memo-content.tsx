@@ -20,6 +20,10 @@ import {
 } from "@/lib/time";
 import { SessionHeatMap } from "@/app/dev/session-logs/session-heat-map";
 import type { ScholarWithCompletedSession } from "@/lib/session-logs";
+import {
+  TrafficWeeklyLineChart,
+  type WeekEntryCount,
+} from "@/app/dev/traffic/traffic-weekly-line-chart";
 import { CohortPieChart } from "./cohort-pie-chart";
 
 function WeekPicker({
@@ -246,6 +250,7 @@ export function MemoContent({
   pieData,
   completedStudy,
   completedFd,
+  trafficWeeklyData,
   weekLabel,
   currentCampusWeek,
   selectedWeekNum,
@@ -255,6 +260,7 @@ export function MemoContent({
   pieData: MemoPieData;
   completedStudy: ScholarWithCompletedSession[];
   completedFd: ScholarWithCompletedSession[];
+  trafficWeeklyData: WeekEntryCount[];
   weekLabel: string;
   currentCampusWeek: number | null;
   selectedWeekNum: number;
@@ -263,7 +269,7 @@ export function MemoContent({
   const scholarColumns = getScholarColumns();
 
   return (
-    <div className="container mx-auto max-w-5xl space-y-8 py-12">
+    <div className="container mx-auto max-w-5xl space-y-4 py-4">
       <div>
         <h1 className="text-2xl font-bold">Scholar hours overview</h1>
         <p className="text-muted-foreground mt-1">
@@ -282,22 +288,19 @@ export function MemoContent({
         />
       </div>
 
+      {/* Traffic: entry count by week */}
+      <TrafficWeeklyLineChart data={trafficWeeklyData} />
+
       {/* Pie: cohort completion – FD and SS per cohort */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Hours completed by cohort</CardTitle>
-          <CardDescription>
-            FD and SS completion rate per cohort this week.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="grid grid-cols-1 sm:grid-cols-2">
+      <Card className="gap-2 border-0 py-2 shadow-none">
+        <CardContent className="p-0 px-2 pb-2 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {/* Sophomores (2024) */}
-            <div className="flex min-h-[200px] flex-col border-border/80 sm:border-r">
-              <div className="border-border/80 flex items-center border-b px-4 py-3">
+            <div className="flex min-h-0 flex-col">
+              <div className="flex items-center px-0.5 pb-0.5">
                 <span className="text-sm font-semibold text-foreground">Sophomores (2024)</span>
               </div>
-              <div className="flex flex-1 flex-row items-center justify-center gap-10 px-4 py-6">
+              <div className="flex flex-1 flex-row items-center justify-center gap-4 px-1 py-2">
                 <CohortPieChart
                   label="2024 FD"
                   percentComplete={pieData.cohort2024.fdPercent}
@@ -315,11 +318,11 @@ export function MemoContent({
               </div>
             </div>
             {/* Freshmen (2025) */}
-            <div className="flex min-h-[200px] flex-col border-border/80 border-t sm:border-t-0">
-              <div className="border-border/80 flex items-center border-b px-4 py-3">
+            <div className="flex min-h-0 flex-col">
+              <div className="flex items-center px-0.5 pb-0.5">
                 <span className="text-sm font-semibold text-foreground">Freshmen (2025)</span>
               </div>
-              <div className="flex flex-1 flex-row items-center justify-center gap-10 px-4 py-6">
+              <div className="flex flex-1 flex-row items-center justify-center gap-4 px-1 py-2">
                 <CohortPieChart
                   label="2025 FD"
                   percentComplete={pieData.cohort2025.fdPercent}
