@@ -2,9 +2,11 @@ import Link from "next/link";
 import {
   getTrafficSessionsForWeek,
   getTrafficEntryCountForWeek,
+  getTrafficEntryCountsForWeeks,
 } from "@/lib/server/traffic";
 import { dateToCampusWeek, campusWeekToDateRange } from "@/lib/time";
 import { TrafficHeatMapSection } from "./traffic-heat-map-section";
+import { TrafficWeeklyLineChart } from "./traffic-weekly-line-chart";
 import {
   Card,
   CardContent,
@@ -55,9 +57,11 @@ export default async function DevTrafficPage({ searchParams }: PageProps) {
     return `/dev/traffic?${sp.toString()}`;
   }
 
-  const [entryCount, sessions] = await Promise.all([
+  const weekNumbers = Array.from({ length: 25 }, (_, i) => i + 1);
+  const [entryCount, sessions, weeklyData] = await Promise.all([
     getTrafficEntryCountForWeek(weekNum),
     getTrafficSessionsForWeek(weekNum),
+    getTrafficEntryCountsForWeeks(weekNumbers),
   ]);
 
   return (
@@ -102,11 +106,10 @@ export default async function DevTrafficPage({ searchParams }: PageProps) {
                 <Link
                   key={w}
                   href={linkUrl({ week: w })}
-                  className={`inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-sm font-medium transition-colors ${
-                    weekNum === w
+                  className={`inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-sm font-medium transition-colors ${weekNum === w
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   {w}
                 </Link>
@@ -130,6 +133,8 @@ export default async function DevTrafficPage({ searchParams }: PageProps) {
           )}
         </CardContent>
       </Card>
+
+      <TrafficWeeklyLineChart data={weeklyData} />
 
       <Card>
         <CardHeader>
