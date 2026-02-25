@@ -209,6 +209,66 @@ function ProgressCell({
   );
 }
 
+function RoomEntriesThisWeek({
+  trafficWeeklyData,
+  selectedWeekNum,
+}: {
+  trafficWeeklyData: WeekEntryCount[];
+  selectedWeekNum: number;
+}) {
+  const thisWeekCount =
+    trafficWeeklyData.find((d) => d.weekNumber === selectedWeekNum)?.entryCount ?? 0;
+  const priorWeekNum = selectedWeekNum - 1;
+  const priorWeekCount =
+    priorWeekNum >= 1
+      ? trafficWeeklyData.find((d) => d.weekNumber === priorWeekNum)?.entryCount ?? 0
+      : null;
+
+  const hasPrior = priorWeekCount !== null;
+  const diffAbs = hasPrior ? thisWeekCount - priorWeekCount : null;
+  const pctChange =
+    hasPrior && priorWeekCount > 0
+      ? ((thisWeekCount - priorWeekCount) / priorWeekCount) * 100
+      : null;
+
+  return (
+    <div className="flex flex-row flex-wrap items-center gap-3 px-1 py-2">
+      <span className="text-lg font-semibold text-foreground">
+        {thisWeekCount} {thisWeekCount === 1 ? "entry" : "entries"}
+      </span>
+      {hasPrior && (
+        <span
+          className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${
+            (diffAbs ?? 0) > 0
+              ? "bg-green-500/20 text-green-700 dark:text-green-400"
+              : (diffAbs ?? 0) < 0
+                ? "bg-red-500/20 text-red-700 dark:text-red-400"
+                : "bg-muted/50 text-muted-foreground"
+          }`}
+          title={
+            priorWeekCount != null
+              ? `Week ${selectedWeekNum}: ${thisWeekCount}. Week ${priorWeekNum}: ${priorWeekCount}.`
+              : undefined
+          }
+        >
+          {(diffAbs ?? 0) > 0 && <span aria-hidden>↑</span>}
+          {(diffAbs ?? 0) < 0 && <span aria-hidden>↓</span>}
+          {diffAbs != null && diffAbs > 0 ? "+" : ""}
+          {diffAbs}
+          {" vs prior week"}
+          {pctChange != null && (
+            <span className="opacity-90">
+              {" "}
+              ({pctChange >= 0 ? "+" : ""}
+              {Math.round(pctChange)}%)
+            </span>
+          )}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function getScholarColumns(): ScholarDataTableColumn<MemoScholarRow>[] {
   return [
     {
@@ -297,6 +357,73 @@ export function MemoContent({
         />
       </div>
 
+      {/* Room entries this week + cohort completion (FD and SS per cohort) */}
+      <Card className="gap-2 border-0 py-2 shadow-none">
+        <CardContent className="p-0 px-2 pb-2 pt-2">
+          {/* Room entries this week vs prior week – first */}
+          <div className="flex min-h-0 flex-col">
+            <div className="flex items-center px-0.5 pb-0.5">
+              <span className="text-sm font-semibold text-foreground">
+                Room entries this week
+              </span>
+            </div>
+            <RoomEntriesThisWeek
+              trafficWeeklyData={trafficWeeklyData}
+              selectedWeekNum={selectedWeekNum}
+            />
+          </div>
+          {/* Cohort pies */}
+          <div className="flex min-h-0 flex-col border-t border-border/60 pt-3 mt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {/* Sophomores (2024) */}
+              <div className="flex min-h-0 flex-col">
+                <div className="flex items-center px-0.5 pb-0.5">
+                  <span className="text-sm font-semibold text-foreground">Sophomores (2024)</span>
+                </div>
+                <div className="flex flex-1 flex-row items-center justify-center gap-4 px-1 py-2">
+                  <CohortPieChart
+                    label="2024 FD"
+                    percentComplete={pieData.cohort2024.fdPercent}
+                    total={pieData.cohort2024.total}
+                    completeCount={pieData.cohort2024.fdCompleteCount}
+                    variant="fd"
+                  />
+                  <CohortPieChart
+                    label="2024 SS"
+                    percentComplete={pieData.cohort2024.ssPercent}
+                    total={pieData.cohort2024.total}
+                    completeCount={pieData.cohort2024.ssCompleteCount}
+                    variant="ss"
+                  />
+                </div>
+              </div>
+              {/* Freshmen (2025) */}
+              <div className="flex min-h-0 flex-col">
+                <div className="flex items-center px-0.5 pb-0.5">
+                  <span className="text-sm font-semibold text-foreground">Freshmen (2025)</span>
+                </div>
+                <div className="flex flex-1 flex-row items-center justify-center gap-4 px-1 py-2">
+                  <CohortPieChart
+                    label="2025 FD"
+                    percentComplete={pieData.cohort2025.fdPercent}
+                    total={pieData.cohort2025.total}
+                    completeCount={pieData.cohort2025.fdCompleteCount}
+                    variant="fd"
+                  />
+                  <CohortPieChart
+                    label="2025 SS"
+                    percentComplete={pieData.cohort2025.ssPercent}
+                    total={pieData.cohort2025.total}
+                    completeCount={pieData.cohort2025.ssCompleteCount}
+                    variant="ss"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Traffic: entry count by week (fall and spring semesters) */}
       {trafficCardSpan === "half" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -325,58 +452,6 @@ export function MemoContent({
           description={trafficCardDescription}
         />
       )}
-
-      {/* Pie: cohort completion – FD and SS per cohort */}
-      <Card className="gap-2 border-0 py-2 shadow-none">
-        <CardContent className="p-0 px-2 pb-2 pt-2">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {/* Sophomores (2024) */}
-            <div className="flex min-h-0 flex-col">
-              <div className="flex items-center px-0.5 pb-0.5">
-                <span className="text-sm font-semibold text-foreground">Sophomores (2024)</span>
-              </div>
-              <div className="flex flex-1 flex-row items-center justify-center gap-4 px-1 py-2">
-                <CohortPieChart
-                  label="2024 FD"
-                  percentComplete={pieData.cohort2024.fdPercent}
-                  total={pieData.cohort2024.total}
-                  completeCount={pieData.cohort2024.fdCompleteCount}
-                  variant="fd"
-                />
-                <CohortPieChart
-                  label="2024 SS"
-                  percentComplete={pieData.cohort2024.ssPercent}
-                  total={pieData.cohort2024.total}
-                  completeCount={pieData.cohort2024.ssCompleteCount}
-                  variant="ss"
-                />
-              </div>
-            </div>
-            {/* Freshmen (2025) */}
-            <div className="flex min-h-0 flex-col">
-              <div className="flex items-center px-0.5 pb-0.5">
-                <span className="text-sm font-semibold text-foreground">Freshmen (2025)</span>
-              </div>
-              <div className="flex flex-1 flex-row items-center justify-center gap-4 px-1 py-2">
-                <CohortPieChart
-                  label="2025 FD"
-                  percentComplete={pieData.cohort2025.fdPercent}
-                  total={pieData.cohort2025.total}
-                  completeCount={pieData.cohort2025.fdCompleteCount}
-                  variant="fd"
-                />
-                <CohortPieChart
-                  label="2025 SS"
-                  percentComplete={pieData.cohort2025.ssPercent}
-                  total={pieData.cohort2025.total}
-                  completeCount={pieData.cohort2025.ssCompleteCount}
-                  variant="ss"
-                />
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Heat map */}
       <SessionHeatMap completedStudy={completedStudy} completedFd={completedFd} />
