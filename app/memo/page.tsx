@@ -14,10 +14,17 @@ import {
   getStudySessionCompletedSessions,
   getFrontDeskCompletedSessions,
 } from "@/lib/server/session-logs";
-import { getTrafficEntryCountsForWeeks } from "@/lib/server/traffic";
+import {
+  getTrafficEntryCountsForWeeks,
+  getTrafficEntryCountForWeek,
+  getTrafficSessionsForWeek,
+} from "@/lib/server/traffic";
 import { MemoContent } from "./memo-content";
 import type { MemoScholarRow, MemoTLRow, MemoPieData } from "./memo-content";
 import type { ScholarWithCompletedSession } from "@/lib/session-logs";
+
+/** Always fetch fresh data on load and on router.refresh() (no segment cache). */
+export const dynamic = "force-dynamic";
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -67,6 +74,8 @@ export default async function MemoPage({ searchParams }: PageProps) {
     completedStudy,
     completedFd,
     trafficWeeklyData,
+    trafficEntryCountForSelectedWeek,
+    trafficSessions,
   ] = await Promise.all([
     fetchAllUsersForMemo(),
     getStudySessionRecordsForWeekAll(weekNum),
@@ -74,6 +83,8 @@ export default async function MemoPage({ searchParams }: PageProps) {
     getStudySessionCompletedSessions(dateRangeOpts),
     getFrontDeskCompletedSessions(dateRangeOpts),
     getTrafficEntryCountsForWeeks(weekNumbers),
+    getTrafficEntryCountForWeek(weekNum),
+    getTrafficSessionsForWeek(weekNum),
   ]);
 
   const studyByUid = new Map(
@@ -228,6 +239,8 @@ export default async function MemoPage({ searchParams }: PageProps) {
       completedStudy={completedStudy as ScholarWithCompletedSession[]}
       completedFd={completedFd as ScholarWithCompletedSession[]}
       trafficWeeklyData={trafficWeeklyData}
+      trafficEntryCountForSelectedWeek={trafficEntryCountForSelectedWeek}
+      trafficSessions={trafficSessions}
       weekLabel={weekLabel}
       currentCampusWeek={currentCampusWeek ?? null}
       selectedWeekNum={weekNum}

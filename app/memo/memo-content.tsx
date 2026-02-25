@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   ScholarDataTable,
   CollapsibleTableSection,
@@ -24,6 +24,8 @@ import {
   TrafficWeeklyLineChartBySemester,
   type WeekEntryCount,
 } from "@/app/dev/traffic/traffic-weekly-line-chart";
+import { TrafficHeatMapSection } from "@/app/dev/traffic/traffic-heat-map-section";
+import type { TrafficSession } from "@/lib/traffic";
 import { CohortPieChart } from "./cohort-pie-chart";
 
 function WeekPicker({
@@ -212,12 +214,20 @@ function ProgressCell({
 function RoomEntriesThisWeek({
   trafficWeeklyData,
   selectedWeekNum,
+  /** Entry count for selected week from getTrafficEntryCountForWeek (same as dev/traffic page). */
+  entryCountForSelectedWeek,
+  /** When set (e.g. after sync), use this for the selected week so the count is current. */
+  overrideEntryCount,
 }: {
   trafficWeeklyData: WeekEntryCount[];
   selectedWeekNum: number;
+  entryCountForSelectedWeek: number;
+  overrideEntryCount?: number | null;
 }) {
   const thisWeekCount =
-    trafficWeeklyData.find((d) => d.weekNumber === selectedWeekNum)?.entryCount ?? 0;
+    overrideEntryCount != null
+      ? overrideEntryCount
+      : entryCountForSelectedWeek;
   const priorWeekNum = selectedWeekNum - 1;
   const priorWeekCount =
     priorWeekNum >= 1
@@ -311,6 +321,8 @@ export function MemoContent({
   completedStudy,
   completedFd,
   trafficWeeklyData,
+  trafficEntryCountForSelectedWeek,
+  trafficSessions,
   weekLabel,
   currentCampusWeek,
   selectedWeekNum,
@@ -324,6 +336,10 @@ export function MemoContent({
   completedStudy: ScholarWithCompletedSession[];
   completedFd: ScholarWithCompletedSession[];
   trafficWeeklyData: WeekEntryCount[];
+  /** Entry count for selected week from getTrafficEntryCountForWeek (same as dev/traffic). */
+  trafficEntryCountForSelectedWeek: number;
+  /** Sessions for selected week (same as dev/traffic heat map). */
+  trafficSessions: TrafficSession[];
   weekLabel: string;
   currentCampusWeek: number | null;
   selectedWeekNum: number;
@@ -336,6 +352,32 @@ export function MemoContent({
 }) {
   const router = useRouter();
   const scholarColumns = getScholarColumns();
+  const [freshEntryCount, setFreshEntryCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    setFreshEntryCount(null);
+  }, [selectedWeekNum]);
+
+  const handleSyncDone = useCallback(async () => {
+    router.refresh();
+    const weekNum = selectedWeekNum;
+    try {
+      const res = await fetch(
+        `/api/memo/traffic-count?weekNum=${encodeURIComponent(weekNum)}`,
+        { cache: "no-store" }
+      );
+      const json = await res.json();
+      if (
+        res.ok &&
+        json.weekNumber === weekNum &&
+        typeof json.entryCount === "number"
+      ) {
+        setFreshEntryCount(json.entryCount);
+      }
+    } catch {
+      // Keep showing server data on fetch error
+    }
+  }, [selectedWeekNum, router]);
 
   return (
     <div className="container mx-auto max-w-5xl space-y-4 py-4">
@@ -353,7 +395,7 @@ export function MemoContent({
         />
         <SyncButtons
           selectedWeekNum={selectedWeekNum}
-          onSyncDone={() => router.refresh()}
+          onSyncDone={handleSyncDone}
         />
       </div>
 
@@ -370,6 +412,8 @@ export function MemoContent({
             <RoomEntriesThisWeek
               trafficWeeklyData={trafficWeeklyData}
               selectedWeekNum={selectedWeekNum}
+              entryCountForSelectedWeek={trafficEntryCountForSelectedWeek}
+              overrideEntryCount={freshEntryCount}
             />
           </div>
           {/* Cohort pies */}
@@ -424,7 +468,7 @@ export function MemoContent({
         </CardContent>
       </Card>
 
-      {/* Traffic: entry count by week (fall and spring semesters) */}
+      {/* Traffic: entry count by week (fall and spring) + heat map — same as dev/traffic */}
       {trafficCardSpan === "half" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <TrafficWeeklyLineChartBySemester
