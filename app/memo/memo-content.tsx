@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useTransition } from "react";
 import {
   ScholarDataTable,
   CollapsibleTableSection,
@@ -37,23 +37,44 @@ function WeekPicker({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
+  const [navigatingToWeek, setNavigatingToWeek] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!isPending) setNavigatingToWeek(null);
+  }, [isPending]);
+
+  const handleWeekClick = (w: number) => {
+    if (w === selectedWeekNum) return;
+    setNavigatingToWeek(w);
+    startTransition(() => {
+      router.push(`${pathname}?week=${w}`);
+    });
+  };
 
   return (
-    <div className="flex flex-wrap gap-1">
-      {Array.from({ length: 25 }, (_, i) => i + 1).map((w) => (
-        <button
-          key={w}
-          type="button"
-          onClick={() => router.push(`${pathname}?week=${w}`)}
-          className={`inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-sm font-medium transition-colors ${
-            w === selectedWeekNum
+    <div className="flex flex-col gap-1.5">
+      <div className="flex flex-wrap gap-1">
+        {Array.from({ length: 25 }, (_, i) => i + 1).map((w) => (
+          <button
+            key={w}
+            type="button"
+            disabled={isPending}
+            onClick={() => handleWeekClick(w)}
+            className={`inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-sm font-medium transition-colors disabled:opacity-60 ${w === selectedWeekNum
               ? "bg-primary text-primary-foreground"
               : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
-          } ${w === currentCampusWeek ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}`}
-        >
-          {w}
-        </button>
-      ))}
+              } ${w === currentCampusWeek ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}`}
+          >
+            {w}
+          </button>
+        ))}
+      </div>
+      {isPending && navigatingToWeek != null && (
+        <p className="text-xs text-muted-foreground" aria-live="polite">
+          Loading week {navigatingToWeek} — fetching scholars, session records, traffic…
+        </p>
+      )}
     </div>
   );
 }
@@ -214,6 +235,7 @@ function ProgressCell({
 function RoomEntriesThisWeek({
   trafficWeeklyData,
   selectedWeekNum,
+  currentCampusWeek,
   /** Entry count for selected week from getTrafficEntryCountForWeek (same as dev/traffic page). */
   entryCountForSelectedWeek,
   /** When set (e.g. after sync), use this for the selected week so the count is current. */
@@ -221,6 +243,7 @@ function RoomEntriesThisWeek({
 }: {
   trafficWeeklyData: WeekEntryCount[];
   selectedWeekNum: number;
+  currentCampusWeek: number | null;
   entryCountForSelectedWeek: number;
   overrideEntryCount?: number | null;
 }) {
@@ -228,6 +251,8 @@ function RoomEntriesThisWeek({
     overrideEntryCount != null
       ? overrideEntryCount
       : entryCountForSelectedWeek;
+  const isCurrentWeek =
+    currentCampusWeek != null && selectedWeekNum === currentCampusWeek;
   const priorWeekNum = selectedWeekNum - 1;
   const priorWeekCount =
     priorWeekNum >= 1
@@ -246,34 +271,42 @@ function RoomEntriesThisWeek({
       <span className="text-lg font-semibold text-foreground">
         {thisWeekCount} {thisWeekCount === 1 ? "entry" : "entries"}
       </span>
-      {hasPrior && (
+      {isCurrentWeek ? (
         <span
-          className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${
-            (diffAbs ?? 0) > 0
+          className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium bg-muted/50 text-muted-foreground"
+          title="This week is still in progress; count will change."
+        >
+          currently collecting
+        </span>
+      ) : (
+        hasPrior && (
+          <span
+            className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${(diffAbs ?? 0) > 0
               ? "bg-green-500/20 text-green-700 dark:text-green-400"
               : (diffAbs ?? 0) < 0
                 ? "bg-red-500/20 text-red-700 dark:text-red-400"
                 : "bg-muted/50 text-muted-foreground"
-          }`}
-          title={
-            priorWeekCount != null
-              ? `Week ${selectedWeekNum}: ${thisWeekCount}. Week ${priorWeekNum}: ${priorWeekCount}.`
-              : undefined
-          }
-        >
-          {(diffAbs ?? 0) > 0 && <span aria-hidden>↑</span>}
-          {(diffAbs ?? 0) < 0 && <span aria-hidden>↓</span>}
-          {diffAbs != null && diffAbs > 0 ? "+" : ""}
-          {diffAbs}
-          {" vs prior week"}
-          {pctChange != null && (
-            <span className="opacity-90">
-              {" "}
-              ({pctChange >= 0 ? "+" : ""}
-              {Math.round(pctChange)}%)
-            </span>
-          )}
-        </span>
+              }`}
+            title={
+              priorWeekCount != null
+                ? `Week ${selectedWeekNum}: ${thisWeekCount}. Week ${priorWeekNum}: ${priorWeekCount}.`
+                : undefined
+            }
+          >
+            {(diffAbs ?? 0) > 0 && <span aria-hidden>↑</span>}
+            {(diffAbs ?? 0) < 0 && <span aria-hidden>↓</span>}
+            {diffAbs != null && diffAbs > 0 ? "+" : ""}
+            {diffAbs}
+            {" vs prior week"}
+            {pctChange != null && (
+              <span className="opacity-90">
+                {" "}
+                ({pctChange >= 0 ? "+" : ""}
+                {Math.round(pctChange)}%)
+              </span>
+            )}
+          </span>
+        )
       )}
     </div>
   );
@@ -400,24 +433,23 @@ export function MemoContent({
       </div>
 
       {/* Room entries this week + cohort completion (FD and SS per cohort) */}
-      <Card className="gap-2 border-0 py-2 shadow-none">
-        <CardContent className="p-0 px-2 pb-2 pt-2">
-          {/* Room entries this week vs prior week – first */}
-          <div className="flex min-h-0 flex-col">
-            <div className="flex items-center px-0.5 pb-0.5">
-              <span className="text-sm font-semibold text-foreground">
-                Room entries this week
-              </span>
-            </div>
-            <RoomEntriesThisWeek
-              trafficWeeklyData={trafficWeeklyData}
-              selectedWeekNum={selectedWeekNum}
-              entryCountForSelectedWeek={trafficEntryCountForSelectedWeek}
-              overrideEntryCount={freshEntryCount}
-            />
-          </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Room entries this week</CardTitle>
+          <CardDescription>
+            Entry count for the selected week; cohort FD/SS completion below.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <RoomEntriesThisWeek
+            trafficWeeklyData={trafficWeeklyData}
+            selectedWeekNum={selectedWeekNum}
+            currentCampusWeek={currentCampusWeek}
+            entryCountForSelectedWeek={trafficEntryCountForSelectedWeek}
+            overrideEntryCount={freshEntryCount}
+          />
           {/* Cohort pies */}
-          <div className="flex min-h-0 flex-col border-t border-border/60 pt-3 mt-1">
+          <div className="flex min-h-0 flex-col border-t border-border/60 pt-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {/* Sophomores (2024) */}
               <div className="flex min-h-0 flex-col">
