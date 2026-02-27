@@ -1,5 +1,5 @@
 import type { ScholarWithCompletedSession } from "@/lib/session-logs/types";
-import { EASTERN_TIMEZONE } from "@/lib/session-logs/types";
+import { getEasternDayOfWeek } from "@/lib/time";
 
 /**
  * Day-of-week minutes for a single scholar (Monday–Friday).
@@ -11,25 +11,6 @@ export interface WeeklyMinutesByDay {
   wed_min: number;
   thurs_min: number;
   fri_min: number;
-}
-
-/** Get Eastern day of week: 0=Sun, 1=Mon, ..., 6=Sat */
-function getEasternDayOfWeek(d: Date): number {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: EASTERN_TIMEZONE,
-    weekday: "short",
-  });
-  const day = formatter.format(d);
-  const map: Record<string, number> = {
-    Sun: 0,
-    Mon: 1,
-    Tue: 2,
-    Wed: 3,
-    Thu: 4,
-    Fri: 5,
-    Sat: 6,
-  };
-  return map[day] ?? 0;
 }
 
 /**

@@ -21,6 +21,7 @@ import {
   formatEntryDate,
   getDurationMs,
 } from "@/lib/time";
+import { getWeekFetchEnd } from "@/lib/session-records";
 import { SessionHeatMap } from "./session-heat-map";
 import { DoubleEntryChecker } from "@/components/double-entry-checker";
 import {
@@ -36,8 +37,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 export const metadata = {
   title: "Session Logs Test | Dev Tools",
@@ -64,9 +63,7 @@ export default async function SessionLogsTestPage({ searchParams }: PageProps) {
 
   // For DB queries: include full last day (end of Sunday)
   const startDate = range?.startDate ?? undefined;
-  const endDate = range
-    ? new Date(range.endDate.getTime() + ONE_DAY_MS - 1)
-    : undefined;
+  const endDate = range ? getWeekFetchEnd(range) : undefined;
 
   const scholarUids =
     params.uids != null && params.uids !== ""

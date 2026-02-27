@@ -1,17 +1,17 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { campusWeekToDateRange } from "@/lib/time";
+import { getWeekFetchEnd } from "@/lib/session-records";
 import type { McfFormLogRow, WhafFormLogRow, WplFormLogRow } from "./types";
-
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-
-/** End of the last day of the week (inclusive) for created_at queries. */
-function getWeekFetchEnd(range: { endDate: Date }): Date {
-  return new Date(range.endDate.getTime() + ONE_DAY_MS - 1);
-}
 
 // ---- MCF (Mentor Check-in Form) ----
 
+/**
+ * Fetch all MCF form logs for a given campus week.
+ *
+ * @param weekNum - Campus week number (1-based).
+ * @returns All `mcf_form_logs` rows whose `created_at` falls within that week.
+ */
 export async function getMcfFormLogsForWeek(
   weekNum: number
 ): Promise<McfFormLogRow[]> {
@@ -29,7 +29,12 @@ export async function getMcfFormLogsForWeek(
   return (data ?? []) as McfFormLogRow[];
 }
 
-/** Rows where mentor_uid or mentee_uid equals the given uid. */
+/**
+ * Fetch all MCF form logs where the scholar appears as mentor or mentee.
+ *
+ * @param uid - Scholar UID to match against `mentor_uid` or `mentee_uid`.
+ * @returns All matching `mcf_form_logs` rows ordered by `created_at`.
+ */
 export async function getMcfFormLogsByUid(uid: string): Promise<McfFormLogRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -41,7 +46,13 @@ export async function getMcfFormLogsByUid(uid: string): Promise<McfFormLogRow[]>
   return (data ?? []) as McfFormLogRow[];
 }
 
-/** MCF logs for a given uid within a campus week. */
+/**
+ * Fetch all MCF form logs for a given scholar within a campus week.
+ *
+ * @param uid - Scholar UID to match against `mentor_uid` or `mentee_uid`.
+ * @param weekNum - Campus week number (1-based).
+ * @returns Matching `mcf_form_logs` rows for that scholar in the given week.
+ */
 export async function getMcfFormLogsByUidAndWeek(
   uid: string,
   weekNum: number
@@ -64,6 +75,12 @@ export async function getMcfFormLogsByUidAndWeek(
 // ---- WHAF (Weekly Honors Academic Form) ----
 // No uid column; only by week.
 
+/**
+ * Fetch all WHAF form logs for a given campus week.
+ *
+ * @param weekNum - Campus week number (1-based).
+ * @returns All `whaf_form_logs` rows whose `created_at` falls within that week.
+ */
 export async function getWhafFormLogsForWeek(
   weekNum: number
 ): Promise<WhafFormLogRow[]> {
@@ -83,6 +100,12 @@ export async function getWhafFormLogsForWeek(
 
 // ---- WPL (Work Placement Log) ----
 
+/**
+ * Fetch all WPL form logs for a given campus week.
+ *
+ * @param weekNum - Campus week number (1-based).
+ * @returns All `wpl_form_logs` rows whose `created_at` falls within that week.
+ */
 export async function getWplFormLogsForWeek(
   weekNum: number
 ): Promise<WplFormLogRow[]> {
@@ -100,6 +123,12 @@ export async function getWplFormLogsForWeek(
   return (data ?? []) as WplFormLogRow[];
 }
 
+/**
+ * Fetch all WPL form logs for a given scholar.
+ *
+ * @param uid - Scholar UID to match against `scholar_uid`.
+ * @returns All matching `wpl_form_logs` rows ordered by `created_at`.
+ */
 export async function getWplFormLogsByUid(uid: string): Promise<WplFormLogRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -111,7 +140,13 @@ export async function getWplFormLogsByUid(uid: string): Promise<WplFormLogRow[]>
   return (data ?? []) as WplFormLogRow[];
 }
 
-/** WPL logs for a given scholar_uid within a campus week. */
+/**
+ * Fetch all WPL form logs for a given scholar within a campus week.
+ *
+ * @param uid - Scholar UID to match against `scholar_uid`.
+ * @param weekNum - Campus week number (1-based).
+ * @returns Matching `wpl_form_logs` rows for that scholar in the given week.
+ */
 export async function getWplFormLogsByUidAndWeek(
   uid: string,
   weekNum: number

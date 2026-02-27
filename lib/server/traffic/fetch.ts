@@ -1,21 +1,17 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { requireDateOrUidLimit } from "@/lib/server/query-limit";
 import type { TrafficRow } from "@/lib/traffic/types";
-
-const TRAFFIC_FETCH_REQUIRED_OPTIONS_MSG =
-  "At least one of startDate, endDate, or scholarUids (non-empty) is required to limit the search.";
 
 export function requireTrafficFetchLimit(options?: {
   startDate?: Date;
   endDate?: Date;
   scholarUids?: string[];
 }): void {
-  const hasDateRange =
-    options?.startDate != null || options?.endDate != null;
-  const hasUids = (options?.scholarUids?.length ?? 0) > 0;
-  if (!hasDateRange && !hasUids) {
-    throw new Error(TRAFFIC_FETCH_REQUIRED_OPTIONS_MSG);
-  }
+  requireDateOrUidLimit(
+    options,
+    "At least one of startDate, endDate, or scholarUids (non-empty) is required to limit the search."
+  );
 }
 
 export async function fetchTrafficLogs(options?: {

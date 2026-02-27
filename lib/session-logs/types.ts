@@ -3,8 +3,8 @@
  * The minimal row shape allows different tables to be used interchangeably.
  */
 
-/** Eastern timezone for all date logic (handles EST/EDT) */
-export const EASTERN_TIMEZONE = "America/New_York";
+/** Eastern timezone for all date logic (handles EST/EDT). Re-exported from lib/time. */
+export { EASTERN_TIMEZONE } from "@/lib/time";
 
 /**
  * Session types - study session vs front desk.

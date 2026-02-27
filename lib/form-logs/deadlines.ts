@@ -5,9 +5,7 @@
  * Client-safe; uses lib/time for campus week boundaries.
  */
 
-import { campusWeekToDateRange, dateToCampusWeek } from "@/lib/time";
-
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+import { campusWeekToDateRange, dateToCampusWeek, ONE_DAY_MS } from "@/lib/time";
 
 /** Thursday 23:59:59.999 Eastern for the given campus week (WHAF deadline). */
 export function getWhafDeadlineForWeek(weekNum: number): Date | null {
@@ -35,37 +33,38 @@ function toDate(createdAt: string | Date): Date {
 }
 
 /**
- * True if the WHAF was submitted after Thursday 23:59 EST of its campus week.
+ * True if submitted is after the deadline for its campus week.
+ * Used by both MCF and WPL (same Friday 17:00 deadline).
  */
-export function isWhafLate(createdAt: string | Date): boolean {
+function isLateAfterDeadline(
+  createdAt: string | Date,
+  getDeadlineForWeek: (weekNum: number) => Date | null
+): boolean {
   const submitted = toDate(createdAt);
   const weekNum = dateToCampusWeek(submitted);
   if (weekNum == null) return false;
-  const deadline = getWhafDeadlineForWeek(weekNum);
+  const deadline = getDeadlineForWeek(weekNum);
   if (!deadline) return false;
   return submitted.getTime() > deadline.getTime();
+}
+
+/**
+ * True if the WHAF was submitted after Thursday 23:59 EST of its campus week.
+ */
+export function isWhafLate(createdAt: string | Date): boolean {
+  return isLateAfterDeadline(createdAt, getWhafDeadlineForWeek);
 }
 
 /**
  * True if the MCF was submitted after Friday 17:00 EST of its campus week.
  */
 export function isMcfLate(createdAt: string | Date): boolean {
-  const submitted = toDate(createdAt);
-  const weekNum = dateToCampusWeek(submitted);
-  if (weekNum == null) return false;
-  const deadline = getMcfWplDeadlineForWeek(weekNum);
-  if (!deadline) return false;
-  return submitted.getTime() > deadline.getTime();
+  return isLateAfterDeadline(createdAt, getMcfWplDeadlineForWeek);
 }
 
 /**
  * True if the WPL was submitted after Friday 17:00 EST of its campus week.
  */
 export function isWplLate(createdAt: string | Date): boolean {
-  const submitted = toDate(createdAt);
-  const weekNum = dateToCampusWeek(submitted);
-  if (weekNum == null) return false;
-  const deadline = getMcfWplDeadlineForWeek(weekNum);
-  if (!deadline) return false;
-  return submitted.getTime() > deadline.getTime();
+  return isLateAfterDeadline(createdAt, getMcfWplDeadlineForWeek);
 }

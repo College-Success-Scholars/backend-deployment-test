@@ -125,11 +125,10 @@ export default async function FormLogsTestPage({ searchParams }: PageProps) {
                 <Link
                   key={w}
                   href={formLogsWeekLink(w)}
-                  className={`inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-sm font-medium transition-colors ${
-                    weekNum === w
+                  className={`inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-sm font-medium transition-colors ${weekNum === w
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   {w}
                 </Link>

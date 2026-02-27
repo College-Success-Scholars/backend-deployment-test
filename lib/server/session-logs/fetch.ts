@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { requireDateOrUidLimit } from "@/lib/server/query-limit";
 import type { SessionLogRow, SessionType } from "@/lib/session-logs/types";
 import {
   FrontDeskLogRow,
@@ -31,19 +32,12 @@ function toSessionLogRowStudy(row: StudySessionLogRow): SessionLogRow {
   };
 }
 
-const LOG_FETCH_REQUIRED_OPTIONS_MSG =
-  "At least one of startDate, endDate, or scholarUids (non-empty) is required to limit the search.";
-
 export function requireLogFetchLimit(options: {
   startDate?: Date;
   endDate?: Date;
   scholarUids?: string[];
 } | undefined): void {
-  const hasDateRange = options?.startDate != null || options?.endDate != null;
-  const hasUids = (options?.scholarUids?.length ?? 0) > 0;
-  if (!hasDateRange && !hasUids) {
-    throw new Error(LOG_FETCH_REQUIRED_OPTIONS_MSG);
-  }
+  requireDateOrUidLimit(options);
 }
 
 export async function fetchFrontDeskLogs(options?: {
@@ -52,7 +46,7 @@ export async function fetchFrontDeskLogs(options?: {
   scholarUids?: string[];
   sessionType?: SessionType | string;
 }): Promise<SessionLogRow[]> {
-  requireLogFetchLimit(options);
+  requireDateOrUidLimit(options);
   const supabase = await createClient();
   let query = supabase
     .from("front_desk_logs")
@@ -72,7 +66,7 @@ export async function fetchStudySessionLogs(options?: {
   scholarUids?: string[];
   sessionType?: SessionType | string;
 }): Promise<SessionLogRow[]> {
-  requireLogFetchLimit(options);
+  requireDateOrUidLimit(options);
   const supabase = await createClient();
   let query = supabase
     .from("study_session_logs")

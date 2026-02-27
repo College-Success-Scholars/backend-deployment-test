@@ -9,18 +9,29 @@ import { isWhafLate, isMcfLate, isWplLate } from "./deadlines";
 export type FormLogRowWithLate<T> = T & { isLate: boolean };
 
 /**
- * Mark each WHAF row with isLate (true if submitted after Thursday 23:59 EST of that week).
+ * Mark each row with isLate using the given deadline check.
+ * Shared implementation for WHAF, MCF, and WPL.
  */
-export function markWhafFormLogsLate<T extends { created_at: string | null }>(
-  rows: T[]
+function markFormLogsLate<T extends { created_at: string | null }>(
+  rows: T[],
+  isLate: (createdAt: string | Date) => boolean
 ): FormLogRowWithLate<T>[] {
   return rows.map((row) => ({
     ...row,
     isLate:
       row.created_at != null && row.created_at !== ""
-        ? isWhafLate(row.created_at)
+        ? isLate(row.created_at)
         : false,
   }));
+}
+
+/**
+ * Mark each WHAF row with isLate (true if submitted after Thursday 23:59 EST of that week).
+ */
+export function markWhafFormLogsLate<T extends { created_at: string | null }>(
+  rows: T[]
+): FormLogRowWithLate<T>[] {
+  return markFormLogsLate(rows, isWhafLate);
 }
 
 /**
@@ -29,13 +40,7 @@ export function markWhafFormLogsLate<T extends { created_at: string | null }>(
 export function markMcfFormLogsLate<T extends { created_at: string | null }>(
   rows: T[]
 ): FormLogRowWithLate<T>[] {
-  return rows.map((row) => ({
-    ...row,
-    isLate:
-      row.created_at != null && row.created_at !== ""
-        ? isMcfLate(row.created_at)
-        : false,
-  }));
+  return markFormLogsLate(rows, isMcfLate);
 }
 
 /**
@@ -44,11 +49,5 @@ export function markMcfFormLogsLate<T extends { created_at: string | null }>(
 export function markWplFormLogsLate<T extends { created_at: string | null }>(
   rows: T[]
 ): FormLogRowWithLate<T>[] {
-  return rows.map((row) => ({
-    ...row,
-    isLate:
-      row.created_at != null && row.created_at !== ""
-        ? isWplLate(row.created_at)
-        : false,
-  }));
+  return markFormLogsLate(rows, isWplLate);
 }

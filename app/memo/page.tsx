@@ -2,6 +2,7 @@ import {
   dateToCampusWeek,
   campusWeekToDateRange,
 } from "@/lib/time";
+import { getWeekFetchEnd } from "@/lib/session-records";
 import {
   fetchAllUsersForMemo,
   type MemoUserRow,
@@ -28,8 +29,6 @@ import type { ScholarWithCompletedSession } from "@/lib/session-logs";
 
 /** Always fetch fresh data on load and on router.refresh() (no segment cache). */
 export const dynamic = "force-dynamic";
-
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 function isScholar(role: string | null): boolean {
   return (role ?? "").toLowerCase() === "scholar";
@@ -63,9 +62,7 @@ export default async function MemoPage({ searchParams }: PageProps) {
 
   const range = campusWeekToDateRange(weekNum);
   const startDate = range?.startDate ?? undefined;
-  const endDate = range
-    ? new Date(range.endDate.getTime() + ONE_DAY_MS - 1)
-    : undefined;
+  const endDate = range ? getWeekFetchEnd(range) : undefined;
 
   const dateRangeOpts = { startDate, endDate };
 

@@ -8,9 +8,8 @@ import {
   getEntryCountByWeek,
   type TrafficSession,
 } from "@/lib/traffic";
+import { getWeekFetchEnd } from "@/lib/session-records";
 import { fetchTrafficLogs } from "./fetch";
-
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 export { fetchTrafficLogs, requireTrafficFetchLimit } from "./fetch";
 
@@ -19,9 +18,7 @@ export async function getTrafficSessionsForWeek(
 ): Promise<TrafficSession[]> {
   const range = campusWeekToDateRange(weekNumber);
   if (!range) return [];
-  const endDate = new Date(
-    range.endDate.getTime() + ONE_DAY_MS - 1
-  );
+  const endDate = getWeekFetchEnd(range);
   const rows = await fetchTrafficLogs({
     startDate: range.startDate,
     endDate,
@@ -34,9 +31,7 @@ export async function getTrafficEntryCountForWeek(
 ): Promise<number> {
   const range = campusWeekToDateRange(weekNumber);
   if (!range) return 0;
-  const endDate = new Date(
-    range.endDate.getTime() + ONE_DAY_MS - 1
-  );
+  const endDate = getWeekFetchEnd(range);
   const rows = await fetchTrafficLogs({
     startDate: range.startDate,
     endDate,
@@ -64,10 +59,10 @@ export async function getTrafficEntryCountsForWeeks(
   );
   const endDate = ranges.reduce(
     (max, r) => {
-      const end = new Date(r.endDate.getTime() + ONE_DAY_MS - 1);
+      const end = getWeekFetchEnd(r);
       return end.getTime() > max.getTime() ? end : max;
     },
-    new Date(ranges[0].endDate.getTime() + ONE_DAY_MS - 1)
+    getWeekFetchEnd(ranges[0])
   );
   const rows = await fetchTrafficLogs({ startDate, endDate });
   const currentCampusWeek = dateToCampusWeek(new Date());

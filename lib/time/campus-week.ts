@@ -6,8 +6,8 @@ import {
 
 export const EASTERN_TIMEZONE = "America/New_York";
 
-/** One day in ms */
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+/** One day in ms. Exported for use by deadlines and other time-based logic. */
+export const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
  * Parse "YYYY-MM-DD" as midnight Eastern (start of that calendar day in America/New_York).
@@ -40,8 +40,9 @@ const WINTER_END = parseEasternDate(WINTER_BREAK_LAST_DAY);
 
 /**
  * Get day of week in Eastern (0=Sun, 1=Mon, ..., 6=Sat).
+ * Exported for use by session-records/weekly-minutes and other callers.
  */
-function getEasternDayOfWeek(d: Date): number {
+export function getEasternDayOfWeek(d: Date): number {
   const formatter = new Intl.DateTimeFormat("en-US", {
     timeZone: EASTERN_TIMEZONE,
     weekday: "short",

@@ -16,10 +16,27 @@ import {
   getWplFormLogsByUidAndWeek,
 } from "./fetch";
 
+/**
+ * WHAF row with an `isLate` flag computed from Eastern-time deadlines.
+ */
 export type WhafFormLogRowWithLate = FormLogRowWithLate<WhafFormLogRow>;
+
+/**
+ * MCF row with an `isLate` flag computed from Eastern-time deadlines.
+ */
 export type McfFormLogRowWithLate = FormLogRowWithLate<McfFormLogRow>;
+
+/**
+ * WPL row with an `isLate` flag computed from Eastern-time deadlines.
+ */
 export type WplFormLogRowWithLate = FormLogRowWithLate<WplFormLogRow>;
 
+/**
+ * Fetch WHAF rows for a campus week and attach `isLate` based on WHAF deadlines.
+ *
+ * @param weekNum - Campus week number (1-based).
+ * @returns WHAF rows for that week with `isLate` set.
+ */
 export async function getWhafFormLogsForWeekWithLate(
   weekNum: number
 ): Promise<WhafFormLogRowWithLate[]> {
@@ -27,6 +44,12 @@ export async function getWhafFormLogsForWeekWithLate(
   return markWhafFormLogsLate(rows);
 }
 
+/**
+ * Fetch MCF rows for a campus week and attach `isLate` based on MCF deadlines.
+ *
+ * @param weekNum - Campus week number (1-based).
+ * @returns MCF rows for that week with `isLate` set.
+ */
 export async function getMcfFormLogsForWeekWithLate(
   weekNum: number
 ): Promise<McfFormLogRowWithLate[]> {
@@ -34,6 +57,12 @@ export async function getMcfFormLogsForWeekWithLate(
   return markMcfFormLogsLate(rows);
 }
 
+/**
+ * Fetch all MCF rows for a scholar and attach `isLate` based on MCF deadlines.
+ *
+ * @param uid - Scholar UID to match against `mentor_uid` or `mentee_uid`.
+ * @returns MCF rows for that scholar with `isLate` set.
+ */
 export async function getMcfFormLogsByUidWithLate(
   uid: string
 ): Promise<McfFormLogRowWithLate[]> {
@@ -41,6 +70,13 @@ export async function getMcfFormLogsByUidWithLate(
   return markMcfFormLogsLate(rows);
 }
 
+/**
+ * Fetch MCF rows for a scholar within a campus week and attach `isLate`.
+ *
+ * @param uid - Scholar UID to match against `mentor_uid` or `mentee_uid`.
+ * @param weekNum - Campus week number (1-based).
+ * @returns MCF rows for that scholar in the given week with `isLate` set.
+ */
 export async function getMcfFormLogsByUidAndWeekWithLate(
   uid: string,
   weekNum: number
@@ -49,6 +85,12 @@ export async function getMcfFormLogsByUidAndWeekWithLate(
   return markMcfFormLogsLate(rows);
 }
 
+/**
+ * Fetch WPL rows for a campus week and attach `isLate` based on WPL deadlines.
+ *
+ * @param weekNum - Campus week number (1-based).
+ * @returns WPL rows for that week with `isLate` set.
+ */
 export async function getWplFormLogsForWeekWithLate(
   weekNum: number
 ): Promise<WplFormLogRowWithLate[]> {
@@ -56,6 +98,12 @@ export async function getWplFormLogsForWeekWithLate(
   return markWplFormLogsLate(rows);
 }
 
+/**
+ * Fetch all WPL rows for a scholar and attach `isLate` based on WPL deadlines.
+ *
+ * @param uid - Scholar UID to match against `scholar_uid`.
+ * @returns WPL rows for that scholar with `isLate` set.
+ */
 export async function getWplFormLogsByUidWithLate(
   uid: string
 ): Promise<WplFormLogRowWithLate[]> {
@@ -63,6 +111,13 @@ export async function getWplFormLogsByUidWithLate(
   return markWplFormLogsLate(rows);
 }
 
+/**
+ * Fetch WPL rows for a scholar within a campus week and attach `isLate`.
+ *
+ * @param uid - Scholar UID to match against `scholar_uid`.
+ * @param weekNum - Campus week number (1-based).
+ * @returns WPL rows for that scholar in the given week with `isLate` set.
+ */
 export async function getWplFormLogsByUidAndWeekWithLate(
   uid: string,
   weekNum: number
