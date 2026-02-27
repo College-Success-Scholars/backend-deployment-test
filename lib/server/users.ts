@@ -118,22 +118,30 @@ export async function fetchAllUsersForMemo(): Promise<MemoUserRow[]> {
   }));
 }
 
+/** Row shape returned by fetchTeamLeaders (excludes app_role, includes mentee_count). */
+export type TeamLeaderRow = Omit<MemoUserRow, "app_role"> & {
+  mentee_count: number | null;
+};
+
 /** Fetch all non-scholars from public.users (team leaders and other roles). Server-only. */
-export async function fetchTeamLeaders(): Promise<MemoUserRow[]> {
+export async function fetchTeamLeaders(): Promise<TeamLeaderRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("users")
-    .select("uid, first_name, last_name, cohort, program_role, app_role, fd_required, ss_required")
+    .select("uid, first_name, last_name, cohort, program_role, fd_required, ss_required, mentee_count")
     .or("program_role.neq.scholar,program_role.is.null");
   if (error) throw error;
-  return (data ?? []).map((r) => ({
+  const rows = (data ?? []).map((r) => ({
     uid: String(r.uid),
     first_name: r.first_name ?? null,
     last_name: r.last_name ?? null,
     cohort: r.cohort != null ? Number(r.cohort) : null,
     program_role: r.program_role ?? null,
-    app_role: r.app_role ?? null,
     fd_required: r.fd_required != null ? Number(r.fd_required) : null,
     ss_required: r.ss_required != null ? Number(r.ss_required) : null,
+    mentee_count: r.mentee_count != null ? Number(r.mentee_count) : null,
   }));
+  return rows.filter(
+    (r) => (r.program_role ?? "").toLowerCase() !== "scholar"
+  );
 }

@@ -65,6 +65,12 @@ export default function DevPage() {
         >
           Campus Time Test →
         </Link>
+        <Link
+          href="/dev/form-logs"
+          className="text-primary hover:underline text-sm font-medium"
+        >
+          Form Logs Test →
+        </Link>
       </div>
 
       <DevTestClient />

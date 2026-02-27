@@ -246,7 +246,7 @@ type ProgressCellProps = ProgressCellTimeProps | ProgressCellCountProps;
  *                or count props (`mode: "count"`, completed, required, label, optional unitLabel).
  * @returns A div with formatted value/required and percentage, and a tooltip explaining the thresholds.
  */
-function ProgressCell(props: ProgressCellProps) {
+export function ProgressCell(props: ProgressCellProps) {
   const effectiveValue =
     props.mode === "time" ? props.total + props.excuseMin : props.completed;
   const required = props.mode === "time" ? props.required : props.required;
@@ -640,32 +640,6 @@ export function MemoContent({
                 uidColumn={{ field: "uid", header: "UID", sortable: true }}
                 columns={scholarColumns}
                 emptyMessage="No scholars"
-              />
-            )}
-          </CollapsibleTableSection>
-        </CardContent>
-      </Card>
-
-      {/* Team leaders forms table (same layout as Scholar hours card) */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Team leaders</CardTitle>
-          <CardDescription>
-            Forms (MCF) progress for the selected week. Yellow = form submitted after deadline.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-6">
-          <CollapsibleTableSection title="Forms (MCF)" defaultOpen={true}>
-            {teamLeaders.length === 0 ? (
-              <p className="text-muted-foreground text-sm">No team leaders.</p>
-            ) : (
-              <ScholarDataTable<MemoTLRow>
-                data={teamLeaders}
-                rowKeyField="uid"
-                nameColumn={{ field: "name", header: "Name", sortable: true }}
-                uidColumn={{ field: "uid", header: "UID", sortable: true }}
-                columns={getTLFormColumns()}
-                emptyMessage="No team leaders"
               />
             )}
           </CollapsibleTableSection>

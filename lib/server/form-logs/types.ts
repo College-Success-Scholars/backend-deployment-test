@@ -24,6 +24,8 @@ export interface McfFormLogRow {
 export interface WhafFormLogRow {
   id: string;
   created_at: string;
+  /** When present, use for matching to scholar then to team leader. Not yet populated in DB. */
+  scholar_uid: string | null;
   scholar_name: string | null;
   team_leader_contact: string | null;
   tl_meeting_in_person: string | null;
