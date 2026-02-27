@@ -20,3 +20,10 @@ export {
   markWplFormLogsLate,
   type FormLogRowWithLate,
 } from "./process";
+export {
+  normalizeName,
+  nameVariants,
+  nameTokens,
+  findTeamLeaderUidByFuzzyName,
+  type TeamLeaderNameRecord,
+} from "./name-matching";

@@ -26,3 +26,7 @@ export {
   type McfFormLogRowWithLate,
   type WplFormLogRowWithLate,
 } from "./with-late";
+export {
+  buildTeamLeaderFormStatsForWeek,
+  type TeamLeaderFormStatsRow,
+} from "./aggregate";

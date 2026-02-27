@@ -5,27 +5,14 @@ import {
   type ScholarDataTableColumn,
 } from "@/components/scholar-data-table";
 import { ProgressCell } from "@/app/memo/memo-content";
+import type { TeamLeaderFormStatsRow } from "@/lib/server/form-logs";
 
-export type TeamLeaderTableRow = {
-  uid: string;
-  name: string;
-  program_role: string | null;
-  whaf_completed: number;
-  whaf_required: number | null;
-  whaf_late: boolean;
-  whaf_pct: number | null;
-  mcf_completed: number;
-  mcf_required: number | null;
-  mcf_late: boolean;
-  mcf_pct: number | null;
-  wpl_completed: number;
-  wpl_required: number | null;
-  wpl_late: boolean;
-  wpl_pct: number | null;
-};
-
-export function TeamLeadersTable({ rows }: { rows: TeamLeaderTableRow[] }) {
-  const columns: ScholarDataTableColumn<TeamLeaderTableRow>[] = [
+export function TeamLeadersTable({
+  rows,
+}: {
+  rows: TeamLeaderFormStatsRow[];
+}) {
+  const columns: ScholarDataTableColumn<TeamLeaderFormStatsRow>[] = [
     {
       id: "program_role",
       header: "Program role",
@@ -40,7 +27,7 @@ export function TeamLeadersTable({ rows }: { rows: TeamLeaderTableRow[] }) {
       width: "16%",
       field: "whaf_pct",
       sortable: true,
-      sortField: "whaf_pct",
+      sortField: "whaf_latest_at",
       renderCell: (row) => (
         <ProgressCell
           mode="count"
@@ -58,7 +45,7 @@ export function TeamLeadersTable({ rows }: { rows: TeamLeaderTableRow[] }) {
       width: "16%",
       field: "mcf_pct",
       sortable: true,
-      sortField: "mcf_pct",
+      sortField: "mcf_latest_at",
       renderCell: (row) =>
         row.mcf_required === 0 ? (
           <div
@@ -89,7 +76,7 @@ export function TeamLeadersTable({ rows }: { rows: TeamLeaderTableRow[] }) {
       width: "16%",
       field: "wpl_pct",
       sortable: true,
-      sortField: "wpl_pct",
+      sortField: "wpl_latest_at",
       renderCell: (row) => (
         <ProgressCell
           mode="count"
@@ -104,7 +91,7 @@ export function TeamLeadersTable({ rows }: { rows: TeamLeaderTableRow[] }) {
   ];
 
   return (
-    <ScholarDataTable<TeamLeaderTableRow>
+    <ScholarDataTable<TeamLeaderFormStatsRow>
       data={rows}
       rowKeyField="uid"
       defaultSortColumnId="name"
