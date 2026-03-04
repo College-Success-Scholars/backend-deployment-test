@@ -63,23 +63,30 @@ export default async function FormLogsTestPage({ searchParams }: PageProps) {
     wplRowsWithLate
   );
 
-  // Overall completion stats across all team leaders
+  // Overall completion stats across all team leaders (including late counts for pie charts).
+  // Cap each TL's completed at required so double submissions don't inflate totals (e.g. 45/44).
   const overall = teamLeaderRows.reduce(
     (acc, row) => ({
-      whaf_completed: acc.whaf_completed + row.whaf_completed,
+      whaf_completed: acc.whaf_completed + Math.min(row.whaf_completed, row.whaf_required),
       whaf_required: acc.whaf_required + row.whaf_required,
-      mcf_completed: acc.mcf_completed + row.mcf_completed,
+      whaf_late_count: acc.whaf_late_count + (row.whaf_late ? 1 : 0),
+      mcf_completed: acc.mcf_completed + Math.min(row.mcf_completed, row.mcf_required),
       mcf_required: acc.mcf_required + row.mcf_required,
-      wpl_completed: acc.wpl_completed + row.wpl_completed,
+      mcf_late_count: acc.mcf_late_count + (row.mcf_late ? 1 : 0),
+      wpl_completed: acc.wpl_completed + Math.min(row.wpl_completed, row.wpl_required),
       wpl_required: acc.wpl_required + row.wpl_required,
+      wpl_late_count: acc.wpl_late_count + (row.wpl_late ? 1 : 0),
     }),
     {
       whaf_completed: 0,
       whaf_required: 0,
+      whaf_late_count: 0,
       mcf_completed: 0,
       mcf_required: 0,
+      mcf_late_count: 0,
       wpl_completed: 0,
       wpl_required: 0,
+      wpl_late_count: 0,
     }
   );
   return (
@@ -126,8 +133,8 @@ export default async function FormLogsTestPage({ searchParams }: PageProps) {
                   key={w}
                   href={formLogsWeekLink(w)}
                   className={`inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-sm font-medium transition-colors ${weekNum === w
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
                     }`}
                 >
                   {w}
