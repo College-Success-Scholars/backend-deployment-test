@@ -218,7 +218,7 @@ export default function TrafficPage() {
                         handleSubmitTraffic()
                       }
                     }}
-                    placeholder="Scan or Type UID"
+                    placeholder="Type UID"
                     className={`h-14 pl-12 text-lg rounded-xl transition-all shadow-sm ${uidError ? "border-red-500 focus-visible:ring-red-500 bg-red-50/50" : "bg-card"}`}
                   />
                 </div>
