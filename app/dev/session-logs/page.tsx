@@ -37,6 +37,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export const metadata = {
   title: "Session Logs Test | Dev Tools",

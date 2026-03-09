@@ -1,9 +1,4 @@
 import "server-only";
-import {
-  nameVariants,
-  findTeamLeaderUidByFuzzyName,
-  type TeamLeaderNameRecord,
-} from "@/lib/form-logs";
 import type { McfFormLogRow, WhafFormLogRow, WplFormLogRow } from "./types";
 import type { FormLogRowWithLate } from "@/lib/form-logs";
 
@@ -35,7 +30,10 @@ type McfWithLate = FormLogRowWithLate<McfFormLogRow>;
 type WhafWithLate = FormLogRowWithLate<WhafFormLogRow>;
 type WplWithLate = FormLogRowWithLate<WplFormLogRow>;
 
-type TeamLeaderInput = TeamLeaderNameRecord & {
+type TeamLeaderInput = {
+  uid: string;
+  first_name: string | null;
+  last_name: string | null;
   program_role: string | null;
   mentee_count: number | null;
 };
@@ -50,16 +48,7 @@ export function buildTeamLeaderFormStatsForWeek(
   whafRowsWithLate: WhafWithLate[],
   wplRowsWithLate: WplWithLate[]
 ): TeamLeaderFormStatsRow[] {
-  // TL name → uid (exact variants) for matching form rows to TLs.
-  const tlNameToUid = new Map<string, string>();
-  for (const u of teamLeaders) {
-    const name = [u.first_name, u.last_name].filter(Boolean).join(" ").trim();
-    if (name) {
-      for (const variant of nameVariants(name)) {
-        tlNameToUid.set(variant, u.uid);
-      }
-    }
-  }
+  const tlUids = new Set(teamLeaders.map((u) => u.uid));
 
   // MCF this week: match by TL uid (mentor_uid on row).
   const mcfByUid = new Map<string, { count: number; hasLate: boolean; latestAt: string }>();
@@ -76,39 +65,14 @@ export function buildTeamLeaderFormStatsForWeek(
     }
   }
 
-  // scholar_uid → TL from this week's MCF only (mentee_uid → mentor_uid).
-  const scholarToTlFromWeek = new Map<string, string>();
-  for (const row of mcfRowsWithLate) {
-    const menteeUid = row.mentee_uid ?? null;
-    const mentorUid = row.mentor_uid ?? null;
-    if (menteeUid && mentorUid) {
-      scholarToTlFromWeek.set(menteeUid, mentorUid);
-    }
-  }
-
-  // WHAF this week: match by uid (when scholar_uid → TL exists) or fuzzy name.
+  // WHAF this week: scholar_uid is the TL (same person as mentor_uid in MCF).
   const whafByUid = new Map<string, { count: number; hasLate: boolean; latestAt: string }>();
   for (const u of teamLeaders) {
     whafByUid.set(u.uid, { count: 0, hasLate: false, latestAt: "" });
   }
   for (const row of whafRowsWithLate) {
-    let uid: string | null = null;
-    if (row.scholar_uid) {
-      uid = scholarToTlFromWeek.get(row.scholar_uid) ?? null;
-    }
-    if (!uid) {
-      const contact = (row.team_leader_contact ?? "").trim();
-      const scholarName = (row.scholar_name ?? "").trim();
-      for (const nameToTry of [contact, scholarName]) {
-        if (!nameToTry) continue;
-        for (const variant of nameVariants(nameToTry)) {
-          uid = tlNameToUid.get(variant);
-          if (uid) break;
-        }
-        if (!uid) uid = findTeamLeaderUidByFuzzyName(nameToTry, teamLeaders);
-        if (uid) break;
-      }
-    }
+    const uid =
+      row.scholar_uid && tlUids.has(row.scholar_uid) ? row.scholar_uid : null;
     if (!uid) continue;
     const cur = whafByUid.get(uid)!;
     const created = row.created_at ?? "";
@@ -119,28 +83,14 @@ export function buildTeamLeaderFormStatsForWeek(
     });
   }
 
-  // WPL this week: match by scholar_uid → TL (from MCF) or fuzzy name (full_name).
+  // WPL this week: scholar_uid is the TL (same person as mentor_uid in MCF).
   const wplByUid = new Map<string, { count: number; hasLate: boolean; latestAt: string }>();
   for (const u of teamLeaders) {
     wplByUid.set(u.uid, { count: 0, hasLate: false, latestAt: "" });
   }
   for (const row of wplRowsWithLate) {
-    let uid: string | null = null;
-    if (row.scholar_uid) {
-      if (wplByUid.has(row.scholar_uid)) {
-        uid = row.scholar_uid;
-      } else {
-        uid = scholarToTlFromWeek.get(row.scholar_uid) ?? null;
-      }
-    }
-    if (!uid && row.full_name) {
-      const nameToTry = row.full_name.trim();
-      for (const variant of nameVariants(nameToTry)) {
-        uid = tlNameToUid.get(variant);
-        if (uid) break;
-      }
-      if (!uid) uid = findTeamLeaderUidByFuzzyName(nameToTry, teamLeaders);
-    }
+    const uid =
+      row.scholar_uid && tlUids.has(row.scholar_uid) ? row.scholar_uid : null;
     if (!uid) continue;
     const cur = wplByUid.get(uid)!;
     const created = row.created_at ?? "";
