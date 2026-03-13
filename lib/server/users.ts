@@ -186,3 +186,17 @@ export async function fetchTeamLeaders(): Promise<TeamLeaderRow[]> {
     (r) => (r.program_role ?? "").toLowerCase() !== "scholar"
   );
 }
+
+/**
+ * Fetch UIDs of all users with program_role = 'scholar'.
+ * Used for form-logs "all scholars" WHAF completion percentage.
+ */
+export async function fetchScholarUids(): Promise<string[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("users")
+    .select("uid")
+    .ilike("program_role", "scholar");
+  if (error) throw error;
+  return (data ?? []).map((r) => String(r.uid)).filter(Boolean);
+}

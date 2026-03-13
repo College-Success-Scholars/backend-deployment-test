@@ -18,7 +18,10 @@ const WPL_CHART_COLOR = "#9333ea";
 /** Same yellow as progress cell (bg-yellow-500/20 uses yellow-500) */
 const LATE_CHART_COLOR = "#eab308";
 
-function FormCompletionDonut({
+/** WHAF donut color; exported for use in all-scholars WHAF card. */
+export const FORM_COMPLETION_WHAF_COLOR = WHAF_CHART_COLOR;
+
+export function FormCompletionDonut({
   label,
   percentComplete,
   total,

@@ -196,6 +196,9 @@ export function TrafficWeeklyLineChart({
   );
 }
 
+/** When set to "fall" or "spring", only that semester's chart is shown. Default "both". */
+export type TrafficSemesterFilter = "fall" | "spring" | "both";
+
 interface TrafficWeeklyLineChartBySemesterProps {
   data: WeekEntryCount[];
   /** Max campus week to include in spring (e.g. 25). */
@@ -204,6 +207,10 @@ interface TrafficWeeklyLineChartBySemesterProps {
   cardSpan?: "full" | "half";
   title?: string;
   description?: string | null;
+  /** Which semester(s) to show. "both" = fall and spring; "fall" or "spring" = single chart. */
+  semesterFilter?: TrafficSemesterFilter;
+  /** When true, render only the chart content (no Card wrapper). Use when embedding inside another card. */
+  hideCard?: boolean;
 }
 
 export function TrafficWeeklyLineChartBySemester({
@@ -212,6 +219,8 @@ export function TrafficWeeklyLineChartBySemester({
   cardSpan = "full",
   title = DEFAULT_TITLE,
   description = DEFAULT_DESCRIPTION,
+  semesterFilter = "both",
+  hideCard = false,
 }: TrafficWeeklyLineChartBySemesterProps) {
   const fallWeekNumbers = useMemo(() => {
     const list: number[] = [];
@@ -224,16 +233,50 @@ export function TrafficWeeklyLineChartBySemester({
     return list;
   }, [maxWeek]);
 
+  const showFall = (semesterFilter === "both" || semesterFilter === "fall") && fallWeekNumbers.length > 0;
+  const showSpring = (semesterFilter === "both" || semesterFilter === "spring") && springWeekNumbers.length > 0;
+
   const chartSpan = cardSpan === "half" ? "half" : "full";
-  /* Full view: side by side with padding; half view: stacked, no top space. */
-  const contentClass =
-    cardSpan === "full"
+  /* Full view: side by side with padding; half view: stacked, no top space. When single semester, no grid. */
+  const isSingleChart = semesterFilter !== "both";
+  const contentClass = isSingleChart
+    ? "pt-0 pb-0"
+    : cardSpan === "full"
       ? "pt-6 grid grid-cols-1 md:grid-cols-2 gap-6"
       : "pt-0 pb-0 space-y-6";
   /* When full and side-by-side, use smaller width so two charts fit with gap. */
-  const chartWidth = cardSpan === "full" ? SIDE_BY_SIDE_WIDTH : undefined;
+  const chartWidth = cardSpan === "full" && !isSingleChart ? SIDE_BY_SIDE_WIDTH : undefined;
   /* Half view: shorter charts so card profile is roughly square. */
   const chartHeight = cardSpan === "half" ? HALF_VIEW_CHART_HEIGHT : undefined;
+
+  const content = (
+    <div className={contentClass}>
+      {showFall && (
+        <TrafficWeeklyLineChart
+          data={data}
+          allWeekNumbers={fallWeekNumbers}
+          semesterLabel="Fall semester"
+          cardSpan={chartSpan}
+          width={chartWidth}
+          height={chartHeight}
+          hideCard
+        />
+      )}
+      {showSpring && (
+        <TrafficWeeklyLineChart
+          data={data}
+          allWeekNumbers={springWeekNumbers}
+          semesterLabel="Spring semester"
+          cardSpan={chartSpan}
+          width={chartWidth}
+          height={chartHeight}
+          hideCard
+        />
+      )}
+    </div>
+  );
+
+  if (hideCard) return content;
 
   return (
     <Card>
@@ -245,30 +288,7 @@ export function TrafficWeeklyLineChartBySemester({
           )}
         </CardHeader>
       )}
-      <CardContent className={contentClass}>
-        {fallWeekNumbers.length > 0 && (
-          <TrafficWeeklyLineChart
-            data={data}
-            allWeekNumbers={fallWeekNumbers}
-            semesterLabel="Fall semester"
-            cardSpan={chartSpan}
-            width={chartWidth}
-            height={chartHeight}
-            hideCard
-          />
-        )}
-        {springWeekNumbers.length > 0 && (
-          <TrafficWeeklyLineChart
-            data={data}
-            allWeekNumbers={springWeekNumbers}
-            semesterLabel="Spring semester"
-            cardSpan={chartSpan}
-            width={chartWidth}
-            height={chartHeight}
-            hideCard
-          />
-        )}
-      </CardContent>
+      <CardContent>{content}</CardContent>
     </Card>
   );
 }

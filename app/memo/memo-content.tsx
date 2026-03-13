@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   formatMinutesToHoursAndMinutes,
+  WINTER_BREAK_CAMPUS_WEEK_NUMBER,
 } from "@/lib/time";
 import { SessionHeatMap } from "@/app/dev/session-logs/session-heat-map";
 import type { ScholarWithCompletedSession } from "@/lib/session-logs";
@@ -520,15 +521,15 @@ export function MemoContent({
         />
       </div>
 
-      {/* Room entries this week */}
+      {/* Room entries this week + traffic chart for current semester only */}
       <Card>
         <CardHeader>
           <CardTitle>Room entries this week</CardTitle>
           <CardDescription>
-            Entry count for the selected week.
+            Entry count for the selected week. Chart below shows entries by week for the current semester.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-6">
           <RoomEntriesThisWeek
             trafficWeeklyData={trafficWeeklyData}
             selectedWeekNum={selectedWeekNum}
@@ -536,6 +537,13 @@ export function MemoContent({
             entryCountForSelectedWeek={trafficEntryCountForSelectedWeek}
             overrideEntryCount={freshEntryCount}
           />
+          <div className="border-t border-border/60 pt-4">
+            <TrafficWeeklyLineChartBySemester
+              data={trafficWeeklyData}
+              semesterFilter={selectedWeekNum > WINTER_BREAK_CAMPUS_WEEK_NUMBER ? "spring" : "fall"}
+              hideCard
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -593,27 +601,7 @@ export function MemoContent({
 
       <FormCompletionOverviewCard overall={formCompletionOverall} />
 
-      {/* Traffic: entry count by week (fall and spring) + heat map — same as dev/traffic */}
-      {trafficCardSpan === "half" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <TrafficWeeklyLineChartBySemester
-            data={trafficWeeklyData}
-            cardSpan={trafficCardSpan}
-            title={trafficCardTitle}
-            description={trafficCardDescription}
-          />
-          <Card className="flex min-h-[200px] items-center justify-center border-dashed">
-            <CardContent className="flex flex-col items-center justify-center gap-1 p-6 text-center">
-              <span className="text-sm font-medium text-muted-foreground">
-                Placeholder
-              </span>
-              <span className="text-xs text-muted-foreground">
-                Another card can go here
-              </span>
-            </CardContent>
-          </Card>
-        </div>
-      ) : (
+      {trafficCardSpan !== "half" && (
         <TrafficWeeklyLineChartBySemester
           data={trafficWeeklyData}
           cardSpan={trafficCardSpan}

@@ -8,14 +8,18 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { dateToCampusWeek } from "@/lib/time";
-import { fetchTeamLeaders } from "@/lib/server/users";
+import { fetchTeamLeaders, fetchAllUsersForMemo } from "@/lib/server/users";
 import {
   getMcfFormLogsForWeekWithLate,
   getWhafFormLogsForWeekWithLate,
   getWplFormLogsForWeekWithLate,
   buildTeamLeaderFormStatsForWeek,
 } from "@/lib/server/form-logs";
-import { FormCompletionOverviewCard } from "@/components/form-completion-overview-card";
+import {
+  FormCompletionOverviewCard,
+  FormCompletionDonut,
+  FORM_COMPLETION_WHAF_COLOR,
+} from "@/components/form-completion-overview-card";
 import { TeamLeadersTable } from "./team-leaders-table";
 
 export const metadata = {
@@ -43,13 +47,22 @@ export default async function FormLogsTestPage({ searchParams }: PageProps) {
   const currentCampusWeek = dateToCampusWeek(new Date());
   const weekNum = parseWeekParam(params.week, currentCampusWeek);
 
-  const [teamLeadersRaw, mcfRowsWithLate, whafRows, wplRowsWithLate] =
+  const [teamLeadersRaw, mcfRowsWithLate, whafRows, wplRowsWithLate, allUsers] =
     await Promise.all([
       fetchTeamLeaders(),
       getMcfFormLogsForWeekWithLate(weekNum),
       getWhafFormLogsForWeekWithLate(weekNum),
       getWplFormLogsForWeekWithLate(weekNum),
+      fetchAllUsersForMemo(),
     ]);
+
+  const whafSubmitterUids = new Set(
+    whafRows.map((r) => r.scholar_uid).filter((uid): uid is string => Boolean(uid))
+  );
+  const totalEveryone = allUsers.length;
+  const everyoneWithWhaf = allUsers.filter((u) => whafSubmitterUids.has(u.uid)).length;
+  const everyoneWhafPct =
+    totalEveryone > 0 ? Math.round((everyoneWithWhaf / totalEveryone) * 100) : 0;
 
   const teamLeaderRows = buildTeamLeaderFormStatsForWeek(
     teamLeadersRaw,
@@ -109,7 +122,26 @@ export default async function FormLogsTestPage({ searchParams }: PageProps) {
         selectedWeek={weekNum}
       />
 
-      <FormCompletionOverviewCard overall={overall} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="md:col-span-1">
+          <CardHeader>
+            <CardTitle>WHAF completion (everyone)</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-row flex-wrap items-center justify-center gap-6 sm:gap-8">
+            <FormCompletionDonut
+              label="WHAF"
+              percentComplete={totalEveryone > 0 ? everyoneWhafPct : null}
+              total={totalEveryone}
+              completeCount={everyoneWithWhaf}
+              lateCount={0}
+              strokeColor={FORM_COMPLETION_WHAF_COLOR}
+            />
+          </CardContent>
+        </Card>
+        <div className="md:col-span-2">
+          <FormCompletionOverviewCard overall={overall} />
+        </div>
+      </div>
 
       <Card>
         <CardHeader>
