@@ -50,7 +50,6 @@ export default async function FormLogsTestPage({ searchParams }: PageProps) {
       getWhafFormLogsForWeekWithLate(weekNum),
       getWplFormLogsForWeekWithLate(weekNum),
     ]);
-    console.log(whafRows);
 
   const teamLeaderRows = buildTeamLeaderFormStatsForWeek(
     teamLeadersRaw,

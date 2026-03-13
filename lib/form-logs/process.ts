@@ -3,7 +3,14 @@
  * Client-safe; use with rows from lib/server/form-logs or any object with created_at.
  */
 
-import { isWhafLate, isMcfLate, isWplLate } from "./deadlines";
+import {
+  isWhafLate,
+  isWhafLateForWeek,
+  isMcfLate,
+  isMcfLateForWeek,
+  isWplLate,
+  isWplLateForWeek,
+} from "./deadlines";
 
 /** Row with created_at and optional isLate (after processing). */
 export type FormLogRowWithLate<T> = T & { isLate: boolean };
@@ -27,27 +34,37 @@ function markFormLogsLate<T extends { created_at: string | null }>(
 
 /**
  * Mark each WHAF row with isLate (true if submitted after Thursday 23:59 EST of that week).
+ * When weekNum is provided (e.g. rows were fetched for that week), uses that week's deadline
+ * so late status matches the viewed week and avoids timezone/week-boundary quirks.
  */
 export function markWhafFormLogsLate<T extends { created_at: string | null }>(
-  rows: T[]
+  rows: T[],
+  weekNum?: number
 ): FormLogRowWithLate<T>[] {
-  return markFormLogsLate(rows, isWhafLate);
+  const isLate = weekNum != null ? (c: string | Date) => isWhafLateForWeek(c, weekNum) : isWhafLate;
+  return markFormLogsLate(rows, isLate);
 }
 
 /**
  * Mark each MCF row with isLate (true if submitted after Friday 17:00 EST of that week).
+ * When weekNum is provided, uses that week's deadline for consistency with the viewed week.
  */
 export function markMcfFormLogsLate<T extends { created_at: string | null }>(
-  rows: T[]
+  rows: T[],
+  weekNum?: number
 ): FormLogRowWithLate<T>[] {
-  return markFormLogsLate(rows, isMcfLate);
+  const isLate = weekNum != null ? (c: string | Date) => isMcfLateForWeek(c, weekNum) : isMcfLate;
+  return markFormLogsLate(rows, isLate);
 }
 
 /**
  * Mark each WPL row with isLate (true if submitted after Friday 17:00 EST of that week).
+ * When weekNum is provided, uses that week's deadline for consistency with the viewed week.
  */
 export function markWplFormLogsLate<T extends { created_at: string | null }>(
-  rows: T[]
+  rows: T[],
+  weekNum?: number
 ): FormLogRowWithLate<T>[] {
-  return markFormLogsLate(rows, isWplLate);
+  const isLate = weekNum != null ? (c: string | Date) => isWplLateForWeek(c, weekNum) : isWplLate;
+  return markFormLogsLate(rows, isLate);
 }

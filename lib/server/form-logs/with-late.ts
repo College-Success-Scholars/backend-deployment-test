@@ -41,7 +41,7 @@ export async function getWhafFormLogsForWeekWithLate(
   weekNum: number
 ): Promise<WhafFormLogRowWithLate[]> {
   const rows = await getWhafFormLogsForWeek(weekNum);
-  return markWhafFormLogsLate(rows);
+  return markWhafFormLogsLate(rows, weekNum);
 }
 
 /**
@@ -54,7 +54,7 @@ export async function getMcfFormLogsForWeekWithLate(
   weekNum: number
 ): Promise<McfFormLogRowWithLate[]> {
   const rows = await getMcfFormLogsForWeek(weekNum);
-  return markMcfFormLogsLate(rows);
+  return markMcfFormLogsLate(rows, weekNum);
 }
 
 /**
@@ -95,7 +95,7 @@ export async function getWplFormLogsForWeekWithLate(
   weekNum: number
 ): Promise<WplFormLogRowWithLate[]> {
   const rows = await getWplFormLogsForWeek(weekNum);
-  return markWplFormLogsLate(rows);
+  return markWplFormLogsLate(rows, weekNum);
 }
 
 /**

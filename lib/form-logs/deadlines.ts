@@ -56,6 +56,21 @@ export function isWhafLate(createdAt: string | Date): boolean {
 }
 
 /**
+ * True if the WHAF was submitted after Thursday 23:59 EST of the given campus week.
+ * Use this when rows were already fetched for a specific week so the deadline is
+ * consistent with the week being viewed (avoids timezone/week-boundary quirks).
+ */
+export function isWhafLateForWeek(
+  createdAt: string | Date,
+  weekNum: number
+): boolean {
+  const deadline = getWhafDeadlineForWeek(weekNum);
+  if (!deadline) return false;
+  const submitted = toDate(createdAt);
+  return submitted.getTime() > deadline.getTime();
+}
+
+/**
  * True if the MCF was submitted after Friday 17:00 EST of its campus week.
  */
 export function isMcfLate(createdAt: string | Date): boolean {
@@ -63,8 +78,34 @@ export function isMcfLate(createdAt: string | Date): boolean {
 }
 
 /**
+ * True if the MCF was submitted after Friday 17:00 EST of the given campus week.
+ */
+export function isMcfLateForWeek(
+  createdAt: string | Date,
+  weekNum: number
+): boolean {
+  const deadline = getMcfWplDeadlineForWeek(weekNum);
+  if (!deadline) return false;
+  const submitted = toDate(createdAt);
+  return submitted.getTime() > deadline.getTime();
+}
+
+/**
  * True if the WPL was submitted after Friday 17:00 EST of its campus week.
  */
 export function isWplLate(createdAt: string | Date): boolean {
   return isLateAfterDeadline(createdAt, getMcfWplDeadlineForWeek);
+}
+
+/**
+ * True if the WPL was submitted after Friday 17:00 EST of the given campus week.
+ */
+export function isWplLateForWeek(
+  createdAt: string | Date,
+  weekNum: number
+): boolean {
+  const deadline = getMcfWplDeadlineForWeek(weekNum);
+  if (!deadline) return false;
+  const submitted = toDate(createdAt);
+  return submitted.getTime() > deadline.getTime();
 }
