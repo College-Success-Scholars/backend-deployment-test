@@ -15,7 +15,7 @@ import {
   getWplFormLogsForWeekWithLate,
   buildTeamLeaderFormStatsForWeek,
 } from "@/lib/server/form-logs";
-import { FormCompletionPieCharts } from "./form-completion-pie-charts";
+import { FormCompletionOverviewCard } from "@/components/form-completion-overview-card";
 import { TeamLeadersTable } from "./team-leaders-table";
 
 export const metadata = {
@@ -109,6 +109,8 @@ export default async function FormLogsTestPage({ searchParams }: PageProps) {
         selectedWeek={weekNum}
       />
 
+      <FormCompletionOverviewCard overall={overall} />
+
       <Card>
         <CardHeader>
           <CardTitle>Team leaders</CardTitle>
@@ -119,7 +121,6 @@ export default async function FormLogsTestPage({ searchParams }: PageProps) {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
-          <FormCompletionPieCharts overall={overall} />
           <TeamLeadersTable rows={teamLeaderRows} />
         </CardContent>
       </Card>
