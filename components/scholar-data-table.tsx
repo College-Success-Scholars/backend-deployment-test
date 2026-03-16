@@ -246,12 +246,13 @@ export function ScholarDataTable<T>({
           {sortedData.map((row, i) => (
             <tr
               key={`${String(row[rowKeyField])}-${i}`}
+              className="even:bg-muted/40 dark:even:bg-muted/25"
               {...(rowDataAttributes?.(row) ?? {})}
             >
               {resolvedColumns.map((col) => (
                 <td
                   key={col.id}
-                  className={`${cellClass} ${col.cellClassName ?? ""}`}
+                  className={`${cellClass} pl-4 ${col.cellClassName ?? ""}`}
                   colSpan={col.colSpan ?? 1}
                   data-column-id={col.id}
                 >
