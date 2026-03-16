@@ -4,7 +4,6 @@ import { useRouter, usePathname } from "next/navigation";
 import { useState, useCallback, useEffect, useTransition } from "react";
 import {
   ScholarDataTable,
-  CollapsibleTableSection,
   type ScholarDataTableColumn,
 } from "@/components/scholar-data-table";
 import {
@@ -456,42 +455,39 @@ function RoomEntriesThisWeek({
   );
 }
 
-function getScholarColumns(): ScholarDataTableColumn<MemoScholarRow>[] {
-  return [
-    {
-      id: "fd-progress",
-      header: "Front desk",
-      field: "fd_pct",
-      sortable: true,
-      sortField: "fd_pct",
-      renderCell: (row) => (
-        <ProgressCell
-          mode="time"
-          total={row.fd_total}
-          required={row.fd_required}
-          excuseMin={row.fd_excuse_min}
-          label="FD"
-        />
-      ),
-    },
-    {
-      id: "ss-progress",
-      header: "Study session",
-      field: "ss_pct",
-      sortable: true,
-      sortField: "ss_pct",
-      renderCell: (row) => (
-        <ProgressCell
-          mode="time"
-          total={row.ss_total}
-          required={row.ss_required}
-          excuseMin={row.ss_excuse_min}
-          label="SS"
-        />
-      ),
-    },
-  ];
-}
+const FD_COLUMN: ScholarDataTableColumn<MemoScholarRow> = {
+  id: "fd-progress",
+  header: "Front desk",
+  field: "fd_pct",
+  sortable: true,
+  sortField: "fd_pct",
+  renderCell: (row) => (
+    <ProgressCell
+      mode="time"
+      total={row.fd_total}
+      required={row.fd_required}
+      excuseMin={row.fd_excuse_min}
+      label="FD"
+    />
+  ),
+};
+
+const SS_COLUMN: ScholarDataTableColumn<MemoScholarRow> = {
+  id: "ss-progress",
+  header: "Study session",
+  field: "ss_pct",
+  sortable: true,
+  sortField: "ss_pct",
+  renderCell: (row) => (
+    <ProgressCell
+      mode="time"
+      total={row.ss_total}
+      required={row.ss_required}
+      excuseMin={row.ss_excuse_min}
+      label="SS"
+    />
+  ),
+};
 
 function getTLFormColumns(): ScholarDataTableColumn<MemoTLRow>[] {
   return [
@@ -554,7 +550,6 @@ export function MemoContent({
   trafficCardDescription?: string | null;
 }) {
   const router = useRouter();
-  const scholarColumns = getScholarColumns();
   const [freshEntryCount, setFreshEntryCount] = useState<number | null>(null);
 
   useEffect(() => {
@@ -585,9 +580,9 @@ export function MemoContent({
   return (
     <div className="container mx-auto max-w-5xl space-y-4 py-4">
       <div>
-        <h1 className="text-2xl font-bold">Scholar hours overview</h1>
+        <h1 className="text-2xl font-bold">Program Overview</h1>
         <p className="text-muted-foreground mt-1">
-          Front desk and study session hours by scholar. Week: {weekLabel}.
+         {weekLabel}.
         </p>
       </div>
 
@@ -617,9 +612,6 @@ export function MemoContent({
         <Card>
           <CardHeader>
             <CardTitle>Cohort completion</CardTitle>
-            <CardDescription>
-              Front desk and study session completion by cohort (2024 & 2025).
-            </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-row flex-wrap items-center justify-center gap-4 sm:gap-6">
             <CohortPieChart
@@ -657,9 +649,6 @@ export function MemoContent({
         <Card>
           <CardHeader>
             <CardTitle>Sophomores (2024)</CardTitle>
-            <CardDescription>
-              Front desk and study session completion for 2024 cohort.
-            </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-row items-center justify-center gap-4">
             <CohortPieChart
@@ -681,9 +670,6 @@ export function MemoContent({
         <Card>
           <CardHeader>
             <CardTitle>Freshmen (2025)</CardTitle>
-            <CardDescription>
-              Front desk and study session completion for 2025 cohort.
-            </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-row items-center justify-center gap-4">
             <CohortPieChart
@@ -746,19 +732,21 @@ export function MemoContent({
         />
       )}
 
-      {/* Heat map */}
-      <SessionHeatMap completedStudy={completedStudy} completedFd={completedFd} />
+      {/* Heat map — hidden when printing */}
+      <div className="print:hidden">
+        <SessionHeatMap completedStudy={completedStudy} completedFd={completedFd} />
+      </div>
 
-      {/* Scholars table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Scholars</CardTitle>
-          <CardDescription>
-            Front desk and study session progress for the current week.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <CollapsibleTableSection title="Scholar hours (FD & SS)" defaultOpen={true}>
+      {/* Scholars — two distinct cards (FD and SS) side-by-side on md+ */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Front desk</CardTitle>
+            <CardDescription>
+              Scholar hours for the current week.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
             {scholars.length === 0 ? (
               <p className="text-muted-foreground text-sm">No scholars with required hours.</p>
             ) : (
@@ -770,14 +758,42 @@ export function MemoContent({
                   header: "Scholar",
                   sortable: true,
                 }}
-                uidColumn={{ field: "uid", header: "UID", sortable: true }}
-                columns={scholarColumns}
+                columns={[FD_COLUMN]}
                 emptyMessage="No scholars"
+defaultSortColumnId="fd-progress"
+                  defaultSortDirection="desc"
               />
             )}
-          </CollapsibleTableSection>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Study session</CardTitle>
+            <CardDescription>
+              Scholar hours for the current week.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {scholars.length === 0 ? (
+              <p className="text-muted-foreground text-sm">No scholars with required hours.</p>
+            ) : (
+              <ScholarDataTable<MemoScholarRow>
+                data={scholars}
+                rowKeyField="uid"
+                nameColumn={{
+                  field: "scholar_name",
+                  header: "Scholar",
+                  sortable: true,
+                }}
+                columns={[SS_COLUMN]}
+                emptyMessage="No scholars"
+defaultSortColumnId="ss-progress"
+                  defaultSortDirection="desc"
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
