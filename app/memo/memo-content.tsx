@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   formatMinutesToHoursAndMinutes,
@@ -295,6 +296,81 @@ export function ProgressCell(props: ProgressCellProps) {
   );
 }
 
+function RoomEntriesCornerSummary({
+  trafficWeeklyData,
+  selectedWeekNum,
+  currentCampusWeek,
+  entryCountForSelectedWeek,
+  overrideEntryCount,
+}: {
+  trafficWeeklyData: WeekEntryCount[];
+  selectedWeekNum: number;
+  currentCampusWeek: number | null;
+  entryCountForSelectedWeek: number;
+  overrideEntryCount?: number | null;
+}) {
+  const thisWeekCount =
+    overrideEntryCount != null ? overrideEntryCount : entryCountForSelectedWeek;
+  const isCurrentWeek =
+    currentCampusWeek != null && selectedWeekNum === currentCampusWeek;
+  const priorWeekNum = selectedWeekNum - 1;
+  const priorWeekCount =
+    priorWeekNum >= 1
+      ? trafficWeeklyData.find((d) => d.weekNumber === priorWeekNum)?.entryCount ?? 0
+      : null;
+  const hasPrior = priorWeekCount !== null;
+  const diffAbs = hasPrior ? thisWeekCount - priorWeekCount : null;
+  const pctChange =
+    hasPrior && priorWeekCount > 0
+      ? ((thisWeekCount - priorWeekCount) / priorWeekCount) * 100
+      : null;
+
+  return (
+    <div className="absolute top-6 right-6 flex flex-row flex-wrap items-center justify-end gap-2">
+      <span className="text-lg font-semibold text-foreground">
+        {thisWeekCount} {thisWeekCount === 1 ? "entry" : "entries"}
+      </span>
+      {isCurrentWeek ? (
+        <span
+          className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium bg-muted/50 text-muted-foreground"
+          title="This week is still in progress; count will change."
+        >
+          currently collecting
+        </span>
+      ) : (
+        hasPrior && (
+          <span
+            className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${(diffAbs ?? 0) > 0
+              ? "bg-green-500/20 text-green-700 dark:text-green-400"
+              : (diffAbs ?? 0) < 0
+                ? "bg-red-500/20 text-red-700 dark:text-red-400"
+                : "bg-muted/50 text-muted-foreground"
+              }`}
+            title={
+              priorWeekCount != null
+                ? `Week ${selectedWeekNum}: ${thisWeekCount}. Week ${priorWeekNum}: ${priorWeekCount}.`
+                : undefined
+            }
+          >
+            {(diffAbs ?? 0) > 0 && <span aria-hidden>↑</span>}
+            {(diffAbs ?? 0) < 0 && <span aria-hidden>↓</span>}
+            {diffAbs != null && diffAbs > 0 ? "+" : ""}
+            {diffAbs}
+            {" vs prior week"}
+            {pctChange != null && (
+              <span className="opacity-90">
+                {" "}
+                ({pctChange >= 0 ? "+" : ""}
+                {Math.round(pctChange)}%)
+              </span>
+            )}
+          </span>
+        )
+      )}
+    </div>
+  );
+}
+
 function RoomEntriesThisWeek({
   trafficWeeklyData,
   selectedWeekNum,
@@ -303,12 +379,15 @@ function RoomEntriesThisWeek({
   entryCountForSelectedWeek,
   /** When set (e.g. after sync), use this for the selected week so the count is current. */
   overrideEntryCount,
+  /** When true, count is shown in card corner instead of here. */
+  hideCountInCorner,
 }: {
   trafficWeeklyData: WeekEntryCount[];
   selectedWeekNum: number;
   currentCampusWeek: number | null;
   entryCountForSelectedWeek: number;
   overrideEntryCount?: number | null;
+  hideCountInCorner?: boolean;
 }) {
   const thisWeekCount =
     overrideEntryCount != null
@@ -328,6 +407,8 @@ function RoomEntriesThisWeek({
     hasPrior && priorWeekCount > 0
       ? ((thisWeekCount - priorWeekCount) / priorWeekCount) * 100
       : null;
+
+  if (hideCountInCorner) return null;
 
   return (
     <div className="flex flex-row flex-wrap items-center gap-3 px-1 py-2">
@@ -510,7 +591,7 @@ export function MemoContent({
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4 print:hidden">
         <WeekPicker
           currentCampusWeek={currentCampusWeek}
           selectedWeekNum={selectedWeekNum}
@@ -519,36 +600,60 @@ export function MemoContent({
           selectedWeekNum={selectedWeekNum}
           onSyncDone={handleSyncDone}
         />
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={() => window.print()}
+          className="print:hidden"
+        >
+          <Printer className="size-4" />
+          Print
+        </Button>
       </div>
 
-      {/* Room entries this week + traffic chart for current semester only */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Room entries this week</CardTitle>
-          <CardDescription>
-            Entry count for the selected week. Chart below shows entries by week for the current semester.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-6">
-          <RoomEntriesThisWeek
-            trafficWeeklyData={trafficWeeklyData}
-            selectedWeekNum={selectedWeekNum}
-            currentCampusWeek={currentCampusWeek}
-            entryCountForSelectedWeek={trafficEntryCountForSelectedWeek}
-            overrideEntryCount={freshEntryCount}
-          />
-          <div className="border-t border-border/60 pt-4">
-            <TrafficWeeklyLineChartBySemester
-              data={trafficWeeklyData}
-              semesterFilter={selectedWeekNum > WINTER_BREAK_CAMPUS_WEEK_NUMBER ? "spring" : "fall"}
-              hideCard
+      {/* Cohort FD/SS completion — single row of 4 charts on narrow screens, two cards on md+ */}
+      <div className="md:hidden">
+        <Card>
+          <CardHeader>
+            <CardTitle>Cohort completion</CardTitle>
+            <CardDescription>
+              Front desk and study session completion by cohort (2024 & 2025).
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-row flex-wrap items-center justify-center gap-4 sm:gap-6">
+            <CohortPieChart
+              label="2024 FD"
+              percentComplete={pieData.cohort2024.fdPercent}
+              total={pieData.cohort2024.total}
+              completeCount={pieData.cohort2024.fdCompleteCount}
+              variant="fd"
             />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Cohort FD/SS completion — two standalone cards side by side */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CohortPieChart
+              label="2024 SS"
+              percentComplete={pieData.cohort2024.ssPercent}
+              total={pieData.cohort2024.total}
+              completeCount={pieData.cohort2024.ssCompleteCount}
+              variant="ss"
+            />
+            <CohortPieChart
+              label="2025 FD"
+              percentComplete={pieData.cohort2025.fdPercent}
+              total={pieData.cohort2025.total}
+              completeCount={pieData.cohort2025.fdCompleteCount}
+              variant="fd"
+            />
+            <CohortPieChart
+              label="2025 SS"
+              percentComplete={pieData.cohort2025.ssPercent}
+              total={pieData.cohort2025.total}
+              completeCount={pieData.cohort2025.ssCompleteCount}
+              variant="ss"
+            />
+          </CardContent>
+        </Card>
+      </div>
+      <div className="hidden md:grid grid-cols-2 gap-4">
         <Card>
           <CardHeader>
             <CardTitle>Sophomores (2024)</CardTitle>
@@ -600,6 +705,37 @@ export function MemoContent({
       </div>
 
       <FormCompletionOverviewCard overall={formCompletionOverall} />
+
+      {/* Room entries this week + traffic chart for current semester only */}
+      <Card className="relative">
+        <RoomEntriesCornerSummary
+          trafficWeeklyData={trafficWeeklyData}
+          selectedWeekNum={selectedWeekNum}
+          currentCampusWeek={currentCampusWeek}
+          entryCountForSelectedWeek={trafficEntryCountForSelectedWeek}
+          overrideEntryCount={freshEntryCount}
+        />
+        <CardHeader>
+          <CardTitle>Traffic log </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <RoomEntriesThisWeek
+            trafficWeeklyData={trafficWeeklyData}
+            selectedWeekNum={selectedWeekNum}
+            currentCampusWeek={currentCampusWeek}
+            entryCountForSelectedWeek={trafficEntryCountForSelectedWeek}
+            overrideEntryCount={freshEntryCount}
+            hideCountInCorner
+          />
+          <div className="">
+            <TrafficWeeklyLineChartBySemester
+              data={trafficWeeklyData}
+              semesterFilter={selectedWeekNum > WINTER_BREAK_CAMPUS_WEEK_NUMBER ? "spring" : "fall"}
+              hideCard
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {trafficCardSpan !== "half" && (
         <TrafficWeeklyLineChartBySemester

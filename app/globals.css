@@ -120,3 +120,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+@media print {
+  html,
+  body {
+    background: white !important;
+    color: #111;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  [data-slot="card"] {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

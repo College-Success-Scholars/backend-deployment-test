@@ -35,7 +35,7 @@ interface TrafficWeeklyLineChartProps {
 
 const MARGIN = { top: 24, right: 24, bottom: 32, left: 40 };
 const DEFAULT_WIDTH = 600;
-const DEFAULT_HEIGHT = 280;
+const DEFAULT_HEIGHT = 200;
 /** Width per chart when two are shown side by side (fits in max-w-5xl with gap). */
 const SIDE_BY_SIDE_WIDTH = 460;
 /** Height per chart in half view so card profile is roughly square. */
