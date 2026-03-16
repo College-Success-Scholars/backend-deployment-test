@@ -98,6 +98,23 @@ export async function getWhafFormLogsForWeek(
   return (data ?? []) as WhafFormLogRow[];
 }
 
+/**
+ * Fetch all WHAF form logs for a given scholar (by scholar_uid).
+ *
+ * @param uid - Scholar UID to match against `scholar_uid`.
+ * @returns All matching `whaf_form_logs` rows ordered by `created_at`.
+ */
+export async function getWhafFormLogsByUid(uid: string): Promise<WhafFormLogRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("whaf_form_logs")
+    .select("*")
+    .eq("scholar_uid", uid)
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as WhafFormLogRow[];
+}
+
 // ---- WPL (Work Placement Log) ----
 
 /**

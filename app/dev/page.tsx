@@ -40,7 +40,7 @@ export default function DevPage() {
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-col gap-4">
         <Link
           href="/dev/session-logs"
           className="text-primary hover:underline text-sm font-medium"
@@ -70,6 +70,12 @@ export default function DevPage() {
           className="text-primary hover:underline text-sm font-medium"
         >
           Form Logs Test →
+        </Link>
+        <Link
+          href="/dev/profiles"
+          className="text-primary hover:underline text-sm font-medium"
+        >
+          Profile Test →
         </Link>
       </div>
 

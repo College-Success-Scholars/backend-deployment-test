@@ -39,6 +39,30 @@ export async function getStudySessionRecord(
   return data as StudySessionRecordRow | null;
 }
 
+/** Fetch all front_desk_records for a user (all weeks). */
+export async function getFrontDeskRecordsByUid(uid: string): Promise<FrontDeskRecordRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("front_desk_records")
+    .select("*")
+    .eq("uid", uid)
+    .order("week_num", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as FrontDeskRecordRow[];
+}
+
+/** Fetch all study_session_records for a user (all weeks). */
+export async function getStudySessionRecordsByUid(uid: string): Promise<StudySessionRecordRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("study_session_records")
+    .select("*")
+    .eq("uid", uid)
+    .order("week_num", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as StudySessionRecordRow[];
+}
+
 /** Study session record with optional scholar display name and required hours (from public.users). */
 export type StudySessionRecordWithName = StudySessionRecordRow & {
   scholar_name?: string | null;

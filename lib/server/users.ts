@@ -154,6 +154,30 @@ export async function fetchAllUsersForMemo(): Promise<MemoUserRow[]> {
 }
 
 /**
+ * Fetch a single user by UID (memo row shape). Returns null if not found.
+ */
+export async function getUserByUid(uid: string): Promise<MemoUserRow | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("users")
+    .select("uid, first_name, last_name, cohort, program_role, app_role, fd_required, ss_required")
+    .eq("uid", uid)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  return {
+    uid: String(data.uid),
+    first_name: data.first_name ?? null,
+    last_name: data.last_name ?? null,
+    cohort: data.cohort != null ? Number(data.cohort) : null,
+    program_role: data.program_role ?? null,
+    app_role: data.app_role ?? null,
+    fd_required: data.fd_required != null ? Number(data.fd_required) : null,
+    ss_required: data.ss_required != null ? Number(data.ss_required) : null,
+  };
+}
+
+/**
  * Row shape returned by `fetchTeamLeaders` (excludes `app_role`, includes mentee count).
  */
 export type TeamLeaderRow = Omit<MemoUserRow, "app_role"> & {

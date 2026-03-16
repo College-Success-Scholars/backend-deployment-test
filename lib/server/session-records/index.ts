@@ -5,6 +5,8 @@
 export {
   getFrontDeskRecord,
   getStudySessionRecord,
+  getFrontDeskRecordsByUid,
+  getStudySessionRecordsByUid,
   getStudySessionRecordsForWeek,
   getFrontDeskRecordsForWeek,
   getStudySessionRecordsForWeekAll,

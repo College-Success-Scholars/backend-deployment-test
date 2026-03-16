@@ -10,6 +10,7 @@ export {
   getMcfFormLogsByUid,
   getMcfFormLogsByUidAndWeek,
   getWhafFormLogsForWeek,
+  getWhafFormLogsByUid,
   getWplFormLogsForWeek,
   getWplFormLogsByUid,
   getWplFormLogsByUidAndWeek,
