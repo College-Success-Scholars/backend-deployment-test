@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { UserProfile } from "./types";
 import { APP_ROLE_ORDER } from "./types";
+import { getSupabasePublicKey } from "./public-key";
 
 /**
  * Especially important if using Fluid compute: Don't put this client in a
@@ -14,9 +15,41 @@ import { APP_ROLE_ORDER } from "./types";
 export async function createClient() {
   const cookieStore = await cookies();
 
-  const supabaseKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY ??
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
+  const supabaseKey = getSupabasePublicKey();
+
+  // #region agent log
+  fetch("http://127.0.0.1:7682/ingest/a3f80154-cba6-470b-b5c5-b2e641a9ba29", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Debug-Session-Id": "689c88",
+    },
+    body: JSON.stringify({
+      sessionId: "689c88",
+      runId: "post-fix",
+      location: "lib/supabase/server.ts:createClient",
+      message: "server createClient env probe",
+      data: {
+        hasUrl: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()),
+        urlLen: process.env.NEXT_PUBLIC_SUPABASE_URL?.length ?? 0,
+        hasPublishableOrAnon: Boolean(
+          process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY?.trim(),
+        ),
+        publishableOrAnonLen:
+          process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY?.length ?? 0,
+        hasPublishableDefault: Boolean(
+          process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY?.trim(),
+        ),
+        publishableDefaultLen:
+          process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY?.length ?? 0,
+        hasLegacyAnon: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()),
+        resolvedKeyLen: supabaseKey?.length ?? 0,
+        hypothesisId: "H1-H2-H3-H5",
+      },
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+  // #endregion
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

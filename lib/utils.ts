@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { getSupabasePublicKey } from "@/lib/supabase/public-key"
 
 /**
  * Merges Tailwind (or other) class names. Use for conditional or combined `className` values
@@ -17,6 +18,5 @@ export function cn(...inputs: ClassValue[]) {
  * Can be removed once the project is fully set up.
  */
 export const hasEnvVars =
-  process.env.NEXT_PUBLIC_SUPABASE_URL &&
-  (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY);
+  Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()) &&
+  Boolean(getSupabasePublicKey()?.trim());
