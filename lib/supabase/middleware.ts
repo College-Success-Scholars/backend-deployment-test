@@ -8,6 +8,12 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
+  const pathname = request.nextUrl.pathname;
+  // Next.js static assets must not hit auth redirects (browser would get HTML instead of CSS/JS/fonts).
+  if (pathname.startsWith("/_next") || pathname.startsWith("/favicon")) {
+    return supabaseResponse;
+  }
+
   // If the env vars are not set, skip middleware check. You can remove this
   // once you setup the project.
   if (!hasEnvVars) {
