@@ -21,7 +21,8 @@ export async function GET(request: NextRequest) {
       if (type === "invite") {
         const q = new URLSearchParams();
         q.set("next", next);
-        redirect(`/auth/set-password?${q.toString()}`);
+        const baseUrl = request.nextUrl.origin;
+        redirect(`${baseUrl}/auth/set-password?${q.toString()}`);
       }
       redirect(next);
     } else {
