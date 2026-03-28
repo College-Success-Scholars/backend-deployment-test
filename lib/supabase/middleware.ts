@@ -13,6 +13,11 @@ export async function updateSession(request: NextRequest) {
   if (pathname.startsWith("/_next") || pathname.startsWith("/favicon")) {
     return supabaseResponse;
   }
+  // Files from public/ (and next/image internal fetches) must bypass auth — otherwise the
+  // optimizer receives a redirect/HTML and fails with "isn't a valid image ... received null".
+  if (/\.(ico|png|jpg|jpeg|svg|gif|webp|avif|woff2?|ttf|eot)$/i.test(pathname)) {
+    return supabaseResponse;
+  }
 
   // If the env vars are not set, skip middleware check. You can remove this
   // once you setup the project.
