@@ -1,24 +1,16 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 
-/**
- * When Supabase delivers an implicit invite (tokens in the URL hash), the server
- * never sees `type=invite`. After the browser client establishes the session,
- * redirect to `/auth/set-password` so the user can set a password.
- */
 export function InviteFromHashRedirect() {
   const router = useRouter();
-  const pathname = usePathname();
   const redirected = useRef(false);
 
   useEffect(() => {
-    if (redirected.current) return;
-    if (pathname.startsWith("/auth/set-password")) return;
-
-    const hash = typeof window !== "undefined" ? window.location.hash : "";
+    // Only run once on mount — no pathname dependency
+    const hash = window.location.hash;
     if (!hash || hash.length <= 1) return;
 
     const params = new URLSearchParams(hash.slice(1));
@@ -32,20 +24,24 @@ export function InviteFromHashRedirect() {
       router.replace("/auth/set-password");
     };
 
-    void supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) go();
-    });
-
+    // Listen FIRST before getSession, so we don't miss the event
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && (event === "SIGNED_IN" || event === "USER_UPDATED" || event === "INITIAL_SESSION")) {
+        go();
+      }
+    });
+
+    // Also try immediately in case session was already established
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) go();
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [pathname, router]);
+  }, []); // ← Empty deps: run once on mount only
 
   return null;
 }
