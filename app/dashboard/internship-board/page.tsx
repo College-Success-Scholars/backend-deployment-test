@@ -153,113 +153,37 @@ export default function InternshipBoardPage() {
     try {
       setLoading(true)
       setError(null)
-      
-      console.log('🔍 [DEBUG] Starting API fetch to: http://localhost:8000/internship-opportunities')
-      
-      const response = await fetch('http://localhost:8000/internship-opportunities')
-      
-      console.log('📡 [DEBUG] API Response received:', {
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok,
-        headers: Object.fromEntries(response.headers.entries()),
-        url: response.url
-      })
-      
+
+      const response = await fetch("http://localhost:8000/internship-opportunities")
+
       if (!response.ok) {
-        console.error('❌ [DEBUG] API request failed:', {
-          status: response.status,
-          statusText: response.statusText,
-          url: response.url
-        })
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
-      // Get raw response text first to debug structure
-      const rawText = await response.text()
-      console.log('📄 [DEBUG] Raw API response text:', rawText)
-      console.log('📏 [DEBUG] Response text length:', rawText.length)
-      console.log('🔍 [DEBUG] Response text type:', typeof rawText)
-      
-      // Parse JSON and log structure
-      let data
-      try {
-        data = JSON.parse(rawText)
-        console.log('✅ [DEBUG] Successfully parsed JSON')
-        console.log('📊 [DEBUG] Parsed data type:', typeof data)
-        console.log('📊 [DEBUG] Parsed data is array:', Array.isArray(data))
-        console.log('📊 [DEBUG] Parsed data length:', Array.isArray(data) ? data.length : 'N/A')
-        console.log('📋 [DEBUG] Full parsed data structure:', JSON.stringify(data, null, 2))
-        
-        if (Array.isArray(data) && data.length > 0) {
-          console.log('🔍 [DEBUG] First item structure:', JSON.stringify(data[0], null, 2))
-          console.log('🔍 [DEBUG] First item keys:', Object.keys(data[0]))
-          console.log('🔍 [DEBUG] First item types:', {
-            id: typeof data[0].id,
-            company: typeof data[0].company,
-            title: typeof data[0].title,
-            tags: typeof data[0].tags,
-            datePosted: typeof data[0].datePosted,
-            expiryDate: typeof data[0].expiryDate,
-            description: typeof data[0].description,
-            jobUrl: typeof data[0].jobUrl
-          })
-        }
-      } catch (parseError) {
-        console.error('❌ [DEBUG] JSON parse error:', parseError)
-        console.error('❌ [DEBUG] Raw text that failed to parse:', rawText)
-        throw new Error(`Failed to parse JSON response: ${parseError}`)
-      }
-      
-      // Validate data structure
+
+      const data: unknown = await response.json()
       if (!Array.isArray(data)) {
-        console.error('❌ [DEBUG] Expected array but got:', typeof data)
-        throw new Error('API response is not an array')
+        throw new Error("API response is not an array")
       }
-      
-      console.log('🔄 [DEBUG] Starting data transformation...')
-      
-      // Transform API data to match our Opportunity interface
-      const transformedData: Opportunity[] = data.map((item: Opportunity, index: number) => {
-        console.log(`🔧 [DEBUG] Transforming item ${index}:`, item)
-        
-        const transformed = {
-          id: item.id,
-          company: item.company,
-          title: item.title,
-          tags: item.tags,
-          datePosted: item.datePosted,
-          expiryDate: item.expiryDate,
-          description: item.description,
-          jobUrl: item.jobUrl,
-          bookmarked: false, // Default to false since API doesn't include this
-        }
-        
-        console.log(`✅ [DEBUG] Transformed item ${index}:`, transformed)
-        return transformed
-      })
-      
-      console.log('🎯 [DEBUG] Final transformed data:', transformedData)
-      console.log('📊 [DEBUG] Total opportunities after transformation:', transformedData.length)
-      
+
+      const transformedData: Opportunity[] = data.map((item: Opportunity) => ({
+        id: item.id,
+        company: item.company,
+        title: item.title,
+        tags: item.tags,
+        datePosted: item.datePosted,
+        expiryDate: item.expiryDate,
+        description: item.description,
+        jobUrl: item.jobUrl,
+        bookmarked: false,
+      }))
+
       setOpportunities(transformedData)
-      
-      console.log('✅ [DEBUG] Successfully set opportunities in state')
-      
     } catch (err) {
-      console.error('❌ [DEBUG] Error in fetchOpportunities:', err)
-      console.error('❌ [DEBUG] Error details:', {
-        name: err instanceof Error ? err.name : 'Unknown',
-        message: err instanceof Error ? err.message : String(err),
-        stack: err instanceof Error ? err.stack : 'No stack trace'
-      })
-      
-      setError(err instanceof Error ? err.message : 'Failed to fetch opportunities')
-      // Don't fallback to mock data - show empty state instead
+      console.error("fetchOpportunities:", err)
+      setError(err instanceof Error ? err.message : "Failed to fetch opportunities")
       setOpportunities([])
     } finally {
       setLoading(false)
-      console.log('🏁 [DEBUG] fetchOpportunities completed, loading set to false')
     }
   }
 
