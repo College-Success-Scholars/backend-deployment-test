@@ -1,6 +1,11 @@
 import { DailyActivityMinutesNote } from "@/components/dashboard/daily-activity-minutes-note"
 import { MenteeMonitoringClient } from "./mentee-monitoring-client"
 import { createClient } from "@/lib/supabase/server"
+import type {
+  MenteeActivityRpcRow,
+  MyMenteeRpcRow,
+  WeekBreakRpcRow,
+} from "@/lib/types/mentee-rpc"
 import type { FrontDeskRecordRow, StudySessionRecordRow } from "@/lib/session-records/types"
 import { campusWeekToDateRange, dateToCampusWeek, ONE_DAY_MS } from "@/lib/time"
 
@@ -62,27 +67,7 @@ function buildActivityRowsFromSessionRecords(
   return rows
 }
 
-export type MyMenteeRpcRow = {
-  first_name: string | null
-  last_name: string | null
-  fd_required: number | null
-  ss_required: number | null
-  scholar_uid?: string | null
-}
-
-export type MenteeActivityRpcRow = {
-  scholar_uid: string | null
-  activity_date: string | null
-  log_source: string | null
-  duration_minutes: number | null
-  week_num: number
-}
-
-export type WeekBreakRpcRow = {
-  break_days: number | null
-  is_break_week: boolean | null
-  breaks: unknown[] | null
-}
+export type { MyMenteeRpcRow, MenteeActivityRpcRow, WeekBreakRpcRow } from "@/lib/types/mentee-rpc"
 
 export type WeeklyComplianceRow = {
   scholar_uid: string | null

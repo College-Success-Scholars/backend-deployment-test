@@ -41,7 +41,7 @@ export function InviteFromHashRedirect() {
     return () => {
       subscription.unsubscribe();
     };
-  }, []); // ← Empty deps: run once on mount only
+  }, [router]);
 
   return null;
 }

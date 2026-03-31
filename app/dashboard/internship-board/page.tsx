@@ -268,9 +268,9 @@ export default function InternshipBoardPage() {
     fetchOpportunities()
   }, [])
 
-  // Filter opportunities
+  // Filter opportunities (API-backed state; mock is unused here)
   const filteredOpportunities = useMemo(() => {
-    return mockOpportunities.filter((opp) => {
+    return opportunities.filter((opp) => {
       if (filters.tag && !opp.tags.includes(filters.tag)) return false
       if (filters.company && opp.company !== filters.company) return false
       if (filters.datePosted) {
