@@ -1,18 +1,8 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { BookOpen, Clock, User } from "lucide-react"
-import { 
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Card, CardContent } from "@/components/ui/card"
 
-interface TutoringSession {
+export interface TutoringSession {
   id: string
   course: string
   tutorName: string
@@ -27,145 +17,88 @@ interface TutoringHoursProps {
 }
 
 export function TutoringHours({ menteeName, sessions }: TutoringHoursProps) {
-  // Calculate total hours
   const totalMinutes = sessions.reduce((sum, session) => sum + session.duration, 0)
-  const totalHours = Math.round((totalMinutes / 60) * 10) / 10 // Round to 1 decimal place
+  const totalHours = Math.round((totalMinutes / 60) * 10) / 10
 
-  // Group sessions by course for summary
-  const courseSummary = sessions.reduce((acc, session) => {
-    if (!acc[session.course]) {
-      acc[session.course] = {
-        course: session.course,
-        totalMinutes: 0,
-        sessionCount: 0,
-        tutors: new Set<string>()
+  const courseSummary = sessions.reduce(
+    (acc, session) => {
+      if (!acc[session.course]) {
+        acc[session.course] = {
+          course: session.course,
+          totalMinutes: 0,
+          sessionCount: 0,
+          tutors: new Set<string>(),
+        }
       }
-    }
-    acc[session.course].totalMinutes += session.duration
-    acc[session.course].sessionCount += 1
-    acc[session.course].tutors.add(session.tutorName)
-    return acc
-  }, {} as Record<string, { course: string; totalMinutes: number; sessionCount: number; tutors: Set<string> }>)
+      acc[session.course].totalMinutes += session.duration
+      acc[session.course].sessionCount += 1
+      acc[session.course].tutors.add(session.tutorName)
+      return acc
+    },
+    {} as Record<
+      string,
+      { course: string; totalMinutes: number; sessionCount: number; tutors: Set<string> }
+    >
+  )
 
-  const courseSummaries = Object.values(courseSummary).map(course => ({
-    ...course,
-    totalHours: Math.round((course.totalMinutes / 60) * 10) / 10,
-    tutorNames: Array.from(course.tutors).join(", ")
-  }))
+  const courseSummaries = Object.values(courseSummary).map((course) => {
+    const rounded = Math.round((course.totalMinutes / 60) * 10) / 10
+    const displayHours = `${rounded}h`
+    const primaryTutor = Array.from(course.tutors)[0] ?? ""
+    return {
+      course: course.course,
+      sessionCount: course.sessionCount,
+      tutorName: primaryTutor,
+      hoursLabel: displayHours,
+    }
+  })
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BookOpen className="h-5 w-5" />
-          Tutoring Hours
-        </CardTitle>
-        <CardDescription>
-          Tutoring sessions attended by {menteeName} this week
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {/* Summary Stats */}
-          <div className="flex justify-between gap-4">
-            <div className="flex-1 text-center p-3 border rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{totalHours}</div>
-              <div className="text-xs text-muted-foreground">Total Hours</div>
-            </div>
-            <div className="flex-1 text-center p-3 border rounded-lg">
-              <div className="text-2xl font-bold text-green-600">{sessions.length}</div>
-              <div className="text-xs text-muted-foreground">Sessions</div>
+    <Card className="h-full min-h-0 flex-col justify-start py-0">
+      <CardContent className="flex flex-1 flex-col justify-start space-y-6 pt-4 pb-6">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Tutoring hours
+        </p>
+
+        <div className="grid items-start gap-4 sm:grid-cols-2">
+          <div className="rounded-lg border bg-muted/30 px-4 py-4">
+            <p className="text-3xl font-semibold tracking-tight">{totalHours}h</p>
+            <p className="text-sm text-muted-foreground">Total this week</p>
+          </div>
+          <div className="rounded-lg border bg-muted/30 px-4 py-4">
+            <p className="text-3xl font-semibold tracking-tight">{sessions.length}</p>
+            <p className="text-sm text-muted-foreground">Sessions attended</p>
+          </div>
+        </div>
+
+        {courseSummaries.length > 0 ? (
+          <div className="space-y-3">
+            <p className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
+              By course
+            </p>
+            <div className="divide-y rounded-lg border">
+              {courseSummaries.map((row, index) => (
+                <div
+                  key={`${row.course}-${index}`}
+                  className="flex flex-wrap items-start justify-between gap-4 px-4 py-3"
+                >
+                  <div className="min-w-0 space-y-0.5">
+                    <p className="font-medium leading-tight">{row.course}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {row.sessionCount} session{row.sessionCount !== 1 ? "s" : ""} &middot;{" "}
+                      {row.tutorName}
+                    </p>
+                  </div>
+                  <p className="shrink-0 font-medium tabular-nums">{row.hoursLabel}</p>
+                </div>
+              ))}
             </div>
           </div>
-
-          {/* Course Summary */}
-          {courseSummaries.length > 0 && (
-            <div>
-              <h4 className="font-medium mb-3 flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
-                By Course
-              </h4>
-              <div className="space-y-2">
-                {courseSummaries.map((course, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <p className="font-medium">{course.course}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {course.sessionCount} session{course.sessionCount !== 1 ? 's' : ''} • {course.tutorNames}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium">{course.totalHours}h</p>
-                      <p className="text-xs text-muted-foreground">total</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Detailed Sessions Table */}
-          {sessions.length > 0 && (
-            <div>
-              <h4 className="font-medium mb-3 flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                Session Details
-              </h4>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Course</TableHead>
-                      <TableHead>Tutor</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Duration</TableHead>
-                      <TableHead>Topic</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sessions
-                      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                      .map((session) => (
-                        <TableRow key={session.id}>
-                          <TableCell className="font-medium">
-                            {session.course}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <User className="h-3 w-3 text-muted-foreground" />
-                              {session.tutorName}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {new Date(session.date).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric'
-                            })}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">
-                              {Math.round((session.duration / 60) * 10) / 10}h
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {session.topic || "-"}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-          )}
-
-          {/* Empty State */}
-          {sessions.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No tutoring sessions this week</p>
-            </div>
-          )}
-        </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            No tutoring sessions for {menteeName} this week.
+          </p>
+        )}
       </CardContent>
     </Card>
   )

@@ -22,6 +22,7 @@ import {
   Briefcase,
   Calendar,
   User,
+  Home,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -180,33 +181,26 @@ const getRoleBasedNav = (role: UserRole) => {
     case 'team-leader':
       return [
         {
-          title: "Personal Monitoring",
-          url: "/dashboard/personal",
-          icon: User,
+          title: "Home",
+          url: "/dashboard",
+          icon: Home,
           isActive: true,
         },
         {
-          title: "Mentee Monitoring",
+          title: "Personal",
+          url: "/dashboard/personal",
+          icon: User,
+        },
+        {
+          title: "Mentees",
           url: "/dashboard/mentee",
           icon: Users,
-          isActive: true,
-          items: [
-            {
-              title: "Weekly Report",
-              url: "/dashboard/mentee",
-            },
-            {
-              title: "Trends (Coming Soon)",
-              url: "/dashboard/mentee/reports",
-            },
-          ],
         },
         {
           title: "Room Monitoring",
           url: "/dashboard/room",
           icon: Building,
-          isActive: true,
-        }
+        },
       ]
     
     case 'exec':

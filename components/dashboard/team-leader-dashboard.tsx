@@ -28,13 +28,13 @@ export function TeamLeaderDashboard() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="p-4 border rounded-lg">
-              <h3 className="font-medium mb-2">Personal Monitoring</h3>
+              <h3 className="font-medium mb-2">Personal</h3>
               <p className="text-sm text-muted-foreground">
                 Track your WPL, MCF, and WAHF submission status, plus view your activity log.
               </p>
             </div>
             <div className="p-4 border rounded-lg">
-              <h3 className="font-medium mb-2">Mentee Monitoring</h3>
+              <h3 className="font-medium mb-2">Mentees</h3>
               <p className="text-sm text-muted-foreground">
                 Monitor your mentees&apos; study sessions, front desk hours, tutoring, and WAHF status.
               </p>
