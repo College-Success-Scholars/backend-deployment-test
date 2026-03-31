@@ -1,14 +1,13 @@
 import { redirect } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { 
-  FileText,
-  ClipboardList,
-  AlertCircle
+  CheckCircle2,
+  CircleX
 } from "lucide-react"
-import { ActivityLog } from "@/components/dashboard/activity-log"
 import { getCurrentUserWithProfilesRow } from "@/lib/supabase/server"
-import { getCurrentWeekPersonalFormStatuses } from "@/lib/server/personal-monitoring"
+import {
+  getCurrentWeekPersonalFormStatuses,
+} from "@/lib/server/personal-monitoring"
+import { PersonalActivityLog } from "@/components/dashboard/personal-activity-log"
 
 function displayName(profile: {
   full_name: string | null
@@ -34,6 +33,8 @@ function displayTeams(teams: string[] | null | undefined): string {
 export default async function PersonalMonitoringPage() {
   const { user, profile } = await getCurrentUserWithProfilesRow()
   if (!user) redirect("/auth/login")
+  const name = displayName(profile)
+  const avatarUrl = `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(name)}`
   const personalFormStatuses = await getCurrentWeekPersonalFormStatuses({
     profile,
     userEmail: user.email ?? null,
@@ -47,48 +48,62 @@ export default async function PersonalMonitoringPage() {
           Track your personal progress, form submissions, and activities
         </p>
         <div className="mt-3 space-y-1 text-sm">
-          <p className="font-medium text-foreground">
-            Name: <span className="font-semibold">{displayName(profile)}</span>
-          </p>
-          <p className="font-medium text-foreground">
-            Role: <span className="font-semibold">{displayRole(profile?.program_role)}</span>
-          </p>
-          <p className="text-muted-foreground">
-            Team: <span className="font-medium text-foreground">{displayTeams(profile?.teams)}</span>
-          </p>
+          <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-card px-3 py-2">
+            <img
+              src={avatarUrl}
+              alt={`${name} avatar`}
+              className="h-10 w-10 rounded-full border border-border/60 bg-muted object-cover"
+            />
+            <div>
+              <p className="font-semibold text-foreground">{name}</p>
+              <p className="text-muted-foreground">
+                {displayRole(profile?.program_role)} · {displayTeams(profile?.teams)}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Form Status Cards */}
       <div className="grid gap-4 md:grid-cols-3">
         {personalFormStatuses.map((form) => (
-          <Card key={form.name}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{form.name} Status</CardTitle>
-              {form.name === "WPL" && <FileText className="h-4 w-4 text-muted-foreground" />}
-              {form.name === "MCF" && <ClipboardList className="h-4 w-4 text-muted-foreground" />}
-              {form.name === "WHAF" && <AlertCircle className="h-4 w-4 text-muted-foreground" />}
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Badge 
-                  variant={
-                    form.status === "completed" ? "default" : "destructive"
-                  }
+          <div key={form.name} className="rounded-2xl border border-border/70 bg-card px-5 py-4 shadow-sm">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-3xl font-semibold leading-none text-foreground">{form.name} Status</p>
+                <p
+                  className={`mt-1 text-3xl font-bold ${
+                    form.status === "completed" ? "text-emerald-500" : "text-orange-500"
+                  }`}
                 >
                   {form.status === "completed" ? "Completed" : "Incomplete"}
-                </Badge>
-                <div className="text-sm text-muted-foreground">
-                  <p>{form.detail}</p>
-                </div>
+                </p>
+                <p className="mt-2 text-2xl text-muted-foreground">{form.detail}</p>
               </div>
-            </CardContent>
-          </Card>
+              <div
+                className={`flex h-16 w-16 items-center justify-center rounded-full ${
+                  form.status === "completed" ? "bg-emerald-100" : "bg-orange-100"
+                }`}
+              >
+                {form.status === "completed" ? (
+                  <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+                ) : (
+                  <CircleX className="h-8 w-8 text-orange-600" />
+                )}
+              </div>
+            </div>
+            <div className="mt-4 h-2 w-full rounded-full bg-muted">
+              <div
+                className={`h-2 rounded-full ${
+                  form.status === "completed" ? "w-full bg-emerald-500" : "w-1/2 bg-orange-500"
+                }`}
+              />
+            </div>
+          </div>
         ))}
       </div>
 
-      {/* Activity Log */}
-      <ActivityLog />
+      <PersonalActivityLog profile={profile} userEmail={user.email ?? null} />
     </div>
   )
 }
