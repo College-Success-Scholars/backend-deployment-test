@@ -14,6 +14,13 @@ export type PersonalFormStatus = {
   detail: string;
 };
 
+export type CurrentWeekContext = {
+  weekNumber: number | null;
+  weekStartDate: Date | null;
+  weekEndDate: Date | null;
+  label: string;
+};
+
 export type ActivityFormType = "WHAF" | "WPL" | "MCF";
 
 export type RecentFormSubmission = {
@@ -38,14 +45,32 @@ export type RecentFormSubmission = {
   needs_tutor?: string | null;
 };
 
+export function getCurrentWeekContext(): CurrentWeekContext {
+  const weekNumber = dateToCampusWeek(new Date());
+  if (typeof weekNumber !== "number") {
+    return {
+      weekNumber: null,
+      weekStartDate: null,
+      weekEndDate: null,
+      label: "Current week unavailable",
+    };
+  }
+
+  const range = campusWeekToDateRange(weekNumber);
+  return {
+    weekNumber,
+    weekStartDate: range?.startDate ?? null,
+    weekEndDate: range?.endDate ?? null,
+    label: `Week ${weekNumber}`,
+  };
+}
+
 export async function getCurrentWeekPersonalFormStatuses(params: {
   profile: ProfilesRow | null;
   userEmail: string | null;
 }): Promise<PersonalFormStatus[]> {
   const { profile, userEmail } = params;
-  const weekNum = dateToCampusWeek(new Date());
-  const currentWeekLabel =
-    typeof weekNum === "number" ? `Week ${weekNum}` : "Current week unavailable";
+  const { weekNumber: weekNum, label: currentWeekLabel } = getCurrentWeekContext();
 
   if (typeof weekNum !== "number") {
     return [

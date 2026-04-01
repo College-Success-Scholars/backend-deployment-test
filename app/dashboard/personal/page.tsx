@@ -1,10 +1,12 @@
 import { redirect } from "next/navigation"
 import { 
+  CalendarDays,
   CheckCircle2,
   CircleX
 } from "lucide-react"
 import { getCurrentUserWithProfilesRow } from "@/lib/supabase/server"
 import {
+  getCurrentWeekContext,
   getCurrentWeekPersonalFormStatuses,
 } from "@/lib/server/personal-monitoring"
 import { PersonalActivityLog } from "@/components/dashboard/personal-activity-log"
@@ -39,16 +41,37 @@ export default async function PersonalMonitoringPage() {
     profile,
     userEmail: user.email ?? null,
   })
+  const weekContext = getCurrentWeekContext()
+  const weekRangeLabel =
+    weekContext.weekNumber &&
+    weekContext.weekStartDate &&
+    weekContext.weekEndDate
+      ? `Week ${weekContext.weekNumber}: ${new Intl.DateTimeFormat("en-US", {
+          month: "short",
+          day: "numeric",
+        }).format(weekContext.weekStartDate)} - ${new Intl.DateTimeFormat("en-US", {
+          month: "short",
+          day: "numeric",
+        }).format(weekContext.weekEndDate)}`
+      : "Current week unavailable"
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Personal Monitoring</h1>
-        <p className="text-muted-foreground">
-          Track your personal progress, form submissions, and activities
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">Personal </h1>
         <div className="mt-3 space-y-1 text-sm">
-          <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-card px-3 py-2">
+      
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-border/60 bg-card px-4 py-3">
+        <div className="flex items-center gap-2 text-foreground">
+          <CalendarDays className="h-4 w-4 text-muted-foreground" />
+          <p className="text-lg font-semibold">{weekRangeLabel}</p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-card px-3 py-2">
             <img
               src={avatarUrl}
               alt={`${name} avatar`}
@@ -61,8 +84,6 @@ export default async function PersonalMonitoringPage() {
               </p>
             </div>
           </div>
-        </div>
-      </div>
 
       {/* Form Status Cards */}
       <div className="grid gap-4 md:grid-cols-3">
@@ -78,7 +99,6 @@ export default async function PersonalMonitoringPage() {
                 >
                   {form.status === "completed" ? "Completed" : "Incomplete"}
                 </p>
-                <p className="mt-2 text-2xl text-muted-foreground">{form.detail}</p>
               </div>
               <div
                 className={`flex h-16 w-16 items-center justify-center rounded-full ${
@@ -91,13 +111,6 @@ export default async function PersonalMonitoringPage() {
                   <CircleX className="h-8 w-8 text-orange-600" />
                 )}
               </div>
-            </div>
-            <div className="mt-4 h-2 w-full rounded-full bg-muted">
-              <div
-                className={`h-2 rounded-full ${
-                  form.status === "completed" ? "w-full bg-emerald-500" : "w-1/2 bg-orange-500"
-                }`}
-              />
             </div>
           </div>
         ))}
