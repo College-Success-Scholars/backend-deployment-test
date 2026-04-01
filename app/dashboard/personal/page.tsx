@@ -1,69 +1,122 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { redirect } from "next/navigation"
 import { 
-  FileText,
-  ClipboardList,
-  AlertCircle
+  CalendarDays,
+  CheckCircle2,
+  CircleX
 } from "lucide-react"
-import { ActivityLog } from "@/components/dashboard/activity-log"
+import { getCurrentUserWithProfilesRow } from "@/lib/supabase/server"
+import {
+  getCurrentWeekContext,
+  getCurrentWeekPersonalFormStatuses,
+} from "@/lib/server/personal-monitoring"
+import { PersonalActivityLog } from "@/components/dashboard/personal-activity-log"
 
-interface FormStatus {
-  name: string
-  status: "completed" | "pending" | "overdue"
-  dueDate: string
-  lastSubmitted?: string
+function displayName(profile: {
+  full_name: string | null
+  first_name: string | null
+  last_name: string | null
+} | null): string {
+  if (!profile) return "Unknown user"
+  const full = profile.full_name?.trim()
+  if (full) return full
+  return [profile.first_name, profile.last_name].filter(Boolean).join(" ").trim() || "Unknown user"
 }
 
-export default function PersonalMonitoringPage() {
-  // Placeholder data
-  const personalFormStatuses: FormStatus[] = [
-    { name: "WPL", status: "completed", dueDate: "Jan 20", lastSubmitted: "Jan 18" },
-    { name: "MCF", status: "pending", dueDate: "Jan 25", lastSubmitted: "Jan 10" },
-    { name: "WAHF", status: "overdue", dueDate: "Jan 15", lastSubmitted: "Jan 5" }
-  ]
+function displayRole(role: string | null | undefined): string {
+  const r = role?.trim()
+  return r ? r : "—"
+}
+
+function displayTeams(teams: string[] | null | undefined): string {
+  if (!teams || teams.length === 0) return "No team assigned"
+  return teams.join(", ")
+}
+
+export default async function PersonalMonitoringPage() {
+  const { user, profile } = await getCurrentUserWithProfilesRow()
+  if (!user) redirect("/auth/login")
+  const name = displayName(profile)
+  const avatarUrl = `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(name)}`
+  const personalFormStatuses = await getCurrentWeekPersonalFormStatuses({
+    profile,
+    userEmail: user.email ?? null,
+  })
+  const weekContext = getCurrentWeekContext()
+  const weekRangeLabel =
+    weekContext.weekNumber &&
+    weekContext.weekStartDate &&
+    weekContext.weekEndDate
+      ? `Week ${weekContext.weekNumber}: ${new Intl.DateTimeFormat("en-US", {
+          month: "short",
+          day: "numeric",
+        }).format(weekContext.weekStartDate)} - ${new Intl.DateTimeFormat("en-US", {
+          month: "short",
+          day: "numeric",
+        }).format(weekContext.weekEndDate)}`
+      : "Current week unavailable"
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Personal Monitoring</h1>
-        <p className="text-muted-foreground">
-          Track your personal progress, form submissions, and activities
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">Personal </h1>
+        <div className="mt-3 space-y-1 text-sm">
+      
+        </div>
       </div>
+
+      <div className="rounded-xl border border-border/60 bg-card px-4 py-3">
+        <div className="flex items-center gap-2 text-foreground">
+          <CalendarDays className="h-4 w-4 text-muted-foreground" />
+          <p className="text-lg font-semibold">{weekRangeLabel}</p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-card px-3 py-2">
+            <img
+              src={avatarUrl}
+              alt={`${name} avatar`}
+              className="h-10 w-10 rounded-full border border-border/60 bg-muted object-cover"
+            />
+            <div>
+              <p className="font-semibold text-foreground">{name}</p>
+              <p className="text-muted-foreground">
+                {displayRole(profile?.program_role)} · {displayTeams(profile?.teams)}
+              </p>
+            </div>
+          </div>
 
       {/* Form Status Cards */}
       <div className="grid gap-4 md:grid-cols-3">
         {personalFormStatuses.map((form) => (
-          <Card key={form.name}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{form.name} Status</CardTitle>
-              {form.name === "WPL" && <FileText className="h-4 w-4 text-muted-foreground" />}
-              {form.name === "MCF" && <ClipboardList className="h-4 w-4 text-muted-foreground" />}
-              {form.name === "WAHF" && <AlertCircle className="h-4 w-4 text-muted-foreground" />}
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Badge 
-                  variant={
-                    form.status === "completed" ? "default" :
-                    form.status === "pending" ? "secondary" : "destructive"
-                  }
+          <div key={form.name} className="rounded-2xl border border-border/70 bg-card px-5 py-4 shadow-sm">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-3xl font-semibold leading-none text-foreground">{form.name} Status</p>
+                <p
+                  className={`mt-1 text-3xl font-bold ${
+                    form.status === "completed" ? "text-emerald-500" : "text-orange-500"
+                  }`}
                 >
-                  {form.status === "completed" ? "Completed" :
-                   form.status === "pending" ? "Pending" : "Overdue"}
-                </Badge>
-                <div className="text-sm text-muted-foreground">
-                  <p>Due: {form.dueDate}</p>
-                  {form.lastSubmitted && <p>Last submitted: {form.lastSubmitted}</p>}
-                </div>
+                  {form.status === "completed" ? "Completed" : "Incomplete"}
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <div
+                className={`flex h-16 w-16 items-center justify-center rounded-full ${
+                  form.status === "completed" ? "bg-emerald-100" : "bg-orange-100"
+                }`}
+              >
+                {form.status === "completed" ? (
+                  <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+                ) : (
+                  <CircleX className="h-8 w-8 text-orange-600" />
+                )}
+              </div>
+            </div>
+          </div>
         ))}
       </div>
 
-      {/* Activity Log */}
-      <ActivityLog />
+      <PersonalActivityLog profile={profile} userEmail={user.email ?? null} />
     </div>
   )
 }

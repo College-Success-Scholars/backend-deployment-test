@@ -7,6 +7,22 @@ import type { UserProfile } from "./types";
 import { APP_ROLE_ORDER } from "./types";
 import { getSupabasePublicKey } from "./public-key";
 
+// Local reusable type for rows fetched from public.profiles by
+// getCurrentUserWithProfilesRow(). Kept in this file so we can add a
+// general-purpose profiles helper without modifying lib/supabase/types.ts.
+export type ProfilesRow = {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  full_name: string | null;
+  program_role: string | null;
+  app_role?: string | null;
+  teams: string[] | null;
+  emails: string[] | null;
+  student_id: number | null;
+  [key: string]: unknown;
+};
+
 /**
  * Especially important if using Fluid compute: Don't put this client in a
  * global variable. Always create a new client within each function when using
@@ -58,6 +74,49 @@ export async function getCurrentUser(): Promise<User | null> {
     data: { user },
   } = await supabase.auth.getUser();
   return user;
+}
+
+/**
+ * General profiles-table lookup for the currently signed-in auth user.
+ *
+ * Purpose: fetch profile data from `public.profiles` (not `public.users`) so this
+ * helper can be reused by any feature that needs profile-backed identity details.
+ *
+ * Keeps getCurrentUserWithProfile() behavior untouched for existing callers.
+ */
+export async function getCurrentUserWithProfilesRow(): Promise<{
+  user: User | null;
+  profile: ProfilesRow | null;
+}> {
+  const user = await getCurrentUser();
+  if (!user?.email) return { user, profile: null };
+
+  const supabase = await createClient();
+  const authEmail = user.email.trim();
+
+  const lookupByEmailArray = async (email: string): Promise<ProfilesRow | null> => {
+    const { data, error } = await supabase
+      .schema("public")
+      .from("profiles")
+      .select("*")
+      .contains("emails", [email])
+      .maybeSingle();
+    if (error) {
+      console.error("[getCurrentUserWithProfilesRow] profiles lookup failed:", error.message);
+      return null;
+    }
+    return (data as ProfilesRow | null) ?? null;
+  };
+
+  let profile = await lookupByEmailArray(authEmail);
+  if (!profile) {
+    const lower = authEmail.toLowerCase();
+    if (lower !== authEmail) {
+      profile = await lookupByEmailArray(lower);
+    }
+  }
+
+  return { user, profile };
 }
 
 /**
