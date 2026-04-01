@@ -5,6 +5,10 @@ export type MyMenteeRpcRow = {
   fd_required: number | null
   ss_required: number | null
   scholar_uid?: string | null
+  fd_effective: number | null
+  ss_effective: number | null
+  fd_actual: number | null
+  ss_actual: number | null
 }
 
 /** Row shape from Supabase RPC `get_mentee_activity`. */
