@@ -1,13 +1,13 @@
 # Dev Tools
 
-This folder is **developer-only**. Access is restricted to users with `app_role === 'developer'` in `public.users`.
+This folder is **developer-only**. Access is restricted via `getDeveloperUser()` (`app_role === 'developer'` on the merged profile from `public.profiles` and `public.user_roster`).
 
 ## Granting developer access
 
-Set `app_role` to `'developer'` in your `public.users` table for the user:
+Set `app_role` to `'developer'` in your `public.user_roster` table for the user:
 
 ```sql
-update public.users
+update public.user_roster
 set app_role = 'developer'
 where email = 'your-email@example.com';
 ```

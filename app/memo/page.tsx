@@ -263,7 +263,7 @@ export default async function MemoPage({ searchParams }: PageProps) {
     },
   };
 
-  // Team leaders: non-scholars from users table
+  // Team leaders: non-scholars from user_roster (via fetchAllUsersForMemo)
   const tlUsers = allUsers.filter((u) => isTeamLeader(u.program_role));
 
   // MCF: fetch per TL by uid + week (DB filters mentor_uid or mentee_uid = TL uid)
