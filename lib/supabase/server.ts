@@ -137,12 +137,30 @@ export async function getCurrentUserWithProfile(): Promise<{
 
   const supabase = await createClient();
   const { data: profile } = await supabase.schema("public")
-    .from("users")
-    .select("*")
-    .eq("email", user.email)
+    .from("profiles")
+    .select("*, user_roster(*)")
+    .eq("id", user.id)
     .maybeSingle();
-  console.log("profile", profile);
 
+  // Here to populate the profile with the user_roster data, should be removed once the user_roster table is fully migrated to the profiles table
+  if (!profile) {
+    return { user, profile: null };
+  }
+  if (!profile.program_role) {
+    profile.program_role = profile.user_roster?.program_role;
+  }
+  if (!profile.cohort) {
+    profile.cohort = profile.user_roster?.cohort;
+  }
+  if (!profile.last_name) {
+    profile.last_name = profile.user_roster?.last_name;
+  }
+  if (!profile.first_name) {
+    profile.first_name = profile.user_roster?.first_name;
+  }
+  if (!profile.email) {
+    profile.email = profile.user_roster?.email;
+  }
   return { user, profile: profile as UserProfile | null };
 }
 
@@ -218,7 +236,7 @@ export async function requireTeamLeaderOrAbove(): Promise<User> {
 export async function requireDeveloper(): Promise<User | null> {
   const user = await getDeveloperUser();
   if (!user) {
-    
+
     redirect("/dashboard");
   }
   return user;
