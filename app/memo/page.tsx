@@ -71,7 +71,12 @@ export default async function MemoPage({ searchParams }: PageProps) {
 
   const dateRangeOpts = { startDate, endDate };
 
-  const weekNumbers = Array.from({ length: 25 }, (_, i) => i + 1);
+  const weekPickerMax = Math.max(
+    25,
+    currentCampusWeek ?? 1,
+    weekNum
+  );
+  const weekNumbers = Array.from({ length: weekPickerMax }, (_, i) => i + 1);
   const [
     allUsers,
     studyRecords,

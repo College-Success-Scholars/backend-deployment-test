@@ -38,6 +38,11 @@ function WeekPicker({
   currentCampusWeek: number | null;
   selectedWeekNum: number;
 }) {
+  const weekCount = Math.max(
+    25,
+    currentCampusWeek ?? 1,
+    selectedWeekNum
+  );
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
@@ -58,7 +63,7 @@ function WeekPicker({
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex flex-wrap gap-1">
-        {Array.from({ length: 25 }, (_, i) => i + 1).map((w) => (
+        {Array.from({ length: weekCount }, (_, i) => i + 1).map((w) => (
           <button
             key={w}
             type="button"
