@@ -14,6 +14,5 @@ export default async function DevLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requireDeveloper();
   return <>{children}</>;
 }

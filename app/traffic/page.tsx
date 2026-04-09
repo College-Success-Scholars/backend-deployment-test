@@ -43,6 +43,8 @@ export default function TrafficPage() {
   const [customMinutes, setCustomMinutes] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  /** Submitted stay length for the success overlay only (form resets `durationMin` after submit). */
+  const [successExitMinutes, setSuccessExitMinutes] = useState<number | null>(null)
 
   const uidInputRef = useRef<HTMLInputElement>(null)
 
@@ -131,7 +133,7 @@ export default function TrafficPage() {
         return
       }
 
-      // Show large success overlay instead of toast
+      setSuccessExitMinutes(durationMin)
       setShowSuccess(true)
 
       // Reset form variables internally
@@ -145,6 +147,7 @@ export default function TrafficPage() {
       // Auto dismiss success screen after ~4 seconds
       setTimeout(() => {
         setShowSuccess(false)
+        setSuccessExitMinutes(null)
         // Refocus input for next person
         setTimeout(() => uidInputRef.current?.focus(), 100)
       }, 1500)
@@ -200,7 +203,7 @@ export default function TrafficPage() {
                 Estimated exit
               </p>
               <p className="text-5xl font-extrabold tracking-tighter text-green-900 dark:text-green-100 tabular-nums" suppressHydrationWarning>
-                {formatEstimatedExit(durationMin)}
+                {formatEstimatedExit(successExitMinutes ?? durationMin)}
               </p>
             </div>
           </CardContent>

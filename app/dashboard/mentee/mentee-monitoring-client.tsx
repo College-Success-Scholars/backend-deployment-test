@@ -191,6 +191,13 @@ type MenteeMonitoringClientProps = {
   weekUtcDaysByWeekNum: WeekUtcDaysMap
 }
 
+type WeekDataResponse = {
+  week_num: number
+  weeklyCompliance: WeeklyComplianceRow[]
+  dailyLogsByWeek: DailyLogsMinutesRow[]
+  weekUtcDaysByWeekNum: WeekUtcDaysMap
+}
+
 export function MenteeMonitoringClient({
   mentees: menteeRows,
   weeklyCompliance,
@@ -220,6 +227,9 @@ export function MenteeMonitoringClient({
   const [selectedWeekNumber, setSelectedWeekNumber] = useState<number | null>(
     weekOptions[0]?.week_num ?? null
   )
+  const [weeklyComplianceState, setWeeklyComplianceState] = useState(weeklyCompliance)
+  const [dailyLogsByWeekState, setDailyLogsByWeekState] = useState(dailyLogsByWeek)
+  const [weekUtcDaysByWeekNumState, setWeekUtcDaysByWeekNumState] = useState(weekUtcDaysByWeekNum)
 
   useEffect(() => {
     if (!mentees.length) {
@@ -244,10 +254,48 @@ export function MenteeMonitoringClient({
     }
   }, [weekOptions, selectedWeekNumber])
 
+  useEffect(() => {
+    if (selectedWeekNumber == null) return
+
+    const hasWeekData =
+      weeklyComplianceState.some((row) => row.week_num === selectedWeekNumber) ||
+      Boolean(weekUtcDaysByWeekNumState[selectedWeekNumber])
+    if (hasWeekData) return
+
+    let cancelled = false
+    const loadWeekData = async () => {
+      const response = await fetch(`/dashboard/mentee/week-data?week_num=${selectedWeekNumber}`)
+      if (!response.ok) return
+      const payload = (await response.json()) as WeekDataResponse
+      if (cancelled) return
+
+      setWeeklyComplianceState((prev) => [
+        ...prev.filter((row) => row.week_num !== payload.week_num),
+        ...payload.weeklyCompliance,
+      ])
+      setDailyLogsByWeekState((prev) => [
+        ...prev.filter((row) => row.week_num !== payload.week_num),
+        ...payload.dailyLogsByWeek,
+      ])
+      setWeekUtcDaysByWeekNumState((prev) => ({
+        ...prev,
+        ...payload.weekUtcDaysByWeekNum,
+      }))
+    }
+
+    loadWeekData().catch((error) => {
+      console.error("Failed to load mentee week data", error)
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [selectedWeekNumber, weeklyComplianceState, weekUtcDaysByWeekNumState])
+
   const selectedWeekOption = weekOptions.find((week) => week.week_num === selectedWeekNumber) ?? null
   const currentWeekRange = selectedWeekOption?.range ?? ""
   const selectedMenteeData = mentees.find((mentee) => mentee.name === selectedMentee)
-  const selectedCompliance = weeklyCompliance.find(
+  const selectedCompliance = weeklyComplianceState.find(
     (row) =>
       row.week_num === selectedWeekNumber &&
       Boolean(selectedMenteeData?.scholarUid) &&
@@ -270,9 +318,9 @@ export function MenteeMonitoringClient({
       return { frontDeskDailyWeek: empty, studyDailyWeek: empty }
     }
 
-    const weekDays = weekUtcDaysByWeekNum[weekNum] ?? []
+    const weekDays = weekUtcDaysByWeekNumState[weekNum] ?? []
     const byDate = new Map<string, { fd: number; ss: number }>()
-    for (const row of dailyLogsByWeek) {
+    for (const row of dailyLogsByWeekState) {
       if (row.week_num !== weekNum || row.scholar_uid !== uid) continue
       byDate.set(row.date_iso, {
         fd: row.front_desk_logs_minutes,
@@ -299,12 +347,7 @@ export function MenteeMonitoringClient({
       frontDeskDailyWeek: tiles.map(({ dayLabel, fd }) => ({ dayLabel, hours: fd })),
       studyDailyWeek: tiles.map(({ dayLabel, ss }) => ({ dayLabel, hours: ss })),
     }
-  }, [
-    dailyLogsByWeek,
-    weekUtcDaysByWeekNum,
-    selectedMenteeData?.scholarUid,
-    selectedWeekNumber,
-  ])
+  }, [dailyLogsByWeekState, weekUtcDaysByWeekNumState, selectedMenteeData?.scholarUid, selectedWeekNumber])
 
   /** Remount progress widgets when week/mentee changes so the bar updates even if % matches the previous week (same DOM `style` string). */
   const progressWidgetKey =
@@ -319,7 +362,7 @@ export function MenteeMonitoringClient({
       .filter((d) => d.weekOffset === selectedIdx)
       .map((d) => {
         const weekNum = weekOptions[d.weekOffset]?.week_num
-        const days = weekNum != null ? (weekUtcDaysByWeekNum[weekNum] ?? []) : []
+        const days = weekNum != null ? (weekUtcDaysByWeekNumState[weekNum] ?? []) : []
         const dateIso = days[d.dayOffset] ?? ""
         return {
           id: d.id,
@@ -330,7 +373,7 @@ export function MenteeMonitoringClient({
           date: dateIso,
         }
       })
-  }, [selectedMentee, selectedWeekNumber, weekOptions, weekUtcDaysByWeekNum])
+  }, [selectedMentee, selectedWeekNumber, weekOptions, weekUtcDaysByWeekNumState])
 
   const seminarData: Record<string, SeminarAttendance> = {
     "Alex Rodriguez": {

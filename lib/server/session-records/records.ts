@@ -63,7 +63,7 @@ export async function getStudySessionRecordsByUid(uid: string): Promise<StudySes
   return (data ?? []) as StudySessionRecordRow[];
 }
 
-/** Study session record with optional scholar display name and required hours (from public.users). */
+/** Study session record with optional scholar display name and required hours (from public.user_roster). */
 export type StudySessionRecordWithName = StudySessionRecordRow & {
   scholar_name?: string | null;
   fd_required?: number | null;
@@ -127,7 +127,7 @@ export async function getStudySessionRecordsForWeekAll(
     }));
 }
 
-/** Front desk record with optional scholar display name and required hours (from public.users). */
+/** Front desk record with optional scholar display name and required hours (from public.user_roster). */
 export type FrontDeskRecordWithName = FrontDeskRecordRow & {
   scholar_name?: string | null;
   fd_required?: number | null;

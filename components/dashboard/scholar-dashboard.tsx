@@ -13,9 +13,9 @@ export async function ScholarDashboard() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
-  // Fetch user profile data from the users table
+  // Fetch user profile data from user_roster
   const { data: profile } = await supabase
-    .from('users')
+    .from('user_roster')
     .select('first_name, last_name')
     .eq('id', user?.id)
     .single();

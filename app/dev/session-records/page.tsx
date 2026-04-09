@@ -1044,7 +1044,7 @@ export default function SessionRecordsTestPage() {
           <CardDescription>
             Sync front_desk_records and study_session_records from ticket data for a given week.
             &quot;Sync for week&quot; updates only scholars who have tickets that week (or a single
-            UID if provided). &quot;Sync all UIDs&quot; upserts one row per user in public.users
+            UID if provided). &quot;Sync all UIDs&quot; upserts one row per user in public.user_roster
             (zeros if no tickets).
           </CardDescription>
         </CardHeader>

@@ -27,7 +27,7 @@ export interface SessionLogRow {
   id: string;
   created_at: string;
   scholar_uid: string | null;
-  /** Not populated from logs; resolve from public.users by scholar_uid when needed */
+  /** Not populated from logs; resolve from public.user_roster by scholar_uid when needed */
   scholar_name?: string | null;
   action_type: string | null;
   session_type?: string | null;

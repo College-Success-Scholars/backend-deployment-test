@@ -1,5 +1,5 @@
 /**
- * Form logs: client-safe deadline and late-processing logic.
+ * Form logs: client-safe deadline and late-processing logic, plus shared activity DTO types.
  * For fetching rows, use @/lib/server/form-logs.
  *
  * Deadlines (Eastern):
@@ -27,3 +27,4 @@ export {
   findTeamLeaderUidByFuzzyName,
   type TeamLeaderNameRecord,
 } from "./name-matching";
+export type { ActivityFormType, RecentFormSubmission } from "./recent-submission-dto";

@@ -207,7 +207,9 @@ export type TrafficSemesterFilter = "fall" | "spring" | "both";
 
 interface TrafficWeeklyLineChartBySemesterProps {
   data: WeekEntryCount[];
-  /** Max campus week to include in spring (e.g. 25). */
+  /** Today's campus week; extends fall/spring axes through this week when in that segment. */
+  currentCampusWeek?: number | null;
+  /** Minimum last week on the spring axis before extending by current campus week (e.g. 25). */
   maxWeek?: number;
   /** "full" = stacked; "half" = two charts side by side in a grid. */
   cardSpan?: "full" | "half";
@@ -221,6 +223,7 @@ interface TrafficWeeklyLineChartBySemesterProps {
 
 export function TrafficWeeklyLineChartBySemester({
   data,
+  currentCampusWeek = null,
   maxWeek = 25,
   cardSpan = "full",
   title = DEFAULT_TITLE,
@@ -229,15 +232,24 @@ export function TrafficWeeklyLineChartBySemester({
   hideCard = false,
 }: TrafficWeeklyLineChartBySemesterProps) {
   const fallWeekNumbers = useMemo(() => {
+    const lastFallWeek = WINTER_BREAK_CAMPUS_WEEK_NUMBER - 1;
+    const fallThrough =
+      currentCampusWeek != null && currentCampusWeek < WINTER_BREAK_CAMPUS_WEEK_NUMBER
+        ? Math.min(currentCampusWeek, lastFallWeek)
+        : lastFallWeek;
     const list: number[] = [];
-    for (let w = 1; w < WINTER_BREAK_CAMPUS_WEEK_NUMBER; w++) list.push(w);
+    for (let w = 1; w <= fallThrough; w++) list.push(w);
     return list;
-  }, []);
+  }, [currentCampusWeek]);
   const springWeekNumbers = useMemo(() => {
+    const springThrough =
+      currentCampusWeek != null && currentCampusWeek > WINTER_BREAK_CAMPUS_WEEK_NUMBER
+        ? Math.max(maxWeek, currentCampusWeek)
+        : maxWeek;
     const list: number[] = [];
-    for (let w = WINTER_BREAK_CAMPUS_WEEK_NUMBER + 1; w <= maxWeek; w++) list.push(w);
+    for (let w = WINTER_BREAK_CAMPUS_WEEK_NUMBER + 1; w <= springThrough; w++) list.push(w);
     return list;
-  }, [maxWeek]);
+  }, [maxWeek, currentCampusWeek]);
 
   const showFall = (semesterFilter === "both" || semesterFilter === "fall") && fallWeekNumbers.length > 0;
   const showSpring = (semesterFilter === "both" || semesterFilter === "spring") && springWeekNumbers.length > 0;
