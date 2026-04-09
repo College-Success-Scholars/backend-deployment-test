@@ -46,7 +46,12 @@ export default async function DevTrafficPage({ searchParams }: PageProps) {
         : 1;
   const slotMinutes = parseSlotMinutes(incrementParam);
 
-  const weekNumbers = Array.from({ length: 25 }, (_, i) => i + 1);
+  const weekPickerMax = Math.max(
+    25,
+    currentCampusWeek ?? 1,
+    weekNum
+  );
+  const weekNumbers = Array.from({ length: weekPickerMax }, (_, i) => i + 1);
   const [entryCount, sessions, weeklyData] = await Promise.all([
     getTrafficEntryCountForWeek(weekNum),
     getTrafficSessionsForWeek(weekNum),
@@ -78,7 +83,10 @@ export default async function DevTrafficPage({ searchParams }: PageProps) {
         selectedWeek={weekNum}
       />
 
-      <TrafficWeeklyLineChartBySemester data={weeklyData} />
+      <TrafficWeeklyLineChartBySemester
+        data={weeklyData}
+        currentCampusWeek={currentCampusWeek}
+      />
 
       <Card>
         <CardHeader>

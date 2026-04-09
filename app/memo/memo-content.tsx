@@ -721,6 +721,7 @@ export function MemoContent({
           <div className="">
             <TrafficWeeklyLineChartBySemester
               data={trafficWeeklyData}
+              currentCampusWeek={currentCampusWeek}
               semesterFilter={selectedWeekNum > WINTER_BREAK_CAMPUS_WEEK_NUMBER ? "spring" : "fall"}
               hideCard
             />
@@ -731,6 +732,7 @@ export function MemoContent({
       {trafficCardSpan !== "half" && (
         <TrafficWeeklyLineChartBySemester
           data={trafficWeeklyData}
+          currentCampusWeek={currentCampusWeek}
           cardSpan={trafficCardSpan}
           title={trafficCardTitle}
           description={trafficCardDescription}
