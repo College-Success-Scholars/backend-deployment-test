@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { ActivityFormType, RecentFormSubmission } from "@/lib/server/personal-monitoring";
+import type { ActivityFormType, RecentFormSubmission } from "@/lib/form-logs";
 
 type FilterType = "ALL" | ActivityFormType;
 
@@ -73,8 +73,7 @@ export function ActivityLogClient({ entries }: { entries: RecentFormSubmission[]
   const [filter, setFilter] = useState<FilterType>("ALL");
 
   const visibleEntries = useMemo(() => {
-    const filtered = filter === "ALL" ? entries : entries.filter((entry) => entry.formType === filter);
-    return filtered.slice(0, 3);
+    return filter === "ALL" ? entries : entries.filter((entry) => entry.formType === filter);
   }, [entries, filter]);
 
   return (

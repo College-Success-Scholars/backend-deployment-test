@@ -3,13 +3,10 @@ import { createServerClient } from "@supabase/ssr";
 import type { User } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import type { UserProfile } from "./types";
 import { APP_ROLE_ORDER } from "./types";
 import { getSupabasePublicKey } from "./public-key";
 
-// Local reusable type for rows fetched from public.profiles by
-// getCurrentUserWithProfilesRow(). Kept in this file so we can add a
-// general-purpose profiles helper without modifying lib/supabase/types.ts.
+/** Row shape from `public.profiles` (and joined `user_roster`) as returned by getCurrentUserWithProfile(). */
 export type ProfilesRow = {
   id: string;
   first_name: string | null;
@@ -77,14 +74,11 @@ export async function getCurrentUser(): Promise<User | null> {
 }
 
 /**
- * General profiles-table lookup for the currently signed-in auth user.
- *
- * Purpose: fetch profile data from `public.profiles` (not `public.users`) so this
- * helper can be reused by any feature that needs profile-backed identity details.
- *
- * Keeps getCurrentUserWithProfile() behavior untouched for existing callers.
+ * Returns the current auth user plus the matching row from `public.profiles` (if any),
+ * with `user_roster` merged in for legacy fields. Matches by auth `user.id`.
+ * Uses maybeSingle() so a missing profile returns null without error.
  */
-export async function getCurrentUserWithProfilesRow(): Promise<{
+export async function getCurrentUserWithProfile(): Promise<{
   user: User | null;
   profile: ProfilesRow | null;
 }> {
@@ -92,67 +86,41 @@ export async function getCurrentUserWithProfilesRow(): Promise<{
   if (!user?.email) return { user, profile: null };
 
   const supabase = await createClient();
-  const authEmail = user.email.trim();
-
-  const lookupByEmailArray = async (email: string): Promise<ProfilesRow | null> => {
-    const { data, error } = await supabase
-      .schema("public")
-      .from("profiles")
-      .select("*")
-      .contains("emails", [email])
-      .maybeSingle();
-    if (error) {
-      console.error("[getCurrentUserWithProfilesRow] profiles lookup failed:", error.message);
-      return null;
-    }
-    return (data as ProfilesRow | null) ?? null;
-  };
-
-  let profile = await lookupByEmailArray(authEmail);
-  if (!profile) {
-    const lower = authEmail.toLowerCase();
-    if (lower !== authEmail) {
-      profile = await lookupByEmailArray(lower);
-    }
-  }
-
-  return { user, profile };
-}
-
-/**
- * Returns the current auth user plus the row from public.users (if any).
- * Use when you need profile data (name, avatar, etc.). Keeps getCurrentUser()
- * for auth-only checks.
- *
- * Assumes your table is named "users" and matches by email.
- * Uses maybeSingle() so a missing profile (no email match) returns null without error.
- */
-export async function getCurrentUserWithProfile(): Promise<{
-  user: User | null;
-  profile: UserProfile | null;
-}> {
-  const user = await getCurrentUser();
-  console.log("user", user);
-  if (!user?.email) return { user, profile: null };
-
-  const supabase = await createClient();
   const { data: profile } = await supabase.schema("public")
-    .from("users")
-    .select("*")
-    .eq("email", user.email)
+    .from("profiles")
+    .select("*, user_roster(*)")
+    .eq("id", user.id)
     .maybeSingle();
-  console.log("profile", profile);
 
-  return { user, profile: profile as UserProfile | null };
+  // Here to populate the profile with the user_roster data, should be removed once the user_roster table is fully migrated to the profiles table
+  if (!profile) {
+    return { user, profile: null };
+  }
+  if (!profile.program_role) {
+    profile.program_role = profile.user_roster?.program_role;
+  }
+  if (!profile.cohort) {
+    profile.cohort = profile.user_roster?.cohort;
+  }
+  if (!profile.last_name) {
+    profile.last_name = profile.user_roster?.last_name;
+  }
+  if (!profile.first_name) {
+    profile.first_name = profile.user_roster?.first_name;
+  }
+  if (!profile.email) {
+    profile.email = profile.user_roster?.email;
+  }
+  return { user, profile: profile as ProfilesRow };
 }
 
 /**
- * Like requireUser(), but also returns the profile from public.users.
+ * Like requireUser(), but also returns the profile from public.profiles (with linked user_roster).
  * Throws if not authenticated.
  */
 export async function requireUserWithProfile(): Promise<{
   user: User;
-  profile: UserProfile | null;
+  profile: ProfilesRow | null;
 }> {
   const { user, profile } = await getCurrentUserWithProfile();
   if (!user) throw new Error("Unauthorized");
@@ -189,8 +157,8 @@ export async function getTeamLeaderOrAboveUser(): Promise<User | null> {
 
 /**
  * Returns the current user if they have developer access, or null.
- * Developer access is determined by profile.app_role === 'developer' in public.users.
- * Set app_role in your users table for the user you want to grant developer access.
+ * Developer access is determined by profile.app_role === 'developer' (merged profiles + user_roster).
+ * Set app_role in public.user_roster (or profiles, per your setup) for the user you want to grant developer access.
  */
 export async function getDeveloperUser(): Promise<User | null> {
   const { user, profile } = await getCurrentUserWithProfile();
@@ -218,7 +186,7 @@ export async function requireTeamLeaderOrAbove(): Promise<User> {
 export async function requireDeveloper(): Promise<User | null> {
   const user = await getDeveloperUser();
   if (!user) {
-    
+
     redirect("/dashboard");
   }
   return user;

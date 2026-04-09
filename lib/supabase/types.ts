@@ -1,7 +1,7 @@
 import type { User } from "@supabase/supabase-js";
 
 /**
- * Row from your public.users table in Supabase.
+ * Row from your public.user_roster table in Supabase.
  *
  * IMPORTANT: `uid` in this table is NOT the same as Supabase Auth's user.id
  * (auth.users.id). They are separate identifiers from different systems.
@@ -25,7 +25,7 @@ export type UserProfile = {
 };
 
 /**
- * Auth user + profile from public.users. Use getCurrentUserWithProfile() to fetch.
+ * Auth user + profile from public.user_roster. Use getCurrentUserWithProfile() to fetch.
  */
 export type UserWithProfile = {
   user: User;

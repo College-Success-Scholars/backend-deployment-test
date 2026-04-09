@@ -1,12 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import type { DailyScholarActivityMinutesRow } from "@/lib/server/daily-scholar-activity-types";
-
-export type {
-  DailyScholarActivityMinutesRow,
-  DailyScholarLogSource,
-} from "@/lib/server/daily-scholar-activity-types";
+import type { DailyScholarActivityMinutesRow } from "./types";
 
 /**
  * Column on `public.daily_scholar_activity` holding per-row minutes. Confirm in Supabase
@@ -38,6 +33,6 @@ export async function getTotalMinutesForMenteeWeek(params: {
 
   if (error) throw error;
 
-  const rows = (data ?? []) as DailyScholarActivityMinutesRow[]
-  return rows.reduce((sum, row) => sum + (row.duration_minutes ?? 0), 0)
+  const rows = (data ?? []) as DailyScholarActivityMinutesRow[];
+  return rows.reduce((sum, row) => sum + (row.duration_minutes ?? 0), 0);
 }

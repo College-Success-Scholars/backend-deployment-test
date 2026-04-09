@@ -16,6 +16,12 @@ export {
   getWplFormLogsByUidAndWeek,
 } from "./fetch";
 export {
+  getRecentFormSubmissions,
+  scholarUidFromProfile,
+  type ActivityFormType,
+  type RecentFormSubmission,
+} from "./recent-submissions";
+export {
   getWhafFormLogsForWeekWithLate,
   getMcfFormLogsForWeekWithLate,
   getMcfFormLogsByUidWithLate,

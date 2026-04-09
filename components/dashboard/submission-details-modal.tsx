@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { CheckCircle2, CircleX } from "lucide-react"
-import type { RecentFormSubmission } from "@/lib/server/personal-monitoring"
+import type { RecentFormSubmission } from "@/lib/form-logs"
 
 function formatSubmittedAt(value: string | null) {
   if (!value) return "Unknown time"

@@ -20,7 +20,7 @@ function totalMinutes(m: WeeklyMinutesByDay): number {
 }
 
 interface SyncOptions {
-  /** When true, sync every user (from users table) and treat tickets as ground truth (including zeroing records when no sessions). */
+  /** When true, sync every user (from user_roster) and treat tickets as ground truth (including zeroing records when no sessions). */
   allUids?: boolean;
   /** When set, only consider this scholar (used for lighter-weight single-uid sync). */
   uid?: number;

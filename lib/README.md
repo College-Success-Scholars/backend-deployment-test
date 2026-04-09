@@ -80,7 +80,7 @@ Supabase client creation, auth helpers, and auth middleware. **Server modules us
 | **`client.ts`** | `createClient()` — browser Supabase client (for Client Components, auth forms). |
 | **`server.ts`** | `createClient()` (async), `getCurrentUser`, `getCurrentUserWithProfile`, `requireUser`, `requireUserWithProfile`, `getDeveloperUser`, `requireDeveloper` — server client and auth helpers. |
 | **`middleware.ts`** | `updateSession(request)` — refresh session and redirect unauthenticated users to login. Uses `hasEnvVars` from `lib/utils`. |
-| **`types.ts`** | `UserProfile` and related types for `public.users`. |
+| **`types.ts`** | `UserProfile` and related types for `public.user_roster`. |
 
 ---
 
@@ -90,7 +90,7 @@ Supabase client creation, auth helpers, and auth middleware. **Server modules us
 
 ### `users.ts`
 
-Shared user data from `public.users`:
+Shared user data from `public.user_roster`:
 
 - **`fetchScholarNamesByUids(uids)`** — Map of uid → display name.
 - **`fetchRequiredHoursByUids(uids)`** — Map of uid → `{ fd_required, ss_required }`.
@@ -103,7 +103,7 @@ Fetches log rows from Supabase and returns cleaned/errored, in-room, or complete
 
 | File | Description |
 |------|-------------|
-| **`index.ts`** | Re-exports `fetchScholarNamesByUids` (from users), fetch helpers, and all get* functions. |
+| **`index.ts`** | Re-exports `fetchScholarNamesByUids` (from `users.ts`), fetch helpers, and all get* functions. |
 | **`fetch.ts`** | `requireLogFetchLimit`, `fetchFrontDeskLogs`, `fetchStudySessionLogs` — raw row fetches from `front_desk_logs` and `study_session_logs`. |
 | **`front-desk.ts`** | `getFrontDeskCleanedAndErrored`, `getFrontDeskScholarsInRoom`, `getFrontDeskCompletedSessions` — fetch + pure logic + name enrichment for front desk. |
 | **`study.ts`** | `getStudySessionCleanedAndErrored`, `getStudySessionScholarsInRoom`, `getStudySessionCompletedSessions` — same for study session logs. |

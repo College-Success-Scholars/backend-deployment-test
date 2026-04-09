@@ -1,5 +1,5 @@
 /**
- * Types for `public.daily_scholar_activity`.
+ * Row types for `public.daily_scholar_activity`.
  * Align `DailyScholarLogSource` with your Postgres enum or text check constraint once defined.
  */
 
@@ -7,6 +7,6 @@
 export type DailyScholarLogSource = string;
 
 /** Shape of the selected row used for minute aggregation. */
-export type DailyScholarActivityMinutesRow = {
+export interface DailyScholarActivityMinutesRow {
   duration_minutes: number | null;
 }

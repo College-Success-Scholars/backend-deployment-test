@@ -2,7 +2,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * Server-only helpers for reading user metadata from `public.users`.
+ * Server-only helpers for reading user metadata from `public.user_roster`.
  *
  * These utilities are used by session logs, form logs, and memo overview pages
  * to hydrate UIDs with names, roles, requirements, and mentee counts.
@@ -13,7 +13,7 @@ function uniqueNonEmptyStrings(values: string[]): string[] {
 }
 
 /**
- * Fetch a map of scholar UID → full name from `public.users`.
+ * Fetch a map of scholar UID → full name from `public.user_roster`.
  *
  * @param uids - List of UIDs to look up.
  * @returns Map of UID to `"First Last"` for rows where a non-empty name exists.
@@ -25,7 +25,7 @@ export async function fetchScholarNamesByUids(
   const supabase = await createClient();
   const uniqueUids = uniqueNonEmptyStrings(uids);
   const { data, error } = await supabase
-    .from("users")
+    .from("user_roster")
     .select("uid, first_name, last_name")
     .in("uid", uniqueUids);
   if (error) throw error;
@@ -50,7 +50,7 @@ export async function fetchRequiredHoursByUids(
   const supabase = await createClient();
   const uniqueUids = uniqueNonEmptyStrings(uids);
   const { data, error } = await supabase
-    .from("users")
+    .from("user_roster")
     .select("uid, fd_required, ss_required")
     .in("uid", uniqueUids);
   if (error) throw error;
@@ -79,7 +79,7 @@ export async function fetchEligibleScholarUids(uids: string[]): Promise<Set<stri
   const supabase = await createClient();
   const uniqueUids = uniqueNonEmptyStrings(uids);
   const { data, error } = await supabase
-    .from("users")
+    .from("user_roster")
     .select("uid, program_role, fd_required, ss_required")
     .in("uid", uniqueUids);
   if (error) throw error;
@@ -98,7 +98,7 @@ export async function fetchEligibleScholarUids(uids: string[]): Promise<Set<stri
 }
 
 /**
- * Fetch all user UIDs from `public.users`.
+ * Fetch all user UIDs from `public.user_roster`.
  *
  * Used by sync routines when `allUids` is true.
  *
@@ -107,7 +107,7 @@ export async function fetchEligibleScholarUids(uids: string[]): Promise<Set<stri
 export async function fetchAllUserUids(): Promise<string[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("users")
+    .from("user_roster")
     .select("uid")
     .not("uid", "is", null);
   if (error) throw error;
@@ -137,7 +137,7 @@ export type MemoUserRow = {
 export async function fetchAllUsersForMemo(): Promise<MemoUserRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("users")
+    .from("user_roster")
     .select("uid, first_name, last_name, cohort, program_role, app_role, fd_required, ss_required")
     .not("uid", "is", null);
   if (error) throw error;
@@ -159,7 +159,7 @@ export async function fetchAllUsersForMemo(): Promise<MemoUserRow[]> {
 export async function getUserByUid(uid: string): Promise<MemoUserRow | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("users")
+    .from("user_roster")
     .select("uid, first_name, last_name, cohort, program_role, app_role, fd_required, ss_required")
     .eq("uid", uid)
     .maybeSingle();
@@ -185,14 +185,14 @@ export type TeamLeaderRow = Omit<MemoUserRow, "app_role"> & {
 };
 
 /**
- * Fetch all non-scholars from `public.users` (team leaders and other roles).
+ * Fetch all non-scholars from `public.user_roster` (team leaders and other roles).
  *
  * @returns Array of `TeamLeaderRow` filtered to rows where `program_role` is not "scholar".
  */
 export async function fetchTeamLeaders(): Promise<TeamLeaderRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("users")
+    .from("user_roster")
     .select("uid, first_name, last_name, cohort, program_role, fd_required, ss_required, mentee_count")
     .or("program_role.neq.scholar,program_role.is.null");
   if (error) throw error;
@@ -218,7 +218,7 @@ export async function fetchTeamLeaders(): Promise<TeamLeaderRow[]> {
 export async function fetchScholarUids(): Promise<string[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("users")
+    .from("user_roster")
     .select("uid")
     .ilike("program_role", "scholar");
   if (error) throw error;

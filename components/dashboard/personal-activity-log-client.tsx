@@ -28,8 +28,7 @@ export function PersonalActivityLogClient({ entries }: { entries: RecentFormSubm
   const [filter, setFilter] = useState<FilterType>("ALL")
 
   const visibleEntries = useMemo(() => {
-    const filtered = filter === "ALL" ? entries : entries.filter((entry) => entry.formType === filter)
-    return filtered.slice(0, 3)
+    return filter === "ALL" ? entries : entries.filter((entry) => entry.formType === filter)
   }, [entries, filter])
 
   return (

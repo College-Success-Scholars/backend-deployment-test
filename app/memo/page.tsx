@@ -71,7 +71,12 @@ export default async function MemoPage({ searchParams }: PageProps) {
 
   const dateRangeOpts = { startDate, endDate };
 
-  const weekNumbers = Array.from({ length: 25 }, (_, i) => i + 1);
+  const weekPickerMax = Math.max(
+    25,
+    currentCampusWeek ?? 1,
+    weekNum
+  );
+  const weekNumbers = Array.from({ length: weekPickerMax }, (_, i) => i + 1);
   const [
     allUsers,
     studyRecords,
@@ -263,7 +268,7 @@ export default async function MemoPage({ searchParams }: PageProps) {
     },
   };
 
-  // Team leaders: non-scholars from users table
+  // Team leaders: non-scholars from user_roster (via fetchAllUsersForMemo)
   const tlUsers = allUsers.filter((u) => isTeamLeader(u.program_role));
 
   // MCF: fetch per TL by uid + week (DB filters mentor_uid or mentee_uid = TL uid)
