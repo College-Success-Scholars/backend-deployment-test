@@ -1,7 +1,10 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Label } from "@/components/ui/label"
 import type { ActivityFormType, RecentFormSubmission } from "@/lib/server/personal-monitoring"
+import { cn } from "@/lib/utils"
 import { useMemo, useState } from "react"
 import { SubmissionDetailsModal } from "./submission-details-modal"
 import { buildActivitySummary, formTone } from "./activity-log-dictionary"
@@ -31,7 +34,7 @@ export function PersonalActivityLogClient({ entries }: { entries: RecentFormSubm
 
   return (
     <>
-      <div className="inline-flex rounded-xl border border-border/60 bg-card p-1">
+      <div className="inline-flex rounded-xl border border-border/60 bg-muted/30 p-1">
         {(["ALL", "WHAF", "WPL", "MCF"] as const).map((option) => (
           <Button
             key={option}
@@ -46,27 +49,59 @@ export function PersonalActivityLogClient({ entries }: { entries: RecentFormSubm
       </div>
 
       <div className="space-y-3">
-        {visibleEntries.map((entry) => (
-          <div
-            key={entry.id}
-            className="flex items-center justify-between gap-3 rounded-2xl border border-border/60 bg-card px-4 py-3"
-          >
-            <div className="min-w-0 flex items-center gap-3">
-              <span
-                className={`inline-flex min-w-16 items-center justify-center rounded-full px-3 py-1 text-sm font-semibold ${formTone[entry.formType]}`}
-              >
-                {entry.formType}
-              </span>
-              <p className="truncate text-lg font-medium text-foreground">{buildActivitySummary(entry)}</p>
+        {visibleEntries.map((entry) => {
+          const formId = `activity-form-${entry.id}`
+          const summaryId = `activity-summary-${entry.id}`
+          const submittedId = `activity-submitted-${entry.id}`
+          return (
+            <div
+              key={entry.id}
+              className="rounded-xl border border-border/60 bg-card px-4 py-3"
+            >
+              <div className="grid gap-4 sm:grid-cols-[minmax(0,8rem)_1fr_auto] sm:items-start sm:gap-6">
+                <div className="space-y-1.5">
+                  <Label htmlFor={formId} className="text-muted-foreground">
+                    Form
+                  </Label>
+                  <Badge
+                    id={formId}
+                    variant="outline"
+                    className={cn(
+                      "min-w-18 justify-center border-transparent font-semibold",
+                      formTone[entry.formType]
+                    )}
+                  >
+                    {entry.formType}
+                  </Badge>
+                </div>
+                <div className="min-w-0 space-y-1.5">
+                  <Label htmlFor={summaryId} className="text-muted-foreground">
+                    Summary
+                  </Label>
+                  <p id={summaryId} className="text-sm font-medium text-foreground">
+                    {buildActivitySummary(entry)}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 sm:items-end sm:text-right">
+                  <div className="space-y-1.5 sm:text-right">
+                    <Label htmlFor={submittedId} className="text-muted-foreground sm:ml-auto">
+                      Submitted
+                    </Label>
+                    <p
+                      id={submittedId}
+                      className="text-sm text-muted-foreground tabular-nums sm:text-right"
+                    >
+                      {formatSubmittedAt(entry.submittedAt)}
+                    </p>
+                  </div>
+                  <SubmissionDetailsModal entry={entry} />
+                </div>
+              </div>
             </div>
-            <div className="flex shrink-0 items-center gap-4">
-              <p className="w-32 text-right text-sm text-muted-foreground">{formatSubmittedAt(entry.submittedAt)}</p>
-              <SubmissionDetailsModal entry={entry} />
-            </div>
-          </div>
-        ))}
+          )
+        })}
         {visibleEntries.length === 0 && (
-          <div className="rounded-2xl border border-border/60 bg-card px-4 py-5 text-sm text-muted-foreground">
+          <div className="rounded-xl border border-border/60 bg-muted/20 px-4 py-5 text-sm text-muted-foreground">
             No recent submissions yet.
           </div>
         )}
