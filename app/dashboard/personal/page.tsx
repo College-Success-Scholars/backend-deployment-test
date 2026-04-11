@@ -20,12 +20,12 @@ export default async function PersonalPage() {
     supabase.from('whaf_form_logs').select('*').eq('scholar_uid', profile.student_id),
     supabase.from('mcf_form_logs').select('*').eq('mentor_uid', profile.student_id),
     supabase.from('wpl_form_logs').select('*').eq('scholar_uid', profile.student_id)
-  ])
+  ]);
 
   // Process the results
-  const wahf = wahfResult.status === 'fulfilled' ? (wahfResult.value.data ?? []) : []
-  const mcf = mcfResult.status === 'fulfilled' ? (mcfResult.value.data ?? []) : []
-  const wpl = wplResult.status === 'fulfilled' ? (wplResult.value.data ?? []) : []
+  const wahf = wahfResult.status === 'fulfilled' ? (wahfResult.value.data ?? []) : [];
+  const mcf  = mcfResult.status  === 'fulfilled' ? (mcfResult.value.data  ?? []) : [];
+  const wpl  = wplResult.status  === 'fulfilled' ? (wplResult.value.data  ?? []) : [];
 
   return (
     <div className="space-y-6">
