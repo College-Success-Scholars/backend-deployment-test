@@ -11,6 +11,9 @@ import {
   getCurrentWeekPersonalFormStatuses,
 } from "./middleware"
 import { PersonalActivityLogSection } from "./personal-activity-log-section"
+import { Card } from "@/components/ui/card"
+import { CardHeader } from "@/components/ui/card"
+import { CardTitle } from "@/components/ui/card"
 
 function displayName(profile: {
   full_name: string | null
@@ -64,12 +67,15 @@ export default async function PersonalMonitoringPage() {
 
       <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-card px-3 py-2">
         <img
-          src={avatarUrl}
-          alt={`${name} avatar`}
+          src={profile?.avatar_url as string | undefined}
+          alt={`${profile?.full_name} avatar`}
           className="h-10 w-10 rounded-full border border-border/60 bg-muted object-cover"
+          onError={(e) => {
+            e.currentTarget.src = "/images/default-avatar.png"
+          }}
         />
         <div>
-          <p className="font-semibold text-foreground">{name}</p>
+          <p className="font-semibold text-foreground">{profile?.full_name}</p>
           <p className="text-muted-foreground">
             {displayRole(profile?.program_role)} · {displayTeams(profile?.teams)}
           </p>

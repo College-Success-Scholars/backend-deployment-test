@@ -11,13 +11,10 @@ import type { McfFormLogRow, WhafFormLogRow, WplFormLogRow } from "./types";
 
 export type { ActivityFormType, RecentFormSubmission } from "@/lib/form-logs/recent-submission-dto";
 
-/** Scholar UID from `profiles.student_id` (string or number). */
+/** Scholar UID from `profiles.student_id` (numeric id as string). */
 export function scholarUidFromProfile(profile: ProfilesRow | null): string | null {
-  if (typeof profile?.student_id === "number") {
+  if (typeof profile?.student_id === "number" && Number.isFinite(profile.student_id)) {
     return String(profile.student_id);
-  }
-  if (typeof profile?.student_id === "string" && profile.student_id.trim() !== "") {
-    return profile.student_id;
   }
   return null;
 }

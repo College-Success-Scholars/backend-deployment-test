@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
-import type { ActivityFormType, RecentFormSubmission } from "@/lib/server/personal-monitoring"
+import type { ActivityFormType, RecentFormSubmission } from "@/lib/form-logs"
 import { cn } from "@/lib/utils"
 import { useMemo, useState } from "react"
 import { SubmissionDetailsModal } from "./submission-details-modal"
