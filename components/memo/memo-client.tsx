@@ -130,7 +130,7 @@ export function MemoClient({
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Weekly memo</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Weekly Memo</h1>
           <p className="text-sm text-muted-foreground">{dateRange}</p>
         </div>
         <div className="flex items-center gap-1">

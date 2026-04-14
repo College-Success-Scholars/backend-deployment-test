@@ -35,6 +35,8 @@ export default async function MemoPage() {
     p_week_num: currentWeek,
   });
 
+  console.log(data)
+
   if (error){
     console.error(error)
     return <div>Error: {error.message}</div>
