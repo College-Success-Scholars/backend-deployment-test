@@ -63,10 +63,10 @@ export function MemoClient({
   const [formSubOpen, setFormSubOpen] = useState(false);
   const [attendanceTab, setAttendanceTab] = useState<"fd" | "ss">("fd");
 
-  const scholars = memoData.scholars ?? [];
-  const tlMenteeMap = memoData.tl_mentee_map ?? [];
-  const currentWeek = memoData.current_week ?? [];
-  const trendWeeks = memoData.trend_weeks ?? [];
+  const scholars = useMemo(() => memoData.scholars ?? [], [memoData.scholars]);
+  const tlMenteeMap = useMemo(() => memoData.tl_mentee_map ?? [], [memoData.tl_mentee_map]);
+  const currentWeek = useMemo(() => memoData.current_week ?? [], [memoData.current_week]);
+  const trendWeeks = useMemo(() => memoData.trend_weeks ?? [], [memoData.trend_weeks]);
   const traffic = memoData.traffic ?? null;
 
   const summary = useMemo(

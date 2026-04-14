@@ -1,3 +1,8 @@
+declare const Deno: {
+  serve(handler: (req: Request) => Promise<Response> | Response): void;
+  env: { get(key: string): string | undefined };
+};
+
 import { createClient, SupabaseClient } from "jsr:@supabase/supabase-js@2";
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
@@ -134,9 +139,9 @@ function extractAvgGrade(grades: unknown): number | null {
   let letters: string[] = [];
 
   if (Array.isArray(grades)) {
-    letters = grades
-      .map((g: any) => g?.grade ?? g?.letter ?? g?.letter_grade)
-      .filter(Boolean);
+    letters = (grades as Record<string, unknown>[])
+      .map((g) => g?.grade ?? g?.letter ?? g?.letter_grade)
+      .filter((v): v is string => typeof v === "string");
   } else if (typeof grades === "object") {
     letters = Object.values(grades as Record<string, string>).filter(Boolean);
   }
@@ -211,7 +216,7 @@ function countConsecutiveFlagged(
 
 // ─── Fetch helpers ────────────────────────────────────────────────────────────
 
-function assertNoError(error: any, label: string) {
+function assertNoError(error: { message: string } | null | undefined, label: string) {
   if (error) throw new Error(`[${label}] ${error.message}`);
 }
 
@@ -279,7 +284,7 @@ Deno.serve(async (req: Request) => {
 
     assertNoError(rosterErr, "roster");
 
-    const scholars: ScholarProfile[] = (rosterRows ?? []).map((r: any) => ({
+    const scholars: ScholarProfile[] = (rosterRows ?? []).map((r: { uid: string; profiles: { fd_required: number; ss_required: number } | null }) => ({
       uid: r.uid,
       fd_required: r.profiles?.fd_required ?? 0,
       ss_required: r.profiles?.ss_required ?? 0,
