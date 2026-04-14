@@ -61,6 +61,7 @@ export type TutoringRow = {
 
 /** Row shape from Supabase table `public.semesters`. */
 export type SemesterRow = {
+    id: number
     iso_week_offset: number
     start_date: string
     end_date: string

@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { ChevronLeft, ChevronRight, AlertCircle, User } from "lucide-react"
+import { ChevronLeft, ChevronRight, AlertCircle, User, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -30,7 +30,7 @@ export function MenteeMonitoringClient({
   mentees,
   activity,
   wahf,
-  tutoring,
+  tutoring, 
   semester,
   currentIsoWeek,
 }: MenteeMonitoringClientProps) {
@@ -83,6 +83,23 @@ export function MenteeMonitoringClient({
     () => computeTutoringSessions(tutoring, selectedUid, selectedWeek),
     [tutoring, selectedUid, selectedWeek],
   )
+
+  if (validMentees.length === 0) {
+    return (
+      <div className="space-y-4 max-w-2xl mx-auto">
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="rounded-full bg-muted p-6 mb-4">
+            <Users className="size-12 text-muted-foreground" aria-hidden />
+          </div>
+          <h2 className="text-lg font-semibold mb-2">No mentees yet</h2>
+          <p className="text-muted-foreground max-w-md">
+            When mentees are assigned to you, their study and front desk hours,
+            tutoring, and WAHF status will show here.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   // ---- Week navigation helpers --------------------------------------------
 

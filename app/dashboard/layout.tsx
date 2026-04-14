@@ -16,6 +16,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { UserRole } from "@/lib/auth";
+import { getCurrentProfile, getActiveSemester } from "@/lib/server/queries";
 
 export default async function DashboardLayout({
   children,
@@ -35,11 +36,13 @@ export default async function DashboardLayout({
   // Get user role
   // const userRole = await getUserRole(); 
   // REMEMBER TO UNCOMMENT THIS WHEN DONE TESTING and add import
-  const userRole = 'team-leader' as UserRole;
+  const [ profile ] = await Promise.all([
+    getCurrentProfile()
+  ]);
 
   return (
     <SidebarProvider>
-      <AppSidebar userRole={userRole} />
+      <AppSidebar profile={profile}/>
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2">
           <div className="flex items-center gap-2 px-4">

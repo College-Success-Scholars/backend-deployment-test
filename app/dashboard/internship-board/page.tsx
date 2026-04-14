@@ -154,7 +154,7 @@ export default function InternshipBoardPage() {
       setLoading(true)
       setError(null)
 
-      const response = await fetch("http://localhost:8000/internship-opportunities")
+      const response = await fetch("")
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)

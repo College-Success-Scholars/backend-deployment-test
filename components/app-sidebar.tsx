@@ -44,7 +44,7 @@ const defaultData = {
   user: {
     name: "CSS",
     email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    avatar: "",
   },
   navMain: [
     {
@@ -178,7 +178,8 @@ const getRoleBasedNav = (role: UserRole) => {
         },
       ]
     
-    case 'team-leader':
+    case 'teamleader':
+    case 'developer':
       return [
         {
           title: "Home",
@@ -196,10 +197,15 @@ const getRoleBasedNav = (role: UserRole) => {
           url: "/dashboard/mentee",
           icon: Users,
         },
+        // {
+        //   title: "Room Monitoring",
+        //   url: "/dashboard/room",
+        //   icon: Building,
+        // },
         {
-          title: "Room Monitoring",
-          url: "/dashboard/room",
-          icon: Building,
+          title: "Memo",
+          url: "/dashboard/memo",
+          icon: FileText,
         },
       ]
     
@@ -325,6 +331,7 @@ const getRoleBasedResources = (role: UserRole) => {
       ]
     
     case 'team-leader':
+    case 'developer':
       return [
         {
           name: "Internship Board",
@@ -365,7 +372,7 @@ const getRoleBasedResources = (role: UserRole) => {
           icon: Users,
         },
       ]
-
+    
     default:
       return defaultData.projects
   }
@@ -375,6 +382,7 @@ const getRoleBasedSecondaryNav = (role: UserRole) => {
   switch (role) {
     case 'scholar':
     case 'team-leader':
+    case 'developer':
     case 'exec':
     case 'admin':
       return [
@@ -394,7 +402,9 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   userRole?: UserRole
 }
 
-export function AppSidebar({ userRole = 'default', ...props }: AppSidebarProps) {
+export function AppSidebar({ profile, ...props }: AppSidebarProps) {
+  console.log(profile)
+  const userRole = profile?.app_role as UserRole ?? 'teamleader';
   const roleNavMain = getRoleBasedNav(userRole)
   const roleNavSecondary = getRoleBasedSecondaryNav(userRole)
   const roleNavResources = getRoleBasedResources(userRole)
@@ -424,7 +434,11 @@ export function AppSidebar({ userRole = 'default', ...props }: AppSidebarProps) 
         <NavSecondary items={roleNavSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={defaultData.user} />
+        <NavUser user={{
+          name: profile?.first_name + " " + profile?.last_name,
+          email: profile?.email,
+          avatar: profile?.avatar,
+        }} />
       </SidebarFooter>
     </Sidebar>
   )

@@ -41,9 +41,9 @@ const HISTORY_WEEKS_INCREMENT = 2
 const FORM_TYPES: FormType[] = ["WAHF", "WPL", "MCF"]
 
 const FORM_URLS: Record<FormType, string> = {
-  WAHF: "#",
-  WPL: "#",
-  MCF: "#",
+  WAHF: "https://docs.google.com/forms/d/e/1FAIpQLSdkQ_3BXulRH8G1uyOjcLNlG2DhBx-JnKvsN0SZ43M4qB7GdA/viewform",
+  WPL: "https://docs.google.com/forms/d/e/1FAIpQLSeyK6mN22XWf5i2dgqkW6BFCvglK5DPEIHu8g3DbRPjpc0P6Q/viewform",
+  MCF: "https://docs.google.com/forms/d/e/1FAIpQLSeaa-aUkIhUzl-WZnlGSMmdx0sJbjQhK6fZniJwL6azT5czkg/viewform",
 }
 
 const FORM_DEADLINES: Record<FormType, string> = {

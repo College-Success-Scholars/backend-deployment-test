@@ -21,7 +21,7 @@ export const getActiveSemester = cache(
       );
       const { data, error } = await supabase
         .from("semesters")
-        .select("iso_week_offset, start_date, end_date")
+        .select("id, iso_week_offset, start_date, end_date")
         .eq("is_active", true)
         .single();
       if (error) throw new Error(error.message);
@@ -68,6 +68,6 @@ export const getCurrentProfile = cache(async () => {
 export const getMyMentees = cache(async () => {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("get_my_mentees");
-  if (error || !data?.length) throw new Error("Unable to fetch mentees");
-  return data as GetMyMenteesRpcRow[];
+  if (error) throw new Error(`Unable to fetch mentees: ${error.message}`);
+  return (data ?? []) as GetMyMenteesRpcRow[];
 });

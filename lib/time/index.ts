@@ -43,3 +43,4 @@ export {
   formatMinutesToHoursAndMinutes,
   getDurationMs,
 } from "./utils";
+export { getCampusWeekForIsoWeek } from "./iso-campus-week";

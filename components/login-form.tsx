@@ -82,7 +82,7 @@ export function LoginForm({
 
       <div className="space-y-2 text-center lg:text-left">
         <h1 className="text-balance text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
-          Welcome Back
+          Login to CSS Atlas
         </h1>
       </div>
 

@@ -8,12 +8,15 @@ import {
   getISODay,
   differenceInCalendarDays,
 } from "date-fns"
+import { getWhafDeadlineForWeek } from "@/lib/form-logs/deadlines"
+import { getCampusWeekForIsoWeek } from "@/lib/time"
 import type {
   ActivityRow,
   WahfRow,
   TutoringRow,
   SemesterRow,
 } from "@/lib/types/supabase"
+import { findSubmissionForIsoWeek } from "@/components/personal/utils"
 
 // ---------------------------------------------------------------------------
 // Week options
@@ -119,34 +122,34 @@ export function computeWahfStatus(
   currentIsoWeek: number,
 ): WahfStatus {
   const menteeWahf = wahf.filter((w) => w.scholar_uid === uid)
-
-  const sorted = [...menteeWahf].sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-  )
-  const latest = sorted[0] ?? null
-
-  const hasSubmissionThisWeek = menteeWahf.some((w) => {
-    const submDate = new Date(w.created_at)
-    return getISOWeek(submDate) === weekNum
-  })
+  const submission = findSubmissionForIsoWeek(menteeWahf, weekNum)
+  const submitted = submission != null
 
   const now = new Date()
-  const currentWeekEnd = endOfISOWeek(now)
-  const dueDate = format(currentWeekEnd, "MMM d, yyyy")
+  const campusWeek = getCampusWeekForIsoWeek(weekNum, currentIsoWeek)
+  const deadline =
+    campusWeek != null ? getWhafDeadlineForWeek(campusWeek) : null
+
+  const dueDate = deadline ? format(deadline, "MMM d, yyyy") : ""
 
   let daysOverdue = 0
-  if (!hasSubmissionThisWeek && weekNum <= currentIsoWeek) {
-    const selectedWeekEnd = latest
-      ? endOfISOWeek(new Date(latest.created_at))
-      : currentWeekEnd
-    daysOverdue = Math.max(0, differenceInCalendarDays(now, selectedWeekEnd))
+  if (submission) {
+    daysOverdue = 0
+  } else if (weekNum < currentIsoWeek) {
+    if (deadline) {
+      daysOverdue = Math.max(0, differenceInCalendarDays(now, deadline))
+    }
+  } else if (weekNum === currentIsoWeek) {
+    if (deadline && now.getTime() > deadline.getTime()) {
+      daysOverdue = Math.max(0, differenceInCalendarDays(now, deadline))
+    }
   }
 
   return {
-    submitted: hasSubmissionThisWeek,
+    submitted,
     dueDate,
     daysOverdue,
-    latestSubmission: latest,
+    latestSubmission: submission,
   }
 }
 

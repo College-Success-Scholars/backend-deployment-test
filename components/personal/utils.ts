@@ -16,7 +16,7 @@ import {
   isMcfLateForWeek,
   isWplLateForWeek,
 } from "@/lib/form-logs/deadlines"
-import { dateToCampusWeek } from "@/lib/time"
+import { getCampusWeekForIsoWeek } from "@/lib/time"
 
 // ---------------------------------------------------------------------------
 // Week options (adapted from mentee-monitoring/utils.ts for ISO weeks)
@@ -90,14 +90,6 @@ function findSubmissionForWeek<T extends { created_at: string }>(
   weekNum: number,
 ): T | null {
   return findSubmissionForIsoWeek(rows, weekNum)
-}
-
-function getCampusWeekForIsoWeek(isoWeek: number, currentIsoWeek: number): number | null {
-  const now = new Date()
-  const ref = startOfISOWeek(now)
-  const diff = isoWeek - currentIsoWeek
-  const targetDate = new Date(ref.getTime() + diff * 7 * 24 * 60 * 60 * 1000)
-  return dateToCampusWeek(targetDate)
 }
 
 export function getFormStatusForWeek(
