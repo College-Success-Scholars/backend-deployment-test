@@ -31,7 +31,8 @@ import type { TrafficSession } from "@/lib/types/traffic";
 import { FormCompletionOverviewCard, FormCompletionDonut, FORM_COMPLETION_WHAF_COLOR } from "@/components/form-completion-overview-card";
 import type { FormCompletionOverall } from "@/components/form-completion-overview-card";
 import type { MemoTutorReportRow } from "@/lib/types/tutor-report-log";
-import type { GradeBreakdown, GradeEntry } from "@/lib/types/form-log";
+import type { GradeBreakdown, GradeEntry, TeamLeaderFormStatsRow } from "@/lib/types/form-log";
+import { Badge } from "@/components/ui/badge";
 import { CohortPieChart } from "./cohort-pie-chart";
 
 function WeekPicker({
@@ -526,6 +527,7 @@ export function MemoContent({
   tutorReports,
   gradeBreakdown,
   whafDonut,
+  teamLeaderFormStats,
   weekLabel,
   currentCampusWeek,
   selectedWeekNum,
@@ -547,6 +549,7 @@ export function MemoContent({
   tutorReports: MemoTutorReportRow[];
   gradeBreakdown: GradeBreakdown;
   whafDonut: { total: number; completeCount: number; lateCount: number; percentComplete: number };
+  teamLeaderFormStats: TeamLeaderFormStatsRow[];
   weekLabel: string;
   currentCampusWeek: number | null;
   selectedWeekNum: number;
@@ -827,6 +830,9 @@ defaultSortColumnId="ss-progress"
       {/* Tutoring */}
       <TutoringSection tutorReports={tutorReports} />
 
+      {/* Team Leader Form Status */}
+      <TLFormStatusSection stats={teamLeaderFormStats} />
+
       {/* Grade Breakdown */}
       <GradeBreakdownSection breakdown={gradeBreakdown} />
     </div>
@@ -919,6 +925,146 @@ function TutoringSection({ tutorReports }: { tutorReports: MemoTutorReportRow[] 
         </CardContent>
       </Card>
     </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Team Leader Form Status
+// ---------------------------------------------------------------------------
+
+function TLFormStatusCell({ row }: { row: TeamLeaderFormStatsRow }) {
+  const issues: React.ReactNode[] = [];
+
+  // Check each form: late (yellow) or missing (red)
+  for (const [label, completed, required, late] of [
+    ["WHAF", row.whaf_completed, row.whaf_required, row.whaf_late],
+    ["MCF", row.mcf_completed, row.mcf_required, row.mcf_late],
+    ["WPL", row.wpl_completed, row.wpl_required, row.wpl_late],
+  ] as [string, number, number, boolean][]) {
+    if (completed < required) {
+      issues.push(
+        <Badge key={`${label}-missing`} variant="destructive" className="text-xs">
+          {label} Missing
+        </Badge>
+      );
+    } else if (late) {
+      issues.push(
+        <Badge key={`${label}-late`} className="text-xs bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30">
+          {label} Late
+        </Badge>
+      );
+    }
+  }
+
+  if (issues.length === 0) {
+    return (
+      <Badge className="text-xs bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30">
+        All good
+      </Badge>
+    );
+  }
+
+  return <div className="flex flex-wrap gap-1">{issues}</div>;
+}
+
+type TLFilter = "all" | "whaf-missing" | "mcf-missing" | "wpl-missing" | "any-issue";
+
+const TL_FILTERS: { value: TLFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "any-issue", label: "Any issue" },
+  { value: "whaf-missing", label: "WHAF missing" },
+  { value: "mcf-missing", label: "MCF missing" },
+  { value: "wpl-missing", label: "WPL missing" },
+];
+
+function filterTLStats(stats: TeamLeaderFormStatsRow[], filter: TLFilter): TeamLeaderFormStatsRow[] {
+  switch (filter) {
+    case "whaf-missing": return stats.filter((r) => r.whaf_completed < r.whaf_required);
+    case "mcf-missing": return stats.filter((r) => r.mcf_completed < r.mcf_required);
+    case "wpl-missing": return stats.filter((r) => r.wpl_completed < r.wpl_required);
+    case "any-issue": return stats.filter((r) =>
+      r.whaf_completed < r.whaf_required || r.mcf_completed < r.mcf_required || r.wpl_completed < r.wpl_required ||
+      r.whaf_late || r.mcf_late || r.wpl_late
+    );
+    default: return stats;
+  }
+}
+
+function TLFormStatusSection({ stats }: { stats: TeamLeaderFormStatsRow[] }) {
+  const [filter, setFilter] = useState<TLFilter>("all");
+  const filtered = filterTLStats(stats, filter);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Team Leader Form Status</CardTitle>
+        <CardDescription>WHAF, MCF, and WPL submission status for the current week.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="flex flex-wrap gap-1.5">
+          {TL_FILTERS.map((f) => (
+            <button
+              key={f.value}
+              type="button"
+              onClick={() => setFilter(f.value)}
+              className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                filter === f.value
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+              }`}
+            >
+              {f.label}
+              {f.value !== "all" && (
+                <span className="ml-1 opacity-70">
+                  ({filterTLStats(stats, f.value).length})
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+        {stats.length === 0 ? (
+          <p className="text-muted-foreground text-sm">No team leaders found.</p>
+        ) : filtered.length === 0 ? (
+          <p className="text-muted-foreground text-sm">No team leaders match this filter.</p>
+        ) : (
+          <ScholarDataTable<TeamLeaderFormStatsRow>
+            data={filtered}
+            rowKeyField="uid"
+            nameColumn={{ field: "name", header: "Name", sortable: true }}
+            columns={[
+              {
+                id: "tl-role",
+                header: "Role",
+                field: "program_role",
+                sortable: true,
+                renderCell: (row) => (
+                  <span className="text-muted-foreground text-xs">{row.program_role ?? "—"}</span>
+                ),
+              },
+              {
+                id: "tl-status",
+                header: "Status",
+                field: "name",
+                colSpan: 2,
+                sortable: true,
+                getSortValue: (row) => {
+                  let score = 0;
+                  for (const [c, r, l] of [[row.whaf_completed, row.whaf_required, row.whaf_late], [row.mcf_completed, row.mcf_required, row.mcf_late], [row.wpl_completed, row.wpl_required, row.wpl_late]] as [number, number, boolean][]) {
+                    if (c < r) score += 10;
+                    else if (l) score += 1;
+                  }
+                  return score;
+                },
+                renderCell: (row) => <TLFormStatusCell row={row} />,
+              },
+            ]}
+            emptyMessage="No team leaders"
+            defaultSortColumnId="tl-status"
+            defaultSortDirection="desc"
+          />
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

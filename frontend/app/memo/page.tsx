@@ -5,7 +5,7 @@ import type { ScholarWithCompletedSession } from "@/lib/types/session-log";
 import type { TrafficSession } from "@/lib/types/traffic";
 import type { FormCompletionOverall } from "@/components/form-completion-overview-card";
 import type { MemoTutorReportRow } from "@/lib/types/tutor-report-log";
-import type { GradeBreakdown } from "@/lib/types/form-log";
+import type { GradeBreakdown, TeamLeaderFormStatsRow } from "@/lib/types/form-log";
 
 /** Always fetch fresh data on load and on router.refresh() (no segment cache). */
 export const dynamic = "force-dynamic";
@@ -23,6 +23,7 @@ type MemoPageData = {
   tutorReports: MemoTutorReportRow[];
   gradeBreakdown: GradeBreakdown;
   whafDonut: { total: number; completeCount: number; lateCount: number; percentComplete: number };
+  teamLeaderFormStats: TeamLeaderFormStatsRow[];
   weekLabel: string;
   currentCampusWeek: number | null;
   selectedWeekNum: number;
@@ -54,6 +55,7 @@ export default async function MemoPage({ searchParams }: PageProps) {
       tutorReports={data.tutorReports}
       gradeBreakdown={data.gradeBreakdown}
       whafDonut={data.whafDonut}
+      teamLeaderFormStats={data.teamLeaderFormStats}
       weekLabel={data.weekLabel}
       currentCampusWeek={data.currentCampusWeek}
       selectedWeekNum={data.selectedWeekNum}

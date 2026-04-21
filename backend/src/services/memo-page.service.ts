@@ -296,6 +296,7 @@ export async function getMemoPageData(weekNum: number) {
     trafficEntryCountForSelectedWeek,
     trafficSessions,
     tutorReports,
+    teamLeaderFormStats: teamLeaderFormRows,
     gradeBreakdown,
     whafDonut,
     weekLabel,
