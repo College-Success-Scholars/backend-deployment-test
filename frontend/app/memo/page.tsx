@@ -1,5 +1,4 @@
 import { backendGet } from "@/lib/server/api-client";
-import { dateToCampusWeek } from "@/lib/time";
 import { MemoContent } from "./memo-content";
 import type { MemoScholarRow, MemoTLRow, MemoPieData } from "./memo-content";
 import type { ScholarWithCompletedSession } from "@/lib/session-logs";
@@ -8,10 +7,6 @@ import type { FormCompletionOverall } from "@/components/form-completion-overvie
 
 /** Always fetch fresh data on load and on router.refresh() (no segment cache). */
 export const dynamic = "force-dynamic";
-
-type PageProps = {
-  searchParams: Promise<{ week?: string }>;
-};
 
 type MemoPageData = {
   scholars: MemoScholarRow[];
@@ -28,18 +23,17 @@ type MemoPageData = {
   selectedWeekNum: number;
 };
 
+type PageProps = {
+  searchParams: Promise<{ week?: string }>;
+};
+
 export default async function MemoPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const weekParam = params.week ?? "";
-  const currentCampusWeek = dateToCampusWeek(new Date());
-  const weekNum =
-    weekParam !== ""
-      ? Math.max(1, Math.min(99, parseInt(weekParam, 10) || 1))
-      : currentCampusWeek != null
-        ? Math.max(1, Math.min(99, currentCampusWeek))
-        : 1;
+  const weekParam = params.week;
 
-  const data = await backendGet<MemoPageData>(`/api/memo/page-data?weekNum=${weekNum}`);
+  // Backend defaults to current campus week when weekNum is omitted
+  const query = weekParam ? `?weekNum=${weekParam}` : "";
+  const data = await backendGet<MemoPageData>(`/api/memo/page-data${query}`);
 
   return (
     <MemoContent

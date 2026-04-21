@@ -71,13 +71,20 @@ export async function refreshStats(req: AuthenticatedRequest, res: Response) {
   }
 }
 
-// GET /api/memo/page-data?weekNum=X
+// GET /api/memo/page-data?weekNum=X  (weekNum optional — defaults to current campus week)
 export async function pageData(req: AuthenticatedRequest, res: Response) {
   const weekParam = req.query.weekNum as string | undefined;
-  const weekNum = weekParam != null ? parseInt(weekParam, 10) : NaN;
-  if (Number.isNaN(weekNum) || weekNum < 1) {
-    res.status(400).json({ error: "weekNum must be a number >= 1" });
-    return;
+  let weekNum: number;
+  if (weekParam != null && weekParam !== "") {
+    weekNum = parseInt(weekParam, 10);
+    if (Number.isNaN(weekNum) || weekNum < 1) {
+      res.status(400).json({ error: "weekNum must be a number >= 1" });
+      return;
+    }
+  } else {
+    const { dateToCampusWeek } = await import("../services/time.service.js");
+    const current = dateToCampusWeek(new Date());
+    weekNum = current ?? 1;
   }
   try {
     const data = await getMemoPageData(weekNum);

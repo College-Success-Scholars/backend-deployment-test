@@ -1,37 +1,56 @@
-import { getISOWeek } from "date-fns";
-import { MemoClient } from "@/components/memo/memo-client";
-import { getActiveSemester, getCurrentProfile } from "@/lib/server/queries";
-import { backendGet, backendPost } from "@/lib/server/api-client";
-import type { MemoRpcResponse } from "@/lib/types/memo";
+import { backendGet } from "@/lib/server/api-client";
+import { MemoContent } from "@/app/memo/memo-content";
+import type { MemoScholarRow, MemoTLRow, MemoPieData } from "@/app/memo/memo-content";
+import type { ScholarWithCompletedSession } from "@/lib/session-logs";
+import type { TrafficSession } from "@/lib/traffic";
+import type { FormCompletionOverall } from "@/components/form-completion-overview-card";
 
-export default async function MemoPage() {
-  const [semester, profile] = await Promise.all([
-    getActiveSemester(),
-    getCurrentProfile(),
-  ]);
+export const dynamic = "force-dynamic";
 
-  const currentWeek = getISOWeek(new Date()) - (semester.iso_week_offset - 1);
+type MemoPageData = {
+  scholars: MemoScholarRow[];
+  teamLeaders: MemoTLRow[];
+  pieData: MemoPieData;
+  formCompletionOverall: FormCompletionOverall;
+  completedStudy: ScholarWithCompletedSession[];
+  completedFd: ScholarWithCompletedSession[];
+  trafficWeeklyData: { weekNumber: number; entryCount: number }[];
+  trafficEntryCountForSelectedWeek: number;
+  trafficSessions: TrafficSession[];
+  weekLabel: string;
+  currentCampusWeek: number | null;
+  selectedWeekNum: number;
+};
 
-  // Fire-and-forget refresh — don't await, don't block render
-  backendPost("/api/memo/refresh-stats", {
-    week_num: currentWeek,
-    semester_id: semester.id,
-  }).catch(() => {});
+type PageProps = {
+  searchParams: Promise<{ week?: string }>;
+};
 
-  const data = await backendGet<MemoRpcResponse>(
-    `/api/memo/weekly?semesterId=${semester.id}&weekNum=${currentWeek}`
-  );
+export default async function DashboardMemoPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const weekParam = params.week;
 
-  if (!data) {
-    return <div>Error: Failed to load memo data</div>;
-  }
+  // Backend defaults to current campus week when weekNum is omitted
+  const query = weekParam ? `?weekNum=${weekParam}` : "";
+  const data = await backendGet<MemoPageData>(`/api/memo/page-data${query}`);
 
   return (
-    <MemoClient
-      profile={profile}
-      memoData={data}
-      semester={semester}
-      currentIsoWeek={currentWeek}
+    <MemoContent
+      scholars={data.scholars}
+      teamLeaders={data.teamLeaders}
+      pieData={data.pieData}
+      formCompletionOverall={data.formCompletionOverall}
+      completedStudy={data.completedStudy}
+      completedFd={data.completedFd}
+      trafficWeeklyData={data.trafficWeeklyData}
+      trafficEntryCountForSelectedWeek={data.trafficEntryCountForSelectedWeek}
+      trafficSessions={data.trafficSessions}
+      weekLabel={data.weekLabel}
+      currentCampusWeek={data.currentCampusWeek}
+      selectedWeekNum={data.selectedWeekNum}
+      trafficCardSpan="half"
+      trafficCardTitle="Traffic log"
+      trafficCardDescription={null}
     />
   );
 }
