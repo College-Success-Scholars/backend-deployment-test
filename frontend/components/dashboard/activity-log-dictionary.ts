@@ -1,4 +1,4 @@
-import type { ActivityFormType, RecentFormSubmission } from "@/lib/form-logs"
+import type { ActivityFormType, RecentFormSubmission } from "@/lib/types/form-log"
 
 export const formTone: Record<ActivityFormType, string> = {
   WHAF: "text-sky-700 bg-sky-100",

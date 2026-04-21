@@ -7,7 +7,7 @@ import { backendGet, backendPost, backendPatch } from "@/lib/client/api-client";
 import type {
   FrontDeskRecordRow,
   StudySessionRecordRow,
-} from "@/lib/session-records";
+} from "@/lib/types/session-record";
 import {
   ScholarDataTable,
   CollapsibleTableSection,
@@ -16,7 +16,7 @@ import {
 import {
   dateToCampusWeek,
   formatMinutesToHoursAndMinutes,
-} from "@/lib/time";
+} from "@/lib/format/time";
 import { CampusWeekCard } from "@/components/campus-week-card";
 import {
   Card,

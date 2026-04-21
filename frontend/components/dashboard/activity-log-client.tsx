@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { ActivityFormType, RecentFormSubmission } from "@/lib/form-logs";
+import type { ActivityFormType, RecentFormSubmission } from "@/lib/types/form-log";
 
 type FilterType = "ALL" | ActivityFormType;
 

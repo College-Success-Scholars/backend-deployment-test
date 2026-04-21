@@ -1,9 +1,11 @@
 import { backendGet } from "@/lib/server/api-client";
 import { MemoContent } from "@/app/memo/memo-content";
 import type { MemoScholarRow, MemoTLRow, MemoPieData } from "@/app/memo/memo-content";
-import type { ScholarWithCompletedSession } from "@/lib/session-logs";
-import type { TrafficSession } from "@/lib/traffic";
+import type { ScholarWithCompletedSession } from "@/lib/types/session-log";
+import type { TrafficSession } from "@/lib/types/traffic";
 import type { FormCompletionOverall } from "@/components/form-completion-overview-card";
+import type { MemoTutorReportRow } from "@/lib/types/tutor-report-log";
+import type { GradeBreakdown } from "@/lib/types/form-log";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +19,9 @@ type MemoPageData = {
   trafficWeeklyData: { weekNumber: number; entryCount: number }[];
   trafficEntryCountForSelectedWeek: number;
   trafficSessions: TrafficSession[];
+  tutorReports: MemoTutorReportRow[];
+  gradeBreakdown: GradeBreakdown;
+  whafDonut: { total: number; completeCount: number; lateCount: number; percentComplete: number };
   weekLabel: string;
   currentCampusWeek: number | null;
   selectedWeekNum: number;
@@ -45,6 +50,9 @@ export default async function DashboardMemoPage({ searchParams }: PageProps) {
       trafficWeeklyData={data.trafficWeeklyData}
       trafficEntryCountForSelectedWeek={data.trafficEntryCountForSelectedWeek}
       trafficSessions={data.trafficSessions}
+      tutorReports={data.tutorReports}
+      gradeBreakdown={data.gradeBreakdown}
+      whafDonut={data.whafDonut}
       weekLabel={data.weekLabel}
       currentCampusWeek={data.currentCampusWeek}
       selectedWeekNum={data.selectedWeekNum}

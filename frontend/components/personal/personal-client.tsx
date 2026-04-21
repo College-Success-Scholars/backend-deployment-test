@@ -33,7 +33,7 @@ import {
   parseNumericGrade,
   parseWplProjectRows,
   formatMeetingTime12Hour,
-} from "@/lib/form-logs/form-view-helpers"
+} from "@/lib/format/form-view-helpers"
 
 const INITIAL_HISTORY_WEEKS = 2
 const HISTORY_WEEKS_INCREMENT = 2

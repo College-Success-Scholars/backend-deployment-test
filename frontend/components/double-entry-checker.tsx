@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { getDoubleEntries, type DoubleEntry } from "@/lib/session-logs";
-import type { ScholarWithCompletedSession } from "@/lib/session-logs";
-import { formatDuration, formatDate } from "@/lib/time";
+import { getDoubleEntries, type DoubleEntry } from "@/lib/types/session-log";
+import type { ScholarWithCompletedSession } from "@/lib/types/session-log";
+import { formatDuration, formatDate } from "@/lib/format/time";
 import {
   Card,
   CardContent,

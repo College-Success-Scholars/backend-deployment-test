@@ -11,6 +11,7 @@ import {
   markMcfFormLogsLate,
   buildTeamLeaderFormStatsForWeek,
 } from "./form-log.service.js";
+import { getTutorReportLogsForWeek } from "./tutor-report-log.service.js";
 import type { MemoUserRow } from "../models/user.model.js";
 
 function isScholar(role: string | null): boolean {
@@ -25,6 +26,28 @@ function hasRequiredHours(u: MemoUserRow): boolean {
   return (u.fd_required ?? 0) > 0 || (u.ss_required ?? 0) > 0;
 }
 
+/**
+ * Build the complete weekly memo page data for a given campus week.
+ *
+ * Flow:
+ * 1. Resolve the campus week date range and prepare query boundaries.
+ * 2. Fetch all data sources in parallel (13 queries):
+ *    - allUsers, studyRecords, fdRecords, completedStudy, completedFd,
+ *      trafficWeeklyData, trafficEntryCount, trafficSessions,
+ *      teamLeaders, mcf/whaf/wpl form logs (with late flags),
+ *      tutorReportLogs.
+ * 3. Parse assignment grades from WHAF submissions into a grade breakdown
+ *    (high ≥90%, mid 70-89%, low <70%) with scholar names attached.
+ * 4. Compute WHAF submission donut stats (total users, submitted, late).
+ * 5. Build team leader form stats (MCF/WHAF/WPL completion per TL).
+ * 6. Aggregate form completion totals across all team leaders.
+ * 7. Build scholar rows: merge FD/SS records with user requirements,
+ *    compute completion percentages, and track cohort-level stats for
+ *    pie charts (2024 vs 2025).
+ * 8. Build team leader MCF rows: per-TL MCF count, late flag, latest date.
+ * 9. Resolve tutor report scholar names and derive day-of-week.
+ * 10. Return everything as a single object for the frontend to render.
+ */
 export async function getMemoPageData(weekNum: number) {
   const currentCampusWeek = dateToCampusWeek(new Date());
   const range = campusWeekToDateRange(weekNum);
@@ -48,6 +71,7 @@ export async function getMemoPageData(weekNum: number) {
     mcfRowsWithLate,
     whafRowsWithLate,
     wplRowsWithLate,
+    tutorReportLogs,
   ] = await Promise.all([
     fetchAllUsersForMemo(),
     getStudySessionRecordsForWeekAll(weekNum),
@@ -61,7 +85,50 @@ export async function getMemoPageData(weekNum: number) {
     getMcfFormLogsForWeekWithLate(weekNum),
     getWhafFormLogsForWeekWithLate(weekNum),
     getWplFormLogsForWeekWithLate(weekNum),
+    getTutorReportLogsForWeek(weekNum),
   ]);
+
+  // Grade breakdown — parse assignment_grades from all WHAF submissions this week
+  type GradeEntry = { scholar_name: string; course: string; assessment: string; grade: string; percent: number };
+  const gradeHigh: GradeEntry[] = [];
+  const gradeMid: GradeEntry[] = [];
+  const gradeLow: GradeEntry[] = [];
+
+  for (const row of whafRowsWithLate) {
+    const grades = row.assignment_grades as Record<string, Record<string, string>> | null;
+    if (!grades || typeof grades !== "object") continue;
+    const scholarName = row.scholar_name ?? row.scholar_uid ?? "Unknown";
+    for (const [course, assessments] of Object.entries(grades)) {
+      if (!assessments || typeof assessments !== "object") continue;
+      for (const [assessment, gradeStr] of Object.entries(assessments)) {
+        const match = String(gradeStr).match(/(\d+(?:\.\d+)?)/);
+        if (!match) continue;
+        const percent = parseFloat(match[1]!);
+        const entry: GradeEntry = { scholar_name: scholarName, course, assessment, grade: String(gradeStr), percent };
+        if (percent >= 90) gradeHigh.push(entry);
+        else if (percent >= 70) gradeMid.push(entry);
+        else gradeLow.push(entry);
+      }
+    }
+  }
+  const gradeBreakdown = { high: gradeHigh, mid: gradeMid, low: gradeLow };
+
+  // WHAF submission donut stats — all users, not just scholars with required hours
+  const whafSubmitterUids = new Set(
+    whafRowsWithLate
+      .map((r) => r.scholar_uid)
+      .filter((uid): uid is string => Boolean(uid))
+  );
+  const totalUsers = allUsers.length;
+  const whafSubmittedCount = allUsers.filter((u) => whafSubmitterUids.has(u.uid)).length;
+  const whafLateCount = whafRowsWithLate.filter((r) => r.isLate).length;
+  const whafPct = totalUsers > 0 ? Math.round((whafSubmittedCount / totalUsers) * 100) : 0;
+  const whafDonut = {
+    total: totalUsers,
+    completeCount: whafSubmittedCount,
+    lateCount: whafLateCount,
+    percentComplete: whafPct,
+  };
 
   const teamLeaderFormRows = buildTeamLeaderFormStatsForWeek(
     teamLeadersRaw,
@@ -187,8 +254,35 @@ export async function getMemoPageData(weekNum: number) {
     };
   });
 
+  // Tutor reports — resolve scholar_uid to scholar_name
+  const userNameByUid = new Map(
+    allUsers.map(u => [u.uid, [u.first_name, u.last_name].filter(Boolean).join(" ").trim() || u.uid])
+  );
+  const tutorReports = tutorReportLogs.map(log => {
+    // Derive day of week from created_at in Eastern time
+    let day_of_week: string = "—";
+    if (log.created_at) {
+      day_of_week = new Date(log.created_at).toLocaleDateString("en-US", {
+        weekday: "short",
+        timeZone: "America/New_York",
+      });
+    }
+    return {
+      id: log.id,
+      scholar_uid: log.scholar_uid,
+      scholar_name: (!log.scholar_uid || log.scholar_uid.toLowerCase() === "n/a")
+        ? "EMPTY SESSION"
+        : (userNameByUid.get(log.scholar_uid) ?? log.scholar_uid),
+      tutor_name: log.tutor_name,
+      courses: log.courses,
+      start_time: log.start_time,
+      end_time: log.end_time,
+      day_of_week,
+    };
+  });
+
   const weekLabel = range != null
-    ? `Week ${range.weekNumber} (${range.startDate.toLocaleDateString("en-US", { timeZone: "America/New_York" })} – ${range.endDate.toLocaleDateString("en-US", { timeZone: "America/New_York" })})`
+    ? `Week ${range.weekNumber} (${range.startDate.toLocaleDateString("en-US", { timeZone: "America/New_York" })} - ${range.endDate.toLocaleDateString("en-US", { timeZone: "America/New_York" })})`
     : `Week ${weekNum}`;
 
   return {
@@ -201,6 +295,9 @@ export async function getMemoPageData(weekNum: number) {
     trafficWeeklyData,
     trafficEntryCountForSelectedWeek,
     trafficSessions,
+    tutorReports,
+    gradeBreakdown,
+    whafDonut,
     weekLabel,
     currentCampusWeek,
     selectedWeekNum: weekNum,

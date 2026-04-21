@@ -3,14 +3,14 @@
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { CheckCircle2, CircleX } from "lucide-react"
-import type { RecentFormSubmission } from "@/lib/form-logs"
+import type { RecentFormSubmission } from "@/lib/types/form-log"
 import {
   formatValue,
   isEmptyValue,
   getObjectValueByKeyPattern,
   formatProjectItem,
   formatMeetingTime12Hour,
-} from "@/lib/form-logs/form-view-helpers"
+} from "@/lib/format/form-view-helpers"
 
 function formatSubmittedAt(value: string | null) {
   if (!value) return "Unknown time"

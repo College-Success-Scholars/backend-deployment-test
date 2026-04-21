@@ -7,7 +7,7 @@ import {
   campusWeekToDateRange,
   dateToCampusWeek,
   WINTER_BREAK_CAMPUS_WEEK_NUMBER,
-} from "@/lib/time";
+} from "@/lib/format/time";
 import {
   Card,
   CardContent,

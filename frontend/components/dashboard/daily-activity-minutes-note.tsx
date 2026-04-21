@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getTotalMinutesForMenteeWeek } from "@/lib/server/daily-scholar-activity";
-import { dateToCampusWeek } from "@/lib/time";
+import { getTotalMinutesForMenteeWeek } from "@/lib/server/data";
+import { dateToCampusWeek } from "@/lib/format/time";
 
 /**
  * Optional dev/preview: set `MENTEE_ACTIVITY_PREVIEW_UID` to a real `mentee_uid` to show

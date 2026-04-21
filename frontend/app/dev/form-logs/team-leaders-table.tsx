@@ -5,7 +5,7 @@ import {
   type ScholarDataTableColumn,
 } from "@/components/scholar-data-table";
 import { ProgressCell } from "@/app/memo/memo-content";
-import type { TeamLeaderFormStatsRow } from "@/lib/server/form-logs";
+import type { TeamLeaderFormStatsRow } from "@/lib/server/data";
 
 export function TeamLeadersTable({
   rows,

@@ -1,6 +1,4 @@
-/**
- * Form log types for mcf_form_logs, whaf_form_logs, wpl_form_logs tables.
- */
+/** Types mirroring backend/src/models/form-log.model.ts */
 
 export interface McfFormLogRow {
   id: string;
@@ -75,10 +73,18 @@ export type RecentFormSubmission = {
   needs_tutor?: string | null;
 };
 
-export type TeamLeaderNameRecord = {
-  uid: string;
-  first_name: string | null;
-  last_name: string | null;
+export type GradeEntry = {
+  scholar_name: string;
+  course: string;
+  assessment: string;
+  grade: string;
+  percent: number;
+};
+
+export type GradeBreakdown = {
+  high: GradeEntry[];
+  mid: GradeEntry[];
+  low: GradeEntry[];
 };
 
 export type TeamLeaderFormStatsRow = {

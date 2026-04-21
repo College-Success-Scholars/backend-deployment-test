@@ -6,13 +6,13 @@ import {
   getFrontDeskCleanedAndErrored,
   getFrontDeskScholarsInRoom,
   getFrontDeskCompletedSessions,
-} from "@/lib/server/session-logs";
-import { SESSION_TYPE_STUDY, SESSION_TYPE_FRONT_DESK } from "@/lib/session-logs";
+} from "@/lib/server/data";
+import { SESSION_TYPE_STUDY, SESSION_TYPE_FRONT_DESK } from "@/lib/types/session-log";
 import type {
   ScholarInRoom,
   ScholarWithCompletedSession,
   CleanedAndErroredResult,
-} from "@/lib/session-logs";
+} from "@/lib/types/session-log";
 import {
   dateToCampusWeek,
   campusWeekToDateRange,
@@ -20,8 +20,8 @@ import {
   formatDuration,
   formatEntryDate,
   getDurationMs,
-} from "@/lib/time";
-import { getWeekFetchEnd } from "@/lib/session-records";
+} from "@/lib/format/time";
+import { getWeekFetchEnd } from "@/lib/format/time";
 import { SessionHeatMap } from "./session-heat-map";
 import { DoubleEntryChecker } from "@/components/double-entry-checker";
 import {

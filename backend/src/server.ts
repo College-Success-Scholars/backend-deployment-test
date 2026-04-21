@@ -10,6 +10,7 @@ import sessionRecordRoutes from "./routes/session-record.routes.js";
 import trafficRoutes from "./routes/traffic.routes.js";
 import formLogRoutes from "./routes/form-log.routes.js";
 import activityRoutes from "./routes/activity.routes.js";
+import tutorReportRoutes from "./routes/tutor-report-log.routes.js";
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
@@ -36,6 +37,7 @@ app.use("/api/session-records", sessionRecordRoutes);
 app.use("/api/traffic", trafficRoutes);
 app.use("/api/form-logs", formLogRoutes);
 app.use("/api/daily-activity", activityRoutes);
+app.use("/api/tutor-reports", tutorReportRoutes);
 
 // Global error handler — logs the full error to the console
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

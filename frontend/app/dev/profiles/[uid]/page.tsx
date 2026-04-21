@@ -4,17 +4,17 @@ import {
   dateToCampusWeek,
   campusWeekToDateRange,
   formatDate,
-} from "@/lib/time";
-import { getWeekFetchEnd } from "@/lib/session-records";
-import { getFrontDeskRecord, getStudySessionRecord } from "@/lib/server/session-records";
-import { fetchFrontDeskLogs, fetchStudySessionLogs } from "@/lib/server/session-logs";
-import { getUserByUid } from "@/lib/server/users";
+} from "@/lib/format/time";
+import { getWeekFetchEnd } from "@/lib/format/time";
+import { getFrontDeskRecord, getStudySessionRecord } from "@/lib/server/data";
+import { fetchFrontDeskLogs, fetchStudySessionLogs } from "@/lib/server/data";
+import { getUserByUid } from "@/lib/server/data";
 import {
   getWhafFormLogsByUid,
   getMcfFormLogsByUid,
   getWplFormLogsByUid,
-} from "@/lib/server/form-logs";
-import type { McfFormLogRow, WhafFormLogRow, WplFormLogRow } from "@/lib/server/form-logs/types";
+} from "@/lib/server/data";
+import type { McfFormLogRow, WhafFormLogRow, WplFormLogRow } from "@/lib/types/form-log";
 import { CampusWeekCard } from "@/components/campus-week-card";
 import { BackButton } from "../back-button";
 import {

@@ -3,8 +3,8 @@ import {
   getTrafficSessionsForWeek,
   getTrafficEntryCountForWeek,
   getTrafficEntryCountsForWeeks,
-} from "@/lib/server/traffic";
-import { dateToCampusWeek } from "@/lib/time";
+} from "@/lib/server/data";
+import { dateToCampusWeek } from "@/lib/format/time";
 import { TrafficHeatMapSection } from "./traffic-heat-map-section";
 import { TrafficWeeklyLineChartBySemester } from "./traffic-weekly-line-chart";
 import { CampusWeekCard } from "@/components/campus-week-card";

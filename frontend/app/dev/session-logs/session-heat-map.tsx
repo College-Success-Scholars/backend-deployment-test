@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import type { ScholarWithCompletedSession } from "@/lib/session-logs";
+import type { ScholarWithCompletedSession } from "@/lib/types/session-log";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Card,

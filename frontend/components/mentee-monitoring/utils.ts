@@ -8,8 +8,8 @@ import {
   getISODay,
   differenceInCalendarDays,
 } from "date-fns"
-import { getWhafDeadlineForWeek } from "@/lib/form-logs/deadlines"
-import { getCampusWeekForIsoWeek } from "@/lib/time"
+import { getWhafDeadlineForWeek } from "@/lib/format/form-deadlines"
+import { getCampusWeekForIsoWeek } from "@/lib/format/time"
 import type {
   ActivityRow,
   WahfRow,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import type { TrafficSession } from "@/lib/traffic";
+import type { TrafficSession } from "@/lib/types/traffic";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Card,

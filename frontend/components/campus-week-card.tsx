@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { dateToCampusWeek } from "@/lib/time";
+import { dateToCampusWeek } from "@/lib/format/time";
 import {
   Card,
   CardContent,

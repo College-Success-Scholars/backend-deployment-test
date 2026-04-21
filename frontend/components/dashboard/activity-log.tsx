@@ -1,7 +1,7 @@
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Clock } from "lucide-react"
 import { getCurrentProfile } from "@/lib/server/queries"
-import { getRecentFormSubmissions } from "@/lib/server/form-logs"
+import { getRecentFormSubmissions } from "@/lib/server/data"
 import { ActivityLogClient } from "./activity-log-client"
 
 export async function ActivityLog() {

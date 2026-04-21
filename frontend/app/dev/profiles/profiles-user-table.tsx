@@ -6,7 +6,7 @@ import {
   type ScholarDataTableColumn,
 } from "@/components/scholar-data-table";
 import { Badge } from "@/components/ui/badge";
-import type { MemoUserRow } from "@/lib/server/users";
+import type { MemoUserRow } from "@/lib/server/data";
 
 function displayName(row: MemoUserRow): string {
   const name = [row.first_name, row.last_name].filter(Boolean).join(" ").trim();

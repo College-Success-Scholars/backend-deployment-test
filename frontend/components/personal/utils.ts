@@ -15,8 +15,8 @@ import {
   isWhafLateForWeek,
   isMcfLateForWeek,
   isWplLateForWeek,
-} from "@/lib/form-logs/deadlines"
-import { getCampusWeekForIsoWeek } from "@/lib/time"
+} from "@/lib/format/form-deadlines"
+import { getCampusWeekForIsoWeek } from "@/lib/format/time"
 
 // ---------------------------------------------------------------------------
 // Week options (adapted from mentee-monitoring/utils.ts for ISO weeks)

@@ -19,17 +19,19 @@ import { Button } from "@/components/ui/button";
 import {
   formatMinutesToHoursAndMinutes,
   WINTER_BREAK_CAMPUS_WEEK_NUMBER,
-} from "@/lib/time";
+} from "@/lib/format/time";
 import { SessionHeatMap } from "@/app/dev/session-logs/session-heat-map";
-import type { ScholarWithCompletedSession } from "@/lib/session-logs";
+import type { ScholarWithCompletedSession } from "@/lib/types/session-log";
 import {
   TrafficWeeklyLineChartBySemester,
   type WeekEntryCount,
 } from "@/app/dev/traffic/traffic-weekly-line-chart";
 import { TrafficHeatMapSection } from "@/app/dev/traffic/traffic-heat-map-section";
-import type { TrafficSession } from "@/lib/traffic";
-import { FormCompletionOverviewCard } from "@/components/form-completion-overview-card";
+import type { TrafficSession } from "@/lib/types/traffic";
+import { FormCompletionOverviewCard, FormCompletionDonut, FORM_COMPLETION_WHAF_COLOR } from "@/components/form-completion-overview-card";
 import type { FormCompletionOverall } from "@/components/form-completion-overview-card";
+import type { MemoTutorReportRow } from "@/lib/types/tutor-report-log";
+import type { GradeBreakdown, GradeEntry } from "@/lib/types/form-log";
 import { CohortPieChart } from "./cohort-pie-chart";
 
 function WeekPicker({
@@ -521,6 +523,9 @@ export function MemoContent({
   trafficWeeklyData,
   trafficEntryCountForSelectedWeek,
   trafficSessions,
+  tutorReports,
+  gradeBreakdown,
+  whafDonut,
   weekLabel,
   currentCampusWeek,
   selectedWeekNum,
@@ -539,6 +544,9 @@ export function MemoContent({
   trafficEntryCountForSelectedWeek: number;
   /** Sessions for selected week (same as dev/traffic heat map). */
   trafficSessions: TrafficSession[];
+  tutorReports: MemoTutorReportRow[];
+  gradeBreakdown: GradeBreakdown;
+  whafDonut: { total: number; completeCount: number; lateCount: number; percentComplete: number };
   weekLabel: string;
   currentCampusWeek: number | null;
   selectedWeekNum: number;
@@ -690,7 +698,26 @@ export function MemoContent({
         </Card>
       </div>
 
-      <FormCompletionOverviewCard overall={formCompletionOverall} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="md:col-span-1">
+          <CardHeader>
+            <CardTitle>WHAF completion (everyone)</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-row flex-wrap items-center justify-center gap-6 sm:gap-8">
+            <FormCompletionDonut
+              label="WHAF"
+              percentComplete={whafDonut.total > 0 ? whafDonut.percentComplete : null}
+              total={whafDonut.total}
+              completeCount={whafDonut.completeCount}
+              lateCount={whafDonut.lateCount}
+              strokeColor={FORM_COMPLETION_WHAF_COLOR}
+            />
+          </CardContent>
+        </Card>
+        <div className="md:col-span-2">
+          <FormCompletionOverviewCard overall={formCompletionOverall} />
+        </div>
+      </div>
 
       {/* Room entries this week + traffic chart for current semester only */}
       <Card className="relative">
@@ -796,6 +823,188 @@ defaultSortColumnId="ss-progress"
           </CardContent>
         </Card>
       </div>
+
+      {/* Tutoring */}
+      <TutoringSection tutorReports={tutorReports} />
+
+      {/* Grade Breakdown */}
+      <GradeBreakdownSection breakdown={gradeBreakdown} />
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Tutoring Section
+// ---------------------------------------------------------------------------
+
+const DAY_SORT_MAP: Record<string, number> = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
+
+function TutoringSection({ tutorReports }: { tutorReports: MemoTutorReportRow[] }) {
+  const sessions = tutorReports.filter((r) => r.scholar_name !== "EMPTY SESSION");
+  const emptySessions = tutorReports.filter((r) => r.scholar_name === "EMPTY SESSION");
+
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-red-500">Empty Sessions</CardTitle>
+          <CardDescription>Tutoring sessions with no scholar present.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {emptySessions.length === 0 ? (
+            <p className="text-muted-foreground text-sm">No empty sessions this week.</p>
+          ) : (
+            <ScholarDataTable<MemoTutorReportRow>
+              data={emptySessions}
+              rowKeyField="id"
+              columns={[
+                {
+                  id: "empty-day",
+                  header: "Day",
+                  field: "day_of_week",
+                  sortable: true,
+                  getSortValue: (row) => DAY_SORT_MAP[row.day_of_week] ?? 7,
+                },
+                { id: "empty-tutor", header: "Tutor", field: "tutor_name", sortable: true },
+              ]}
+              emptyMessage="No empty sessions"
+              defaultSortColumnId="empty-day"
+              defaultSortDirection="asc"
+            />
+          )}
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Tutoring</CardTitle>
+          <CardDescription>Tutor reports for the current week.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {sessions.length === 0 ? (
+            <p className="text-muted-foreground text-sm">No tutoring sessions this week.</p>
+          ) : (
+            <ScholarDataTable<MemoTutorReportRow>
+              data={sessions}
+              rowKeyField="id"
+              nameColumn={{ field: "scholar_name", header: "Scholar", sortable: true }}
+              columns={[
+                {
+                  id: "tutor-day",
+                  header: "Day",
+                  field: "day_of_week",
+                  sortable: true,
+                  getSortValue: (row) => DAY_SORT_MAP[row.day_of_week] ?? 7,
+                },
+                { id: "tutor-name", header: "Tutor", field: "tutor_name", sortable: true },
+                {
+                  id: "tutor-courses",
+                  header: "Courses",
+                  field: "courses",
+                  sortable: false,
+                  renderCell: (row) => <span>{row.courses.join(", ")}</span>,
+                },
+                {
+                  id: "tutor-time",
+                  header: "Time",
+                  field: "start_time",
+                  sortable: true,
+                  renderCell: (row) => <span>{row.start_time} – {row.end_time}</span>,
+                },
+              ]}
+              emptyMessage="No tutoring sessions"
+              defaultSortColumnId="tutor-day"
+              defaultSortDirection="asc"
+            />
+          )}
+        </CardContent>
+      </Card>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Grade Breakdown Component
+// ---------------------------------------------------------------------------
+
+function GradeBreakdownCard({
+  title,
+  entries,
+  colorClass,
+  bgClass,
+}: {
+  title: string;
+  entries: GradeEntry[];
+  colorClass: string;
+  bgClass: string;
+}) {
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center justify-between text-base">
+          <span>{title}</span>
+          <span className={`rounded-full px-2.5 py-0.5 text-sm font-semibold ${bgClass} ${colorClass}`}>
+            {entries.length}
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {entries.length === 0 ? (
+          <p className="text-muted-foreground text-sm">None</p>
+        ) : (
+          <ul className="space-y-1.5 text-sm">
+            {entries.map((e, i) => (
+              <li key={`${e.course}-${e.assessment}-${i}`} className="flex items-center justify-between gap-2">
+                <span className="truncate">
+                  <span className="font-semibold">{e.scholar_name}</span>
+                  <span className="text-muted-foreground"> · {e.course} · {e.assessment}</span>
+                </span>
+                <span className={`shrink-0 font-semibold ${colorClass}`}>{e.grade}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function GradeBreakdownSection({ breakdown }: { breakdown: GradeBreakdown }) {
+  const total = breakdown.high.length + breakdown.mid.length + breakdown.low.length;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Grade Breakdown</CardTitle>
+        <CardDescription>
+          {total === 0
+            ? "No assignment grades submitted this week."
+            : `${total} grade${total === 1 ? "" : "s"} reported from WHAF submissions this week.`}
+        </CardDescription>
+      </CardHeader>
+      {total > 0 && (
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <GradeBreakdownCard
+              title="90 – 100%"
+              entries={breakdown.high}
+              colorClass="text-emerald-600 dark:text-emerald-400"
+              bgClass="bg-emerald-500/15"
+            />
+            <GradeBreakdownCard
+              title="70 – 89%"
+              entries={breakdown.mid}
+              colorClass="text-amber-600 dark:text-amber-400"
+              bgClass="bg-amber-500/15"
+            />
+            <GradeBreakdownCard
+              title="Below 70%"
+              entries={breakdown.low}
+              colorClass="text-red-600 dark:text-red-400"
+              bgClass="bg-red-500/15"
+            />
+          </div>
+        </CardContent>
+      )}
+    </Card>
   );
 }

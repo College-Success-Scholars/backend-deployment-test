@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { fetchAllUsersForMemo } from "@/lib/server/users";
+import { fetchAllUsersForMemo } from "@/lib/server/data";
 import {
   Card,
   CardContent,

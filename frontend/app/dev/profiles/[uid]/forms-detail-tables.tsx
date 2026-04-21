@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { dateToCampusWeek, formatDate } from "@/lib/time";
-import type { McfFormLogRow, WplFormLogRow } from "@/lib/server/form-logs/types";
+import { dateToCampusWeek, formatDate } from "@/lib/format/time";
+import type { McfFormLogRow, WplFormLogRow } from "@/lib/types/form-log";
 import { backendGet } from "@/lib/client/api-client";
 import {
   Card,

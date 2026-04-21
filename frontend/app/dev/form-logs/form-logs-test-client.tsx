@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { dateToCampusWeek, campusWeekToDateRange } from "@/lib/time";
+import { dateToCampusWeek, campusWeekToDateRange } from "@/lib/format/time";
 import {
   getWhafDeadlineForWeek,
   getMcfWplDeadlineForWeek,
   isWhafLate,
   isMcfLate,
   isWplLate,
-} from "@/lib/form-logs";
+} from "@/lib/types/form-log";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

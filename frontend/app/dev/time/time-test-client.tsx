@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   campusWeekToDateRange,
   dateToCampusWeek,
-} from "@/lib/time";
+} from "@/lib/format/time";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

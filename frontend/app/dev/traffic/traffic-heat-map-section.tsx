@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { TrafficSession } from "@/lib/traffic";
+import type { TrafficSession } from "@/lib/types/traffic";
 import { TrafficHeatMap } from "./traffic-heat-map";
 
 const SLOT_OPTIONS = [15, 30, 60] as const;
