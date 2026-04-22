@@ -178,7 +178,7 @@ const getRoleBasedNav = (role: UserRole) => {
         },
       ]
     
-    case 'teamleader':
+    case 'team-leader':
     case 'developer':
       return [
         {
@@ -399,6 +399,7 @@ const getRoleBasedSecondaryNav = (role: UserRole) => {
 }
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  profile: any;
   userRole?: UserRole
 }
 
