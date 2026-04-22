@@ -57,12 +57,6 @@ export default function DevPage() {
           Traffic →
         </Link>
         <Link
-          href="/dev/time"
-          className="text-primary hover:underline text-sm font-medium"
-        >
-          Campus Time Test →
-        </Link>
-        <Link
           href="/dev/form-logs"
           className="text-primary hover:underline text-sm font-medium"
         >
