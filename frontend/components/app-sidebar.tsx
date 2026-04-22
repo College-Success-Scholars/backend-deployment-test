@@ -398,8 +398,24 @@ const getRoleBasedSecondaryNav = (role: UserRole) => {
   }
 }
 
+interface ProfilesRow {
+  app_role: UserRole;
+  first_name: string;
+  last_name: string;
+  email: string;
+  avatar: string;
+  teams: string[];
+  emails: string[];
+  student_id: string;
+  cohort: number;
+  program_role: string;
+  fd_required: number;
+  ss_required: number;
+  mentee_count: number;
+  phone_number: string;
+}
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  profile: any;
+  profile: ProfilesRow;
   userRole?: UserRole
 }
 
