@@ -398,24 +398,8 @@ const getRoleBasedSecondaryNav = (role: UserRole) => {
   }
 }
 
-interface ProfilesRow {
-  app_role: UserRole;
-  first_name: string;
-  last_name: string;
-  email: string;
-  avatar: string;
-  teams: string[];
-  emails: string[];
-  student_id: string;
-  cohort: number;
-  program_role: string;
-  fd_required: number;
-  ss_required: number;
-  mentee_count: number;
-  phone_number: string;
-}
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  profile: ProfilesRow;
+  profile: Record<string, unknown>;
   userRole?: UserRole
 }
 
@@ -453,8 +437,8 @@ export function AppSidebar({ profile, ...props }: AppSidebarProps) {
       <SidebarFooter>
         <NavUser user={{
           name: profile?.first_name + " " + profile?.last_name,
-          email: profile?.email,
-          avatar: profile?.avatar,
+          email: profile?.email as string,
+          avatar: profile?.avatar as string,
         }} />
       </SidebarFooter>
     </Sidebar>

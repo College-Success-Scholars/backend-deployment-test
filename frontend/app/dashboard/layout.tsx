@@ -16,6 +16,7 @@ import {
 import { redirect } from "next/navigation";
 import { backendGet } from "@/lib/server/api-client";
 import { getCurrentProfile } from "@/lib/server/queries";
+import { ProfilesRow } from "@/lib/supabase/server";
 
 export default async function DashboardLayout({
   children,
@@ -28,7 +29,7 @@ export default async function DashboardLayout({
     redirect("/auth/login");
   }
 
-  const profile = await getCurrentProfile();
+  const profile = await getCurrentProfile() as ProfilesRow;
 
   return (
     <SidebarProvider>
