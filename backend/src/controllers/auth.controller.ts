@@ -95,6 +95,37 @@ export async function requireAuth(req: AuthenticatedRequest, res: Response, next
   nextWithToken(req, next);
 }
 
+/**
+ * Requires that the authenticated user is either:
+ * 1. Accessing their own data (req.params.uid matches their student_id), or
+ * 2. A team leader or above (can access any uid).
+ *
+ * Must be used AFTER requireAuth (needs req.profile to be populated).
+ * The :uid route param is compared against profile.student_id.
+ */
+export function requireSelfOrTeamLeader(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  const requestedUid = Array.isArray(req.params.uid) ? req.params.uid[0] : req.params.uid;
+  if (!requestedUid) {
+    res.status(400).json({ error: "Missing uid parameter" });
+    return;
+  }
+
+  // Team leader+ can access any uid
+  if (hasRoleAtLeast(req.profile?.app_role ?? null, "team_leader")) {
+    next();
+    return;
+  }
+
+  // Otherwise, must be accessing own data
+  const userStudentId = String(req.profile?.student_id ?? "");
+  if (requestedUid === userStudentId) {
+    next();
+    return;
+  }
+
+  res.status(403).json({ error: "Forbidden: Can only access your own data" });
+}
+
 // GET /api/auth/me
 export async function getMe(req: AuthenticatedRequest, res: Response) {
   res.json({
