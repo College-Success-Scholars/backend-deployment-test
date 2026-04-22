@@ -3,7 +3,6 @@ import { createServerClient } from "@supabase/ssr";
 import type { User } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { APP_ROLE_ORDER } from "./types";
 import { getSupabasePublicKey } from "./public-key";
 
 /** Row shape from `public.profiles` (and joined `user_roster`) as returned by getCurrentUserWithProfile(). */
