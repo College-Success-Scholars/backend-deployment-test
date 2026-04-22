@@ -9,6 +9,7 @@ import {
   WINTER_BREAK_LAST_DAY,
 } from "./time-config";
 import type { CampusWeekDateRange } from "@/lib/types/time";
+import { startOfISOWeek } from "date-fns";
 
 export const EASTERN_TIMEZONE = "America/New_York";
 export const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -181,7 +182,6 @@ export function getDurationMs(item: { timeInRoomMs?: number; durationMs?: number
 // ---------------------------------------------------------------------------
 
 export function getCampusWeekForIsoWeek(isoWeek: number, currentIsoWeek: number): number | null {
-  const { startOfISOWeek } = require("date-fns") as { startOfISOWeek: (d: Date) => Date };
   const now = new Date();
   const ref = startOfISOWeek(now);
   const diff = isoWeek - currentIsoWeek;
