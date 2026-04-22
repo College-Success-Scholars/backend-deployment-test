@@ -24,7 +24,7 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   // Check auth via backend — redirects to login if not authenticated
-  const meResult = await backendGet<{ user: { id: string; email: string | null }; profile: unknown }>("/api/auth/me").catch(() => null);
+  const meResult = await backendGet<{ user: { id: string; email: string | null }; profile: Record<string, unknown> }>("/api/auth/me").catch(() => null);
   if (!meResult) {
     redirect("/auth/login");
   }
