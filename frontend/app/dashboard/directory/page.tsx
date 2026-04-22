@@ -17,6 +17,7 @@ import { redirect } from "next/navigation";
 import { backendGet } from "@/lib/server/api-client";
 import type { UserRole } from "@/lib/auth";
 import { DirectoryDashboard } from "@/components/dashboard/directory-dashboard";
+import { getCurrentProfile } from "@/lib/server/queries";
 
 export default async function DirectoryPage() {
   const meResult = await backendGet<{ user: { id: string }; profile: unknown }>("/api/auth/me").catch(() => null);
@@ -28,10 +29,10 @@ export default async function DirectoryPage() {
   // const userRole = await getUserRole();
   // REMEMBER TO UNCOMMENT THIS WHEN DONE TESTING and add import
   const userRole = 'scholar' as UserRole;
-
+  const profile = await getCurrentProfile();
   return (
     <SidebarProvider>
-      <AppSidebar userRole={userRole} />
+      <AppSidebar userRole={userRole} profile={profile}/>
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2">
           <div className="flex items-center gap-2 px-4">
