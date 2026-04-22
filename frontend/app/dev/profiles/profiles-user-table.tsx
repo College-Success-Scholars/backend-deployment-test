@@ -10,7 +10,7 @@ import type { MemoUserRow } from "@/lib/server/data";
 
 function displayName(row: MemoUserRow): string {
   const name = [row.first_name, row.last_name].filter(Boolean).join(" ").trim();
-  return name || row.first_name ?? row.last_name ?? "—";
+  return name || (row.first_name ?? row.last_name ?? "—");
 }
 
 export function ProfilesUserTable({ users }: { users: MemoUserRow[] }) {

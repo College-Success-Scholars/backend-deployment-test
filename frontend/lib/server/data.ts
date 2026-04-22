@@ -15,6 +15,7 @@ import type {
 } from "@/lib/types/session-record";
 import type {
   TrafficSession,
+  WeekEntryCount,
 } from "@/lib/types/traffic";
 import type {
   McfFormLogRow,
@@ -22,6 +23,7 @@ import type {
   WplFormLogRow,
   FormLogRowWithLate,
   RecentFormSubmission,
+  TeamLeaderFormStatsRow,
 } from "@/lib/types/form-log";
 
 // ---------------------------------------------------------------------------
@@ -234,7 +236,7 @@ export async function updateRecordExcuse(
 // Traffic
 // ---------------------------------------------------------------------------
 
-export type WeekEntryCount = { weekNumber: number; entryCount: number };
+export type { WeekEntryCount };
 
 export async function getTrafficSessionsForWeek(weekNumber: number): Promise<TrafficSession[]> {
   return backendGet(`/api/traffic/sessions/${weekNumber}`);
@@ -274,15 +276,13 @@ export async function getWplFormLogsForWeekWithLate(weekNum: number) { return ba
 export async function getWplFormLogsByUidWithLate(uid: string) { return backendGet<WplFormLogRowWithLate[]>(`/api/form-logs/wpl/uid/${encodeURIComponent(uid)}/with-late`); }
 export async function getWplFormLogsByUidAndWeekWithLate(uid: string, weekNum: number) { return backendGet<WplFormLogRowWithLate[]>(`/api/form-logs/wpl/uid/${encodeURIComponent(uid)}/week/${weekNum}/with-late`); }
 
-export type TeamLeaderFormStatsRow = {
-  uid: string; name: string; program_role: string | null;
-  mcf_completed: number; mcf_required: number; mcf_late: boolean; mcf_pct: number; mcf_latest_at: string;
-  whaf_completed: number; whaf_required: number; whaf_late: boolean; whaf_pct: number; whaf_latest_at: string;
-  wpl_completed: number; wpl_required: number; wpl_late: boolean; wpl_pct: number; wpl_latest_at: string;
-};
+export type { TeamLeaderFormStatsRow };
 
 export async function buildTeamLeaderFormStatsForWeek(
-  _teamLeaders: unknown[], _mcfRows: unknown[], _whafRows: unknown[], _wplRows: unknown[],
+  _teamLeaders: TeamLeaderRow[],
+  _mcfRows: FormLogRowWithLate<McfFormLogRow>[],
+  _whafRows: FormLogRowWithLate<WhafFormLogRow>[],
+  _wplRows: FormLogRowWithLate<WplFormLogRow>[],
   weekNum?: number
 ): Promise<TeamLeaderFormStatsRow[]> {
   if (weekNum == null) return [];

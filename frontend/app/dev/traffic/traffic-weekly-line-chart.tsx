@@ -10,8 +10,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { WINTER_BREAK_CAMPUS_WEEK_NUMBER } from "@/lib/format/time";
+import type { WeekEntryCount } from "@/lib/types/traffic";
 
-export type WeekEntryCount = { weekNumber: number; entryCount: number };
+export type { WeekEntryCount };
 
 interface TrafficWeeklyLineChartProps {
   data: WeekEntryCount[];

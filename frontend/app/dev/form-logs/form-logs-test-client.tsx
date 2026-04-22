@@ -8,7 +8,7 @@ import {
   isWhafLate,
   isMcfLate,
   isWplLate,
-} from "@/lib/types/form-log";
+} from "@/lib/format/form-deadlines";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
