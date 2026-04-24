@@ -37,7 +37,7 @@ export interface WahfFormLogRow {
 
 export interface WplFormLogRow {
   id: string;
-  created_at: string | null;
+  created_at: string;
   full_name: string | null;
   scholar_uid: string | null;
   hours_worked: number | null;
