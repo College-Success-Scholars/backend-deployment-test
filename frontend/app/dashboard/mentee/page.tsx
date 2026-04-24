@@ -18,7 +18,11 @@ export default async function MenteePage() {
 
   return (
     <div className="space-y-6">
-      
+      <MenteeMonitoringClient
+        mentees={mentees}
+        semester={semester}
+        currentIsoWeek={currentIsoWeek}
+      />
     </div>
   );
 }
