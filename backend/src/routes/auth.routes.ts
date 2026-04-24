@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   requireAuth,
+  requireTeamLeaderOrAbove,
   getMe,
   getProfile,
   getMentees,

@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { getSupabaseClient, getSupabaseAuthClient, runWithToken } from "../services/supabase.service.js";
+import { getMyMentees } from "../services/mentee.service.js";
 import { APP_ROLE_ORDER } from "../models/user.model.js";
 import type { ProfilesRow } from "../models/user.model.js";
 
@@ -147,11 +148,10 @@ export async function getProfile(req: AuthenticatedRequest, res: Response) {
 }
 
 // GET /api/auth/mentees
-export async function getMentees(_req: AuthenticatedRequest, res: Response) {
+export async function getMentees(req: AuthenticatedRequest, res: Response) {
   try {
-    const supabase = getSupabaseClient();
-    const { data, error } = await supabase.rpc("get_my_mentees");
-    if (error) { res.status(500).json({ error: error.message }); return; }
+    const data = await getMyMentees(req.authUser!.id);
+    
     res.json({ data });
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : "Failed to fetch mentees" });

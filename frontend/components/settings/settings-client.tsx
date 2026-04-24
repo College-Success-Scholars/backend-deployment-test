@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import type { ProfileRow, GetMyMenteesRpcRow } from "@/lib/types/supabase"
+import type { ProfileRow, MenteeRow } from "@/lib/types/supabase"
 
 const TABS = [
   { id: "personal", label: "Personal", icon: User },
@@ -31,7 +31,7 @@ export default function SettingsClient({
   mentees,
 }: {
   profile: ProfileRow
-  mentees: GetMyMenteesRpcRow[]
+  mentees: MenteeRow[]
 }) {
   const [activeTab, setActiveTab] = useState<TabId>("personal")
 
@@ -196,7 +196,7 @@ function ProgramTab({ profile }: { profile: ProfileRow }) {
   )
 }
 
-function MenteesTab({ mentees }: { mentees: GetMyMenteesRpcRow[] }) {
+function MenteesTab({ mentees }: { mentees: MenteeRow[] }) {
   return (
     <Card className="gap-0 py-0">
       <CardContent className="p-6 space-y-6">

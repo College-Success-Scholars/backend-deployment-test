@@ -1,5 +1,5 @@
-/** Row shape from Supabase RPC `get_my_mentees`. */
-export type GetMyMenteesRpcRow = {
+/** Row shape from backend GET /api/auth/mentees (mentor_mentee + user_roster join). */
+export type MenteeRow = {
   scholar_uid: string | null
   first_name: string | null
   last_name: string | null
@@ -90,7 +90,7 @@ export type ProfileRow = {
 }
 
 export interface MenteeMonitoringClientProps {
-  mentees: GetMyMenteesRpcRow[]
+  mentees: MenteeRow[]
   activity: ActivityRow[]
   wahf: WahfRow[]
   tutoring: TutoringRow[]

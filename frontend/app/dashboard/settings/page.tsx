@@ -8,7 +8,7 @@ export default async function SettingsPage() {
     // Both run concurrently.
     // const [ profile, mentees] = await Promise.all([
     //   getCurrentProfile() as Promise<Record<string, unknown>>,
-    //   getMyMentees() as Promise<GetMyMenteesRpcRow[]>,
+    //   getMyMentees() as Promise<MenteeRow[]>,
     // ]);
 
   return (
