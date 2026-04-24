@@ -32,21 +32,11 @@ export type ActivityRow = {
     duration_minutes: number
 }
 
-/** Row shape from Supabase table `public.whaf_form_logs`. */
-export type WahfRow = {
-  id: string
-  created_at: string
-  scholar_name: string
-  team_leader_contact: string
-  tl_meeting_in_person: string
-  course_changes: string
-  assignment_grades: Record<string, Record<string, string>>
-  missed_classes: string
-  missed_assignments: string
-  submitted_by_email: string
-  course_change_details: string | null
-  scholar_uid: string
-}
+import { WahfFormLogRow, McfFormLogRow, WplFormLogRow } from "./form-log"
+
+export type WahfRow = WahfFormLogRow
+export type McfRow = McfFormLogRow
+export type WplRow = WplFormLogRow
 
 /** Row shape from Supabase table `public.tutor_report_logs`. */
 export type TutoringRow = {
@@ -74,39 +64,6 @@ export type TrafficRow = {
   uid: string | null
   traffic_type: string | null
   duration_min: number | null
-}
-
-/** Row shape from Supabase table `public.mcf_form_logs`. */
-export type McfRow = {
-  id: number
-  created_at: string
-  mentor_name: string | null
-  mentor_uid: string | null
-  mentee_name: string | null
-  mentee_uid: string | null
-  meeting_date: string | null
-  meeting_time: string | null
-  met_in_person: string | null
-  reason_no_meeting: string | null
-  tasks_completed: string | null
-  meeting_notes: string | null
-  tutoring_status: string | null
-  needs_tutor: string | null
-  support_rank: string | null
-  submitted_by_email: string | null
-}
-
-/** Row shape from Supabase table `public.wpl_form_logs`. */
-export type WplRow = {
-  id: number
-  created_at: string
-  full_name: string | null
-  scholar_uid: string | null
-  hours_worked: number | null
-  projects: unknown[] | null
-  met_with_all: string | null
-  explanation: string | null
-  submitted_by_email: string | null
 }
 
 /** Row shape from Supabase table `public.profiles`. */

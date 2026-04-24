@@ -14,7 +14,7 @@ import {
   getMcfFormLogsByUid,
   getWplFormLogsByUid,
 } from "@/lib/server/data";
-import type { McfFormLogRow, WhafFormLogRow, WplFormLogRow } from "@/lib/types/form-log";
+import type { McfFormLogRow, WahfFormLogRow, WplFormLogRow } from "@/lib/types/form-log";
 import { CampusWeekCard } from "@/components/campus-week-card";
 import { BackButton } from "../back-button";
 import {
@@ -103,7 +103,7 @@ export default async function DevProfilePage({ params, searchParams }: PageProps
     Number.isNaN(uidNum) ? Promise.resolve(null) : getStudySessionRecord(uidNum, weekNum),
     startDate && endDate ? fetchFrontDeskLogs(dateRangeOpts) : Promise.resolve([]),
     startDate && endDate ? fetchStudySessionLogs(dateRangeOpts) : Promise.resolve([]),
-    isScholar ? getWhafFormLogsByUid(uid) : Promise.resolve([] as WhafFormLogRow[]),
+    isScholar ? getWhafFormLogsByUid(uid) : Promise.resolve([] as WahfFormLogRow[]),
     !isScholar ? getMcfFormLogsByUid(uid) : Promise.resolve([] as McfFormLogRow[]),
     !isScholar ? getWplFormLogsByUid(uid) : Promise.resolve([] as WplFormLogRow[]),
   ]);

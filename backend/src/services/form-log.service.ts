@@ -2,7 +2,7 @@ import { getSupabaseClient } from "./supabase.service.js";
 import { campusWeekToDateRange, dateToCampusWeek, getWeekFetchEnd, ONE_DAY_MS } from "./time.service.js";
 import type {
   McfFormLogRow,
-  WhafFormLogRow,
+  WahfFormLogRow,
   WplFormLogRow,
   FormLogRowWithLate,
   RecentFormSubmission,
@@ -212,7 +212,7 @@ export async function getMcfFormLogsByUidAndWeek(uid: string, weekNum: number): 
 // Supabase fetch — WHAF
 // ---------------------------------------------------------------------------
 
-export async function getWhafFormLogsForWeek(weekNum: number): Promise<WhafFormLogRow[]> {
+export async function getWhafFormLogsForWeek(weekNum: number): Promise<WahfFormLogRow[]> {
   const range = campusWeekToDateRange(weekNum);
   if (!range) return [];
   const supabase = getSupabaseClient();
@@ -223,17 +223,17 @@ export async function getWhafFormLogsForWeek(weekNum: number): Promise<WhafFormL
     .lte("created_at", endDate.toISOString())
     .order("created_at", { ascending: true });
   if (error) throw error;
-  return (data ?? []) as WhafFormLogRow[];
+  return (data ?? []) as WahfFormLogRow[];
 }
 
-export async function getWhafFormLogsByUid(uid: string): Promise<WhafFormLogRow[]> {
+export async function getWhafFormLogsByUid(uid: string): Promise<WahfFormLogRow[]> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
     .from("whaf_form_logs").select("*")
     .eq("scholar_uid", uid)
     .order("created_at", { ascending: true });
   if (error) throw error;
-  return (data ?? []) as WhafFormLogRow[];
+  return (data ?? []) as WahfFormLogRow[];
 }
 
 // ---------------------------------------------------------------------------
@@ -335,7 +335,7 @@ type TeamLeaderInput = {
 export function buildTeamLeaderFormStatsForWeek(
   teamLeaders: TeamLeaderInput[],
   mcfRowsWithLate: FormLogRowWithLate<McfFormLogRow>[],
-  whafRowsWithLate: FormLogRowWithLate<WhafFormLogRow>[],
+  whafRowsWithLate: FormLogRowWithLate<WahfFormLogRow>[],
   wplRowsWithLate: FormLogRowWithLate<WplFormLogRow>[]
 ): TeamLeaderFormStatsRow[] {
   const tlUids = new Set(teamLeaders.map((u) => u.uid));
@@ -429,7 +429,7 @@ function sortByCreatedAtDesc<T extends { created_at: string | null }>(rows: T[])
   });
 }
 
-function mapWhafRow(row: WhafFormLogRow): RecentFormSubmission {
+function mapWhafRow(row: WahfFormLogRow): RecentFormSubmission {
   return {
     id: `WHAF-${row.id}`, formType: "WHAF", submittedAt: row.created_at,
     assignment_grades: row.assignment_grades, course_changes: row.course_changes,

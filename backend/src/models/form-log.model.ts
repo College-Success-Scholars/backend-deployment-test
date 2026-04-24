@@ -21,7 +21,7 @@ export interface McfFormLogRow {
   submitted_by_email: string | null;
 }
 
-export interface WhafFormLogRow {
+export interface WahfFormLogRow {
   id: string;
   created_at: string;
   scholar_uid: string | null;
@@ -38,12 +38,12 @@ export interface WhafFormLogRow {
 }
 
 export interface WplFormLogRow {
-  id: number;
+  id: string;
   created_at: string | null;
   full_name: string | null;
   scholar_uid: string | null;
   hours_worked: number | null;
-  projects: unknown;
+  projects: unknown[] | null;
   met_with_all: string | null;
   explanation: string | null;
   submitted_by_email: string | null;
