@@ -27,9 +27,9 @@ export default async function DashboardLayout({
   const meResult = await backendGet<{ user: { id: string; email: string | null }; profile: Record<string, unknown> }>("/api/auth/me").catch(() => null);
   console.log("meResult");
   console.log(meResult);
-//   if (!meResult) {
-//     redirect("/auth/login");
-//   }
+  if (!meResult) {
+    redirect("/auth/login");
+  }
 
   const profile = await getCurrentProfile() as ProfilesRow;
 
