@@ -4,6 +4,24 @@ import { cookies } from "next/headers";
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:3001";
 const BASE64_PREFIX = "base64-";
 
+function getSupabaseProjectRef(): string | null {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
+  if (!url) return null;
+  try {
+    const hostname = new URL(url).hostname;
+    const ref = hostname.split(".")[0];
+    return ref || null;
+  } catch {
+    return null;
+  }
+}
+
+function getCookieChunkIndex(name: string): number {
+  const match = name.match(/\.([0-9]+)$/);
+  if (!match) return 0;
+  return Number.parseInt(match[1], 10);
+}
+
 /**
  * Decode a base64url string (no padding) to a UTF-8 string.
  */
@@ -24,11 +42,25 @@ async function getAccessToken(): Promise<string | null> {
   try {
     const cookieStore = await cookies();
     const allCookies = cookieStore.getAll();
+    const projectRef = getSupabaseProjectRef();
 
-    // Find Supabase auth token cookies and join chunked parts
-    const authParts = allCookies
+    // Find Supabase auth token cookies.
+    const authCandidates = allCookies
       .filter((c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"))
       .sort((a, b) => a.name.localeCompare(b.name));
+
+    // Select only one cookie family to avoid combining multiple Supabase projects.
+    const preferredBase = projectRef ? `sb-${projectRef}-auth-token` : null;
+    let authParts = authCandidates;
+    if (preferredBase) {
+      const matching = authCandidates.filter(
+        (c) => c.name === preferredBase || c.name.startsWith(`${preferredBase}.`)
+      );
+      if (matching.length > 0) {
+        authParts = matching;
+      }
+    }
+    authParts = authParts.sort((a, b) => getCookieChunkIndex(a.name) - getCookieChunkIndex(b.name));
 
     if (authParts.length === 0) return null;
 
@@ -54,7 +86,8 @@ export async function backendFetch<T>(
   options?: { method?: string; body?: unknown }
 ): Promise<T> {
   const token = await getAccessToken();
-  const res = await fetch(`${BACKEND_URL}${path}`, {
+  const requestUrl = `${BACKEND_URL}${path}`;
+  const res = await fetch(requestUrl, {
     method: options?.method ?? "GET",
     headers: {
       "Content-Type": "application/json",
