@@ -1,3 +1,0 @@
-- [Project architecture](project_architecture.md) — Express backend (3001) + Next.js frontend (3002), api-client.ts bridges them
-- [Backend 4-folder structure](feedback_backend_structure.md) — models, services, controllers, routes only
-- [Auth stays on frontend](feedback_auth_frontend.md) — Login/signup on frontend, role checking on backend
