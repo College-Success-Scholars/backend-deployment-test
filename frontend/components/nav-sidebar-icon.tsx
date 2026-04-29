@@ -10,10 +10,10 @@ export function NavSidebarIcon({
   return (
     <Icon
       aria-hidden
-      className="shrink-0 transition-[fill,stroke] duration-150"
-      fill={active ? "currentColor" : "none"}
-      stroke={active ? "none" : "currentColor"}
-      strokeWidth={active ? 0 : 2}
+      className="shrink-0 transition-colors duration-150"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
     />
   )
 }
