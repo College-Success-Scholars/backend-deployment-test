@@ -404,7 +404,6 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ profile, ...props }: AppSidebarProps) {
-  console.log(profile)
   const userRole = profile?.app_role as UserRole ?? 'teamleader';
   const roleNavMain = getRoleBasedNav(userRole)
   const roleNavSecondary = getRoleBasedSecondaryNav(userRole)

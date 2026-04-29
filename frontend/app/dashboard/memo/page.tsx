@@ -1,66 +1,51 @@
-import { backendGet } from "@/lib/server/api-client";
-import { MemoContent } from "@/app/memo/memo-content";
-import type { MemoScholarRow, MemoTLRow, MemoPieData } from "@/app/memo/memo-content";
-import type { ScholarWithCompletedSession } from "@/lib/types/session-log";
-import type { TrafficSession } from "@/lib/types/traffic";
-import type { FormCompletionOverall } from "@/components/form-completion-overview-card";
-import type { MemoTutorReportRow } from "@/lib/types/tutor-report-log";
-import type { GradeBreakdown, TeamLeaderFormStatsRow } from "@/lib/types/form-log";
+import { FormSubmissionsSection } from "./_components/form-submissions-section"
+import { FullAttendanceDetailSection } from "./_components/full-attendance-detail-section"
+import { RecognitionBoardSection } from "./_components/recognition-board-section"
+import { ScholarFollowUpTable } from "./_components/scholar-follow-up-table"
+import { TeamLeaderPerformanceTable } from "./_components/team-leader-performance-table"
+import { WeeklyKpiCards } from "./_components/weekly-kpi-cards"
+import { WeeklyMemoHeader } from "./_components/weekly-memo-header"
+import { assembleWeeklyMemo } from "./_lib/weekly-memo-assembler"
+import { backendMemoSource } from "./_lib/memo-source"
 
-export const dynamic = "force-dynamic";
-
-type MemoPageData = {
-  scholars: MemoScholarRow[];
-  teamLeaders: MemoTLRow[];
-  pieData: MemoPieData;
-  formCompletionOverall: FormCompletionOverall;
-  completedStudy: ScholarWithCompletedSession[];
-  completedFd: ScholarWithCompletedSession[];
-  trafficWeeklyData: { weekNumber: number; entryCount: number }[];
-  trafficEntryCountForSelectedWeek: number;
-  trafficSessions: TrafficSession[];
-  tutorReports: MemoTutorReportRow[];
-  gradeBreakdown: GradeBreakdown;
-  whafDonut: { total: number; completeCount: number; lateCount: number; percentComplete: number };
-  teamLeaderFormStats: TeamLeaderFormStatsRow[];
-  weekLabel: string;
-  currentCampusWeek: number | null;
-  selectedWeekNum: number;
-};
+export const dynamic = "force-dynamic"
 
 type PageProps = {
-  searchParams: Promise<{ week?: string }>;
-};
+  searchParams: Promise<{ week?: string }>
+}
 
-export default async function DashboardMemoPage({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const weekParam = params.week;
+export default async function WeeklyMemoPage({ searchParams }: PageProps) {
+  const params = await searchParams
+  const memoData = await backendMemoSource.getWeeklyMemoPageData(params.week)
+  const data = assembleWeeklyMemo(memoData)
 
-  // Backend defaults to current campus week when weekNum is omitted
-  const query = weekParam ? `?weekNum=${weekParam}` : "";
-  const data = await backendGet<MemoPageData>(`/api/memo/page-data${query}`);
+  const availableWeeks = Array.from(
+    new Set([
+      ...memoData.trafficWeeklyData.map((entry) => entry.weekNumber),
+      memoData.selectedWeekNum,
+      ...(memoData.currentCampusWeek != null ? [memoData.currentCampusWeek] : []),
+    ])
+  ).sort((a, b) => a - b)
+
+  const weekIndex = availableWeeks.indexOf(data.weekNumber)
+  const prevWeek = weekIndex > 0 ? availableWeeks[weekIndex - 1] : null
+  const nextWeek = weekIndex >= 0 && weekIndex < availableWeeks.length - 1 ? availableWeeks[weekIndex + 1] : null
 
   return (
-    <MemoContent
-      scholars={data.scholars}
-      teamLeaders={data.teamLeaders}
-      pieData={data.pieData}
-      formCompletionOverall={data.formCompletionOverall}
-      completedStudy={data.completedStudy}
-      completedFd={data.completedFd}
-      trafficWeeklyData={data.trafficWeeklyData}
-      trafficEntryCountForSelectedWeek={data.trafficEntryCountForSelectedWeek}
-      trafficSessions={data.trafficSessions}
-      tutorReports={data.tutorReports}
-      gradeBreakdown={data.gradeBreakdown}
-      whafDonut={data.whafDonut}
-      teamLeaderFormStats={data.teamLeaderFormStats}
-      weekLabel={data.weekLabel}
-      currentCampusWeek={data.currentCampusWeek}
-      selectedWeekNum={data.selectedWeekNum}
-      trafficCardSpan="half"
-      trafficCardTitle="Traffic log"
-      trafficCardDescription={null}
-    />
-  );
+    <main className="space-y-4 pb-4">
+      <WeeklyMemoHeader
+        weekStartLabel={data.weekStartLabel}
+        weekEndLabel={data.weekEndLabel}
+        weekNumber={data.weekNumber}
+        prevWeek={prevWeek}
+        nextWeek={nextWeek}
+      />
+      <WeeklyKpiCards cards={data.kpis} />
+      <TeamLeaderPerformanceTable rows={data.teamLeaderRows} />
+      <ScholarFollowUpTable rows={data.scholarRows} />
+      <RecognitionBoardSection data={data.recognitionBoard} />
+      <FullAttendanceDetailSection data={data.fullAttendanceDetail} />
+      <FormSubmissionsSection data={data.formSubmissions} />
+    </main>
+  )
 }

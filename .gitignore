@@ -1,4 +1,5 @@
 .env
-.claude
-.next
 .cursor
+.next/
+.DS_Store
+.claude/
