@@ -156,6 +156,7 @@ function SyncButtons({
 export type MemoScholarRow = {
   uid: string;
   scholar_name: string;
+  cohort: number | null;
   fd_total: number;
   ss_total: number;
   fd_required: number | null;
