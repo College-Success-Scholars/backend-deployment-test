@@ -5,9 +5,9 @@ import { classifyScholarFollowUpRisk } from "./risk-classifier"
 const buildMemoData = (): MemoPageData =>
   ({
     scholars: [
-      { uid: "2024-001", scholar_name: "A Scholar", fd_pct: 90, ss_pct: 90, fd_required: 120, ss_required: 120 },
-      { uid: "2023-010", scholar_name: "B Scholar", fd_pct: 60, ss_pct: 90, fd_required: 120, ss_required: 120 },
-      { uid: "2023-011", scholar_name: "C Scholar", fd_pct: 70, ss_pct: 50, fd_required: 120, ss_required: 120 },
+      { uid: "2024-001", scholar_name: "A Scholar", cohort: 2025, fd_pct: 90, ss_pct: 90, fd_required: 120, ss_required: 120 },
+      { uid: "2023-010", scholar_name: "B Scholar", cohort: 2024, fd_pct: 60, ss_pct: 90, fd_required: 120, ss_required: 120 },
+      { uid: "2023-011", scholar_name: "C Scholar", cohort: 2024, fd_pct: 70, ss_pct: 50, fd_required: 120, ss_required: 120 },
     ],
     teamLeaders: [],
     pieData: { mcf: 0, wpl: 0, whaf: 0 },

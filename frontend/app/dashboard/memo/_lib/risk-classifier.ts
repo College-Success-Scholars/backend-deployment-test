@@ -2,7 +2,7 @@ import type { MemoPageData, ScholarFollowUpRow } from "../types"
 
 const LOW_COMPLETION_THRESHOLD = 75
 
-const toScholarYear = (uid: string) => (uid.startsWith("2024") ? "Freshman" : "Sophomore")
+const toScholarYear = (cohort: number | null) => (cohort === 2025 ? "Freshman" : "Sophomore")
 
 export const classifyScholarFollowUpRisk = (data: MemoPageData): ScholarFollowUpRow[] => {
   const rows = data.scholars
@@ -20,7 +20,7 @@ export const classifyScholarFollowUpRisk = (data: MemoPageData): ScholarFollowUp
 
       return {
         scholarName: row.scholar_name,
-        scholarYear: toScholarYear(row.uid),
+        scholarYear: toScholarYear(row.cohort),
         teamLeader: "Unassigned",
         flags,
         frontDeskPct: Math.max(0, Math.round(row.fd_pct ?? 0)),

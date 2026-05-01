@@ -62,7 +62,7 @@ export const assembleWeeklyMemo = (data: MemoPageData): WeeklyMemoViewData => {
       const completionPct = requiredMinutes > 0 ? Math.round((entry.totalMinutes / requiredMinutes) * 100) : 0
       return {
         scholarName: entry.scholarName,
-        scholarYear: scholar?.uid.startsWith("2024") ? "Freshman" : "Sophomore",
+        scholarYear: scholar?.cohort === 2025 ? "Freshman" : "Sophomore",
         completedMinutes: entry.totalMinutes,
         requiredMinutes,
         completionPct: Math.max(0, Math.min(100, completionPct)),

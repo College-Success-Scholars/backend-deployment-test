@@ -179,7 +179,7 @@ export async function getMemoPageData(weekNum: number) {
   );
 
   const scholars: Array<{
-    uid: string; scholar_name: string;
+    uid: string; scholar_name: string; cohort: number | null;
     fd_total: number; ss_total: number;
     fd_required: number | null; ss_required: number | null;
     fd_excuse_min: number; ss_excuse_min: number;
@@ -201,7 +201,7 @@ export async function getMemoPageData(weekNum: number) {
     const name = [u.first_name, u.last_name].filter(Boolean).join(" ").trim() || u.uid;
 
     scholars.push({
-      uid: u.uid, scholar_name: name,
+      uid: u.uid, scholar_name: name, cohort: u.cohort ?? null,
       fd_total: fd.total, ss_total: study.total,
       fd_required: fdReq, ss_required: ssReq,
       fd_excuse_min: fd.excuse_min, ss_excuse_min: study.excuse_min,

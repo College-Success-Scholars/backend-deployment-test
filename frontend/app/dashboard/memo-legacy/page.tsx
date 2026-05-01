@@ -88,7 +88,7 @@ const adaptMemoData = (data: MemoPageData): WeeklyMemoViewData => {
       if (data.gradeBreakdown.low.some((grade) => grade.scholar_name === row.scholar_name)) flags.push("Low grade")
       return {
         scholarName: row.scholar_name,
-        scholarYear: row.uid.startsWith("2024") ? "Freshman" : "Sophomore",
+        scholarYear: row.cohort === 2025 ? "Freshman" : "Sophomore",
         teamLeader: "Unassigned",
         flags,
         frontDeskPct: Math.max(0, Math.round(row.fd_pct ?? 0)),
@@ -108,7 +108,7 @@ const adaptMemoData = (data: MemoPageData): WeeklyMemoViewData => {
       const completionPct = requiredMinutes > 0 ? Math.round((entry.totalMinutes / requiredMinutes) * 100) : 0
       return {
         scholarName: entry.scholarName,
-        scholarYear: scholar?.uid.startsWith("2024") ? "Freshman" : "Sophomore",
+        scholarYear: scholar?.cohort === 2025 ? "Freshman" : "Sophomore",
         completedMinutes: entry.totalMinutes,
         requiredMinutes,
         completionPct: Math.max(0, Math.min(100, completionPct)),
