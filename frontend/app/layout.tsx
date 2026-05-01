@@ -23,6 +23,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
   title: "CSS Atlas",
   description: "View your engagement metrics and stats in one place",
+  icons: {
+    icon: "/css-logo.png",
+    shortcut: "/css-logo.png",
+    apple: "/css-logo.png",
+  },
 };
 
 export default function RootLayout({
