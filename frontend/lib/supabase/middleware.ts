@@ -4,6 +4,9 @@ import { hasEnvVars } from "../utils";
 import { getSupabasePublicKey } from "./public-key";
 
 export async function updateSession(request: NextRequest) {
+  // #region agent log
+  fetch("http://127.0.0.1:7726/ingest/9109985c-ede2-4114-8abc-e19657570996",{method:"POST",headers:{"Content-Type":"application/json","X-Debug-Session-Id":"6c0075"},body:JSON.stringify({sessionId:"6c0075",runId:"pre-fix",hypothesisId:"H2",location:"lib/supabase/middleware.ts:updateSession:entry",message:"Proxy/session handler invoked",data:{pathname:request.nextUrl.pathname},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
   let supabaseResponse = NextResponse.next({
     request,
   });
@@ -11,6 +14,9 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   // Next.js static assets must not hit auth redirects (browser would get HTML instead of CSS/JS/fonts).
   if (pathname.startsWith("/_next") || pathname.startsWith("/favicon")) {
+    // #region agent log
+    fetch("http://127.0.0.1:7726/ingest/9109985c-ede2-4114-8abc-e19657570996",{method:"POST",headers:{"Content-Type":"application/json","X-Debug-Session-Id":"6c0075"},body:JSON.stringify({sessionId:"6c0075",runId:"pre-fix",hypothesisId:"H4",location:"lib/supabase/middleware.ts:asset-bypass",message:"Bypassing _next/favicon path",data:{pathname},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     return supabaseResponse;
   }
   // Files from public/ (and next/image internal fetches) must bypass auth — otherwise the
@@ -69,6 +75,9 @@ export async function updateSession(request: NextRequest) {
     pathname !== "/traffic" &&
     !pathname.startsWith("/traffic/")
   ) {
+    // #region agent log
+    fetch("http://127.0.0.1:7726/ingest/9109985c-ede2-4114-8abc-e19657570996",{method:"POST",headers:{"Content-Type":"application/json","X-Debug-Session-Id":"6c0075"},body:JSON.stringify({sessionId:"6c0075",runId:"pre-fix",hypothesisId:"H3",location:"lib/supabase/middleware.ts:auth-redirect",message:"Redirecting unauthenticated request",data:{pathname,redirectTo:"/auth/login"},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
