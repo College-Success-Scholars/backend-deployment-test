@@ -1,33 +1,54 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useState, useMemo } from "react"
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { CompletionMeter } from "@/components/completion-meter"
+import { DataTable, type DataTableColumn } from "@/components/data-table"
 import { cn } from "@/lib/utils"
 import { MemoAccordionSection } from "./memo-accordion-section"
-import type { FullAttendanceDetailSectionData } from "../types"
+import type { AttendanceDetailRow, FullAttendanceDetailSectionData } from "../types"
 
 type FullAttendanceDetailSectionProps = {
   data: FullAttendanceDetailSectionData
 }
 
-const completionColor = (pct: number) => (pct >= 90 ? "#22c55e" : pct < 60 ? "#ef4444" : "#f59e0b")
-
-function CompletionMeter({ pct }: { pct: number }) {
-  const boundedPct = Math.max(0, Math.min(100, pct))
-
-  return (
-    <div className="flex items-center gap-2">
-      <div className="relative h-2 w-24 overflow-hidden rounded-full bg-muted">
-        <div
-          className="absolute inset-y-0 left-0 rounded-full"
-          style={{ width: `${boundedPct}%`, backgroundColor: completionColor(boundedPct) }}
-        />
-      </div>
-      <span className="text-xs font-medium">{pct}%</span>
-    </div>
-  )
-}
+const columns: DataTableColumn<AttendanceDetailRow>[] = [
+  {
+    id: "scholar",
+    header: "Scholar",
+    field: "scholarName",
+    cellClassName: "font-medium",
+    sortable: true,
+  },
+  {
+    id: "class",
+    header: "Class",
+    field: "scholarYear",
+  },
+  {
+    id: "completed",
+    header: "Completed minutes",
+    field: "completedMinutes",
+    sortable: true,
+  },
+  {
+    id: "required",
+    header: "Required minutes",
+    field: "requiredMinutes",
+    sortable: true,
+  },
+  {
+    id: "completion",
+    header: "Completion",
+    field: "completionPct",
+    sortable: true,
+    compareFn: (a, b) =>
+      a.completionPct !== b.completionPct
+        ? a.completionPct - b.completionPct
+        : a.scholarName.localeCompare(b.scholarName),
+    renderCell: (row) => <CompletionMeter pct={row.completionPct} />,
+  },
+]
 
 export function FullAttendanceDetailSection({ data }: FullAttendanceDetailSectionProps) {
   const [selectedTabId, setSelectedTabId] = useState(data.tabs[0]?.id ?? "front-desk")
@@ -35,15 +56,6 @@ export function FullAttendanceDetailSection({ data }: FullAttendanceDetailSectio
   const selectedTab = useMemo(
     () => data.tabs.find((tab) => tab.id === selectedTabId) ?? data.tabs[0],
     [data.tabs, selectedTabId]
-  )
-  const sortedRows = useMemo(
-    () =>
-      [...(selectedTab?.rows ?? [])].sort((a, b) =>
-        a.completionPct !== b.completionPct
-          ? a.completionPct - b.completionPct
-          : a.scholarName.localeCompare(b.scholarName)
-      ),
-    [selectedTab]
   )
 
   if (!selectedTab) return null
@@ -67,30 +79,14 @@ export function FullAttendanceDetailSection({ data }: FullAttendanceDetailSectio
           ))}
         </div>
 
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/30 hover:bg-muted/30">
-              <TableHead className="px-4">Scholar</TableHead>
-              <TableHead>Class</TableHead>
-              <TableHead>Completed minutes</TableHead>
-              <TableHead>Required minutes</TableHead>
-              <TableHead>Completion</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedRows.map((row) => (
-              <TableRow key={`${selectedTab.id}-${row.scholarName}`}>
-                <TableCell className="px-4 font-medium">{row.scholarName}</TableCell>
-                <TableCell>{row.scholarYear}</TableCell>
-                <TableCell>{row.completedMinutes}</TableCell>
-                <TableCell>{row.requiredMinutes}</TableCell>
-                <TableCell>
-                  <CompletionMeter pct={row.completionPct} />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <DataTable<AttendanceDetailRow>
+          data={selectedTab.rows}
+          rowKeyField="scholarName"
+          columns={columns}
+          defaultSortColumnId="completion"
+          defaultSortDirection="asc"
+          emptyMessage="No attendance records"
+        />
       </div>
     </MemoAccordionSection>
   )

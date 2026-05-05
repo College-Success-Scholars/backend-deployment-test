@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { InviteFromHashRedirect } from "@/components/auth/invite-from-hash-redirect";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
@@ -36,6 +35,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+<<<<<<< Updated upstream
         {/* Suppress Next.js 15 dev-only "params are being enumerated" warning from internal tooling */}
         <script
           dangerouslySetInnerHTML={{
@@ -53,6 +53,11 @@ export default function RootLayout({
           <Toaster />
         </ThemeProvider>
         <Analytics />
+=======
+        <InviteFromHashRedirect />
+        {children}
+        <Toaster />
+>>>>>>> Stashed changes
       </body>
     </html>
   );
