@@ -1,0 +1,26 @@
+import type { Response } from "express";
+import type { AuthenticatedRequest } from "./auth.controller.js";
+export declare function mcfForWeek(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function mcfByUid(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function mcfByUidAndWeek(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function whafForWeek(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function whafByUid(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function wplForWeek(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function wplByUid(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function wplByUidAndWeek(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function mcfForWeekWithLate(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function whafForWeekWithLate(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function wplForWeekWithLate(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function mcfByUidWithLate(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function mcfByUidAndWeekWithLate(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function wplByUidWithLate(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function wplByUidAndWeekWithLate(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function recentSubmissions(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function whafByUids(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function mcfByUids(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function wplByUids(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function tutorReportsByUids(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function dailyActivityByUids(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function getFormLog(req: AuthenticatedRequest, res: Response): Promise<void>;
+export declare function teamLeaderStats(req: AuthenticatedRequest, res: Response): Promise<void>;
+//# sourceMappingURL=form-log.controller.d.ts.map

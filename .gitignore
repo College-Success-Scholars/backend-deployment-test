@@ -3,5 +3,5 @@
 .next/
 .DS_Store
 .claude/
-.vercel/
-node_modules/
+node_modules
+.vercel
