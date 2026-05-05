@@ -2,3 +2,7 @@
 .claude
 .next
 .cursor
+node_modules
+.env.local
+.vercel
+.DS_Store
