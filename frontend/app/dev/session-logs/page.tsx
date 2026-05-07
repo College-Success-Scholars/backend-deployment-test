@@ -54,9 +54,9 @@ export default async function SessionLogsTestPage({ searchParams }: PageProps) {
   const currentCampusWeek = dateToCampusWeek(new Date());
   const weekNum =
     weekParam != null && weekParam !== ""
-      ? Math.max(1, Math.min(30, parseInt(weekParam, 10) || 1))
+      ? Math.max(1, Math.min(52, parseInt(weekParam, 10) || 1))
       : currentCampusWeek != null
-        ? Math.max(1, Math.min(30, currentCampusWeek))
+        ? Math.max(1, Math.min(52, currentCampusWeek))
         : null;
 
   const range =

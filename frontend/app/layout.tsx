@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { InviteFromHashRedirect } from "@/components/auth/invite-from-hash-redirect";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -35,22 +35,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* Suppress Next.js 15 dev-only "params are being enumerated" warning from internal tooling */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var f=function(msg){return msg&&String(msg).includes("params are being enumerated");};var e=console.error,w=console.warn;console.error=function(){if(f(arguments[0]))return;e.apply(console,arguments);};console.warn=function(){if(f(arguments[0]))return;w.apply(console,arguments);};})();`,
-          }}
-        />
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <InviteFromHashRedirect />
-          {children}
-          <Toaster />
-        </ThemeProvider>
+        <InviteFromHashRedirect />
+        {children}
+        <Toaster />
       </body>
     </html>
   );

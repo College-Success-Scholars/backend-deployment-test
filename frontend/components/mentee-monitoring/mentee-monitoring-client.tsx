@@ -225,12 +225,9 @@ export function MenteeMonitoringClient({
           dailyHours={fdDailyHours}
           todayLabel={todayLabel}
         />
-        <SeminarsCard />
         <TutoringCard sessions={tutoringSessions} menteeName={name} />
+        <WahfCard menteeName={name} status={wahfStatus} />
       </div>
-
-      {/* ---- WAHF Card (full width) ---- */}
-      <WahfCard menteeName={name} status={wahfStatus} />
     </div>
   )
 }

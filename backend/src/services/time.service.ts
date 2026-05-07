@@ -5,6 +5,7 @@ import {
   WINTER_BREAK_LAST_DAY,
 } from "../models/time.model.js";
 import type { CampusWeekDateRange } from "../models/time.model.js";
+import { createCampusCalendar, type CampusDay } from "../../../shared/campus-calendar.js";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -95,34 +96,27 @@ export function getStartOfDayEastern(d: Date): Date {
 // Campus week calendar
 // ---------------------------------------------------------------------------
 
-const SEMESTER_START = parseEasternDate(FALL_SEMESTER_FIRST_DAY);
-const WINTER_START = parseEasternDate(WINTER_BREAK_FIRST_DAY);
-const WINTER_END = parseEasternDate(WINTER_BREAK_LAST_DAY);
+const campusCalendar = createCampusCalendar({
+  fallSemesterFirstDay: FALL_SEMESTER_FIRST_DAY as CampusDay,
+  winterBreakFirstDay: WINTER_BREAK_FIRST_DAY as CampusDay,
+  winterBreakLastDay: WINTER_BREAK_LAST_DAY as CampusDay,
+  timeZone: EASTERN_TIMEZONE,
+});
 
-function daysBackToMondayEastern(d: Date): number {
-  return (getEasternDayOfWeek(d) + 6) % 7;
-}
-
-function getMondayOfWeekEastern(d: Date): Date {
-  const easternDay = getStartOfDayEastern(d);
-  const back = daysBackToMondayEastern(easternDay);
-  return addEasternCalendarDays(easternDay, -back);
-}
-
-const WEEK_1_MONDAY = getMondayOfWeekEastern(SEMESTER_START);
-
-const FIRST_SPRING_MONDAY = (() => {
-  const dayAfterBreak = addEasternCalendarDays(WINTER_END, 1);
-  const dayOfWeek = getEasternDayOfWeek(dayAfterBreak);
-  const daysUntilMonday = dayOfWeek === 1 ? 0 : (8 - dayOfWeek) % 7;
-  return addEasternCalendarDays(dayAfterBreak, daysUntilMonday);
-})();
-
-export const WINTER_BREAK_CAMPUS_WEEK_NUMBER = (() => {
-  const dayBeforeWinter = addEasternCalendarDays(WINTER_START, -1);
-  const daysFromWeek1 = easternCalendarDaysBetween(WEEK_1_MONDAY, dayBeforeWinter);
-  return Math.floor(daysFromWeek1 / 7) + 2;
-})();
+const SEMESTER_START = campusCalendar.rangeOf(1)?.startDate ?? parseEasternDate(FALL_SEMESTER_FIRST_DAY);
+export const WINTER_BREAK_CAMPUS_WEEK_NUMBER = campusCalendar.weekOf(
+  WINTER_BREAK_FIRST_DAY as CampusDay
+) ?? 0;
+const WINTER_START =
+  campusCalendar.rangeOf(WINTER_BREAK_CAMPUS_WEEK_NUMBER)?.startDate ??
+  parseEasternDate(WINTER_BREAK_FIRST_DAY);
+const WINTER_END =
+  campusCalendar.rangeOf(WINTER_BREAK_CAMPUS_WEEK_NUMBER)?.endDate ??
+  parseEasternDate(WINTER_BREAK_LAST_DAY);
+const FIRST_SPRING_MONDAY =
+  campusCalendar.rangeOf(WINTER_BREAK_CAMPUS_WEEK_NUMBER + 1)?.startDate ??
+  addEasternCalendarDays(WINTER_END, 1);
+const WEEK_1_MONDAY = SEMESTER_START;
 
 export const CAMPUS_WEEK = {
   WEEK_1_MONDAY,
@@ -135,49 +129,17 @@ export const CAMPUS_WEEK = {
 } as const;
 
 export function campusWeekToDateRange(weekNumber: number): CampusWeekDateRange | null {
-  if (weekNumber < 1) return null;
-
-  if (weekNumber < WINTER_BREAK_CAMPUS_WEEK_NUMBER) {
-    const startDate = addEasternCalendarDays(WEEK_1_MONDAY, (weekNumber - 1) * 7);
-    const endDate = addEasternCalendarDays(startDate, 6);
-    return { weekNumber, startDate, endDate };
-  }
-
-  if (weekNumber === WINTER_BREAK_CAMPUS_WEEK_NUMBER) {
-    return {
-      weekNumber,
-      startDate: new Date(WINTER_START.getTime()),
-      endDate: new Date(WINTER_END.getTime()),
-    };
-  }
-
-  const weeksAfterBreak = weekNumber - WINTER_BREAK_CAMPUS_WEEK_NUMBER - 1;
-  const startDate = addEasternCalendarDays(FIRST_SPRING_MONDAY, weeksAfterBreak * 7);
-  const endDate = addEasternCalendarDays(startDate, 6);
-  return { weekNumber, startDate, endDate };
+  const range = campusCalendar.rangeOf(weekNumber);
+  if (!range) return null;
+  return {
+    weekNumber: range.week,
+    startDate: range.startDate,
+    endDate: range.endDate,
+  };
 }
 
 export function dateToCampusWeek(date: Date): number | null {
-  const d = getStartOfDayEastern(date);
-  const t = d.getTime();
-
-  if (t < WEEK_1_MONDAY.getTime()) return null;
-
-  if (t >= WINTER_START.getTime() && t <= WINTER_END.getTime()) {
-    return WINTER_BREAK_CAMPUS_WEEK_NUMBER;
-  }
-
-  if (t < WINTER_START.getTime()) {
-    const days = easternCalendarDaysBetween(WEEK_1_MONDAY, d);
-    return Math.floor(days / 7) + 1;
-  }
-
-  if (t < FIRST_SPRING_MONDAY.getTime()) {
-    return WINTER_BREAK_CAMPUS_WEEK_NUMBER + 1;
-  }
-
-  const daysFromSpringStart = easternCalendarDaysBetween(FIRST_SPRING_MONDAY, d);
-  return WINTER_BREAK_CAMPUS_WEEK_NUMBER + 1 + Math.floor(daysFromSpringStart / 7);
+  return campusCalendar.weekOf(date);
 }
 
 // ---------------------------------------------------------------------------

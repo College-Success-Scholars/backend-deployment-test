@@ -234,7 +234,7 @@ export function formatIsoWeekRangeWithYear(
 
 /** Date and time of submission in US Eastern (matches form deadline zone). */
 export function formatSubmittedDateTime(createdAt: string): string {
-  return new Date(createdAt).toLocaleString("en-US", {
+  const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: EASTERN_TIMEZONE,
     weekday: "short",
     month: "short",
@@ -242,5 +242,9 @@ export function formatSubmittedDateTime(createdAt: string): string {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
-  })
+  }).formatToParts(new Date(createdAt))
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? ""
+  const formatted = `${part("weekday")}, ${part("month")} ${part("day")}, ${part("hour")}:${part("minute")} ${part("dayPeriod")}`
+  return formatted
 }
