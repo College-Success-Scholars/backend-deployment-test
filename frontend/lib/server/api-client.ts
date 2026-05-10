@@ -87,6 +87,7 @@ export async function backendFetch<T>(
 ): Promise<T> {
   const token = await getAccessToken();
   const requestUrl = `${BACKEND_URL}${path}`;
+  console.log(`[server] ${options?.method ?? "GET"} ${requestUrl}`);
   const res = await fetch(requestUrl, {
     method: options?.method ?? "GET",
     headers: {
