@@ -28,12 +28,6 @@ export default async function MenteePage() {
 
   const currentIsoWeek = getISOWeek(new Date(Date.now()));
 
-  console.log(mentees);
-  console.log(activity);
-  console.log(wahf);
-  console.log(tutoring);
-  console.log(semester);
-  console.log(currentIsoWeek);
 
   return (
     <div className="space-y-6">

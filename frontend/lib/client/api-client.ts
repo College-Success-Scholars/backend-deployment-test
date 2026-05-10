@@ -22,7 +22,6 @@ export async function backendFetch<T>(
   options?: { method?: string; body?: unknown }
 ): Promise<{ data: T; ok: true } | { error: string; ok: false; status: number }> {
   const token = await getAccessToken();
-  console.log(`[client] ${options?.method ?? "GET"} ${BACKEND_URL}${path}`);
   const res = await fetch(`${BACKEND_URL}${path}`, {
     method: options?.method ?? "GET",
     headers: {

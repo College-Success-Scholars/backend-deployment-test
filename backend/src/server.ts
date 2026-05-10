@@ -19,7 +19,7 @@ const HOST = process.env.HOST ?? "0.0.0.0";
 app.use(cors({ origin: "http://localhost:3002" }));
 app.use(express.json());
 
-// Request & response logger
+// Request logger
 app.use((req, res, next) => {
   const start = Date.now();
   const originalJson = res.json.bind(res);
@@ -27,7 +27,6 @@ app.use((req, res, next) => {
   res.json = (body: unknown) => {
     const duration = Date.now() - start;
     console.log(`[${req.method}] ${req.originalUrl} — ${res.statusCode} (${duration}ms)`);
-    console.log("Response:", JSON.stringify(body, null, 2));
     return originalJson(body);
   };
 
@@ -55,6 +54,4 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
   res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
 });
 
-app.listen(Number(PORT), HOST, () => {
-  console.log(`Server running on http://${HOST}:${PORT}`);
-});
+app.listen(Number(PORT), HOST);
