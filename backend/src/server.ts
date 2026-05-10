@@ -14,6 +14,7 @@ import tutorReportRoutes from "./routes/tutor-report-log.routes.js";
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
+const HOST = process.env.HOST ?? "0.0.0.0";
 
 app.use(cors({ origin: "http://localhost:3002" }));
 app.use(express.json());
@@ -54,6 +55,6 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
   res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.listen(Number(PORT), HOST, () => {
+  console.log(`Server running on http://${HOST}:${PORT}`);
 });
