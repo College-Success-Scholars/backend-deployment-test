@@ -18,9 +18,18 @@ const PORT = process.env.PORT ?? 3001;
 app.use(cors({ origin: "http://localhost:3002" }));
 app.use(express.json());
 
-// Request logger
-app.use((req, _res, next) => {
-  console.log(`${req.method} ${req.path}`);
+// Request & response logger
+app.use((req, res, next) => {
+  const start = Date.now();
+  const originalJson = res.json.bind(res);
+
+  res.json = (body: unknown) => {
+    const duration = Date.now() - start;
+    console.log(`[${req.method}] ${req.originalUrl} — ${res.statusCode} (${duration}ms)`);
+    console.log("Response:", JSON.stringify(body, null, 2));
+    return originalJson(body);
+  };
+
   next();
 });
 
