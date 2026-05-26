@@ -1,7 +1,12 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { logApiError, logApiRequest, logApiResponse } from "@/lib/api-log";
+import {
+  buildBackendRequestUrl,
+  logApiError,
+  logApiRequest,
+  logApiResponse,
+} from "@/lib/api-log";
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001";
@@ -23,11 +28,12 @@ export async function backendFetch<T>(
   options?: { method?: string; body?: unknown }
 ): Promise<{ data: T; ok: true } | { error: string; ok: false; status: number }> {
   const method = options?.method ?? "GET";
+  const requestUrl = buildBackendRequestUrl(BACKEND_URL, path);
   const start = Date.now();
-  logApiRequest("client", method, path);
+  logApiRequest("client", method, requestUrl);
 
   const token = await getAccessToken();
-  const res = await fetch(`${BACKEND_URL}${path}`, {
+  const res = await fetch(requestUrl, {
     method,
     headers: {
       "Content-Type": "application/json",
@@ -43,7 +49,7 @@ export async function backendFetch<T>(
   if (!res.ok) {
     const error =
       (json as { error?: string }).error ?? `Backend error: ${res.status}`;
-    logApiError("client", method, path, res.status, error, durationMs);
+    logApiError("client", method, requestUrl, res.status, error, durationMs);
     return {
       error,
       ok: false,
@@ -51,7 +57,7 @@ export async function backendFetch<T>(
     };
   }
 
-  logApiResponse("client", method, path, res.status, durationMs);
+  logApiResponse("client", method, requestUrl, res.status, durationMs);
   // Unwrap { data: ... } wrapper
   const payload = json != null && typeof json === "object" && "data" in json ? json.data : json;
   return { data: payload as T, ok: true };

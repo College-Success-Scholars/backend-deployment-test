@@ -1,6 +1,11 @@
 import "server-only";
 import { cookies } from "next/headers";
-import { logApiError, logApiRequest, logApiResponse } from "@/lib/api-log";
+import {
+  buildBackendRequestUrl,
+  logApiError,
+  logApiRequest,
+  logApiResponse,
+} from "@/lib/api-log";
 
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:3001";
 const BASE64_PREFIX = "base64-";
@@ -87,11 +92,11 @@ export async function backendFetch<T>(
   options?: { method?: string; body?: unknown }
 ): Promise<T> {
   const method = options?.method ?? "GET";
+  const requestUrl = buildBackendRequestUrl(BACKEND_URL, path);
   const start = Date.now();
-  logApiRequest("server", method, path);
+  logApiRequest("server", method, requestUrl);
 
   const token = await getAccessToken();
-  const requestUrl = `${BACKEND_URL}${path}`;
   const res = await fetch(requestUrl, {
     method,
     headers: {
@@ -106,11 +111,11 @@ export async function backendFetch<T>(
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
     const message = (err as { error?: string }).error ?? `Backend error: ${res.status}`;
-    logApiError("server", method, path, res.status, message, durationMs);
+    logApiError("server", method, requestUrl, res.status, message, durationMs);
     throw new Error(message);
   }
 
-  logApiResponse("server", method, path, res.status, durationMs);
+  logApiResponse("server", method, requestUrl, res.status, durationMs);
   const json = await res.json();
   // Backend wraps responses in { data: ... } — unwrap automatically
   if (json != null && typeof json === "object" && "data" in json) {
