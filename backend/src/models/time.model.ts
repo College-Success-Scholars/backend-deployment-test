@@ -4,6 +4,6 @@ export {
   WINTER_BREAK_LAST_DAY,
   WEEKS_IGNORE_FORMS,
   WEEKS_IGNORE_SESSIONS,
-} from "../../../shared/time-config.js";
+} from "../../../shared/dist/time-config.js";
 
-export type { CampusWeekDateRange, WeekDateRange } from "../../../shared/time-types.js";
+export type { CampusWeekDateRange, WeekDateRange } from "../../../shared/dist/time-types.js";

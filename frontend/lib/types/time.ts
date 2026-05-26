@@ -1,1 +1,1 @@
-export type { CampusWeekDateRange, WeekDateRange } from "../../../shared/time-types";
+export type { CampusWeekDateRange, WeekDateRange } from "../../../shared/dist/time-types.js";

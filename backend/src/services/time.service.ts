@@ -1,1 +1,1 @@
-export * from "../../../shared/time.js";
+export * from "../../../shared/dist/time.js";
