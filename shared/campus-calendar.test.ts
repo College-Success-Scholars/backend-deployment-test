@@ -1,10 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { createCampusCalendar } from "../../../shared/campus-calendar";
+import { createCampusCalendar } from "./campus-calendar.js";
+import {
+  FALL_SEMESTER_FIRST_DAY,
+  WINTER_BREAK_FIRST_DAY,
+  WINTER_BREAK_LAST_DAY,
+} from "./time-config.js";
 
 const config = {
-  fallSemesterFirstDay: "2025-09-01",
-  winterBreakFirstDay: "2025-12-16",
-  winterBreakLastDay: "2026-01-28",
+  fallSemesterFirstDay: FALL_SEMESTER_FIRST_DAY,
+  winterBreakFirstDay: WINTER_BREAK_FIRST_DAY,
+  winterBreakLastDay: WINTER_BREAK_LAST_DAY,
 } as const;
 
 describe("createCampusCalendar", () => {
