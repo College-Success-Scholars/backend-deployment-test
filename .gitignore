@@ -3,5 +3,6 @@
 .next
 .cursor
 node_modules
+.env.local
 .vercel
-CODEBASE_NOTES.md
+.DS_Store

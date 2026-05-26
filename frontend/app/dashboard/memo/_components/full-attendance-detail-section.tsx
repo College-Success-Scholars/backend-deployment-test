@@ -1,0 +1,93 @@
+"use client"
+
+import { useState, useMemo } from "react"
+
+import { CompletionMeter } from "@/components/completion-meter"
+import { DataTable, type DataTableColumn } from "@/components/data-table"
+import { cn } from "@/lib/utils"
+import { MemoAccordionSection } from "./memo-accordion-section"
+import type { AttendanceDetailRow, FullAttendanceDetailSectionData } from "../types"
+
+type FullAttendanceDetailSectionProps = {
+  data: FullAttendanceDetailSectionData
+}
+
+const columns: DataTableColumn<AttendanceDetailRow>[] = [
+  {
+    id: "scholar",
+    header: "Scholar",
+    field: "scholarName",
+    cellClassName: "font-medium",
+    sortable: true,
+  },
+  {
+    id: "class",
+    header: "Class",
+    field: "scholarYear",
+  },
+  {
+    id: "completed",
+    header: "Completed minutes",
+    field: "completedMinutes",
+    sortable: true,
+  },
+  {
+    id: "required",
+    header: "Required minutes",
+    field: "requiredMinutes",
+    sortable: true,
+  },
+  {
+    id: "completion",
+    header: "Completion",
+    field: "completionPct",
+    sortable: true,
+    compareFn: (a, b) =>
+      a.completionPct !== b.completionPct
+        ? a.completionPct - b.completionPct
+        : a.scholarName.localeCompare(b.scholarName),
+    renderCell: (row) => <CompletionMeter pct={row.completionPct} />,
+  },
+]
+
+export function FullAttendanceDetailSection({ data }: FullAttendanceDetailSectionProps) {
+  const [selectedTabId, setSelectedTabId] = useState(data.tabs[0]?.id ?? "front-desk")
+
+  const selectedTab = useMemo(
+    () => data.tabs.find((tab) => tab.id === selectedTabId) ?? data.tabs[0],
+    [data.tabs, selectedTabId]
+  )
+
+  if (!selectedTab) return null
+
+  return (
+    <MemoAccordionSection title="Full attendance detail" rightLabel={data.rightLabel}>
+      <div className="space-y-3 px-3 py-3">
+        <div className="flex items-center gap-1.5 rounded-md bg-muted/40 p-1">
+          {data.tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setSelectedTabId(tab.id)}
+              className={cn(
+                "cursor-pointer rounded-sm px-3 py-1.5 text-sm transition-colors",
+                tab.id === selectedTabId ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <DataTable<AttendanceDetailRow>
+          data={selectedTab.rows}
+          rowKeyField="scholarName"
+          columns={columns}
+          defaultSortColumnId="completion"
+          defaultSortDirection="asc"
+          emptyMessage="No attendance records"
+        />
+      </div>
+    </MemoAccordionSection>
+  )
+}

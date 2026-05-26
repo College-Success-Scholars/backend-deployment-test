@@ -6,7 +6,7 @@ export const getActiveSemester = cache(async () => {
 });
 
 export const getCurrentUser = cache(async () => {
-  return backendGet<{ id: string; email: string }>("/api/auth/me");
+  return backendGet<{ user: { id: string; email: string | null }; profile: Record<string, unknown> | null }>("/api/auth/me");
 });
 
 export const getCurrentProfile = cache(async () => {

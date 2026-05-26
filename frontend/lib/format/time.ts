@@ -10,55 +10,10 @@ import {
 } from "./time-config";
 import type { CampusWeekDateRange } from "@/lib/types/time";
 import { startOfISOWeek } from "date-fns";
+import { createCampusCalendar, type CampusDay } from "../../../shared/campus-calendar";
 
 export const EASTERN_TIMEZONE = "America/New_York";
 export const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-
-// ---------------------------------------------------------------------------
-// Internal date helpers
-// ---------------------------------------------------------------------------
-
-function parseEasternDate(s: string): Date {
-  const [y, m, d] = s.split("-").map(Number);
-  if (!y || !m || !d) throw new Error(`Invalid date string: ${s}`);
-  const utcNoon = new Date(Date.UTC(y, m - 1, d, 12, 0, 0, 0));
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: EASTERN_TIMEZONE,
-    hour: "numeric", hour12: false, minute: "numeric", second: "numeric",
-  });
-  const parts = formatter.formatToParts(utcNoon);
-  const hour = parseInt(parts.find((p) => p.type === "hour")?.value ?? "0", 10);
-  const minute = parseInt(parts.find((p) => p.type === "minute")?.value ?? "0", 10);
-  const second = parseInt(parts.find((p) => p.type === "second")?.value ?? "0", 10);
-  const easternMsSinceMidnight = (hour * 3600 + minute * 60 + second) * 1000;
-  return new Date(utcNoon.getTime() - easternMsSinceMidnight);
-}
-
-function getEasternDateParts(d: Date): { year: number; month: number; day: number } {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: EASTERN_TIMEZONE, year: "numeric", month: "2-digit", day: "2-digit",
-  });
-  const parts = formatter.formatToParts(d);
-  return {
-    year: parseInt(parts.find((p) => p.type === "year")?.value ?? "0", 10),
-    month: parseInt(parts.find((p) => p.type === "month")?.value ?? "1", 10) - 1,
-    day: parseInt(parts.find((p) => p.type === "day")?.value ?? "1", 10),
-  };
-}
-
-function addEasternCalendarDays(d: Date, deltaDays: number): Date {
-  const { year, month, day } = getEasternDateParts(getStartOfDayEastern(d));
-  const rolled = new Date(Date.UTC(year, month, day + deltaDays));
-  return parseEasternDate(
-    `${rolled.getUTCFullYear()}-${String(rolled.getUTCMonth() + 1).padStart(2, "0")}-${String(rolled.getUTCDate()).padStart(2, "0")}`
-  );
-}
-
-function easternCalendarDaysBetween(earlier: Date, later: Date): number {
-  const a = getEasternDateParts(getStartOfDayEastern(earlier));
-  const b = getEasternDateParts(getStartOfDayEastern(later));
-  return Math.round((Date.UTC(b.year, b.month, b.day) - Date.UTC(a.year, a.month, a.day)) / ONE_DAY_MS);
-}
 
 // ---------------------------------------------------------------------------
 // Exported date helpers
@@ -71,58 +26,57 @@ export function getEasternDayOfWeek(d: Date): number {
 }
 
 export function getStartOfDayEastern(d: Date): Date {
-  const { year, month, day } = getEasternDateParts(d);
-  return parseEasternDate(`${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`);
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: EASTERN_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(d);
+  const year = parseInt(parts.find((p) => p.type === "year")?.value ?? "0", 10);
+  const month = parseInt(parts.find((p) => p.type === "month")?.value ?? "1", 10);
+  const day = parseInt(parts.find((p) => p.type === "day")?.value ?? "1", 10);
+  const utcNoon = new Date(Date.UTC(year, month - 1, day, 12, 0, 0, 0));
+  const timeParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: EASTERN_TIMEZONE,
+    hour: "numeric",
+    hour12: false,
+    minute: "numeric",
+    second: "numeric",
+  }).formatToParts(utcNoon);
+  const hour = parseInt(timeParts.find((p) => p.type === "hour")?.value ?? "0", 10);
+  const minute = parseInt(timeParts.find((p) => p.type === "minute")?.value ?? "0", 10);
+  const second = parseInt(timeParts.find((p) => p.type === "second")?.value ?? "0", 10);
+  return new Date(utcNoon.getTime() - (hour * 3600 + minute * 60 + second) * 1000);
 }
 
 // ---------------------------------------------------------------------------
 // Campus week calendar
 // ---------------------------------------------------------------------------
 
-const SEMESTER_START = parseEasternDate(FALL_SEMESTER_FIRST_DAY);
-const WINTER_START = parseEasternDate(WINTER_BREAK_FIRST_DAY);
-const WINTER_END = parseEasternDate(WINTER_BREAK_LAST_DAY);
+const campusCalendar = createCampusCalendar({
+  fallSemesterFirstDay: FALL_SEMESTER_FIRST_DAY as CampusDay,
+  winterBreakFirstDay: WINTER_BREAK_FIRST_DAY as CampusDay,
+  winterBreakLastDay: WINTER_BREAK_LAST_DAY as CampusDay,
+  timeZone: EASTERN_TIMEZONE,
+});
 
-function daysBackToMondayEastern(d: Date): number { return (getEasternDayOfWeek(d) + 6) % 7; }
-
-function getMondayOfWeekEastern(d: Date): Date {
-  return addEasternCalendarDays(getStartOfDayEastern(d), -daysBackToMondayEastern(getStartOfDayEastern(d)));
-}
-
-const WEEK_1_MONDAY = getMondayOfWeekEastern(SEMESTER_START);
-
-const FIRST_SPRING_MONDAY = (() => {
-  const dayAfterBreak = addEasternCalendarDays(WINTER_END, 1);
-  const dow = getEasternDayOfWeek(dayAfterBreak);
-  return addEasternCalendarDays(dayAfterBreak, dow === 1 ? 0 : (8 - dow) % 7);
-})();
-
-export const WINTER_BREAK_CAMPUS_WEEK_NUMBER = (() => {
-  const dayBeforeWinter = addEasternCalendarDays(WINTER_START, -1);
-  return Math.floor(easternCalendarDaysBetween(WEEK_1_MONDAY, dayBeforeWinter) / 7) + 2;
-})();
+const WEEK_1_MONDAY = campusCalendar.rangeOf(1)?.startDate ?? new Date();
+export const WINTER_BREAK_CAMPUS_WEEK_NUMBER = campusCalendar.weekOf(
+  WINTER_BREAK_FIRST_DAY as CampusDay
+) ?? 0;
+const WINTER_START = campusCalendar.rangeOf(WINTER_BREAK_CAMPUS_WEEK_NUMBER)?.startDate ?? new Date();
+const WINTER_END = campusCalendar.rangeOf(WINTER_BREAK_CAMPUS_WEEK_NUMBER)?.endDate ?? new Date();
+const FIRST_SPRING_MONDAY =
+  campusCalendar.rangeOf(WINTER_BREAK_CAMPUS_WEEK_NUMBER + 1)?.startDate ?? new Date();
 
 export function campusWeekToDateRange(weekNumber: number): CampusWeekDateRange | null {
-  if (weekNumber < 1) return null;
-  if (weekNumber < WINTER_BREAK_CAMPUS_WEEK_NUMBER) {
-    const startDate = addEasternCalendarDays(WEEK_1_MONDAY, (weekNumber - 1) * 7);
-    return { weekNumber, startDate, endDate: addEasternCalendarDays(startDate, 6) };
-  }
-  if (weekNumber === WINTER_BREAK_CAMPUS_WEEK_NUMBER) {
-    return { weekNumber, startDate: new Date(WINTER_START.getTime()), endDate: new Date(WINTER_END.getTime()) };
-  }
-  const startDate = addEasternCalendarDays(FIRST_SPRING_MONDAY, (weekNumber - WINTER_BREAK_CAMPUS_WEEK_NUMBER - 1) * 7);
-  return { weekNumber, startDate, endDate: addEasternCalendarDays(startDate, 6) };
+  const range = campusCalendar.rangeOf(weekNumber);
+  if (!range) return null;
+  return { weekNumber: range.week, startDate: range.startDate, endDate: range.endDate };
 }
 
 export function dateToCampusWeek(date: Date): number | null {
-  const d = getStartOfDayEastern(date);
-  const t = d.getTime();
-  if (t < WEEK_1_MONDAY.getTime()) return null;
-  if (t >= WINTER_START.getTime() && t <= WINTER_END.getTime()) return WINTER_BREAK_CAMPUS_WEEK_NUMBER;
-  if (t < WINTER_START.getTime()) return Math.floor(easternCalendarDaysBetween(WEEK_1_MONDAY, d) / 7) + 1;
-  if (t < FIRST_SPRING_MONDAY.getTime()) return WINTER_BREAK_CAMPUS_WEEK_NUMBER + 1;
-  return WINTER_BREAK_CAMPUS_WEEK_NUMBER + 1 + Math.floor(easternCalendarDaysBetween(FIRST_SPRING_MONDAY, d) / 7);
+  return campusCalendar.weekOf(date);
 }
 
 export function getWeekFetchEnd(range: { endDate: Date }): Date {
