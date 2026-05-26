@@ -11,6 +11,7 @@ import trafficRoutes from "./routes/traffic.routes.js";
 import formLogRoutes from "./routes/form-log.routes.js";
 import activityRoutes from "./routes/activity.routes.js";
 import tutorReportRoutes from "./routes/tutor-report-log.routes.js";
+import { requestLogger } from "./middleware/request-logger.js";
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
@@ -18,11 +19,7 @@ const PORT = process.env.PORT ?? 3001;
 app.use(cors({ origin: "http://localhost:3002" }));
 app.use(express.json());
 
-// Request logger
-app.use((req, _res, next) => {
-  console.log(`${req.method} ${req.path}`);
-  next();
-});
+app.use(requestLogger);
 
 app.get("/", (_req, res) => {
   res.json({ message: "CSS Atlas API" });

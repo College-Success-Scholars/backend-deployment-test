@@ -1,5 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { logApiError, logApiRequest, logApiResponse } from "@/lib/api-log";
 
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:3001";
 const BASE64_PREFIX = "base64-";
@@ -85,10 +86,14 @@ export async function backendFetch<T>(
   path: string,
   options?: { method?: string; body?: unknown }
 ): Promise<T> {
+  const method = options?.method ?? "GET";
+  const start = Date.now();
+  logApiRequest("server", method, path);
+
   const token = await getAccessToken();
   const requestUrl = `${BACKEND_URL}${path}`;
   const res = await fetch(requestUrl, {
-    method: options?.method ?? "GET",
+    method,
     headers: {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -96,11 +101,16 @@ export async function backendFetch<T>(
     ...(options?.body !== undefined ? { body: JSON.stringify(options.body) } : {}),
     cache: "no-store",
   });
+  const durationMs = Date.now() - start;
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
-    console.error(BACKEND_URL + " " + path + " " + (err as { error?: string }).error);
-    throw new Error((err as { error?: string }).error ?? `Backend error: ${res.status}`);
+    const message = (err as { error?: string }).error ?? `Backend error: ${res.status}`;
+    logApiError("server", method, path, res.status, message, durationMs);
+    throw new Error(message);
   }
+
+  logApiResponse("server", method, path, res.status, durationMs);
   const json = await res.json();
   // Backend wraps responses in { data: ... } — unwrap automatically
   if (json != null && typeof json === "object" && "data" in json) {
