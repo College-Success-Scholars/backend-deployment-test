@@ -11,3 +11,7 @@ Triage uses the canonical default labels (`needs-triage`, `needs-info`, `ready-f
 ### Domain docs
 
 Domain docs use a single-context layout (root `CONTEXT.md` + `docs/adr/` when present). See `docs/agents/domain.md`.
+
+## Knowledge base
+
+The codebase has a specfic structure to follow and to generally maintain. See `docs/agents/codebase-notes.md`
