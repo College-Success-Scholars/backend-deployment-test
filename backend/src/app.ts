@@ -1,3 +1,29 @@
+/**
+ * @file app.ts
+ * @module backend
+ *
+ * Express application factory for the CSS Atlas API.
+ * Configures middleware, mounts all route groups under /api/*, and registers
+ * the global error handler. This module exports the `app` instance — it does
+ * not start an HTTP server (that is server.ts).
+ *
+ * ## Responsibilities
+ * - Configure CORS (comma-separated origins from CORS_ORIGIN env var)
+ * - Register global middleware: JSON body parser, request logger
+ * - Mount domain route groups under /api/<domain>
+ * - Provide a health-check endpoint at GET /
+ * - Catch-all error handler that returns { error } JSON
+ *
+ * ## What belongs here
+ * - App-level middleware registration (app.use())
+ * - Route group mounting (app.use("/api/...", router))
+ * - Global error handler
+ *
+ * ## What does NOT belong here
+ * - Business logic or service calls
+ * - Individual route/endpoint definitions (those live in routes/)
+ * - Process lifecycle (startup, shutdown — that's server.ts)
+ */
 import express from "express";
 import cors from "cors";
 import devRoutes from "./routes/dev.routes.js";

@@ -1,0 +1,35 @@
+# Agent Documentation
+
+**Location:** [`docs/agents/`](../../../docs/agents/)  
+**Docs:** `docs/dev/agents/README.md`
+
+## Navigation
+
+[← Root](../README.md) › Agent Docs
+
+---
+
+## Purpose
+
+Knowledge base for AI coding agents working in this repository. Contains codebase notes, domain vocabulary, and issue-tracking conventions that help agents understand the project context without reading all source files from scratch.
+
+---
+
+## Files
+
+| File | Source Link | Description |
+|------|-------------|-------------|
+| `codebase-notes.md` | [source](../../../docs/agents/codebase-notes.md) | Architecture overview, request flow, auth pattern, backend/frontend how-it-works |
+| `domain.md` | [source](../../../docs/agents/domain.md) | How to read and use domain documentation files |
+| `ubiquitous_language.md` | [source](../../../docs/agents/ubiquitous_language.md) | Domain glossary — authoritative definitions for all domain terms |
+| `issue-tracker.md` | [source](../../../docs/agents/issue-tracker.md) | Issue tracking conventions |
+| `triage-labels.md` | [source](../../../docs/agents/triage-labels.md) | Issue triage label definitions |
+
+---
+
+## Standards
+
+- **`codebase-notes.md` must be kept current** — update it whenever the architecture changes (new route group, new auth pattern, new service, etc.).
+- **`ubiquitous_language.md` is the source of truth for terminology** — before introducing a new term in code or comments, check or update this file.
+- **Do not put implementation details here** — agent docs describe *what exists and why*, not *how to build it*. Implementation guidance belongs in `docs/dev/`.
+- **No secrets or environment-specific values** — these files may be passed directly to AI contexts.

@@ -1,5 +1,17 @@
 /**
- * Session log types for study_session_logs and front_desk_logs tables.
+ * @file session-log.model.ts
+ * @module backend/models
+ *
+ * TypeScript types for raw session check-in/out log data.
+ * Mirrors the shape of the study_session_logs and front_desk_logs Supabase tables.
+ *
+ * ## What belongs here
+ * - Row types for front_desk_logs and study_session_logs tables
+ * - Session type constants (SESSION_TYPE_STUDY, SESSION_TYPE_FRONT_DESK, etc.)
+ * - Computed/cleaned session pair types (CleanedSession, ErroredSession)
+ *
+ * ## What does NOT belong here
+ * - Functions, queries, or runtime logic
  */
 
 export const SESSION_TYPE_STUDY = "Study Session";

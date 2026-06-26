@@ -1,3 +1,25 @@
+/**
+ * @file api-log.ts
+ * @module frontend/lib
+ *
+ * Logging utilities for backend API requests and responses.
+ * Used by both lib/server/api-client.ts (server context) and
+ * lib/client/api-client.ts (browser context) to produce consistent
+ * console log entries for all backend fetch calls.
+ *
+ * ## Responsibilities
+ * - buildBackendRequestUrl(baseUrl, path): construct full request URL
+ * - logApiRequest(scope, method, url): log outgoing request
+ * - logApiResponse(scope, method, url, status, durationMs): log successful response
+ * - logApiError(scope, method, url, status, message, durationMs): log error response
+ *
+ * ## What belongs here
+ * - API call logging helpers (pure functions, no side effects beyond console)
+ *
+ * ## What does NOT belong here
+ * - The actual fetch logic (that's in lib/server/api-client.ts or lib/client/api-client.ts)
+ * - Business logic or data transformation
+ */
 type ApiLogScope = "server" | "client";
 
 function scopeLabel(scope: ApiLogScope): string {

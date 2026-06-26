@@ -1,3 +1,32 @@
+/**
+ * @file time.ts
+ * @module shared
+ *
+ * Main public API for the shared time/calendar library.
+ * This is the single file that both backend and frontend import from
+ * (`shared/dist/time.js`). It provides the campus week calendar functions,
+ * Eastern time utilities, formatting helpers, and re-exports config types.
+ *
+ * ## Responsibilities
+ * - campusWeekToDateRange(weekNum): week number → { startDate, endDate }
+ * - dateToCampusWeek(date): date → week number
+ * - getWeekFetchEnd(weekNum): get the fetch-end boundary date for a week
+ * - formatEntryDate(iso, showTime?): format a timestamp for display
+ * - formatDuration(ms): format milliseconds as "Xh Ym Zs"
+ * - formatDate(iso): format an ISO date string
+ * - formatMinutesToHoursAndMinutes(minutes): format minutes as "Xh Ym"
+ * - Re-export all from eastern-time.ts, time-config.ts, time-types.ts
+ *
+ * ## What belongs here
+ * - Convenience wrappers over campus-calendar.ts that use the app's configured calendar
+ * - All display formatting functions for dates and durations
+ * - Re-exports that make this file the single import target
+ *
+ * ## What does NOT belong here
+ * - Low-level date arithmetic (that's eastern-time.ts)
+ * - Calendar construction (that's campus-calendar.ts)
+ * - Configuration constants (that's time-config.ts)
+ */
 import { createCampusCalendar, type CampusDay } from "./campus-calendar.js";
 import {
   addEasternCalendarDays,

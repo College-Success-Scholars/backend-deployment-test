@@ -1,3 +1,28 @@
+/**
+ * @file auth.controller.ts
+ * @module backend/controllers
+ *
+ * Authentication middleware and auth-related endpoint handlers.
+ * This is the only place in the backend that reads the Authorization header,
+ * verifies JWT tokens with Supabase, and populates req.authUser / req.profile.
+ * It also calls runWithToken() so that all downstream services can obtain
+ * a user-scoped Supabase client via getSupabaseClient().
+ *
+ * ## Responsibilities
+ * - Define the AuthenticatedRequest interface (extends Express Request)
+ * - Provide auth middleware: requireAuth, requireTeamLeaderOrAbove, requireDeveloper, requireSelfOrTeamLeader
+ * - Provide auth endpoint handlers: getMe, getProfile, getMentees, getActiveSemester
+ *
+ * ## What belongs here
+ * - JWT extraction and Supabase token verification
+ * - Role-based access control middleware
+ * - req.authUser / req.profile population
+ * - runWithToken() call that scopes the Supabase client to the request
+ *
+ * ## What does NOT belong here
+ * - Application-wide middleware (logging etc. — see middleware/)
+ * - Domain data queries unrelated to auth identity
+ */
 import type { Request, Response, NextFunction } from "express";
 import { getSupabaseClient, getSupabaseAuthClient, runWithToken } from "../services/supabase.service.js";
 import { getMyMentees } from "../services/mentee.service.js";

@@ -1,3 +1,20 @@
+/**
+ * @file invite-from-hash-redirect.tsx
+ * @module frontend/components/auth
+ *
+ * Handles Supabase magic-link invite redirects where the token is in the URL hash.
+ * Supabase invite emails send the user to the app with #access_token=... in the
+ * URL hash. This component reads the hash, sets the session, and redirects the
+ * user to the set-password page to complete their account setup.
+ * Mounted in the root app/layout.tsx so it runs on every page load.
+ *
+ * ## What belongs here
+ * - Hash-based invite token extraction and Supabase session exchange
+ *
+ * ## What does NOT belong here
+ * - General auth flow components
+ * - Password forms
+ */
 "use client";
 
 import { createClient } from "@/lib/supabase/client";

@@ -1,3 +1,27 @@
+/**
+ * @file api-client.ts
+ * @module frontend/lib/server
+ *
+ * Server-only HTTP client for calling the Express backend API.
+ * Reads the Supabase JWT from auth cookies, attaches it as an Authorization
+ * header, and fetches the requested backend endpoint. Automatically unwraps
+ * the { data: ... } envelope that all backend routes return.
+ *
+ * ## Responsibilities
+ * - getAccessToken(): extract JWT from @supabase/ssr chunked auth cookies
+ * - backendFetch<T>(path, options): authenticated fetch to backend, unwraps data
+ * - backendGet<T>(path): GET shorthand
+ * - backendPost<T>(path, body): POST shorthand
+ * - backendPatch<T>(path, body): PATCH shorthand
+ *
+ * ## What belongs here
+ * - The low-level server-side authenticated fetch infrastructure
+ *
+ * ## What does NOT belong here
+ * - Typed endpoint wrappers (those go in lib/server/data.ts)
+ * - Client-side fetch logic (that's lib/client/api-client.ts)
+ * - Business logic or data transformation
+ */
 import "server-only";
 import { cookies } from "next/headers";
 import {

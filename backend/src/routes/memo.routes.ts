@@ -1,3 +1,17 @@
+/**
+ * @file memo.routes.ts
+ * @module backend/routes
+ *
+ * Express Router for /api/memo/* endpoints.
+ * Most routes require requireTeamLeaderOrAbove. Covers weekly memo data,
+ * sync operations (light/heavy), stats refresh, and traffic counts.
+ *
+ * ## What belongs here
+ * - Route declarations for memo endpoints
+ *
+ * ## What does NOT belong here
+ * - Business logic (that's controllers/memo.controller.ts)
+ */
 import { Router } from "express";
 import { requireAuth, requireTeamLeaderOrAbove } from "../controllers/auth.controller.js";
 import * as memoController from "../controllers/memo.controller.js";

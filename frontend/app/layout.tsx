@@ -1,3 +1,20 @@
+/**
+ * @file layout.tsx
+ * @module frontend/app
+ *
+ * Root Next.js layout — wraps the entire application.
+ * Registers global fonts (Geist, Geist_Mono), sets default metadata,
+ * mounts the Toaster notification system, Vercel Analytics, and the
+ * InviteFromHashRedirect handler for magic-link email invites.
+ *
+ * ## What belongs here
+ * - App-wide providers, fonts, and metadata
+ * - Components that must wrap every page (Toaster, Analytics)
+ *
+ * ## What does NOT belong here
+ * - Page-specific layout (use route-specific layout.tsx files)
+ * - Auth guards (those go in each protected page)
+ */
 import type { Metadata } from "next";
 import { InviteFromHashRedirect } from "@/components/auth/invite-from-hash-redirect";
 import { Geist, Geist_Mono } from "next/font/google";

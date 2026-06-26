@@ -1,6 +1,22 @@
 /**
- * Form deadline checking for UI display.
- * Mirrors backend/src/services/form-log.service.ts deadline logic.
+ * @file form-deadlines.ts
+ * @module frontend/lib/format
+ *
+ * Form submission deadline calculation utilities for UI display.
+ * Computes the deadline dates for WHAF and other forms based on campus week
+ * number. Mirrors the deadline logic in backend/src/services/form-log.service.ts
+ * so the frontend can show "due by" dates without a backend call.
+ *
+ * ## Responsibilities
+ * - getWhafDeadlineForWeek(weekNum): deadline date for WHAF submissions
+ * - Other form-type deadline getters as needed
+ *
+ * ## What belongs here
+ * - Pure deadline calculation functions (no API calls, no side effects)
+ *
+ * ## What does NOT belong here
+ * - Form log data fetching
+ * - Display formatting (use form-view-helpers.ts for label/status formatting)
  */
 
 import { campusWeekToDateRange, dateToCampusWeek, ONE_DAY_MS } from "./time";

@@ -1,3 +1,21 @@
+/**
+ * @file request-logger.ts
+ * @module backend/middleware
+ *
+ * Express middleware that logs every incoming HTTP request.
+ * Attaches a "finish" listener to the response so it can capture
+ * the final status code and total duration after the handler completes.
+ *
+ * ## Responsibilities
+ * - Log HTTP method, full URL, response status code, and duration (ms)
+ *
+ * ## What belongs here
+ * - Application-wide request/response logging
+ *
+ * ## What does NOT belong here
+ * - Authentication logic (see controllers/auth.controller.ts)
+ * - Route-specific middleware
+ */
 import type { Request, Response, NextFunction } from "express";
 
 function getRequestUrl(req: Request): string {

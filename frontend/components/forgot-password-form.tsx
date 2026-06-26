@@ -1,3 +1,17 @@
+/**
+ * @file forgot-password-form.tsx
+ * @module frontend/components
+ *
+ * Password reset request form.
+ * Accepts user's email and sends a Supabase password reset email.
+ *
+ * ## What belongs here
+ * - Password reset request UI and email submission
+ *
+ * ## What does NOT belong here
+ * - The actual password update form (that's update-password-form.tsx)
+ * - Login (that's login-form.tsx)
+ */
 "use client";
 
 import { cn } from "@/lib/utils";

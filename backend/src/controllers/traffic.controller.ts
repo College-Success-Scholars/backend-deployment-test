@@ -1,3 +1,22 @@
+/**
+ * @file traffic.controller.ts
+ * @module backend/controllers
+ *
+ * Request handlers for traffic entry counting endpoints (/api/traffic/*).
+ * "Traffic" refers to the number of check-in/out entries at the front desk
+ * per campus week, used to gauge program activity levels.
+ *
+ * ## Responsibilities
+ * - Parse weekNum from params/query/body
+ * - Delegate to traffic.service.ts
+ * - Return { data } or { error } JSON
+ *
+ * ## What belongs here
+ * - Handler functions for /api/traffic/* routes
+ *
+ * ## What does NOT belong here
+ * - Traffic counting logic (that's in traffic.service.ts)
+ */
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "./auth.controller.js";
 import {

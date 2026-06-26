@@ -1,3 +1,17 @@
+/**
+ * @file update-password-form.tsx
+ * @module frontend/components
+ *
+ * Password update form for authenticated users changing their password.
+ * Also used in the set-password flow for new accounts created via invite links.
+ *
+ * ## What belongs here
+ * - Password update UI and Supabase updateUser() call
+ *
+ * ## What does NOT belong here
+ * - Password reset request (that's forgot-password-form.tsx)
+ * - Login (that's login-form.tsx)
+ */
 "use client";
 
 import { getSafeInternalPath } from "@/lib/auth/safe-next-path";

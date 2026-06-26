@@ -1,3 +1,22 @@
+/**
+ * @file memo.controller.ts
+ * @module backend/controllers
+ *
+ * Request handlers for weekly memo endpoints (/api/memo/*).
+ * The memo is the central weekly report aggregating all scholar activity,
+ * form submissions, traffic counts, and performance metrics.
+ *
+ * ## Responsibilities
+ * - Handle memo sync (light/heavy modes), weekly memo fetch, stats refresh
+ * - Delegate to memo.service.ts, memo-page.service.ts, and traffic.service.ts
+ * - Return { data } or { error } JSON
+ *
+ * ## What belongs here
+ * - Handler functions for /api/memo/* routes
+ *
+ * ## What does NOT belong here
+ * - Memo assembly/aggregation logic (that's in memo.service.ts and memo-page.service.ts)
+ */
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "./auth.controller.js";
 import { syncMemo } from "../services/memo.service.js";

@@ -1,3 +1,19 @@
+/**
+ * @file nav-active.ts
+ * @module frontend/lib
+ *
+ * Navigation state helper utilities.
+ * Provides path normalization and active-item detection for the sidebar
+ * navigation, supporting both exact matches and prefix (parent) matches.
+ *
+ * ## What belongs here
+ * - URL/pathname normalization for nav comparisons
+ * - Logic to determine which sidebar item is "active" for a given pathname
+ *
+ * ## What does NOT belong here
+ * - React hooks (those are in hooks/)
+ * - Component logic
+ */
 /** Normalize pathname for comparisons (trailing slash, empty). */
 export function normalizePath(p: string): string {
   const t = p.replace(/\/$/, "")

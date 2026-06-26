@@ -1,3 +1,23 @@
+/**
+ * @file traffic.service.ts
+ * @module backend/services
+ *
+ * Traffic entry counting service.
+ * "Traffic" measures the volume of front-desk check-in/check-out entries
+ * per campus week. Used in the memo and traffic analytics pages.
+ *
+ * ## Responsibilities
+ * - Fetch traffic sessions (check-in/out pairs) for a week
+ * - Count total entry events for a week
+ * - Batch-count entries for multiple weeks (for trend charts)
+ *
+ * ## What belongs here
+ * - All Supabase queries on traffic/session_log tables for entry counting
+ *
+ * ## What does NOT belong here
+ * - Session log cleaning/pairing (that's session-log.service.ts)
+ * - HTTP request/response logic
+ */
 import { getSupabaseClient } from "./supabase.service.js";
 import { campusWeekToDateRange, dateToCampusWeek, getWeekFetchEnd } from "./time.service.js";
 import type { TrafficRow, TrafficSession, WeekEntryCount } from "../models/traffic.model.js";

@@ -1,3 +1,17 @@
+/**
+ * @file sign-up-form.tsx
+ * @module frontend/components
+ *
+ * New user registration form component.
+ * Calls Supabase signUp and redirects to the sign-up-success page on completion.
+ *
+ * ## What belongs here
+ * - Registration form UI and submission handler
+ *
+ * ## What does NOT belong here
+ * - Login (that's login-form.tsx)
+ * - Invite-link flows (that's components/auth/invite-from-hash-redirect.tsx)
+ */
 "use client";
 
 import { cn } from "@/lib/utils";

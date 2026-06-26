@@ -1,3 +1,25 @@
+/**
+ * @file session-record.service.ts
+ * @module backend/services
+ *
+ * Weekly aggregated session record service.
+ * Session records are computed summaries of raw session logs, stored in
+ * front_desk_records and study_session_records Supabase tables. Records
+ * capture total minutes per scholar per week and excuse information.
+ *
+ * ## Responsibilities
+ * - Fetch session records by UID, weekNum, or both
+ * - Sync (recompute) records for a week — for one UID or all UIDs
+ * - Update excuse fields on existing records
+ *
+ * ## What belongs here
+ * - All Supabase queries on front_desk_records and study_session_records tables
+ * - Record computation and sync logic (derives from raw logs)
+ *
+ * ## What does NOT belong here
+ * - Raw log fetching (that's session-log.service.ts)
+ * - HTTP request/response logic
+ */
 import { getSupabaseClient } from "./supabase.service.js";
 import { campusWeekToDateRange, getEasternDayOfWeek, getWeekFetchEnd } from "./time.service.js";
 import {

@@ -1,3 +1,23 @@
+/**
+ * @file session-log.controller.ts
+ * @module backend/controllers
+ *
+ * Request handlers for raw session check-in/out log endpoints (/api/session-logs/*).
+ * Handles both front-desk and study-session log variants including raw fetch,
+ * cleaned/errored pairs, in-room open sessions, and completed sessions.
+ *
+ * ## Responsibilities
+ * - Parse date and scholarUids from request bodies
+ * - Delegate to session-log.service.ts functions
+ * - Return structured { data } or { error } JSON responses
+ *
+ * ## What belongs here
+ * - Handler functions for /api/session-logs/* routes
+ *
+ * ## What does NOT belong here
+ * - Session log parsing or cleaning logic (that's in session-log.service.ts)
+ * - Supabase queries
+ */
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "./auth.controller.js";
 import {

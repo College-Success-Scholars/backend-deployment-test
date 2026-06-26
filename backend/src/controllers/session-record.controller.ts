@@ -1,3 +1,24 @@
+/**
+ * @file session-record.controller.ts
+ * @module backend/controllers
+ *
+ * Request handlers for weekly aggregated session record endpoints (/api/session-records/*).
+ * Records are computed/derived summaries of raw session logs, stored in
+ * front_desk_records and study_session_records Supabase tables.
+ * Supports GET, sync (recompute), and excuse update operations.
+ *
+ * ## Responsibilities
+ * - Parse uid, weekNum, and excuse fields from params/body
+ * - Delegate to session-record.service.ts
+ * - Return { data } or { error } JSON
+ *
+ * ## What belongs here
+ * - Handler functions for /api/session-records/* routes
+ *
+ * ## What does NOT belong here
+ * - Record computation logic (that's in session-record.service.ts)
+ * - Supabase queries
+ */
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "./auth.controller.js";
 import {

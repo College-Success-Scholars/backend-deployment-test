@@ -1,3 +1,19 @@
+/**
+ * @file middleware.ts
+ * @module frontend/lib/supabase
+ *
+ * Supabase session refresh middleware for Next.js Edge runtime.
+ * Refreshes the user's Supabase auth session on every request so that
+ * Server Components always receive a valid, up-to-date JWT in cookies.
+ * Called by the root frontend/middleware.ts file.
+ *
+ * ## What belongs here
+ * - updateSession(request): the session refresh middleware function
+ *
+ * ## What does NOT belong here
+ * - Auth guards (those go in individual pages via lib/supabase/server.ts)
+ * - Business logic
+ */
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { hasEnvVars } from "../utils";

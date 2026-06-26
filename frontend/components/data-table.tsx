@@ -1,3 +1,18 @@
+/**
+ * @file data-table.tsx
+ * @module frontend/components
+ *
+ * Generic reusable sortable and filterable data table component.
+ * Built on TanStack Table (react-table) with shadcn/ui table primitives.
+ * Supports column sorting, text filtering, expandable rows, and pagination.
+ *
+ * ## What belongs here
+ * - Generic data table logic applicable across multiple domains
+ *
+ * ## What does NOT belong here
+ * - Domain-specific column definitions (those live in the pages or components that use this table)
+ * - Data fetching
+ */
 "use client";
 
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronRight } from "lucide-react";

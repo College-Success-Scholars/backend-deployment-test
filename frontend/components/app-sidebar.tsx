@@ -1,3 +1,19 @@
+/**
+ * @file app-sidebar.tsx
+ * @module frontend/components
+ *
+ * Main application sidebar component.
+ * Renders the full navigation sidebar including nav groups (main, secondary),
+ * project selector, and user menu. Composed of NavMain, NavProjects, NavUser,
+ * and NavSecondary sub-components.
+ *
+ * ## What belongs here
+ * - Sidebar composition and nav item configuration
+ *
+ * ## What does NOT belong here
+ * - Individual nav item components (NavMain, NavProjects, etc. are separate files)
+ * - Route definitions or auth logic
+ */
 "use client"
 
 import * as React from "react"

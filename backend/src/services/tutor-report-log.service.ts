@@ -1,3 +1,22 @@
+/**
+ * @file tutor-report-log.service.ts
+ * @module backend/services
+ *
+ * Tutor session report log service.
+ * Queries the tutor_report_logs Supabase table to track whether scholars
+ * attended required tutoring sessions each campus week.
+ *
+ * ## Responsibilities
+ * - Fetch tutor report logs by weekNum, by uid, or by uid+weekNum
+ * - Check if a specific scholar attended tutoring for a given week
+ *
+ * ## What belongs here
+ * - All Supabase queries on tutor_report_logs table
+ *
+ * ## What does NOT belong here
+ * - Session log queries (that's session-log.service.ts)
+ * - HTTP request/response logic
+ */
 import { getSupabaseClient } from "./supabase.service.js";
 import { campusWeekToDateRange, getWeekFetchEnd } from "./time.service.js";
 import type { TutorReportLogRow } from "../models/tutor-report-log.model.js";

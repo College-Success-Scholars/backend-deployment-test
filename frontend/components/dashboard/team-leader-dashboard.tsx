@@ -1,3 +1,18 @@
+/**
+ * @file team-leader-dashboard.tsx
+ * @module frontend/components/dashboard
+ *
+ * Dashboard view for users with the team_leader role.
+ * Shows a summary of mentee activity, form completion rates, session hours,
+ * and other team leader-relevant KPIs. Rendered by app/dashboard/page.tsx.
+ *
+ * ## What belongs here
+ * - Team leader-specific dashboard layout and data aggregation
+ *
+ * ## What does NOT belong here
+ * - Scholar-only content (that's scholar-dashboard.tsx)
+ * - Admin content (that's admin-dashboard.tsx)
+ */
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { UserCheck } from "lucide-react"

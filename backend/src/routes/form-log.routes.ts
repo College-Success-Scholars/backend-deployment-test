@@ -1,3 +1,18 @@
+/**
+ * @file form-log.routes.ts
+ * @module backend/routes
+ *
+ * Express Router for /api/form-logs/* endpoints.
+ * Covers MCF, WHAF, and WPL form log queries (30+ endpoints).
+ * Most routes require requireAuth; some team-leader stats routes
+ * may require requireTeamLeaderOrAbove.
+ *
+ * ## What belongs here
+ * - Route declarations for form log endpoints
+ *
+ * ## What does NOT belong here
+ * - Business logic (that's controllers/form-log.controller.ts)
+ */
 import { Router } from "express";
 import { requireAuth } from "../controllers/auth.controller.js";
 import * as formLogController from "../controllers/form-log.controller.js";

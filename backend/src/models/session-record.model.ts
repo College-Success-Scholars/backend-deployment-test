@@ -1,5 +1,17 @@
 /**
- * Session record types for front_desk_records and study_session_records tables.
+ * @file session-record.model.ts
+ * @module backend/models
+ *
+ * TypeScript types for weekly aggregated session records.
+ * Mirrors the shape of the front_desk_records and study_session_records Supabase tables.
+ * Records are computed summaries of raw logs, including total minutes and excuse fields.
+ *
+ * ## What belongs here
+ * - Row types for front_desk_records and study_session_records tables
+ * - Excuse update input types
+ *
+ * ## What does NOT belong here
+ * - Functions, queries, or runtime logic
  */
 
 export interface FrontDeskRecordRow {

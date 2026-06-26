@@ -1,3 +1,27 @@
+/**
+ * @file form-log.service.ts
+ * @module backend/services
+ *
+ * Form submission log access and aggregation service.
+ * Handles all three form types: MCF (Mentee Check-in Form),
+ * WHAF (Weekly Hours Activity Form), and WPL (Weekly Performance Log).
+ * Provides individual lookups, batch queries by multiple UIDs, late submission
+ * filtering, and team leader performance stat aggregation.
+ *
+ * ## Responsibilities
+ * - Fetch MCF/WHAF/WPL logs by weekNum, uid, or batch of uids
+ * - Filter by late submission status
+ * - Aggregate submission stats for team leaders
+ * - Get recent form submissions for a scholar profile
+ *
+ * ## What belongs here
+ * - All Supabase queries on form log tables (mcf_form_logs, wahf_form_logs, wpl_form_logs)
+ * - Form log aggregation and stat computation
+ *
+ * ## What does NOT belong here
+ * - Form display formatting (that's frontend lib/format/)
+ * - HTTP request/response logic
+ */
 import { getSupabaseClient } from "./supabase.service.js";
 import { campusWeekToDateRange, dateToCampusWeek, getWeekFetchEnd, ONE_DAY_MS } from "./time.service.js";
 import type {

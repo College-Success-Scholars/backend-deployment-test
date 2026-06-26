@@ -1,5 +1,17 @@
 /**
- * Form log types for mcf_form_logs, whaf_form_logs, wpl_form_logs tables.
+ * @file form-log.model.ts
+ * @module backend/models
+ *
+ * TypeScript types for form submission log data.
+ * Covers all three form types: MCF (Mentee Check-in Form),
+ * WHAF (Weekly Hours Activity Form), and WPL (Weekly Performance Log).
+ *
+ * ## What belongs here
+ * - Row types for mcf_form_logs, wahf_form_logs, wpl_form_logs tables
+ * - Aggregated stat types (TeamLeaderFormStats, etc.)
+ *
+ * ## What does NOT belong here
+ * - Functions, queries, or runtime logic
  */
 
 export interface McfFormLogRow {

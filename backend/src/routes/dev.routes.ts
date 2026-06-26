@@ -1,3 +1,18 @@
+/**
+ * @file dev.routes.ts
+ * @module backend/routes
+ *
+ * Express Router for /api/dev/* endpoints.
+ * All routes require requireDeveloper (app_role === "developer").
+ * Exposes diagnostic and operational endpoints not available to other roles.
+ *
+ * ## What belongs here
+ * - Route declarations for developer-only endpoints
+ *
+ * ## What does NOT belong here
+ * - Business logic (that's controllers/dev.controller.ts)
+ * - Routes accessible to non-developer roles
+ */
 import { Router } from "express";
 import { requireDeveloper } from "../controllers/auth.controller.js";
 import * as devController from "../controllers/dev.controller.js";

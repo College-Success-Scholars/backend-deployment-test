@@ -1,3 +1,25 @@
+/**
+ * @file data.ts
+ * @module frontend/lib/server
+ *
+ * Typed wrapper functions for every backend API endpoint.
+ * This is the preferred way for Server Components and pages to fetch domain data.
+ * Each function calls backendGet/backendPost/backendPatch from api-client.ts
+ * and returns a strongly-typed result.
+ *
+ * ## Responsibilities
+ * - Provide a typed function for every backend endpoint consumed by the frontend
+ * - Keep endpoint paths and return types co-located
+ *
+ * ## What belongs here
+ * - One function per backend endpoint (or logical operation)
+ * - Type annotations for request params and response shapes
+ *
+ * ## What does NOT belong here
+ * - The fetch infrastructure (that's api-client.ts)
+ * - Business logic or data transformation
+ * - Client-side data fetching (that's lib/client/api-client.ts)
+ */
 import "server-only";
 import { backendGet, backendPost, backendPatch } from "./api-client";
 import type {

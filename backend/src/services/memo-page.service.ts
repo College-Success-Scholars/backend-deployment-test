@@ -1,3 +1,24 @@
+/**
+ * @file memo-page.service.ts
+ * @module backend/services
+ *
+ * Memo page data assembly service.
+ * Aggregates all data needed to render the weekly memo page into a single
+ * response object. Calls multiple domain services and merges their results.
+ *
+ * ## Responsibilities
+ * - Fetch and combine session records, form logs, traffic, and user data
+ * - Compute derived metrics (completion rates, traffic trends, etc.)
+ * - Return a fully assembled getMemoPageData(weekNum) payload
+ *
+ * ## What belongs here
+ * - Cross-domain data assembly for the /api/memo/page-data endpoint
+ *
+ * ## What does NOT belong here
+ * - Individual domain queries (those live in their own service files)
+ * - Memo sync operations (that's memo.service.ts)
+ * - HTTP request/response logic
+ */
 import { campusWeekToDateRange, dateToCampusWeek, getWeekFetchEnd } from "./time.service.js";
 import { fetchAllUsersForMemo, fetchTeamLeaders } from "./user.service.js";
 import { getStudySessionRecordsForWeekAll, getFrontDeskRecordsForWeekAll } from "./session-record.service.js";

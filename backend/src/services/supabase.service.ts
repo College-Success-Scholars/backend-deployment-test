@@ -1,3 +1,35 @@
+/**
+ * @file supabase.service.ts
+ * @module backend/services
+ *
+ * Supabase client factory with per-request JWT binding via AsyncLocalStorage.
+ * This is the infrastructure foundation for all database access in the backend.
+ * All domain services call getSupabaseClient() to get a user-scoped client
+ * that has the current request's JWT as the Authorization header, ensuring
+ * Supabase Row Level Security (RLS) is applied automatically.
+ *
+ * ## Responsibilities
+ * - Store per-request JWT in AsyncLocalStorage (via runWithToken)
+ * - Create per-request Supabase clients with user JWT (getSupabaseClient)
+ * - Provide a cached auth-only client for token verification (getSupabaseAuthClient)
+ *
+ * ## What belongs here
+ * - Supabase client creation and JWT binding infrastructure
+ *
+ * ## What does NOT belong here
+ * - Domain queries (those go in domain service files)
+ * - Any business logic
+ *
+ * ## Usage pattern
+ * ```typescript
+ * // In auth middleware:
+ * runWithToken(token, () => next());
+ *
+ * // In any service function:
+ * const supabase = getSupabaseClient(); // reads token from AsyncLocalStorage
+ * const { data } = await supabase.from("profiles").select("*");
+ * ```
+ */
 import { AsyncLocalStorage } from "node:async_hooks";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 

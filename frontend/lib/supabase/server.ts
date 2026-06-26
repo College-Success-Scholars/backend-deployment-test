@@ -1,3 +1,30 @@
+/**
+ * @file server.ts
+ * @module frontend/lib/supabase
+ *
+ * Server-side Supabase client factory and authentication helper functions.
+ * This is the primary module for auth in Server Components, layouts, and pages.
+ * Uses PKCE flow and reads/writes cookies via next/headers.
+ *
+ * ## Responsibilities
+ * - createClient(): create a server-side Supabase client (call inside each function)
+ * - getCurrentUser(): get current user or null (soft auth check)
+ * - getCurrentUserWithProfile(): get user + merged profiles/user_roster row
+ * - requireUser(): get user or throw (hard auth gate)
+ * - requireUserWithProfile(): get user + profile or throw
+ * - requireTeamLeaderOrAbove(): get user or redirect to /dashboard
+ * - requireDeveloper(): get developer user or redirect to /dashboard
+ * - getDeveloperUser(): soft check for developer role
+ * - getTeamLeaderOrAboveUser(): soft check for team_leader+ role
+ *
+ * ## What belongs here
+ * - Server-side Supabase auth client and all auth helper functions
+ * - ProfilesRow type (merged profiles + user_roster shape)
+ *
+ * ## What does NOT belong here
+ * - Domain data queries on non-auth tables (use lib/server/api-client.ts)
+ * - Client-side auth (that's lib/supabase/client.ts)
+ */
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import type { User } from "@supabase/supabase-js";

@@ -1,3 +1,24 @@
+/**
+ * @file form-log.controller.ts
+ * @module backend/controllers
+ *
+ * Request handlers for form submission log endpoints (/api/form-logs/*).
+ * Covers MCF (Mentee Check-in Form), WHAF (Weekly Hours Activity Form),
+ * and WPL (Weekly Performance Log) form logs. Includes individual lookups,
+ * batch operations by multiple UIDs, and team leader aggregation stats.
+ *
+ * ## Responsibilities
+ * - Parse weekNum, uid, uids from params/query/body
+ * - Delegate to form-log.service.ts and related services
+ * - Return { data } or { error } JSON
+ *
+ * ## What belongs here
+ * - Handler functions for /api/form-logs/* routes (30+ endpoints)
+ *
+ * ## What does NOT belong here
+ * - Form log aggregation logic (that's in form-log.service.ts)
+ * - Supabase queries (except incidental profile lookups via supabase.service.ts)
+ */
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "./auth.controller.js";
 import { getSupabaseClient } from "../services/supabase.service.js";

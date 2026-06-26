@@ -1,3 +1,26 @@
+/**
+ * @file campus-calendar.ts
+ * @module shared
+ *
+ * Campus week calendar factory and implementation.
+ * Constructs a calendar from the academic year configuration in time-config.ts
+ * and provides methods to convert between dates and campus week numbers.
+ * Week 1 starts on FALL_SEMESTER_FIRST_DAY; winter break weeks are
+ * numbered but marked as break weeks.
+ *
+ * ## Responsibilities
+ * - Build the campus week calendar from config constants
+ * - weekOf(date): convert a date to its campus week number
+ * - rangeOf(weekNum): convert a campus week number to its date range
+ *
+ * ## What belongs here
+ * - Campus week calendar construction and date<→>week conversion
+ *
+ * ## What does NOT belong here
+ * - Eastern time date arithmetic (that's eastern-time.ts)
+ * - Configuration constants (that's time-config.ts)
+ * - Formatting utilities (those are in time.ts)
+ */
 import {
   addEasternCalendarDays,
   easternCalendarDaysBetween,

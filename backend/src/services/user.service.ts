@@ -1,3 +1,27 @@
+/**
+ * @file user.service.ts
+ * @module backend/services
+ *
+ * User and scholar data access service.
+ * Fetches user profiles, roles, required hours, eligibility status, and
+ * team leader metadata from Supabase. All queries are RLS-scoped via
+ * getSupabaseClient().
+ *
+ * ## Responsibilities
+ * - Fetch scholar display names by UID array
+ * - Fetch required front-desk and study-session hours per scholar
+ * - Filter UIDs to only eligible scholars
+ * - Fetch all user UIDs, memo users, team leaders, scholar UIDs
+ * - Get a single user's data by UID
+ *
+ * ## What belongs here
+ * - All Supabase queries on profiles, user_roster tables
+ * - User-related data transformations (mapping, filtering)
+ *
+ * ## What does NOT belong here
+ * - HTTP request/response logic
+ * - Authentication (that's auth.controller.ts)
+ */
 import { getSupabaseClient } from "./supabase.service.js";
 import type { MemoUserRow, TeamLeaderRow } from "../models/user.model.js";
 

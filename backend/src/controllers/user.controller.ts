@@ -1,3 +1,21 @@
+/**
+ * @file user.controller.ts
+ * @module backend/controllers
+ *
+ * Request handlers for user/scholar data endpoints (/api/users/*).
+ * Each handler validates request inputs and delegates to user.service.ts.
+ *
+ * ## Responsibilities
+ * - Parse and validate request params/body for user endpoints
+ * - Call user.service.ts functions and return { data } or { error } JSON
+ *
+ * ## What belongs here
+ * - Handler functions for /api/users/* routes
+ *
+ * ## What does NOT belong here
+ * - Supabase queries (those are in user.service.ts)
+ * - Business logic beyond input validation
+ */
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "./auth.controller.js";
 import {

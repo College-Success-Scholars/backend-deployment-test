@@ -1,3 +1,18 @@
+/**
+ * @file idle-reset-provider.tsx
+ * @module frontend/components
+ *
+ * Provider component that wraps the application and signs the user out
+ * automatically after a configurable period of inactivity. Uses the
+ * useIdleReset hook to detect idle state, then calls Supabase signOut.
+ *
+ * ## What belongs here
+ * - Idle timeout detection wired to Supabase sign-out
+ *
+ * ## What does NOT belong here
+ * - Idle detection logic (that's in hooks/use-idle-reset.ts)
+ * - Any UI rendering beyond wrapping children
+ */
 "use client";
 
 import { useIdleReset } from "@/hooks/use-idle-reset";

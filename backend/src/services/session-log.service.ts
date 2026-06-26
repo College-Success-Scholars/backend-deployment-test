@@ -1,3 +1,26 @@
+/**
+ * @file session-log.service.ts
+ * @module backend/services
+ *
+ * Raw session check-in/out log access service.
+ * Queries Supabase for front-desk and study-session log entries, and provides
+ * cleaning logic to match check-in/check-out pairs, identify open sessions,
+ * and filter completed sessions.
+ *
+ * ## Responsibilities
+ * - Fetch raw front-desk and study-session logs by date range and/or scholar UIDs
+ * - Match check-in/out pairs and identify errored/unpaired entries
+ * - Return scholars currently in-room (open sessions)
+ * - Return completed (properly paired) sessions
+ *
+ * ## What belongs here
+ * - All Supabase queries on session log tables
+ * - Check-in/out pairing and cleaning logic
+ *
+ * ## What does NOT belong here
+ * - Weekly record aggregation (that's session-record.service.ts)
+ * - HTTP request/response logic
+ */
 import { getSupabaseClient } from "./supabase.service.js";
 import { getStartOfDayEastern } from "./time.service.js";
 import { fetchScholarNamesByUids } from "./user.service.js";

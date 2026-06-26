@@ -1,3 +1,18 @@
+/**
+ * @file login-form.tsx
+ * @module frontend/components
+ *
+ * Email/password login form component.
+ * Calls Supabase signInWithPassword and redirects to /dashboard on success.
+ * Handles form validation, loading state, and error display.
+ *
+ * ## What belongs here
+ * - Login form UI and submission handler
+ *
+ * ## What does NOT belong here
+ * - Social/OAuth login (add a separate component if needed)
+ * - Password reset flow (that's forgot-password-form.tsx)
+ */
 "use client";
 
 import { cn } from "@/lib/utils";

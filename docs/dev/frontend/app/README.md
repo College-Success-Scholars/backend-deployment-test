@@ -1,0 +1,61 @@
+# frontend/app
+
+**Location:** [`frontend/app/`](../../../../frontend/app/)  
+**Docs:** `docs/dev/frontend/app/README.md`
+
+## Navigation
+
+[← Root](../../README.md) › [Frontend](../README.md) › app
+
+Children: [auth/](auth/README.md) · [dashboard/](dashboard/README.md) · [dev/](dev/README.md)
+
+---
+
+## Purpose
+
+Next.js App Router directory. Every `page.tsx`, `layout.tsx`, and `route.ts` here becomes a URL route. The folder structure maps directly to the URL structure.
+
+---
+
+## Files
+
+| File | Source Link | Description |
+|------|-------------|-------------|
+| `layout.tsx` | [source](../../../../frontend/app/layout.tsx) | Root layout — fonts (Geist), metadata, `<Toaster>`, Vercel Analytics, wraps entire app |
+| `page.tsx` | [source](../../../../frontend/app/page.tsx) | Landing page — shows hero for unauthenticated users, redirects authenticated users to `/dashboard` |
+| `globals.css` | [source](../../../../frontend/app/globals.css) | Global CSS — Tailwind base, CSS custom properties for theme tokens |
+
+---
+
+## Subdirectories
+
+| Directory | URL Prefix | Docs | Description |
+|-----------|-----------|------|-------------|
+| `auth/` | `/auth/*` | [auth/README.md](auth/README.md) | Login, sign-up, password reset, email confirmation |
+| `dashboard/` | `/dashboard/*` | [dashboard/README.md](dashboard/README.md) | Main authenticated app: memo, personal, mentee, room, directory, settings |
+| `dev/` | `/dev/*` | [dev/README.md](dev/README.md) | Developer-only diagnostic pages |
+| `memo/` | `/memo/*` | _(no docs)_ | Standalone public/shareable memo view |
+| `traffic/` | `/traffic/*` | _(no docs)_ | Standalone public/shareable traffic view |
+
+---
+
+## Route Conventions
+
+| File | Purpose |
+|------|---------|
+| `layout.tsx` | Shared UI shell for a route segment and its children |
+| `page.tsx` | The UI for the URL — renders for `GET /path` |
+| `route.ts` | API route handler — handles non-UI HTTP requests |
+| `loading.tsx` | Streaming loading UI (Suspense boundary) |
+| `error.tsx` | Error boundary UI |
+
+---
+
+## Standards
+
+- **Server Components by default** — page files should be Server Components unless they need interactivity (`"use client"`).
+- **Auth gates in pages** — call `requireUser()`, `requireTeamLeaderOrAbove()`, or `requireDeveloper()` from `lib/supabase/server.ts` at the top of protected pages.
+- **Data fetching in pages/layouts** — pages call `lib/server/data.ts` or `lib/server/api-client.ts`; components receive data as props.
+- **No global state** — do not use React context or global stores for data that can be fetched server-side.
+- **`globals.css` is the only global stylesheet** — all component styles use Tailwind utility classes.
+- **`layout.tsx` at root level only** — avoid deep nested layouts unless there is a clear shared UI shell.

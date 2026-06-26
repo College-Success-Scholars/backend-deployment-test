@@ -1,3 +1,19 @@
+/**
+ * @file page.tsx
+ * @module frontend/app
+ *
+ * Root landing page (/).
+ * Shows the marketing hero to unauthenticated visitors.
+ * Redirects authenticated users directly to /dashboard.
+ *
+ * ## What belongs here
+ * - Public landing page rendering
+ * - Auth redirect for already-logged-in users
+ *
+ * ## What does NOT belong here
+ * - Authenticated-only content
+ * - Auth forms (those are in app/auth/)
+ */
 import { redirect } from "next/navigation";
 import { backendGet } from "@/lib/server/api-client";
 import { LandingHeader } from "@/components/marketing/landing-header";

@@ -1,3 +1,24 @@
+/**
+ * @file actions.ts
+ * @module frontend/lib/server
+ *
+ * Next.js Server Actions for form submissions and data mutations from the frontend.
+ * Server Actions marked with "use server" can be called directly from Client Components
+ * and are executed securely on the server.
+ *
+ * ## Responsibilities
+ * - Handle profile update mutations (basic info, etc.)
+ * - Validate inputs with Zod before writing to Supabase or calling the backend
+ * - Revalidate Next.js cache paths after mutations
+ *
+ * ## What belongs here
+ * - "use server" functions that handle form submissions or mutations
+ * - Zod input validation schemas
+ *
+ * ## What does NOT belong here
+ * - Data fetching (use data.ts or api-client.ts instead)
+ * - Client-side logic
+ */
 "use server"
 
 import { createClient } from "@/lib/supabase/server"

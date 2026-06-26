@@ -1,3 +1,22 @@
+/**
+ * @file activity.controller.ts
+ * @module backend/controllers
+ *
+ * Request handler for daily scholar activity endpoints (/api/daily-activity/*).
+ * Daily activity tracks the total minutes a scholar was active on a given day,
+ * derived from session logs and aggregated per mentee per week.
+ *
+ * ## Responsibilities
+ * - Parse menteeUid, weekNum, logSource from query params
+ * - Delegate to daily-scholar-activity.service.ts
+ * - Return { data } or { error } JSON
+ *
+ * ## What belongs here
+ * - Handler functions for /api/daily-activity/* routes
+ *
+ * ## What does NOT belong here
+ * - Activity aggregation logic (that's in daily-scholar-activity.service.ts)
+ */
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "./auth.controller.js";
 import { getTotalMinutesForMenteeWeek } from "../services/daily-scholar-activity.service.js";

@@ -1,3 +1,18 @@
+/**
+ * @file session-record.routes.ts
+ * @module backend/routes
+ *
+ * Express Router for /api/session-records/* endpoints.
+ * All routes require requireAuth. Covers GET by uid/week,
+ * sync (single and all), and excuse update for front-desk
+ * and study session record types.
+ *
+ * ## What belongs here
+ * - Route declarations for session record endpoints
+ *
+ * ## What does NOT belong here
+ * - Business logic (that's controllers/session-record.controller.ts)
+ */
 import { Router } from "express";
 import { requireAuth } from "../controllers/auth.controller.js";
 import * as sessionRecordController from "../controllers/session-record.controller.js";

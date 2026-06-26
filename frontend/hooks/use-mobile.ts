@@ -1,3 +1,21 @@
+/**
+ * @file use-mobile.ts
+ * @module frontend/hooks
+ *
+ * React hook that returns true when the viewport is narrower than the
+ * mobile breakpoint (768px). Used to conditionally render mobile-optimized
+ * layouts or hide desktop-only elements.
+ *
+ * ## Responsibilities
+ * - Listen to window resize events and update the mobile state
+ * - Return boolean: true = mobile viewport, false = desktop viewport
+ *
+ * ## What belongs here
+ * - Viewport width detection logic only
+ *
+ * ## What does NOT belong here
+ * - Any UI rendering, Supabase, or API logic
+ */
 import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768

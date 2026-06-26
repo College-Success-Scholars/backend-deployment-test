@@ -1,3 +1,19 @@
+/**
+ * @file next.config.ts
+ * @module frontend
+ *
+ * Next.js configuration for the CSS Atlas frontend.
+ * Enables access to files above the Next.js project root (externalDir)
+ * so both webpack and Turbopack can resolve shared/dist/ imports.
+ *
+ * ## What belongs here
+ * - Next.js build and runtime configuration
+ * - Turbopack/webpack root settings for shared library resolution
+ *
+ * ## What does NOT belong here
+ * - Environment variable defaults (use .env.local)
+ * - Route configuration (that's in app/ directory structure)
+ */
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {

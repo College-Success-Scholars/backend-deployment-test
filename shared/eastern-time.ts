@@ -1,3 +1,29 @@
+/**
+ * @file eastern-time.ts
+ * @module shared
+ *
+ * Timezone-aware date utilities for Eastern Time (America/New_York).
+ * All date arithmetic that the campus calendar depends on goes through
+ * these utilities to ensure correctness across DST transitions.
+ * Safe to use in both Node (backend) and browser/Edge (frontend).
+ *
+ * ## Responsibilities
+ * - Parse "YYYY-MM-DD" date strings as Eastern-time dates
+ * - Get Eastern date components (year, month, day)
+ * - Calculate start-of-day in Eastern time
+ * - Add/subtract calendar days respecting Eastern DST
+ * - Count calendar days between two dates in Eastern time
+ * - Get day-of-week (0=Sun) in Eastern time
+ * - Find the Monday of the week containing a given date
+ *
+ * ## What belongs here
+ * - Pure date utility functions that are timezone-aware for Eastern Time
+ *
+ * ## What does NOT belong here
+ * - Calendar week number logic (that's campus-calendar.ts)
+ * - Campus-specific configuration (that's time-config.ts)
+ * - Any I/O, network, or side effects
+ */
 export const EASTERN_TIMEZONE = "America/New_York";
 export const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 

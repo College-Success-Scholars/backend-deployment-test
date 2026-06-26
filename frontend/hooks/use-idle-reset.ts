@@ -1,3 +1,23 @@
+/**
+ * @file use-idle-reset.ts
+ * @module frontend/hooks
+ *
+ * React hook that detects user inactivity and triggers a callback after a
+ * configurable timeout. Used by IdleResetProvider to sign the user out
+ * automatically after extended periods of inactivity.
+ *
+ * ## Responsibilities
+ * - Listen for mouse, keyboard, and touch activity to reset the idle timer
+ * - Call the provided onReset callback when the idle timeout expires
+ * - Clean up event listeners on unmount
+ *
+ * ## What belongs here
+ * - Idle detection logic only
+ *
+ * ## What does NOT belong here
+ * - Sign-out logic (that's in the IdleResetProvider component that uses this hook)
+ * - Any Supabase or API calls
+ */
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";

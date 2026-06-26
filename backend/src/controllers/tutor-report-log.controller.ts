@@ -1,3 +1,21 @@
+/**
+ * @file tutor-report-log.controller.ts
+ * @module backend/controllers
+ *
+ * Request handlers for tutoring report log endpoints (/api/tutor-reports/*).
+ * Tutor reports track whether scholars attended tutoring sessions each week.
+ *
+ * ## Responsibilities
+ * - Parse weekNum and uid from route params
+ * - Delegate to tutor-report-log.service.ts
+ * - Return { data } or { error } JSON
+ *
+ * ## What belongs here
+ * - Handler functions for /api/tutor-reports/* routes
+ *
+ * ## What does NOT belong here
+ * - Tutor report query logic (that's in tutor-report-log.service.ts)
+ */
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "./auth.controller.js";
 import {

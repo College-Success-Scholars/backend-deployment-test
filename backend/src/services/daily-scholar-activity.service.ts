@@ -1,3 +1,23 @@
+/**
+ * @file daily-scholar-activity.service.ts
+ * @module backend/services
+ *
+ * Daily scholar activity service.
+ * Queries per-day activity minutes for a scholar across a campus week.
+ * Activity minutes are derived from session logs and stored in a
+ * daily_scholar_activity table, filtered by mentee UID, week number,
+ * and log source (front_desk vs study_session).
+ *
+ * ## Responsibilities
+ * - Fetch total activity minutes for a mentee for a given week and log source
+ *
+ * ## What belongs here
+ * - Queries on the daily_scholar_activity table
+ *
+ * ## What does NOT belong here
+ * - Session log queries (that's session-log.service.ts)
+ * - HTTP request/response logic
+ */
 import { getSupabaseClient } from "./supabase.service.js";
 import type { DailyScholarActivityMinutesRow } from "../models/daily-scholar-activity.model.js";
 

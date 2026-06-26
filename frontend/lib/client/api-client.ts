@@ -1,3 +1,27 @@
+/**
+ * @file api-client.ts
+ * @module frontend/lib/client
+ *
+ * Browser-side HTTP client for calling the Express backend API from Client Components.
+ * Reads the current Supabase session token using the browser Supabase client
+ * and attaches it as Authorization: Bearer to backend requests.
+ * Automatically unwraps the { data: ... } envelope that all backend routes return.
+ *
+ * ## Responsibilities
+ * - getAccessToken(): get JWT from browser Supabase session
+ * - backendFetch<T>(path, options): authenticated browser fetch to backend
+ * - backendGet<T>(path): GET shorthand
+ * - backendPost<T>(path, body): POST shorthand
+ * - backendPatch<T>(path, body): PATCH shorthand
+ *
+ * ## What belongs here
+ * - Client-side authenticated fetch to the backend
+ *
+ * ## What does NOT belong here
+ * - Server-side fetch (that's lib/server/api-client.ts)
+ * - import "server-only" — this runs in the browser
+ * - next/headers or cookies() — those are server-only APIs
+ */
 "use client";
 
 import { createClient } from "@/lib/supabase/client";

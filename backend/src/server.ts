@@ -1,3 +1,27 @@
+/**
+ * @file server.ts
+ * @module backend
+ *
+ * Process entry point for the CSS Atlas Express API.
+ * Validates required environment variables at startup (fail-fast), then starts
+ * the HTTP server. Handles graceful shutdown on SIGTERM so Railway/Vercel can
+ * drain in-flight requests cleanly.
+ *
+ * ## Responsibilities
+ * - Load environment variables via dotenv
+ * - Assert SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY are present
+ * - Start the HTTP server on PORT (default 3001)
+ * - Register SIGTERM handler for graceful shutdown
+ *
+ * ## What belongs here
+ * - Process lifecycle logic (startup, shutdown)
+ * - Environment variable validation
+ *
+ * ## What does NOT belong here
+ * - Express app configuration (that's app.ts)
+ * - Route definitions or middleware
+ * - Business logic of any kind
+ */
 import "dotenv/config";
 
 // Fail fast: crash at startup if required env vars are missing so Railway/Vercel

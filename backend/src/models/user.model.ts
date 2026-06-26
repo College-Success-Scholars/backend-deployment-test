@@ -1,5 +1,19 @@
 /**
- * User and profile types for Supabase tables: profiles, user_roster.
+ * @file user.model.ts
+ * @module backend/models
+ *
+ * TypeScript types and constants for user and scholar data.
+ * Covers the merged profile shape (profiles + user_roster), the app role
+ * hierarchy constant, and derived display types for memo and team leader views.
+ *
+ * ## What belongs here
+ * - Types derived from Supabase profiles and user_roster tables
+ * - APP_ROLE_ORDER constant (defines role hierarchy for access control)
+ * - Computed/derived user shapes (MemoUserRow, TeamLeaderRow)
+ *
+ * ## What does NOT belong here
+ * - Functions or runtime logic
+ * - Supabase client imports
  */
 
 export type ProfilesRow = {

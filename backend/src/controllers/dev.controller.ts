@@ -1,3 +1,24 @@
+/**
+ * @file dev.controller.ts
+ * @module backend/controllers
+ *
+ * Request handlers for developer-only diagnostic endpoints (/api/dev/*).
+ * These endpoints expose raw or unfiltered data for debugging and operational
+ * purposes. Accessible only to users with app_role = "developer".
+ *
+ * ## Responsibilities
+ * - Provide diagnostic endpoints: test, me, raw session records, form log lookups
+ * - Allow developers to trigger sync operations manually
+ * - Return unfiltered data that standard endpoints might restrict
+ *
+ * ## What belongs here
+ * - Handler functions for /api/dev/* routes
+ * - Dev-specific data access patterns that do not belong in production routes
+ *
+ * ## What does NOT belong here
+ * - Production-grade endpoints (add those to the appropriate domain routes)
+ * - Endpoints accessible to non-developer roles
+ */
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "./auth.controller.js";
 import { getSupabaseClient } from "../services/supabase.service.js";

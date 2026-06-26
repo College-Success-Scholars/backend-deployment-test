@@ -1,5 +1,16 @@
 /**
- * Row type for public.tutor_report_logs table.
+ * @file tutor-report-log.model.ts
+ * @module backend/models
+ *
+ * TypeScript types for tutor session report log data.
+ * Mirrors the shape of the tutor_report_logs Supabase table, which tracks
+ * whether scholars attended required tutoring sessions each campus week.
+ *
+ * ## What belongs here
+ * - TutorReportLogRow type for the tutor_report_logs table
+ *
+ * ## What does NOT belong here
+ * - Functions, queries, or runtime logic
  *
  * TODO: A future column (e.g. `session_date`) will allow tutors to specify
  * when tutoring actually occurred, separate from `created_at` (form submission

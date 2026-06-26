@@ -1,5 +1,23 @@
 /**
- * Shared parsing/formatting for form log UIs (personal modal, submission details, etc.).
+ * @file form-view-helpers.ts
+ * @module frontend/lib/format
+ *
+ * Display formatting and parsing utilities for form log UI components.
+ * Used in the personal activity modal, submission details modal, and any
+ * component that renders MCF/WHAF/WPL form log data to the user.
+ *
+ * ## Responsibilities
+ * - isEmptyValue(value): check if a form field value is blank/empty
+ * - Label and status formatting for form log display fields
+ * - Any shared UI helpers for form log rendering
+ *
+ * ## What belongs here
+ * - Pure formatting/display functions for form log data
+ *
+ * ## What does NOT belong here
+ * - Form log data fetching
+ * - Deadline calculation (use form-deadlines.ts)
+ * - Business logic
  */
 
 export function isEmptyValue(value: unknown): boolean {

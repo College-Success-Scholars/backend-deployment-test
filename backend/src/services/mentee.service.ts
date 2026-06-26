@@ -1,3 +1,22 @@
+/**
+ * @file mentee.service.ts
+ * @module backend/services
+ *
+ * Mentee relationship service.
+ * Fetches the list of mentees assigned to the currently authenticated user
+ * via a Supabase RPC call. The RPC applies RLS to return only the caller's
+ * assigned mentees.
+ *
+ * ## Responsibilities
+ * - Call the get_my_mentees Supabase RPC for the given mentor user ID
+ *
+ * ## What belongs here
+ * - Mentee relationship queries from Supabase
+ *
+ * ## What does NOT belong here
+ * - Mentee activity data (that's daily-scholar-activity.service.ts)
+ * - HTTP request/response logic
+ */
 import { getSupabaseClient } from "./supabase.service.js";
 import type { MenteeRow } from "../models/mentee.model.js";
 

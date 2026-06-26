@@ -1,3 +1,18 @@
+/**
+ * @file session-log.routes.ts
+ * @module backend/routes
+ *
+ * Express Router for /api/session-logs/* endpoints.
+ * All routes require requireAuth. Covers raw log retrieval,
+ * cleaned/errored pairs, in-room status, and completed sessions
+ * for both front-desk and study session types.
+ *
+ * ## What belongs here
+ * - Route declarations for session log endpoints
+ *
+ * ## What does NOT belong here
+ * - Business logic (that's controllers/session-log.controller.ts)
+ */
 import { Router } from "express";
 import { requireAuth } from "../controllers/auth.controller.js";
 import * as sessionLogController from "../controllers/session-log.controller.js";
