@@ -59,3 +59,4 @@ app.use(
 );
 
 export { app };
+export default app;
