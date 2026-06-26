@@ -22,6 +22,13 @@ RUN cd backend && npx tsc
 # ── Production stage ─────────────────────────────────────────────────────────
 FROM node:22-alpine AS runner
 
+ARG SUPABASE_URL
+ARG SUPABASE_PUBLISHABLE_KEY
+ARG CORS_ORIGIN
+ENV SUPABASE_URL=$SUPABASE_URL
+ENV SUPABASE_PUBLISHABLE_KEY=$SUPABASE_PUBLISHABLE_KEY
+ENV CORS_ORIGIN=$CORS_ORIGIN
+
 WORKDIR /app
 
 # shared/dist must be accessible at runtime — backend imports via relative path
