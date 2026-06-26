@@ -6,7 +6,9 @@ function scopeLabel(scope: ApiLogScope): string {
 
 /** Join backend base URL and API path into a full request URL. */
 export function buildBackendRequestUrl(baseUrl: string, path: string): string {
-  return new URL(path, baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`).href;
+  const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  const normalizedPath = path.startsWith("/") ? path.slice(1) : path;
+  return new URL(normalizedPath, base).href;
 }
 
 /** Log an outgoing backend API request. */
