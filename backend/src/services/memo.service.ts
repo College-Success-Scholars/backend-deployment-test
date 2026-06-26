@@ -20,6 +20,7 @@
  * - Memo page data assembly (that's memo-page.service.ts)
  * - HTTP request/response logic
  */
+import { getSupabaseClient } from "./supabase.service.js";
 import {
   syncFrontDeskRecordsForWeek,
   syncFrontDeskRecordsForWeekAllUids,
@@ -28,6 +29,29 @@ import {
 } from "./session-record.service.js";
 
 
+
+export async function getWeeklyMemo(semesterId: number, weekNum: number): Promise<unknown> {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase.rpc("get_weekly_memo", {
+    p_semester_id: semesterId,
+    p_week_num: weekNum,
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function triggerRefreshStats(weekNum: number, semesterId: number): Promise<void> {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+  fetch(`${supabaseUrl}/functions/v1/refresh_weekly_stats`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${publishableKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ week_num: weekNum, semester_id: semesterId }),
+  }).catch(() => {});
+}
 
 export async function syncMemo(
   weekNum: number,

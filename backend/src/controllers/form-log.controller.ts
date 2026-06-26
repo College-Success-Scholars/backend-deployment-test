@@ -21,7 +21,6 @@
  */
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "./auth.controller.js";
-import { getSupabaseClient } from "../services/supabase.service.js";
 import {
   getMcfFormLogsForWeek,
   getMcfFormLogsByUid,
@@ -40,7 +39,14 @@ import {
   getWplFormLogsByUidAndWeekWithLate,
   getRecentFormSubmissions,
   buildTeamLeaderFormStatsForWeek,
+  getWhafFormLogsByUids,
+  getMcfFormLogsByUids,
+  getWplFormLogsByUids,
+  getMcfFormLogById,
+  getWplFormLogById,
 } from "../services/form-log.service.js";
+import { getTutorReportLogsByUids } from "../services/tutor-report-log.service.js";
+import { getDailyActivityByUids } from "../services/daily-scholar-activity.service.js";
 import { fetchTeamLeaders } from "../services/user.service.js";
 
 function paramStr(val: string | string[] | undefined): string | undefined {
@@ -264,13 +270,9 @@ export async function whafByUids(req: AuthenticatedRequest, res: Response) {
   try {
     const { uids } = req.body as { uids?: string[] };
     if (!uids?.length) { res.json({ data: [] }); return; }
-    const supabase = getSupabaseClient();
-    const { data, error } = await supabase
-      .from("whaf_form_logs").select("*").in("scholar_uid", uids);
-    if (error) { res.status(500).json({ error: error.message }); return; }
-    res.json({ data: data ?? [] });
+    const data = await getWhafFormLogsByUids(uids);
+    res.json({ data });
   } catch (e) {
-    console.error(e);
     res.status(500).json({ error: e instanceof Error ? e.message : "Failed to fetch WHAF logs" });
   }
 }
@@ -280,14 +282,10 @@ export async function mcfByUids(req: AuthenticatedRequest, res: Response) {
   try {
     const { uids, field } = req.body as { uids?: string[]; field?: string };
     if (!uids?.length) { res.json({ data: [] }); return; }
-    const col = field === "mentee_uid" ? "mentee_uid" : "mentor_uid";
-    const supabase = getSupabaseClient();
-    const { data, error } = await supabase
-      .from("mcf_form_logs").select("*").in(col, uids);
-    if (error) { res.status(500).json({ error: error.message }); return; }
-    res.json({ data: data ?? [] });
+    const col = field === "mentee_uid" ? "mentee_uid" as const : "mentor_uid" as const;
+    const data = await getMcfFormLogsByUids(uids, col);
+    res.json({ data });
   } catch (e) {
-    console.error(e);
     res.status(500).json({ error: e instanceof Error ? e.message : "Failed to fetch MCF logs" });
   }
 }
@@ -297,13 +295,9 @@ export async function wplByUids(req: AuthenticatedRequest, res: Response) {
   try {
     const { uids } = req.body as { uids?: string[] };
     if (!uids?.length) { res.json({ data: [] }); return; }
-    const supabase = getSupabaseClient();
-    const { data, error } = await supabase
-      .from("wpl_form_logs").select("*").in("scholar_uid", uids);
-    if (error) { res.status(500).json({ error: error.message }); return; }
-    res.json({ data: data ?? [] });
+    const data = await getWplFormLogsByUids(uids);
+    res.json({ data });
   } catch (e) {
-    console.error(e);
     res.status(500).json({ error: e instanceof Error ? e.message : "Failed to fetch WPL logs" });
   }
 }
@@ -313,13 +307,9 @@ export async function tutorReportsByUids(req: AuthenticatedRequest, res: Respons
   try {
     const { uids } = req.body as { uids?: string[] };
     if (!uids?.length) { res.json({ data: [] }); return; }
-    const supabase = getSupabaseClient();
-    const { data, error } = await supabase
-      .from("tutor_report_logs").select("*").in("scholar_uid", uids);
-    if (error) { res.status(500).json({ error: error.message }); return; }
-    res.json({ data: data ?? [] });
+    const data = await getTutorReportLogsByUids(uids);
+    res.json({ data });
   } catch (e) {
-    console.error(e);
     res.status(500).json({ error: e instanceof Error ? e.message : "Failed to fetch tutor reports" });
   }
 }
@@ -329,13 +319,9 @@ export async function dailyActivityByUids(req: AuthenticatedRequest, res: Respon
   try {
     const { uids } = req.body as { uids?: string[] };
     if (!uids?.length) { res.json({ data: [] }); return; }
-    const supabase = getSupabaseClient();
-    const { data, error } = await supabase
-      .from("daily_scholar_activity").select("*").in("scholar_uid", uids);
-    if (error) { res.status(500).json({ error: error.message }); return; }
-    res.json({ data: data ?? [] });
+    const data = await getDailyActivityByUids(uids);
+    res.json({ data });
   } catch (e) {
-    console.error(e);
     res.status(500).json({ error: e instanceof Error ? e.message : "Failed to fetch daily activity" });
   }
 }
@@ -344,13 +330,10 @@ export async function dailyActivityByUids(req: AuthenticatedRequest, res: Respon
 export async function getFormLog(req: AuthenticatedRequest, res: Response) {
   const formType = paramStr(req.params.formType);
   const formId = paramStr(req.params.formId);
-  const supabase = getSupabaseClient();
 
   try {
     if (formType === "mcf") {
-      const { data, error } = await supabase
-        .from("mcf_form_logs").select("*").eq("id", formId).maybeSingle();
-      if (error) { res.status(500).json({ error: error.message }); return; }
+      const data = await getMcfFormLogById(formId!);
       if (!data) { res.status(404).json({ error: "MCF submission not found." }); return; }
       res.json({ data }); return;
     }
@@ -358,9 +341,7 @@ export async function getFormLog(req: AuthenticatedRequest, res: Response) {
     if (formType === "wpl") {
       const numericId = Number(formId);
       if (Number.isNaN(numericId)) { res.status(400).json({ error: "Invalid WPL ID." }); return; }
-      const { data, error } = await supabase
-        .from("wpl_form_logs").select("*").eq("id", numericId).maybeSingle();
-      if (error) { res.status(500).json({ error: error.message }); return; }
+      const data = await getWplFormLogById(numericId);
       if (!data) { res.status(404).json({ error: "WPL submission not found." }); return; }
       res.json({ data }); return;
     }

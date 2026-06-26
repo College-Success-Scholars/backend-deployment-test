@@ -20,6 +20,7 @@ Shell scripts for deployment validation and operational tasks. These run outside
 | File | Source Link | Description |
 |------|-------------|-------------|
 | `smoke-test.sh` | [source](../../../scripts/smoke-test.sh) | Deployment health-check: tests health endpoint, auth gating, and CORS headers |
+| `log-agent-session.sh` | [source](../../../scripts/log-agent-session.sh) | Records an agent/AI session to `docs/agents/logs/`: who ran it, raw user prompt, stated purpose, agent response summary, and changed files |
 
 ---
 
@@ -40,4 +41,16 @@ BASE_URL=http://localhost:3001 bash scripts/smoke-test.sh
 
 # Run against production
 BASE_URL=https://your-backend.railway.app bash scripts/smoke-test.sh
+
+# Log an agent session (interactive — prompts for all fields)
+bash scripts/log-agent-session.sh
+
+# Log an agent session (fully scripted)
+bash scripts/log-agent-session.sh \
+  --title "fix-role-check" \
+  --user "dev@example.com" \
+  --purpose "Fix hasRoleAtLeast stub that allowed all authenticated users through team_leader routes" \
+  --prompt-text "Fix the role check in server.ts" \
+  --summary-text "Implemented ROLE_ORDER map; role hierarchy now enforced correctly" \
+  --changes "frontend/lib/supabase/server.ts"
 ```

@@ -21,7 +21,7 @@
  */
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "./auth.controller.js";
-import { getSupabaseClient } from "../services/supabase.service.js";
+import { getMcfFormLogById, getWplFormLogById } from "../services/form-log.service.js";
 import {
   getFrontDeskRecord,
   getFrontDeskRecordsForWeek,
@@ -217,26 +217,26 @@ export async function excuseStudy(req: AuthenticatedRequest, res: Response) {
 
 // GET /api/dev/form-logs/:formType/:formId
 export async function getFormLog(req: AuthenticatedRequest, res: Response) {
-  const { formType, formId } = req.params;
-  const supabase = getSupabaseClient();
+  const formType = req.params.formType as string;
+  const formId = req.params.formId as string;
 
-  if (formType === "mcf") {
-    const { data, error } = await supabase
-      .from("mcf_form_logs").select("*").eq("id", formId).maybeSingle();
-    if (error) { res.status(500).json({ error: error.message }); return; }
-    if (!data) { res.status(404).json({ error: "MCF submission not found." }); return; }
-    res.json({ data }); return;
+  try {
+    if (formType === "mcf") {
+      const data = await getMcfFormLogById(formId!);
+      if (!data) { res.status(404).json({ error: "MCF submission not found." }); return; }
+      res.json({ data }); return;
+    }
+
+    if (formType === "wpl") {
+      const numericId = Number(formId);
+      if (Number.isNaN(numericId)) { res.status(400).json({ error: "Invalid WPL ID." }); return; }
+      const data = await getWplFormLogById(numericId);
+      if (!data) { res.status(404).json({ error: "WPL submission not found." }); return; }
+      res.json({ data }); return;
+    }
+
+    res.status(400).json({ error: "Unsupported form type." });
+  } catch (e) {
+    res.status(500).json({ error: e instanceof Error ? e.message : "Failed to fetch form log" });
   }
-
-  if (formType === "wpl") {
-    const numericId = Number(formId);
-    if (Number.isNaN(numericId)) { res.status(400).json({ error: "Invalid WPL ID." }); return; }
-    const { data, error } = await supabase
-      .from("wpl_form_logs").select("*").eq("id", numericId).maybeSingle();
-    if (error) { res.status(500).json({ error: error.message }); return; }
-    if (!data) { res.status(404).json({ error: "WPL submission not found." }); return; }
-    res.json({ data }); return;
-  }
-
-  res.status(400).json({ error: "Unsupported form type." });
 }

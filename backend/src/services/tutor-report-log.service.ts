@@ -66,6 +66,17 @@ export async function getTutorReportLogsByUidAndWeek(
   return (data ?? []) as TutorReportLogRow[];
 }
 
+export async function getTutorReportLogsByUids(uids: string[]): Promise<TutorReportLogRow[]> {
+  if (!uids.length) return [];
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from("tutor_report_logs")
+    .select("*")
+    .in("scholar_uid", uids);
+  if (error) throw error;
+  return (data ?? []) as TutorReportLogRow[];
+}
+
 export async function didScholarAttendTutoring(
   uid: string,
   weekNum: number

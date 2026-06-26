@@ -19,9 +19,8 @@
  */
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "./auth.controller.js";
-import { syncMemo } from "../services/memo.service.js";
+import { syncMemo, getWeeklyMemo, triggerRefreshStats } from "../services/memo.service.js";
 import { getTrafficEntryCountForWeek } from "../services/traffic.service.js";
-import { getSupabaseClient } from "../services/supabase.service.js";
 import { getMemoPageData } from "../services/memo-page.service.js";
 
 // POST /api/memo/sync
@@ -52,12 +51,7 @@ export async function weeklyMemo(req: AuthenticatedRequest, res: Response) {
     return;
   }
   try {
-    const supabase = getSupabaseClient();
-    const { data, error } = await supabase.rpc("get_weekly_memo", {
-      p_semester_id: semesterId,
-      p_week_num: weekNum,
-    });
-    if (error) { res.status(500).json({ error: error.message }); return; }
+    const data = await getWeeklyMemo(semesterId, weekNum);
     res.json({ data });
   } catch (e) {
     console.error(e);
@@ -73,17 +67,7 @@ export async function refreshStats(req: AuthenticatedRequest, res: Response) {
     return;
   }
   try {
-    // Fire-and-forget to the Supabase edge function
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
-    fetch(`${supabaseUrl}/functions/v1/refresh_weekly_stats`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${publishableKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ week_num, semester_id }),
-    }).catch(() => {});
+    triggerRefreshStats(week_num, semester_id);
     res.json({ data: { ok: true } });
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : "Failed to trigger refresh" });

@@ -165,8 +165,12 @@ export async function requireUser(): Promise<User> {
   return user;
 }
 
+// TODO: This should be more fully fledged out, but for now this is good enough
+const ROLE_ORDER: Record<string, number> = { team_leader: 1, developer: 2 };
+
 function hasRoleAtLeast(role: string | null, minRole: "team_leader" | "developer"): boolean {
-  return true
+  const userLevel = ROLE_ORDER[role ?? ""] ?? 0;
+  return userLevel >= ROLE_ORDER[minRole];
 }
 
 /**

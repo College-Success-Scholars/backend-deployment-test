@@ -22,6 +22,7 @@ All non-component TypeScript utilities for the frontend. Organized by execution 
 | File | Source Link | Description |
 |------|-------------|-------------|
 | `api-log.ts` | [source](../../../../frontend/lib/api-log.ts) | Logging helpers for API requests/responses (`logApiRequest`, `logApiResponse`, `logApiError`, `buildBackendRequestUrl`) |
+| `auth.ts` | [source](../../../../frontend/lib/auth.ts) | `UserRole` union type for role-based UI rendering in sidebar and dashboard components |
 | `nav-active.ts` | [source](../../../../frontend/lib/nav-active.ts) | Navigation state helpers — determines which nav item is active based on the current path |
 | `utils.ts` | [source](../../../../frontend/lib/utils.ts) | General-purpose utilities (e.g., `cn()` Tailwind class merger) |
 
@@ -31,6 +32,7 @@ All non-component TypeScript utilities for the frontend. Organized by execution 
 
 | Directory | Docs | Environment | Description |
 |-----------|------|-------------|-------------|
+| `auth/` | [auth/README.md](auth/README.md) | Both | Auth redirect safety utilities (open-redirect prevention) |
 | `server/` | [server/README.md](server/README.md) | Server only | Backend API client, server actions, data functions, query builders |
 | `client/` | [client/README.md](client/README.md) | Client only | Browser-side backend API fetch wrapper |
 | `supabase/` | [supabase/README.md](supabase/README.md) | Server + Client | Supabase client factories and auth helpers |

@@ -23,6 +23,17 @@ import type { DailyScholarActivityMinutesRow } from "../models/daily-scholar-act
 
 const MINUTES_COLUMN = "duration_minutes" as const;
 
+export async function getDailyActivityByUids(uids: string[]): Promise<DailyScholarActivityMinutesRow[]> {
+  if (!uids.length) return [];
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from("daily_scholar_activity")
+    .select("*")
+    .in("scholar_uid", uids);
+  if (error) throw error;
+  return (data ?? []) as DailyScholarActivityMinutesRow[];
+}
+
 export async function getTotalMinutesForMenteeWeek(params: {
   menteeUid: string;
   weekNum: number;

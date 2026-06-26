@@ -435,6 +435,60 @@ export function buildTeamLeaderFormStatsForWeek(
 }
 
 // ---------------------------------------------------------------------------
+// Batch fetch by UIDs
+// ---------------------------------------------------------------------------
+
+export async function getWhafFormLogsByUids(uids: string[]): Promise<WahfFormLogRow[]> {
+  if (!uids.length) return [];
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from("whaf_form_logs").select("*").in("scholar_uid", uids);
+  if (error) throw error;
+  return (data ?? []) as WahfFormLogRow[];
+}
+
+export async function getMcfFormLogsByUids(
+  uids: string[],
+  field: "mentor_uid" | "mentee_uid" = "mentor_uid"
+): Promise<McfFormLogRow[]> {
+  if (!uids.length) return [];
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from("mcf_form_logs").select("*").in(field, uids);
+  if (error) throw error;
+  return (data ?? []) as McfFormLogRow[];
+}
+
+export async function getWplFormLogsByUids(uids: string[]): Promise<WplFormLogRow[]> {
+  if (!uids.length) return [];
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from("wpl_form_logs").select("*").in("scholar_uid", uids);
+  if (error) throw error;
+  return (data ?? []) as WplFormLogRow[];
+}
+
+// ---------------------------------------------------------------------------
+// Single form log by ID
+// ---------------------------------------------------------------------------
+
+export async function getMcfFormLogById(id: string): Promise<McfFormLogRow | null> {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from("mcf_form_logs").select("*").eq("id", id).maybeSingle();
+  if (error) throw error;
+  return (data ?? null) as McfFormLogRow | null;
+}
+
+export async function getWplFormLogById(id: number): Promise<WplFormLogRow | null> {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from("wpl_form_logs").select("*").eq("id", id).maybeSingle();
+  if (error) throw error;
+  return (data ?? null) as WplFormLogRow | null;
+}
+
+// ---------------------------------------------------------------------------
 // Recent form submissions
 // ---------------------------------------------------------------------------
 
