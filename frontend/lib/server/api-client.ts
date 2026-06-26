@@ -7,7 +7,9 @@ import {
   logApiResponse,
 } from "@/lib/api-log";
 
-const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:3001";
+const BACKEND_URL =
+  process.env.BACKEND_URL ??
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/_/backend` : "http://localhost:3001");
 const BASE64_PREFIX = "base64-";
 
 function getSupabaseProjectRef(): string | null {
