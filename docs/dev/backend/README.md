@@ -1,6 +1,6 @@
 # Backend
 
-**Location:** [`backend/`](../../../backend/)  
+**Location:** `[backend/](../../../backend/)`  
 **Docs:** `docs/dev/backend/README.md`
 
 ## Navigation
@@ -19,21 +19,25 @@ The Express + TypeScript REST API server. It validates user JWTs from Supabase, 
 
 ## Files
 
-| File | Source Link | Description |
-|------|-------------|-------------|
-| `package.json` | [source](../../../backend/package.json) | NPM workspace config, scripts, and dependencies |
-| `tsconfig.json` | [source](../../../backend/tsconfig.json) | TypeScript compiler config (ESM, Node 22 target) |
-| `vitest.config.ts` | [source](../../../backend/vitest.config.ts) | Vitest test runner configuration |
-| `railway.toml` | [source](../../../backend/railway.toml) | Railway deployment configuration |
-| `API.md` | [source](../../../backend/API.md) | Comprehensive REST API reference (all endpoints, auth levels, params) |
+
+| File               | Source Link                                 | Description                                                           |
+| ------------------ | ------------------------------------------- | --------------------------------------------------------------------- |
+| `package.json`     | [source](../../../backend/package.json)     | NPM workspace config, scripts, and dependencies                       |
+| `tsconfig.json`    | [source](../../../backend/tsconfig.json)    | TypeScript compiler config (ESM, Node 22 target)                      |
+| `vitest.config.ts` | [source](../../../backend/vitest.config.ts) | Vitest test runner configuration                                      |
+| `railway.toml`     | [source](../../../backend/railway.toml)     | Railway deployment configuration                                      |
+| `API.md`           | [source](../../../backend/API.md)           | Comprehensive REST API reference (all endpoints, auth levels, params) |
+
 
 ---
 
 ## Subdirectories
 
-| Directory | Docs | Description |
-|-----------|------|-------------|
-| `src/` | [src/README.md](src/README.md) | All TypeScript source code |
+
+| Directory | Docs                           | Description                |
+| --------- | ------------------------------ | -------------------------- |
+| `src/`    | [src/README.md](src/README.md) | All TypeScript source code |
+
 
 ---
 
@@ -54,7 +58,8 @@ npm run test:watch # vitest
 
 - **Entry point is `src/server.ts`** — do not run `app.ts` directly; server.ts handles env validation and process lifecycle.
 - **Build output goes to `dist/`** — never commit the `dist/` directory.
-- **`.js` extensions on all local imports** — required for Node ESM even though source is `.ts`.
+- `**.js` extensions on all local imports** — required for Node ESM even though source is `.ts`.
 - **No `.env` files committed** — use Railway/Vercel environment variable injection in production.
 - **API reference must stay updated** — when adding or changing endpoints, update `API.md`.
 - **All routes must be registered in `src/app.ts`** — do not create loose route files outside `src/routes/`.
+
