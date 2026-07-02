@@ -33,7 +33,7 @@ function stringifyValue(value: unknown): string {
 }
 
 function renderDetails(entry: RecentFormSubmission) {
-  if (entry.formType === "WHAF") {
+  if (entry.formType === "WAHF") {
     return (
       <div className="space-y-1 text-sm text-muted-foreground">
         <p><span className="font-medium text-foreground">Assignment grades:</span> {stringifyValue(entry.assignment_grades)}</p>
@@ -79,7 +79,7 @@ export function ActivityLogClient({ entries }: { entries: RecentFormSubmission[]
   return (
     <CardContent className="space-y-4">
       <div className="flex flex-wrap gap-2">
-        {(["ALL", "WHAF", "WPL", "MCF"] as const).map((option) => (
+        {(["ALL", "WAHF", "WPL", "MCF"] as const).map((option) => (
           <Button
             key={option}
             type="button"

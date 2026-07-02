@@ -59,10 +59,10 @@ const baseMemoData: MemoPageData = {
   trafficSessions: [] as MemoPageData["trafficSessions"],
   tutorReports: [] as MemoPageData["tutorReports"],
   gradeBreakdown: { low: 0, mid: 0, high: 0 } as unknown as MemoPageData["gradeBreakdown"],
-  whafDonut: { total: 0, completeCount: 0, lateCount: 0, percentComplete: 0 },
+  wahfDonut: { total: 0, completeCount: 0, lateCount: 0, percentComplete: 0 },
   teamLeaderFormStats: [] as MemoPageData["teamLeaderFormStats"],
   weekLabel: "",
-  selectedWeekNum: 12,
+  selectedWeekNumber: 12,
   currentCampusWeek: 12,
 }
 
@@ -70,7 +70,7 @@ const weeklyMemoByWeek: Record<number, WeeklyMemoViewData> = {
   12: {
     ...baseMemoData,
     weekLabel: "Apr 14 - Apr 20, 2026",
-    selectedWeekNum: 12,
+    selectedWeekNumber: 12,
     weekStartLabel: "Apr 14",
     weekEndLabel: "Apr 20, 2026",
     weekNumber: 12,
@@ -248,7 +248,7 @@ const weeklyMemoByWeek: Record<number, WeeklyMemoViewData> = {
   11: {
     ...baseMemoData,
     weekLabel: "Apr 07 - Apr 13, 2026",
-    selectedWeekNum: 11,
+    selectedWeekNumber: 11,
     weekStartLabel: "Apr 07",
     weekEndLabel: "Apr 13, 2026",
     weekNumber: 11,

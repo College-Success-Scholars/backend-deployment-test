@@ -105,7 +105,7 @@ function SyncButtons({
     setSyncing(mode);
     setMessage(null);
     try {
-      const result = await backendPost<{ message?: string }>("/api/memo/sync", { weekNum: selectedWeekNum, mode });
+      const result = await backendPost<{ message?: string }>("/api/memo/sync", { weekNumber: selectedWeekNum, mode });
       if (!result.ok) {
         setMessage({ type: "err", text: result.error });
         return;
@@ -154,28 +154,28 @@ function SyncButtons({
 }
 
 export type MemoScholarRow = {
-  uid: string;
-  scholar_name: string;
+  scholarId: string;
+  scholarName: string;
   cohort: number | null;
-  fd_total: number;
-  ss_total: number;
-  fd_required: number | null;
-  ss_required: number | null;
-  fd_excuse_min: number;
-  ss_excuse_min: number;
-  fd_pct: number | null;
-  ss_pct: number | null;
+  fdTotal: number;
+  ssTotal: number;
+  fdRequired: number | null;
+  ssRequired: number | null;
+  fdExcuseMin: number;
+  ssExcuseMin: number;
+  fdPct: number | null;
+  ssPct: number | null;
 };
 
 export type MemoTLRow = {
-  uid: string;
+  scholarId: string;
   name: string;
-  mcf_completed: number;
-  mcf_required: number;
-  mcf_late: boolean;
-  mcf_pct: number | null;
+  mcfCompleted: number;
+  mcfRequired: number;
+  mcfLate: boolean;
+  mcfPct: number | null;
   /** ISO date string of the most recent MCF entry (for column sort). */
-  mcf_latest_at: string | null;
+  mcfLatestAt: string | null;
 };
 
 export type MemoPieData = {
@@ -462,15 +462,15 @@ function RoomEntriesThisWeek({
 const FD_COLUMN: ScholarDataTableColumn<MemoScholarRow> = {
   id: "fd-progress",
   header: "Front desk",
-  field: "fd_pct",
+  field: "fdPct",
   sortable: true,
-  sortField: "fd_pct",
+  sortField: "fdPct",
   renderCell: (row) => (
     <ProgressCell
       mode="time"
-      total={row.fd_total}
-      required={row.fd_required}
-      excuseMin={row.fd_excuse_min}
+      total={row.fdTotal}
+      required={row.fdRequired}
+      excuseMin={row.fdExcuseMin}
       label="FD"
     />
   ),
@@ -479,15 +479,15 @@ const FD_COLUMN: ScholarDataTableColumn<MemoScholarRow> = {
 const SS_COLUMN: ScholarDataTableColumn<MemoScholarRow> = {
   id: "ss-progress",
   header: "Study session",
-  field: "ss_pct",
+  field: "ssPct",
   sortable: true,
-  sortField: "ss_pct",
+  sortField: "ssPct",
   renderCell: (row) => (
     <ProgressCell
       mode="time"
-      total={row.ss_total}
-      required={row.ss_required}
-      excuseMin={row.ss_excuse_min}
+      total={row.ssTotal}
+      required={row.ssRequired}
+      excuseMin={row.ssExcuseMin}
       label="SS"
     />
   ),
@@ -498,17 +498,17 @@ function getTLFormColumns(): ScholarDataTableColumn<MemoTLRow>[] {
     {
       id: "mcf-progress",
       header: "MCF",
-      field: "mcf_pct",
+      field: "mcfPct",
       sortable: true,
-      sortField: "mcf_latest_at",
+      sortField: "mcfLatestAt",
       renderCell: (row) => (
         <ProgressCell
           mode="count"
-          completed={row.mcf_completed}
-          required={row.mcf_required}
+          completed={row.mcfCompleted}
+          required={row.mcfRequired}
           label="MCF"
           unitLabel="form"
-          isLate={row.mcf_late}
+          isLate={row.mcfLate}
         />
       ),
     },
@@ -527,7 +527,7 @@ export function MemoContent({
   trafficSessions,
   tutorReports,
   gradeBreakdown,
-  whafDonut,
+  wahfDonut,
   teamLeaderFormStats,
   weekLabel,
   currentCampusWeek,
@@ -549,7 +549,7 @@ export function MemoContent({
   trafficSessions: TrafficSession[];
   tutorReports: MemoTutorReportRow[];
   gradeBreakdown: GradeBreakdown;
-  whafDonut: { total: number; completeCount: number; lateCount: number; percentComplete: number };
+  wahfDonut: { total: number; completeCount: number; lateCount: number; percentComplete: number };
   teamLeaderFormStats: TeamLeaderFormStatsRow[];
   weekLabel: string;
   currentCampusWeek: number | null;
@@ -573,16 +573,17 @@ export function MemoContent({
     const weekNum = selectedWeekNum;
     try {
       const res = await fetch(
-        `/api/memo/traffic-count?weekNum=${encodeURIComponent(weekNum)}`,
+        `/api/memo/traffic-count?weekNumber=${encodeURIComponent(weekNum)}`,
         { cache: "no-store" }
       );
       const json = await res.json();
+      const payload = json.data ?? json;
       if (
         res.ok &&
-        json.weekNumber === weekNum &&
-        typeof json.entryCount === "number"
+        payload.weekNumber === weekNum &&
+        typeof payload.entryCount === "number"
       ) {
-        setFreshEntryCount(json.entryCount);
+        setFreshEntryCount(payload.entryCount);
       }
     } catch {
       // Keep showing server data on fetch error
@@ -710,10 +711,10 @@ export function MemoContent({
           <CardContent className="flex flex-row flex-wrap items-center justify-center gap-6 sm:gap-8">
             <FormCompletionDonut
               label="WHAF"
-              percentComplete={whafDonut.total > 0 ? whafDonut.percentComplete : null}
-              total={whafDonut.total}
-              completeCount={whafDonut.completeCount}
-              lateCount={whafDonut.lateCount}
+              percentComplete={wahfDonut.total > 0 ? wahfDonut.percentComplete : null}
+              total={wahfDonut.total}
+              completeCount={wahfDonut.completeCount}
+              lateCount={wahfDonut.lateCount}
               strokeColor={FORM_COMPLETION_WHAF_COLOR}
             />
           </CardContent>
@@ -785,9 +786,9 @@ export function MemoContent({
             ) : (
               <ScholarDataTable<MemoScholarRow>
                 data={scholars}
-                rowKeyField="uid"
+                rowKeyField="scholarId"
                 nameColumn={{
-                  field: "scholar_name",
+                  field: "scholarName",
                   header: "Scholar",
                   sortable: true,
                 }}
@@ -812,9 +813,9 @@ defaultSortColumnId="fd-progress"
             ) : (
               <ScholarDataTable<MemoScholarRow>
                 data={scholars}
-                rowKeyField="uid"
+                rowKeyField="scholarId"
                 nameColumn={{
-                  field: "scholar_name",
+                  field: "scholarName",
                   header: "Scholar",
                   sortable: true,
                 }}
@@ -847,8 +848,8 @@ defaultSortColumnId="ss-progress"
 const DAY_SORT_MAP: Record<string, number> = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
 
 function TutoringSection({ tutorReports }: { tutorReports: MemoTutorReportRow[] }) {
-  const sessions = tutorReports.filter((r) => r.scholar_name !== "EMPTY SESSION");
-  const emptySessions = tutorReports.filter((r) => r.scholar_name === "EMPTY SESSION");
+  const sessions = tutorReports.filter((r) => r.scholarName !== "EMPTY SESSION");
+  const emptySessions = tutorReports.filter((r) => r.scholarName === "EMPTY SESSION");
 
   return (
     <>
@@ -868,11 +869,11 @@ function TutoringSection({ tutorReports }: { tutorReports: MemoTutorReportRow[] 
                 {
                   id: "empty-day",
                   header: "Day",
-                  field: "day_of_week",
+                  field: "dayOfWeek",
                   sortable: true,
-                  getSortValue: (row) => DAY_SORT_MAP[row.day_of_week] ?? 7,
+                  getSortValue: (row) => DAY_SORT_MAP[row.dayOfWeek] ?? 7,
                 },
-                { id: "empty-tutor", header: "Tutor", field: "tutor_name", sortable: true },
+                { id: "empty-tutor", header: "Tutor", field: "tutorName", sortable: true },
               ]}
               emptyMessage="No empty sessions"
               defaultSortColumnId="empty-day"
@@ -893,16 +894,16 @@ function TutoringSection({ tutorReports }: { tutorReports: MemoTutorReportRow[] 
             <ScholarDataTable<MemoTutorReportRow>
               data={sessions}
               rowKeyField="id"
-              nameColumn={{ field: "scholar_name", header: "Scholar", sortable: true }}
+              nameColumn={{ field: "scholarName", header: "Scholar", sortable: true }}
               columns={[
                 {
                   id: "tutor-day",
                   header: "Day",
-                  field: "day_of_week",
+                  field: "dayOfWeek",
                   sortable: true,
-                  getSortValue: (row) => DAY_SORT_MAP[row.day_of_week] ?? 7,
+                  getSortValue: (row) => DAY_SORT_MAP[row.dayOfWeek] ?? 7,
                 },
-                { id: "tutor-name", header: "Tutor", field: "tutor_name", sortable: true },
+                { id: "tutor-name", header: "Tutor", field: "tutorName", sortable: true },
                 {
                   id: "tutor-courses",
                   header: "Courses",
@@ -913,9 +914,9 @@ function TutoringSection({ tutorReports }: { tutorReports: MemoTutorReportRow[] 
                 {
                   id: "tutor-time",
                   header: "Time",
-                  field: "start_time",
+                  field: "startTime",
                   sortable: true,
-                  renderCell: (row) => <span>{row.start_time} – {row.end_time}</span>,
+                  renderCell: (row) => <span>{row.startTime} – {row.endTime}</span>,
                 },
               ]}
               emptyMessage="No tutoring sessions"
@@ -938,9 +939,9 @@ function TLFormStatusCell({ row }: { row: TeamLeaderFormStatsRow }) {
 
   // Check each form: late (yellow) or missing (red)
   for (const [label, completed, required, late] of [
-    ["WHAF", row.whaf_completed, row.whaf_required, row.whaf_late],
-    ["MCF", row.mcf_completed, row.mcf_required, row.mcf_late],
-    ["WPL", row.wpl_completed, row.wpl_required, row.wpl_late],
+    ["WAHF", row.wahfCompleted, row.wahfRequired, row.wahfLate],
+    ["MCF", row.mcfCompleted, row.mcfRequired, row.mcfLate],
+    ["WPL", row.wplCompleted, row.wplRequired, row.wplLate],
   ] as [string, number, number, boolean][]) {
     if (completed < required) {
       issues.push(
@@ -980,12 +981,12 @@ const TL_FILTERS: { value: TLFilter; label: string }[] = [
 
 function filterTLStats(stats: TeamLeaderFormStatsRow[], filter: TLFilter): TeamLeaderFormStatsRow[] {
   switch (filter) {
-    case "whaf-missing": return stats.filter((r) => r.whaf_completed < r.whaf_required);
-    case "mcf-missing": return stats.filter((r) => r.mcf_completed < r.mcf_required);
-    case "wpl-missing": return stats.filter((r) => r.wpl_completed < r.wpl_required);
+    case "whaf-missing": return stats.filter((r) => r.wahfCompleted < r.wahfRequired);
+    case "mcf-missing": return stats.filter((r) => r.mcfCompleted < r.mcfRequired);
+    case "wpl-missing": return stats.filter((r) => r.wplCompleted < r.wplRequired);
     case "any-issue": return stats.filter((r) =>
-      r.whaf_completed < r.whaf_required || r.mcf_completed < r.mcf_required || r.wpl_completed < r.wpl_required ||
-      r.whaf_late || r.mcf_late || r.wpl_late
+      r.wahfCompleted < r.wahfRequired || r.mcfCompleted < r.mcfRequired || r.wplCompleted < r.wplRequired ||
+      r.wahfLate || r.mcfLate || r.wplLate
     );
     default: return stats;
   }
@@ -1030,16 +1031,16 @@ function TLFormStatusSection({ stats }: { stats: TeamLeaderFormStatsRow[] }) {
         ) : (
           <ScholarDataTable<TeamLeaderFormStatsRow>
             data={filtered}
-            rowKeyField="uid"
+            rowKeyField="scholarId"
             nameColumn={{ field: "name", header: "Name", sortable: true }}
             columns={[
               {
                 id: "tl-role",
                 header: "Role",
-                field: "program_role",
+                field: "programRole",
                 sortable: true,
                 renderCell: (row) => (
-                  <span className="text-muted-foreground text-xs">{row.program_role ?? "—"}</span>
+                  <span className="text-muted-foreground text-xs">{row.programRole ?? "—"}</span>
                 ),
               },
               {
@@ -1050,7 +1051,7 @@ function TLFormStatusSection({ stats }: { stats: TeamLeaderFormStatsRow[] }) {
                 sortable: true,
                 getSortValue: (row) => {
                   let score = 0;
-                  for (const [c, r, l] of [[row.whaf_completed, row.whaf_required, row.whaf_late], [row.mcf_completed, row.mcf_required, row.mcf_late], [row.wpl_completed, row.wpl_required, row.wpl_late]] as [number, number, boolean][]) {
+                  for (const [c, r, l] of [[row.wahfCompleted, row.wahfRequired, row.wahfLate], [row.mcfCompleted, row.mcfRequired, row.mcfLate], [row.wplCompleted, row.wplRequired, row.wplLate]] as [number, number, boolean][]) {
                     if (c < r) score += 10;
                     else if (l) score += 1;
                   }
@@ -1102,7 +1103,7 @@ function GradeBreakdownCard({
             {entries.map((e, i) => (
               <li key={`${e.course}-${e.assessment}-${i}`} className="flex items-center justify-between gap-2">
                 <span className="truncate">
-                  <span className="font-semibold">{e.scholar_name}</span>
+                  <span className="font-semibold">{e.scholarName}</span>
                   <span className="text-muted-foreground"> · {e.course} · {e.assessment}</span>
                 </span>
                 <span className={`shrink-0 font-semibold ${colorClass}`}>{e.grade}</span>
