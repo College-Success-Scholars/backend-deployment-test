@@ -74,6 +74,21 @@ export function WeeklyMemoDataSkeleton() {
         <SkeletonTableBody rows={4} columns={5} />
       </MemoAccordionSection>
 
+      <MemoAccordionSection
+        title="Tutoring log"
+        badgeText={<SkeletonBadge />}
+        badgeClassName="border-0 bg-transparent p-0 shadow-none"
+        rightLabel="Sessions · Empty sessions"
+      >
+        <div className="space-y-3 px-3 py-3">
+          <div className="flex items-center gap-1.5 rounded-md bg-muted/40 p-1">
+            <Skeleton className="h-8 w-24 rounded-sm" />
+            <Skeleton className="h-8 w-32 rounded-sm" />
+          </div>
+          <SkeletonTableBody rows={4} columns={5} />
+        </div>
+      </MemoAccordionSection>
+
       <MemoAccordionSection title="Recognition board" rightLabel="Highlights">
         <ul className="space-y-2 px-8 py-4">
           {Array.from({ length: 3 }, (_, index) => (

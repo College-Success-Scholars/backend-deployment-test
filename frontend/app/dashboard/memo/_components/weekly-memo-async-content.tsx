@@ -3,6 +3,7 @@ import { FullAttendanceDetailSection } from "./full-attendance-detail-section"
 import { RecognitionBoardSection } from "./recognition-board-section"
 import { ScholarFollowUpTable } from "./scholar-follow-up-table"
 import { TeamLeaderPerformanceTable } from "./team-leader-performance-table"
+import { TutoringLogSection } from "./tutoring-log-section"
 import { WeeklyKpiCards } from "./weekly-kpi-cards"
 import { WeeklyMemoNavSync } from "./weekly-memo-nav-context"
 import { backendMemoSource } from "../_lib/memo-source"
@@ -36,6 +37,7 @@ export async function WeeklyMemoAsyncContent({ weekParam }: WeeklyMemoAsyncConte
       <WeeklyKpiCards cards={data.kpis} />
       <TeamLeaderPerformanceTable rows={data.teamLeaderRows} />
       <ScholarFollowUpTable rows={data.scholarRows} />
+      <TutoringLogSection data={data.tutoringLog} />
       <RecognitionBoardSection data={data.recognitionBoard} />
       <FullAttendanceDetailSection data={data.fullAttendanceDetail} />
       <FormSubmissionsSection data={data.formSubmissions} />

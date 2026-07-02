@@ -1,8 +1,10 @@
 import type { ScholarWithCompletedSession } from "@/lib/types/session-log"
+import type { MemoTutorReportRow } from "@/lib/types/tutor-report-log"
 import type {
   FormStatus,
   MemoPageData,
   TeamLeaderPerformanceRow,
+  TutoringLogRow,
   WeeklyMemoViewData,
 } from "../types"
 import { classifyScholarFollowUpRisk } from "./risk-classifier"
@@ -48,6 +50,34 @@ const buildTeamLeaderRows = (data: MemoPageData): TeamLeaderPerformanceRow[] =>
     menteesOk: row.wahfPct >= 90 && row.wplPct >= 90 && row.mcfPct >= 90 ? ("yes" as const) : ("check" as const),
   }))
 
+const mapTutoringLogRow = (report: MemoTutorReportRow): TutoringLogRow => ({
+  id: report.id,
+  scholarName: report.scholarName,
+  dayOfWeek: report.dayOfWeek,
+  tutorName: report.tutorName,
+  courses: report.courses,
+  startTime: report.startTime,
+  endTime: report.endTime,
+})
+
+const buildTutoringLog = (tutorReports: MemoTutorReportRow[]) => {
+  const sessions = tutorReports
+    .filter((report) => report.scholarName !== "EMPTY SESSION")
+    .map(mapTutoringLogRow)
+  const emptySessions = tutorReports
+    .filter((report) => report.scholarName === "EMPTY SESSION")
+    .map(mapTutoringLogRow)
+
+  return {
+    badgeText: `${sessions.length} session${sessions.length === 1 ? "" : "s"}`,
+    rightLabel: "Sessions · Empty sessions",
+    tabs: [
+      { id: "sessions" as const, label: "Sessions", rows: sessions },
+      { id: "empty-sessions" as const, label: "Empty sessions", rows: emptySessions },
+    ],
+  }
+}
+
 export const assembleWeeklyMemo = (data: MemoPageData): WeeklyMemoViewData => {
   const weekDates = formatWeekDateRange(data.weekLabel)
   const visitsLastWeek = data.trafficWeeklyData.find((entry) => entry.weekNumber === data.selectedWeekNumber - 1)?.entryCount ?? 0
@@ -55,6 +85,8 @@ export const assembleWeeklyMemo = (data: MemoPageData): WeeklyMemoViewData => {
 
   const teamLeaderRows = buildTeamLeaderRows(data)
   const scholarRows = classifyScholarFollowUpRisk(data)
+  const tutoringLog = buildTutoringLog(data.tutorReports)
+  const emptySessionCount = tutoringLog.tabs.find((tab) => tab.id === "empty-sessions")?.rows.length ?? 0
 
   const fdByScholar = aggregateSessionMinutes(data.completedFd)
   const studyByScholar = aggregateSessionMinutes(data.completedStudy)
@@ -120,13 +152,14 @@ export const assembleWeeklyMemo = (data: MemoPageData): WeeklyMemoViewData => {
       {
         title: "Tutoring sessions held",
         primaryValue: String(data.tutorReports.length),
-        secondaryText: `${data.gradeBreakdown.low.length} low-grade alerts`,
+        secondaryText: `${emptySessionCount} empty session${emptySessionCount === 1 ? "" : "s"}`,
         trendText: "",
         subStats: [],
       },
     ],
     teamLeaderRows,
     scholarRows,
+    tutoringLog,
     recognitionBoard: {
       badgeText: `${Math.min(5, data.scholars.length)} recognized`,
       rightLabel: "Scholars · Team leaders",

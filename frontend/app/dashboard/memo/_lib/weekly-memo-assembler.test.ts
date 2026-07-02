@@ -62,7 +62,10 @@ const buildMemoData = (): MemoPageData =>
     ],
     trafficEntryCountForSelectedWeek: 100,
     trafficSessions: [{ id: "session-1" }],
-    tutorReports: [{ id: 1, scholarId: "1", scholarName: "A", tutorName: "T", courses: [], startTime: "", endTime: "", dayOfWeek: "Mon" }],
+    tutorReports: [
+      { id: 1, scholarId: "1", scholarName: "A", tutorName: "T", courses: [], startTime: "", endTime: "", dayOfWeek: "Mon" },
+      { id: 2, scholarId: null, scholarName: "EMPTY SESSION", tutorName: "T2", courses: [], startTime: "", endTime: "", dayOfWeek: "Tue" },
+    ],
     gradeBreakdown: { low: [{ scholarName: "Bob Scholar", course: "X", assessment: "Y", grade: "60", percent: 60 }], high: [], mid: [] },
     wahfDonut: { total: 0, completeCount: 0, lateCount: 0, percentComplete: 0 },
     teamLeaderFormStats: [
@@ -115,5 +118,24 @@ describe("weekly-memo-assembler", () => {
       flags: ["Low front desk completion", "Low study session completion", "Low grade"],
     })
     expect(result.formSubmissions.summaries).toEqual(expect.arrayContaining([expect.objectContaining({ form: "MCF", missing: 1 })]))
+    expect(result.tutoringLog).toMatchObject({
+      badgeText: "1 session",
+      rightLabel: "Sessions · Empty sessions",
+      tabs: [
+        expect.objectContaining({
+          id: "sessions",
+          rows: [expect.objectContaining({ scholarName: "A", tutorName: "T" })],
+        }),
+        expect.objectContaining({
+          id: "empty-sessions",
+          rows: [expect.objectContaining({ scholarName: "EMPTY SESSION", tutorName: "T2" })],
+        }),
+      ],
+    })
+    expect(result.kpis).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ title: "Tutoring sessions held", secondaryText: "1 empty session" }),
+      ])
+    )
   })
 })

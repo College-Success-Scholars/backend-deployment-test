@@ -9,6 +9,7 @@ const {
   mockTeamLeaderPerformanceTable,
   mockScholarFollowUpTable,
   mockRecognitionBoardSection,
+  mockTutoringLogSection,
   mockFullAttendanceDetailSection,
   mockFormSubmissionsSection,
 } = vi.hoisted(() => ({
@@ -20,6 +21,7 @@ const {
   ),
   mockScholarFollowUpTable: vi.fn(() => React.createElement("section", { "data-testid": "scholar-follow-up-table" })),
   mockRecognitionBoardSection: vi.fn(() => React.createElement("section", { "data-testid": "recognition-board-section" })),
+  mockTutoringLogSection: vi.fn(() => React.createElement("section", { "data-testid": "tutoring-log-section" })),
   mockFullAttendanceDetailSection: vi.fn(() =>
     React.createElement("section", { "data-testid": "full-attendance-detail-section" })
   ),
@@ -50,6 +52,10 @@ vi.mock("./scholar-follow-up-table", () => ({
 
 vi.mock("./recognition-board-section", () => ({
   RecognitionBoardSection: mockRecognitionBoardSection,
+}))
+
+vi.mock("./tutoring-log-section", () => ({
+  TutoringLogSection: mockTutoringLogSection,
 }))
 
 vi.mock("./full-attendance-detail-section", () => ({
@@ -230,6 +236,19 @@ describe("WeeklyMemoAsyncContent", () => {
             flags: expect.arrayContaining(["Low front desk completion", "Low study session completion", "Low grade"]),
           }),
         ],
+      }),
+      undefined
+    )
+
+    expect(mockTutoringLogSection).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          badgeText: "1 session",
+          tabs: expect.arrayContaining([
+            expect.objectContaining({ id: "sessions" }),
+            expect.objectContaining({ id: "empty-sessions" }),
+          ]),
+        }),
       }),
       undefined
     )

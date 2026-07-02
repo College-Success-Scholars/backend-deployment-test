@@ -153,6 +153,28 @@ export type FormSubmissionsSectionData = {
   rows: FormSubmissionRow[]
 }
 
+export type TutoringLogRow = {
+  id: number
+  scholarName: string
+  dayOfWeek: string
+  tutorName: string
+  courses: string[]
+  startTime: string
+  endTime: string
+}
+
+export type TutoringLogTab = {
+  id: "sessions" | "empty-sessions"
+  label: string
+  rows: TutoringLogRow[]
+}
+
+export type TutoringLogSectionData = {
+  badgeText: string
+  rightLabel: string
+  tabs: TutoringLogTab[]
+}
+
 export type WeeklyMemoViewData = MemoPageData & {
   weekStartLabel: string
   weekEndLabel: string
@@ -160,6 +182,7 @@ export type WeeklyMemoViewData = MemoPageData & {
   kpis: WeeklyKpiCard[]
   teamLeaderRows: TeamLeaderPerformanceRow[]
   scholarRows: ScholarFollowUpRow[]
+  tutoringLog: TutoringLogSectionData
   recognitionBoard: RecognitionBoardSectionData
   fullAttendanceDetail: FullAttendanceDetailSectionData
   formSubmissions: FormSubmissionsSectionData

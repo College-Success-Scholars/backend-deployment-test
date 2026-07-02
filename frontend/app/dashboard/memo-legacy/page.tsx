@@ -4,6 +4,7 @@ import { FullAttendanceDetailSection } from "../memo/_components/full-attendance
 import { RecognitionBoardSection } from "../memo/_components/recognition-board-section"
 import { ScholarFollowUpTable } from "../memo/_components/scholar-follow-up-table"
 import { TeamLeaderPerformanceTable } from "../memo/_components/team-leader-performance-table"
+import { TutoringLogSection } from "../memo/_components/tutoring-log-section"
 import { WeeklyKpiCards } from "../memo/_components/weekly-kpi-cards"
 import { WeeklyMemoHeader } from "../memo/_components/weekly-memo-header"
 import { assembleWeeklyMemo } from "../memo/_lib/weekly-memo-assembler"
@@ -45,6 +46,7 @@ export default async function DashboardMemoPage({ searchParams }: PageProps) {
       <WeeklyKpiCards cards={data.kpis} />
       <TeamLeaderPerformanceTable rows={data.teamLeaderRows} />
       <ScholarFollowUpTable rows={data.scholarRows} />
+      <TutoringLogSection data={data.tutoringLog} />
       <RecognitionBoardSection data={data.recognitionBoard} />
       <FullAttendanceDetailSection data={data.fullAttendanceDetail} />
       <FormSubmissionsSection data={data.formSubmissions} />
