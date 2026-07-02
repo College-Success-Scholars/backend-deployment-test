@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 
 type MemoAccordionSectionProps = {
   title: string
-  badgeText?: string
+  badgeText?: ReactNode
   badgeClassName?: string
   rightLabel?: string
   defaultOpen?: boolean
@@ -30,7 +30,13 @@ export function MemoAccordionSection({
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <CardTitle className="text-base font-semibold">{title}</CardTitle>
-              {badgeText ? <Badge className={badgeClassName}>{badgeText}</Badge> : null}
+              {badgeText ? (
+                typeof badgeText === "string" ? (
+                  <Badge className={badgeClassName}>{badgeText}</Badge>
+                ) : (
+                  badgeText
+                )
+              ) : null}
             </div>
             <div className="flex items-center gap-2">
               {rightLabel ? <span className="text-muted-foreground text-xs">{rightLabel}</span> : null}

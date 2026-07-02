@@ -12,6 +12,7 @@ import { ScholarFollowUpTable } from "../memo/_components/scholar-follow-up-tabl
 import { TeamLeaderPerformanceTable } from "../memo/_components/team-leader-performance-table"
 import { WeeklyKpiCards } from "../memo/_components/weekly-kpi-cards"
 import { WeeklyMemoHeader } from "../memo/_components/weekly-memo-header"
+import { computeWeekNavigation } from "../memo/_lib/week-navigation"
 import type { FormStatus, WeeklyMemoViewData } from "../memo/types"
 
 export const dynamic = "force-dynamic"
@@ -228,17 +229,11 @@ export default async function DashboardMemoPage({ searchParams }: PageProps) {
   const memoData = await backendGet<MemoPageData>(`/api/memo/page-data${query}`)
   const data = adaptMemoData(memoData)
 
-  const availableWeeks = Array.from(
-    new Set([
-      ...memoData.trafficWeeklyData.map((entry) => entry.weekNumber),
-      memoData.selectedWeekNum,
-      ...(memoData.currentCampusWeek != null ? [memoData.currentCampusWeek] : []),
-    ])
-  ).sort((a, b) => a - b)
-
-  const weekIndex = availableWeeks.indexOf(data.weekNumber)
-  const prevWeek = weekIndex > 0 ? availableWeeks[weekIndex - 1] : null
-  const nextWeek = weekIndex >= 0 && weekIndex < availableWeeks.length - 1 ? availableWeeks[weekIndex + 1] : null
+  const navigation = computeWeekNavigation({
+    trafficWeeklyData: memoData.trafficWeeklyData,
+    selectedWeekNum: memoData.selectedWeekNum,
+    currentCampusWeek: memoData.currentCampusWeek,
+  })
 
   return (
     <main className="space-y-4 pb-4">
@@ -246,8 +241,10 @@ export default async function DashboardMemoPage({ searchParams }: PageProps) {
         weekStartLabel={data.weekStartLabel}
         weekEndLabel={data.weekEndLabel}
         weekNumber={data.weekNumber}
-        prevWeek={prevWeek}
-        nextWeek={nextWeek}
+        availableWeeks={navigation.availableWeeks}
+        prevWeek={navigation.prevWeek}
+        nextWeek={navigation.nextWeek}
+        currentCampusWeek={memoData.currentCampusWeek}
         basePath="/dashboard/memo-legacy"
       />
       <WeeklyKpiCards cards={data.kpis} />
