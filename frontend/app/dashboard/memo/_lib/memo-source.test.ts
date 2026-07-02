@@ -15,13 +15,13 @@ describe("memo-source", () => {
     vi.clearAllMocks()
   })
 
-  it("uses weekNum query for valid week params", async () => {
+  it("uses weekNumber query for valid week params", async () => {
     mockBackendGet.mockResolvedValue({})
     await backendMemoSource.getWeeklyMemoPageData("9")
-    expect(mockBackendGet).toHaveBeenCalledWith("/api/memo/page-data?weekNum=9")
+    expect(mockBackendGet).toHaveBeenCalledWith("/api/memo/page-data?weekNumber=9")
   })
 
-  it("omits weekNum query for invalid week params", async () => {
+  it("omits weekNumber query for invalid week params", async () => {
     mockBackendGet.mockResolvedValue({})
     await backendMemoSource.getWeeklyMemoPageData("abc")
     expect(mockBackendGet).toHaveBeenCalledWith("/api/memo/page-data")

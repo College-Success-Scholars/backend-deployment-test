@@ -13,11 +13,11 @@ export interface TutorReportLogRow {
 /** Display-ready row with scholar name resolved. */
 export interface MemoTutorReportRow {
   id: number;
-  scholar_uid: string | null;
-  scholar_name: string;
-  tutor_name: string;
+  scholarId: string | null;
+  scholarName: string;
+  tutorName: string;
   courses: string[];
-  start_time: string;
-  end_time: string;
-  day_of_week: string;
+  startTime: string;
+  endTime: string;
+  dayOfWeek: string;
 }

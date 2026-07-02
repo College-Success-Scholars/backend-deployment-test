@@ -345,7 +345,7 @@ export function getScholarsCurrentlyInRoom(
       const entryAt = lastUnmatchedEntry.ticket.created_at;
       const timeInRoomMs = asOf.getTime() - new Date(entryAt).getTime();
       result.push({
-        scholarUid: uid,
+        scholarId: uid,
         scholarName,
         entryTicket: lastUnmatchedEntry.ticket,
         entryAt,
@@ -387,7 +387,7 @@ export function getScholarsWithValidEntryExit(
       const entryTime = new Date(pairedEntryAt).getTime();
       const exitTime = new Date(exit.ticket.created_at).getTime();
       result.push({
-        scholarUid: uid,
+        scholarId: uid,
         scholarName,
         entryTicket: entry.ticket,
         exitTicket: exit.ticket,
@@ -418,10 +418,10 @@ export function enrichCleanedAndErroredWithNames(
 }
 
 export function enrichWithScholarNames<
-  T extends { scholarUid: string; scholarName?: string | null },
+  T extends { scholarId: string; scholarName?: string | null },
 >(items: T[], nameMap: Map<string, string>): T[] {
   if (items.length === 0) return items;
-  return items.map((r) => ({ ...r, scholarName: nameMap.get(r.scholarUid) ?? null }));
+  return items.map((r) => ({ ...r, scholarName: nameMap.get(r.scholarId) ?? null }));
 }
 
 // ---------------------------------------------------------------------------
@@ -447,16 +447,16 @@ export function getDoubleEntries(
 
   const studyByUid = new Map<string, ScholarWithCompletedSession[]>();
   for (const s of completedStudy) {
-    const list = studyByUid.get(s.scholarUid) ?? [];
+    const list = studyByUid.get(s.scholarId) ?? [];
     list.push(s);
-    studyByUid.set(s.scholarUid, list);
+    studyByUid.set(s.scholarId, list);
   }
 
   const fdByUid = new Map<string, ScholarWithCompletedSession[]>();
   for (const f of completedFrontDesk) {
-    const list = fdByUid.get(f.scholarUid) ?? [];
+    const list = fdByUid.get(f.scholarId) ?? [];
     list.push(f);
-    fdByUid.set(f.scholarUid, list);
+    fdByUid.set(f.scholarId, list);
   }
 
   const result: DoubleEntry[] = [];
@@ -478,7 +478,7 @@ export function getDoubleEntries(
         const { overlapMs: duration, overlapStart, overlapEnd } = computeOverlapMs(studyStart, studyEnd, fdStart, fdEnd);
         if (duration >= toleranceMs) {
           result.push({
-            scholarUid: uid,
+            scholarId: uid,
             scholarName,
             studySession: study,
             frontDeskSession: fd,
@@ -524,7 +524,7 @@ export async function getFrontDeskScholarsInRoom(
     ...options,
     sessionType: options?.sessionType ?? SESSION_TYPE_FRONT_DESK,
   });
-  const nameMap = await fetchScholarNamesByUids(result.map((r) => r.scholarUid));
+  const nameMap = await fetchScholarNamesByUids(result.map((r) => r.scholarId));
   return enrichWithScholarNames(result, nameMap);
 }
 
@@ -538,7 +538,7 @@ export async function getFrontDeskCompletedSessions(options?: {
   const result = getScholarsWithValidEntryExit(rows, undefined, {
     sessionType: options?.sessionType ?? SESSION_TYPE_FRONT_DESK,
   });
-  const nameMap = await fetchScholarNamesByUids(result.map((r) => r.scholarUid));
+  const nameMap = await fetchScholarNamesByUids(result.map((r) => r.scholarId));
   return enrichWithScholarNames(result, nameMap);
 }
 
@@ -569,7 +569,7 @@ export async function getStudySessionScholarsInRoom(
 ) {
   const rows = await fetchStudySessionLogs(options);
   const result = getScholarsCurrentlyInRoom(rows, undefined, options ?? {});
-  const nameMap = await fetchScholarNamesByUids(result.map((r) => r.scholarUid));
+  const nameMap = await fetchScholarNamesByUids(result.map((r) => r.scholarId));
   return enrichWithScholarNames(result, nameMap);
 }
 
@@ -581,6 +581,6 @@ export async function getStudySessionCompletedSessions(options?: {
 }) {
   const rows = await fetchStudySessionLogs(options);
   const result = getScholarsWithValidEntryExit(rows, undefined, options ?? {});
-  const nameMap = await fetchScholarNamesByUids(result.map((r) => r.scholarUid));
+  const nameMap = await fetchScholarNamesByUids(result.map((r) => r.scholarId));
   return enrichWithScholarNames(result, nameMap);
 }

@@ -29,10 +29,13 @@ router.get("/mcf/week/:weekNum/with-late", formLogController.mcfForWeekWithLate)
 router.get("/mcf/uid/:uid/with-late", formLogController.mcfByUidWithLate);
 router.get("/mcf/uid/:uid/week/:weekNum/with-late", formLogController.mcfByUidAndWeekWithLate);
 
-// WHAF
+// WHAF (legacy path) + WAHF (canonical)
 router.get("/whaf/week/:weekNum", formLogController.whafForWeek);
+router.get("/wahf/week/:weekNum", formLogController.whafForWeek);
 router.get("/whaf/uid/:uid", formLogController.whafByUid);
+router.get("/wahf/uid/:uid", formLogController.whafByUid);
 router.get("/whaf/week/:weekNum/with-late", formLogController.whafForWeekWithLate);
+router.get("/wahf/week/:weekNum/with-late", formLogController.whafForWeekWithLate);
 
 // WPL
 router.get("/wpl/week/:weekNum", formLogController.wplForWeek);
@@ -44,6 +47,7 @@ router.get("/wpl/uid/:uid/week/:weekNum/with-late", formLogController.wplByUidAn
 
 // Batch by UIDs
 router.post("/whaf/by-uids", formLogController.whafByUids);
+router.post("/wahf/by-uids", formLogController.whafByUids);
 router.post("/mcf/by-uids", formLogController.mcfByUids);
 router.post("/wpl/by-uids", formLogController.wplByUids);
 router.post("/tutor-reports/by-uids", formLogController.tutorReportsByUids);

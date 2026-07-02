@@ -277,7 +277,7 @@ function ScholarsInRoomTableSection({
     ...row,
     enteredDisplay: formatEntryDate(row.entryAt),
     durationDisplay: formatDuration(row.timeInRoomMs),
-    nameSort: (row.scholarName ?? row.scholarUid).toLowerCase(),
+    nameSort: (row.scholarName ?? row.scholarId).toLowerCase(),
   }));
 
   const extraColumns: ScholarDataTableColumn<Row>[] = [
@@ -303,13 +303,13 @@ function ScholarsInRoomTableSection({
     <CollapsibleTableSection title={`${title} (${data.length})`}>
       <ScholarDataTable<Row>
         data={tableData}
-        rowKeyField="scholarUid"
+        rowKeyField="scholarId"
         nameColumn={{
           header: "",
           colSpan: 2,
           width: "40%",
           field: "scholarName",
-          fallbackField: "scholarUid",
+          fallbackField: "scholarId",
           sortField: "nameSort",
           cellClassName: "font-medium",
           sortable: true,
@@ -317,7 +317,7 @@ function ScholarsInRoomTableSection({
         uidColumn={{
           header: "UID",
           width: "20%",
-          field: "scholarUid",
+          field: "scholarId",
           cellClassName: "text-muted-foreground font-mono text-xs",
           sortable: true,
         }}
@@ -349,7 +349,7 @@ function CompletedSessionsTableSection({
     enteredDisplay: formatEntryDate(row.entryAt),
     durationDisplay: formatDuration(getDurationMs(row)),
     durationMs: getDurationMs(row),
-    nameSort: (row.scholarName ?? row.scholarUid).toLowerCase(),
+    nameSort: (row.scholarName ?? row.scholarId).toLowerCase(),
   }));
 
   const extraColumns: ScholarDataTableColumn<Row>[] = [
@@ -376,13 +376,13 @@ function CompletedSessionsTableSection({
     <CollapsibleTableSection title={`${title} (${data.length})`}>
       <ScholarDataTable<Row>
         data={tableData}
-        rowKeyField="scholarUid"
+        rowKeyField="scholarId"
         nameColumn={{
           header: "",
           colSpan: 2,
           width: "40%",
           field: "scholarName",
-          fallbackField: "scholarUid",
+          fallbackField: "scholarId",
           sortField: "nameSort",
           cellClassName: "font-medium",
           sortable: true,
@@ -390,7 +390,7 @@ function CompletedSessionsTableSection({
         uidColumn={{
           header: "UID",
           width: "20%",
-          field: "scholarUid",
+          field: "scholarId",
           cellClassName: "text-muted-foreground font-mono text-xs",
           sortable: true,
         }}

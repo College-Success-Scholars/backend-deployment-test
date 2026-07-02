@@ -18,7 +18,7 @@ export async function WeeklyMemoAsyncContent({ weekParam }: WeeklyMemoAsyncConte
   const data = assembleWeeklyMemo(memoData)
   const navigation = computeWeekNavigation({
     trafficWeeklyData: memoData.trafficWeeklyData,
-    selectedWeekNum: memoData.selectedWeekNum,
+    selectedWeekNumber: memoData.selectedWeekNumber,
     currentCampusWeek: memoData.currentCampusWeek,
   })
 

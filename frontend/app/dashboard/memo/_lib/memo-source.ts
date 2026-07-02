@@ -15,7 +15,7 @@ const normalizeWeek = (weekParam?: string) => {
 export const backendMemoSource: MemoSource = {
   async getWeeklyMemoPageData(weekParam?: string) {
     const normalizedWeek = normalizeWeek(weekParam)
-    const query = normalizedWeek ? `?weekNum=${normalizedWeek}` : ""
+    const query = normalizedWeek ? `?weekNumber=${normalizedWeek}` : ""
     return backendGet<MemoPageData>(`/api/memo/page-data${query}`)
   },
 }

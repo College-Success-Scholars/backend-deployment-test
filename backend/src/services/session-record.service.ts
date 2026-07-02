@@ -66,7 +66,7 @@ export function computeWeeklyMinutesByUid(
   for (const s of sessions) {
     const entryMs = new Date(s.entryAt).getTime();
     if (entryMs < startMs || entryMs >= endMs) continue;
-    const uid = s.scholarUid ?? "";
+    const uid = s.scholarId ?? "";
     if (!uid) continue;
     if (!byUid.has(uid)) byUid.set(uid, empty());
     const row = byUid.get(uid)!;

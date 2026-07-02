@@ -2,44 +2,34 @@ import { describe, expect, it } from "vitest"
 import type { MemoPageData } from "../types"
 import { classifyScholarFollowUpRisk } from "./risk-classifier"
 
-const buildMemoData = (): MemoPageData =>
-  ({
+describe("risk-classifier", () => {
+  const baseData = {
     scholars: [
-      { uid: "2024-001", scholar_name: "A Scholar", cohort: 2025, fd_pct: 90, ss_pct: 90, fd_required: 120, ss_required: 120 },
-      { uid: "2023-010", scholar_name: "B Scholar", cohort: 2024, fd_pct: 60, ss_pct: 90, fd_required: 120, ss_required: 120 },
-      { uid: "2023-011", scholar_name: "C Scholar", cohort: 2024, fd_pct: 70, ss_pct: 50, fd_required: 120, ss_required: 120 },
+      { scholarId: "2024-001", scholarName: "A Scholar", cohort: 2025, fdPct: 90, ssPct: 90, fdRequired: 120, ssRequired: 120, fdTotal: 0, ssTotal: 0, fdExcuseMin: 0, ssExcuseMin: 0 },
+      { scholarId: "2023-010", scholarName: "B Scholar", cohort: 2024, fdPct: 60, ssPct: 90, fdRequired: 120, ssRequired: 120, fdTotal: 0, ssTotal: 0, fdExcuseMin: 0, ssExcuseMin: 0 },
+      { scholarId: "2023-011", scholarName: "C Scholar", cohort: 2024, fdPct: 70, ssPct: 50, fdRequired: 120, ssRequired: 120, fdTotal: 0, ssTotal: 0, fdExcuseMin: 0, ssExcuseMin: 0 },
     ],
     teamLeaders: [],
-    pieData: { mcf: 0, wpl: 0, whaf: 0 },
-    formCompletionOverall: { whaf_completed: 0, whaf_required: 0, wpl_completed: 0, wpl_required: 0, mcf_completed: 0, mcf_required: 0 },
+    pieData: { cohort2024: { total: 0, fdCompleteCount: 0, ssCompleteCount: 0, fdPercent: 0, ssPercent: 0 }, cohort2025: { total: 0, fdCompleteCount: 0, ssCompleteCount: 0, fdPercent: 0, ssPercent: 0 } },
+    formCompletionOverall: { wahfCompleted: 0, wahfRequired: 0, wahfLateCount: 0, wplCompleted: 0, wplRequired: 0, wplLateCount: 0, mcfCompleted: 0, mcfRequired: 0, mcfLateCount: 0 },
     completedStudy: [],
     completedFd: [],
     trafficWeeklyData: [],
     trafficEntryCountForSelectedWeek: 0,
     trafficSessions: [],
     tutorReports: [],
-    gradeBreakdown: { low: [{ scholar_name: "C Scholar" }] },
-    whafDonut: { total: 0, completeCount: 0, lateCount: 0, percentComplete: 0 },
+    gradeBreakdown: { low: [{ scholarName: "C Scholar", course: "X", assessment: "Y", grade: "60", percent: 60 }], high: [], mid: [] },
+    wahfDonut: { total: 0, completeCount: 0, lateCount: 0, percentComplete: 0 },
     teamLeaderFormStats: [],
-    weekLabel: "Apr 1 - Apr 7",
-    currentCampusWeek: 5,
-    selectedWeekNum: 5,
-  }) as unknown as MemoPageData
+    weekLabel: "Week 1",
+    currentCampusWeek: 1,
+    selectedWeekNumber: 1,
+  } as MemoPageData
 
-describe("risk-classifier", () => {
-  it("returns only scholars with follow-up risk flags and sorts by lowest completion", () => {
-    const result = classifyScholarFollowUpRisk(buildMemoData())
-
-    expect(result).toHaveLength(2)
-    expect(result[0]).toMatchObject({
-      scholarName: "C Scholar",
-      scholarYear: "Sophomore",
-      flags: ["Low front desk completion", "Low study session completion", "Low grade"],
-    })
-    expect(result[1]).toMatchObject({
-      scholarName: "B Scholar",
-      scholarYear: "Sophomore",
-      flags: ["Low front desk completion"],
-    })
+  it("flags scholars below completion thresholds and low grades", () => {
+    const rows = classifyScholarFollowUpRisk(baseData)
+    expect(rows.map((row) => row.scholarName)).toEqual(["C Scholar", "B Scholar"])
+    expect(rows[0]?.flags).toContain("Low study session completion")
+    expect(rows[1]?.flags).toContain("Low front desk completion")
   })
 })

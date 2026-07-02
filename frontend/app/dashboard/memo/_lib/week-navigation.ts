@@ -1,6 +1,6 @@
 export type WeekNavigationInput = {
   trafficWeeklyData: { weekNumber: number }[]
-  selectedWeekNum: number
+  selectedWeekNumber: number
   currentCampusWeek: number | null
 }
 
@@ -20,12 +20,12 @@ export function computeWeekNavigation(input: WeekNavigationInput): WeekNavigatio
   const availableWeeks = Array.from(
     new Set([
       ...input.trafficWeeklyData.map((entry) => entry.weekNumber),
-      input.selectedWeekNum,
+      input.selectedWeekNumber,
       ...(input.currentCampusWeek != null ? [input.currentCampusWeek] : []),
     ])
   ).sort((a, b) => a - b)
 
-  const weekIndex = availableWeeks.indexOf(input.selectedWeekNum)
+  const weekIndex = availableWeeks.indexOf(input.selectedWeekNumber)
   const prevWeek = weekIndex > 0 ? availableWeeks[weekIndex - 1] : null
   const nextWeek = weekIndex >= 0 && weekIndex < availableWeeks.length - 1 ? availableWeeks[weekIndex + 1] : null
 

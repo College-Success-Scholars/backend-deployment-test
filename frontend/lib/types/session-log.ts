@@ -42,7 +42,7 @@ export interface CleanedAndErroredResult {
 }
 
 export interface ScholarInRoom {
-  scholarUid: string;
+  scholarId: string;
   scholarName: string | null;
   entryTicket: SessionLogRow;
   entryAt: string;
@@ -51,7 +51,7 @@ export interface ScholarInRoom {
 }
 
 export interface ScholarWithCompletedSession {
-  scholarUid: string;
+  scholarId: string;
   scholarName: string | null;
   entryTicket: SessionLogRow;
   exitTicket: SessionLogRow;
@@ -62,7 +62,7 @@ export interface ScholarWithCompletedSession {
 }
 
 export interface DoubleEntry {
-  scholarUid: string;
+  scholarId: string;
   scholarName: string | null;
   studySession: ScholarWithCompletedSession;
   frontDeskSession: ScholarWithCompletedSession;
@@ -101,15 +101,15 @@ export function getDoubleEntries(
   const toleranceMs = (options.toleranceMinutes ?? 5) * MS_PER_MINUTE;
   const studyByUid = new Map<string, ScholarWithCompletedSession[]>();
   for (const s of completedStudy) {
-    const list = studyByUid.get(s.scholarUid) ?? [];
+    const list = studyByUid.get(s.scholarId) ?? [];
     list.push(s);
-    studyByUid.set(s.scholarUid, list);
+    studyByUid.set(s.scholarId, list);
   }
   const fdByUid = new Map<string, ScholarWithCompletedSession[]>();
   for (const f of completedFrontDesk) {
-    const list = fdByUid.get(f.scholarUid) ?? [];
+    const list = fdByUid.get(f.scholarId) ?? [];
     list.push(f);
-    fdByUid.set(f.scholarUid, list);
+    fdByUid.set(f.scholarId, list);
   }
   const result: DoubleEntry[] = [];
   for (const uid of new Set([...studyByUid.keys(), ...fdByUid.keys()])) {
@@ -125,7 +125,7 @@ export function getDoubleEntries(
         );
         if (duration >= toleranceMs) {
           result.push({
-            scholarUid: uid, scholarName,
+            scholarId: uid, scholarName,
             studySession: study, frontDeskSession: fd,
             overlapMs: duration,
             overlapStart: new Date(overlapStart).toISOString(),

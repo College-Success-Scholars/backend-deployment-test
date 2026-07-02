@@ -421,15 +421,15 @@ export function buildTeamLeaderFormStatsForWeek(
     const wpl_completed = wpl.count;
     const wpl_pct = wpl_completed >= wpl_required ? 100 : Math.round((wpl_completed / wpl_required) * 100);
     return {
-      uid: u.uid,
+      scholarId: u.uid,
       name: [u.first_name, u.last_name].filter(Boolean).join(" ").trim() || u.uid,
-      program_role: u.program_role,
-      mcf_completed, mcf_required, mcf_late: mcf.hasLate, mcf_pct,
-      mcf_latest_at: mcf.latestAt || (mcf_required > 0 ? NO_SUBMISSION_SENTINEL : ""),
-      whaf_completed, whaf_required, whaf_late: whaf.hasLate, whaf_pct,
-      whaf_latest_at: whaf.latestAt || NO_SUBMISSION_SENTINEL,
-      wpl_completed, wpl_required, wpl_late: wpl.hasLate, wpl_pct,
-      wpl_latest_at: wpl.latestAt || NO_SUBMISSION_SENTINEL,
+      programRole: u.program_role,
+      mcfCompleted: mcf_completed, mcfRequired: mcf_required, mcfLate: mcf.hasLate, mcfPct: mcf_pct,
+      mcfLatestAt: mcf.latestAt || (mcf_required > 0 ? NO_SUBMISSION_SENTINEL : ""),
+      wahfCompleted: whaf_completed, wahfRequired: whaf_required, wahfLate: whaf.hasLate, wahfPct: whaf_pct,
+      wahfLatestAt: whaf.latestAt || NO_SUBMISSION_SENTINEL,
+      wplCompleted: wpl_completed, wplRequired: wpl_required, wplLate: wpl.hasLate, wplPct: wpl_pct,
+      wplLatestAt: wpl.latestAt || NO_SUBMISSION_SENTINEL,
     };
   });
 }
@@ -535,9 +535,10 @@ function mapMcfRow(row: McfFormLogRow): RecentFormSubmission {
 }
 
 export async function getRecentFormSubmissions(params: {
-  profile: ProfilesRow | null;
+  profile?: ProfilesRow | null;
+  scholarId?: string | null;
 }): Promise<RecentFormSubmission[]> {
-  const uid = scholarUidFromProfile(params.profile);
+  const uid = params.scholarId ?? scholarUidFromProfile(params.profile ?? null);
   if (!uid) return [];
 
   const [whafAll, wplAll, mcfAll] = await Promise.all([

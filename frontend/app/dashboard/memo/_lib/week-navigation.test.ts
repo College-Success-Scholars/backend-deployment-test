@@ -20,7 +20,7 @@ describe("computeWeekNavigation", () => {
   it("builds sparse available weeks from traffic, selected, and current campus week", () => {
     const result = computeWeekNavigation({
       trafficWeeklyData: [{ weekNumber: 4 }, { weekNumber: 6 }],
-      selectedWeekNum: 5,
+      selectedWeekNumber: 5,
       currentCampusWeek: 7,
     })
 
@@ -32,7 +32,7 @@ describe("computeWeekNavigation", () => {
   it("uses current campus week as next when beyond traffic weeks", () => {
     const result = computeWeekNavigation({
       trafficWeeklyData: [{ weekNumber: 5 }],
-      selectedWeekNum: 6,
+      selectedWeekNumber: 6,
       currentCampusWeek: 7,
     })
 
@@ -44,7 +44,7 @@ describe("computeWeekNavigation", () => {
   it("returns null prev/next at list boundaries", () => {
     const first = computeWeekNavigation({
       trafficWeeklyData: [{ weekNumber: 3 }],
-      selectedWeekNum: 3,
+      selectedWeekNumber: 3,
       currentCampusWeek: 5,
     })
     expect(first.prevWeek).toBeNull()
@@ -52,7 +52,7 @@ describe("computeWeekNavigation", () => {
 
     const last = computeWeekNavigation({
       trafficWeeklyData: [{ weekNumber: 3 }],
-      selectedWeekNum: 5,
+      selectedWeekNumber: 5,
       currentCampusWeek: 5,
     })
     expect(last.prevWeek).toBe(3)
