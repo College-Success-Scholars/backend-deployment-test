@@ -1,0 +1,49 @@
+# CSS Atlas — local full-stack via Docker
+#
+# Prerequisites: create a .env file in the repo root (or export vars) with:
+#   SUPABASE_URL=https://<project-ref>.supabase.co
+#   SUPABASE_PUBLISHABLE_KEY=sb_publishable_<key>
+#
+# Usage:
+#   docker compose up --build
+#
+# Frontend: http://localhost:3000
+# Backend:  http://localhost:3001
+
+name: css-atlas
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+      args:
+        SUPABASE_URL: ${SUPABASE_URL:?Set SUPABASE_URL in .env}
+        SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:?Set SUPABASE_PUBLISHABLE_KEY in .env}
+        CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+    ports:
+      - "${BACKEND_PORT:-3001}:3001"
+    environment:
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      PORT: "3001"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY}
+        # Browser calls backend via the host-mapped port
+        NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:3001}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      # Server Components call backend over the compose network
+      BACKEND_URL: http://backend:3001
+    depends_on:
+      - backend
+    restart: unless-stopped

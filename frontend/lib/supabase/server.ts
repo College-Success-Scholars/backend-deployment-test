@@ -31,6 +31,7 @@ import type { User } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getSupabasePublicKey } from "./public-key";
+import { hasRoleAtLeast, mergeProfileWithRoster } from "../../../shared/dist/auth.js";
 
 /** Row shape from `public.profiles` (and joined `user_roster`) as returned by getCurrentUserWithProfile(). */
 export type ProfilesRow = {
@@ -118,25 +119,10 @@ export async function getCurrentUserWithProfile(): Promise<{
     .eq("id", user.id)
     .maybeSingle();
 
-  // Here to populate the profile with the user_roster data, should be removed once the user_roster table is fully migrated to the profiles table
   if (!profile) {
     return { user, profile: null };
   }
-  if (!profile.program_role) {
-    profile.program_role = profile.user_roster?.program_role;
-  }
-  if (!profile.cohort) {
-    profile.cohort = profile.user_roster?.cohort;
-  }
-  if (!profile.last_name) {
-    profile.last_name = profile.user_roster?.last_name;
-  }
-  if (!profile.first_name) {
-    profile.first_name = profile.user_roster?.first_name;
-  }
-  if (!profile.email) {
-    profile.email = profile.user_roster?.email;
-  }
+  mergeProfileWithRoster(profile);
   return { user, profile: profile as ProfilesRow };
 }
 
@@ -163,14 +149,6 @@ export async function requireUser(): Promise<User> {
     throw new Error("Unauthorized");
   }
   return user;
-}
-
-// TODO: This should be more fully fledged out, but for now this is good enough
-const ROLE_ORDER: Record<string, number> = { team_leader: 1, developer: 2 };
-
-function hasRoleAtLeast(role: string | null, minRole: "team_leader" | "developer"): boolean {
-  const userLevel = ROLE_ORDER[role ?? ""] ?? 0;
-  return userLevel >= ROLE_ORDER[minRole];
 }
 
 /**

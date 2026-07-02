@@ -19,7 +19,7 @@ TypeScript type definitions and constants that describe the shape of domain data
 
 | File | Source Link | Description |
 |------|-------------|-------------|
-| `user.model.ts` | [source](../../../../../backend/src/models/user.model.ts) | `ProfilesRow` (merged profiles + user_roster), `MemoUserRow`, `TeamLeaderRow`, `APP_ROLE_ORDER` constant |
+| `user.model.ts` | [source](../../../../../backend/src/models/user.model.ts) | `ProfilesRow` (merged profiles + user_roster), `MemoUserRow`, `TeamLeaderRow`; re-exports `APP_ROLE_ORDER` from shared |
 | `session-log.model.ts` | [source](../../../../../backend/src/models/session-log.model.ts) | Raw session check-in/out log row types |
 | `session-record.model.ts` | [source](../../../../../backend/src/models/session-record.model.ts) | Weekly aggregated session record row types |
 | `form-log.model.ts` | [source](../../../../../backend/src/models/form-log.model.ts) | MCF/WHAF/WPL form log row types |
@@ -36,6 +36,6 @@ TypeScript type definitions and constants that describe the shape of domain data
 - **Types only** — no functions, no class methods, no runtime logic.
 - **No Supabase imports** — models must not import from `@supabase/supabase-js`.
 - **Mirror Supabase column names** — row type fields should match the actual database column names unless a transformation is intentional and documented.
-- **Constants here if type-adjacent** — `APP_ROLE_ORDER` lives in `user.model.ts` because it directly describes the role type hierarchy.
+- **Constants here if type-adjacent** — `APP_ROLE_ORDER` is re-exported from `shared/auth.ts` (canonical source); `user.model.ts` keeps the re-export for backward compatibility.
 - **Naming** — row types end in `Row` (e.g., `ProfilesRow`). Computed/aggregated shapes use descriptive names (e.g., `MemoUserRow`, `TeamLeaderRow`).
 - **One model file per domain** — align with the corresponding service and controller files.

@@ -20,6 +20,8 @@ Shell scripts for deployment validation and operational tasks. These run outside
 | File | Source Link | Description |
 |------|-------------|-------------|
 | `smoke-test.sh` | [source](../../../scripts/smoke-test.sh) | Deployment health-check: tests health endpoint, auth gating, and CORS headers |
+| `alert.sh` | [source](../../../scripts/alert.sh) | Records an architectural alert to `docs/agents/alerts/` |
+| `resolve-alert.sh` | [source](../../../scripts/resolve-alert.sh) | Resolves an alert: logs the fix session via `log-agent-session.sh`, then deletes the alert file |
 | `log-agent-session.sh` | [source](../../../scripts/log-agent-session.sh) | Records an agent/AI session to `docs/agents/logs/`: who ran it, raw user prompt, stated purpose, agent response summary, and changed files |
 
 ---
@@ -53,4 +55,10 @@ bash scripts/log-agent-session.sh \
   --prompt-text "Fix the role check in server.ts" \
   --summary-text "Implemented ROLE_ORDER map; role hierarchy now enforced correctly" \
   --changes "frontend/lib/supabase/server.ts"
+
+# Resolve an alert (logs session + deletes alert file)
+bash scripts/resolve-alert.sh \
+  --alert docs/agents/alerts/2026-06-26T055650Z-auth-role-hierarchy-duplication.md \
+  --summary-text "Extracted APP_ROLE_ORDER, hasRoleAtLeast, and mergeProfileWithRoster into shared/auth.ts" \
+  --changes "shared/auth.ts,frontend/lib/supabase/server.ts,backend/src/controllers/auth.controller.ts,backend/src/models/user.model.ts"
 ```
