@@ -1,7 +1,7 @@
 import type { ActivityFormType, RecentFormSubmission } from "@/lib/types/form-log"
 
 export const formTone: Record<ActivityFormType, string> = {
-  WHAF: "text-sky-700 bg-sky-100",
+  WAHF: "text-sky-700 bg-sky-100",
   WPL: "text-teal-700 bg-teal-100",
   MCF: "text-amber-700 bg-amber-100",
 }

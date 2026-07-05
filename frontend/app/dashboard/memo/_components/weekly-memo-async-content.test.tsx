@@ -1,0 +1,286 @@
+import React from "react"
+import { describe, it, expect, vi, beforeEach } from "vitest"
+import { renderToStaticMarkup } from "react-dom/server"
+
+const {
+  mockGetWeeklyMemoPageData,
+  mockWeeklyMemoNavSync,
+  mockWeeklyKpiCards,
+  mockTeamLeaderPerformanceTable,
+  mockScholarFollowUpTable,
+  mockRecognitionBoardSection,
+  mockTutoringLogSection,
+  mockFullAttendanceDetailSection,
+  mockFormSubmissionsSection,
+} = vi.hoisted(() => ({
+  mockGetWeeklyMemoPageData: vi.fn(),
+  mockWeeklyMemoNavSync: vi.fn(() => null),
+  mockWeeklyKpiCards: vi.fn(() => React.createElement("section", { "data-testid": "weekly-kpi-cards" })),
+  mockTeamLeaderPerformanceTable: vi.fn(() =>
+    React.createElement("section", { "data-testid": "team-leader-performance-table" })
+  ),
+  mockScholarFollowUpTable: vi.fn(() => React.createElement("section", { "data-testid": "scholar-follow-up-table" })),
+  mockRecognitionBoardSection: vi.fn(() => React.createElement("section", { "data-testid": "recognition-board-section" })),
+  mockTutoringLogSection: vi.fn(() => React.createElement("section", { "data-testid": "tutoring-log-section" })),
+  mockFullAttendanceDetailSection: vi.fn(() =>
+    React.createElement("section", { "data-testid": "full-attendance-detail-section" })
+  ),
+  mockFormSubmissionsSection: vi.fn(() => React.createElement("section", { "data-testid": "form-submissions-section" })),
+}))
+
+vi.mock("../_lib/memo-source", () => ({
+  backendMemoSource: {
+    getWeeklyMemoPageData: mockGetWeeklyMemoPageData,
+  },
+}))
+
+vi.mock("./weekly-memo-nav-context", () => ({
+  WeeklyMemoNavSync: mockWeeklyMemoNavSync,
+}))
+
+vi.mock("./weekly-kpi-cards", () => ({
+  WeeklyKpiCards: mockWeeklyKpiCards,
+}))
+
+vi.mock("./team-leader-performance-table", () => ({
+  TeamLeaderPerformanceTable: mockTeamLeaderPerformanceTable,
+}))
+
+vi.mock("./scholar-follow-up-table", () => ({
+  ScholarFollowUpTable: mockScholarFollowUpTable,
+}))
+
+vi.mock("./recognition-board-section", () => ({
+  RecognitionBoardSection: mockRecognitionBoardSection,
+}))
+
+vi.mock("./tutoring-log-section", () => ({
+  TutoringLogSection: mockTutoringLogSection,
+}))
+
+vi.mock("./full-attendance-detail-section", () => ({
+  FullAttendanceDetailSection: mockFullAttendanceDetailSection,
+}))
+
+vi.mock("./form-submissions-section", () => ({
+  FormSubmissionsSection: mockFormSubmissionsSection,
+}))
+
+import { WeeklyMemoAsyncContent } from "./weekly-memo-async-content"
+
+const renderAsyncContent = async (props: { weekParam?: string } = {}) => {
+  const element = await WeeklyMemoAsyncContent(props)
+  renderToStaticMarkup(element)
+}
+
+const buildMemoData = (overrides: Record<string, unknown> = {}) => ({
+  scholars: [
+    {
+      scholarId: "2024-001",
+      scholarName: "Alice Scholar",
+      cohort: 2024,
+      fdPct: 95,
+      ssPct: 91,
+      fdRequired: 120,
+      ssRequired: 120,
+      fdTotal: 0,
+      ssTotal: 0,
+      fdExcuseMin: 0,
+      ssExcuseMin: 0,
+    },
+    {
+      scholarId: "2023-010",
+      scholarName: "Bob Scholar",
+      cohort: 2024,
+      fdPct: 50,
+      ssPct: 70,
+      fdRequired: 120,
+      ssRequired: 120,
+      fdTotal: 0,
+      ssTotal: 0,
+      fdExcuseMin: 0,
+      ssExcuseMin: 0,
+    },
+  ],
+  teamLeaders: [],
+  pieData: {
+    cohort2024: { total: 0, fdCompleteCount: 0, ssCompleteCount: 0, fdPercent: 0, ssPercent: 0 },
+    cohort2025: { total: 0, fdCompleteCount: 0, ssCompleteCount: 0, fdPercent: 0, ssPercent: 0 },
+  },
+  formCompletionOverall: {
+    wahfCompleted: 1,
+    wahfRequired: 2,
+    wahfLateCount: 0,
+    wplCompleted: 2,
+    wplRequired: 2,
+    wplLateCount: 0,
+    mcfCompleted: 1,
+    mcfRequired: 2,
+    mcfLateCount: 0,
+  },
+  completedStudy: [
+    { scholarId: "2024-001", scholarName: "Alice Scholar", durationMs: 60 * 60 * 1000 },
+    { scholarId: "2023-010", scholarName: "Bob Scholar", durationMs: 20 * 60 * 1000 },
+  ],
+  completedFd: [
+    { scholarId: "2024-001", scholarName: "Alice Scholar", durationMs: 90 * 60 * 1000 },
+    { scholarId: "2023-010", scholarName: "Bob Scholar", durationMs: 45 * 60 * 1000 },
+  ],
+  trafficWeeklyData: [
+    { weekNumber: 4, entryCount: 80 },
+    { weekNumber: 5, entryCount: 100 },
+  ],
+  trafficEntryCountForSelectedWeek: 100,
+  trafficSessions: [{ id: "session-1" }],
+  tutorReports: [{ id: 1, scholarId: "1", scholarName: "A", tutorName: "T", courses: [], startTime: "", endTime: "", dayOfWeek: "Mon" }],
+  gradeBreakdown: { low: [{ scholarName: "Bob Scholar", course: "X", assessment: "Y", grade: "60", percent: 60 }], high: [], mid: [] },
+  wahfDonut: { total: 0, completeCount: 0, lateCount: 0, percentComplete: 0 },
+  teamLeaderFormStats: [
+    {
+      scholarId: "tl-1",
+      name: "TL One",
+      programRole: null,
+      mcfCompleted: 0,
+      mcfRequired: 1,
+      mcfLate: false,
+      mcfPct: 0,
+      mcfLatestAt: "",
+      wplCompleted: 1,
+      wplRequired: 1,
+      wplLate: false,
+      wplPct: 100,
+      wplLatestAt: "",
+      wahfCompleted: 1,
+      wahfRequired: 1,
+      wahfLate: false,
+      wahfPct: 100,
+      wahfLatestAt: "",
+    },
+  ],
+  weekLabel: "Apr 1 - Apr 7",
+  currentCampusWeek: 6,
+  selectedWeekNumber: 5,
+  ...overrides,
+})
+
+describe("WeeklyMemoAsyncContent", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it("calls memo source with week param", async () => {
+    mockGetWeeklyMemoPageData.mockResolvedValue(buildMemoData())
+
+    await WeeklyMemoAsyncContent({ weekParam: "7" })
+    await WeeklyMemoAsyncContent({ weekParam: undefined })
+
+    expect(mockGetWeeklyMemoPageData).toHaveBeenNthCalledWith(1, "7")
+    expect(mockGetWeeklyMemoPageData).toHaveBeenNthCalledWith(2, undefined)
+  })
+
+  it("syncs sparse week navigation metadata to header context", async () => {
+    mockGetWeeklyMemoPageData.mockResolvedValue(
+      buildMemoData({
+        selectedWeekNumber: 5,
+        currentCampusWeek: 7,
+        trafficWeeklyData: [
+          { weekNumber: 4, entryCount: 70 },
+          { weekNumber: 6, entryCount: 90 },
+        ],
+      })
+    )
+
+    await renderAsyncContent({})
+
+    expect(mockWeeklyMemoNavSync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        weekNumber: 5,
+        weekStartLabel: "Apr 1",
+        weekEndLabel: "Apr 7",
+        availableWeeks: [4, 5, 6, 7],
+        prevWeek: 4,
+        nextWeek: 6,
+        currentCampusWeek: 7,
+      }),
+      undefined
+    )
+  })
+
+  it("passes transformed props to section components", async () => {
+    mockGetWeeklyMemoPageData.mockResolvedValue(buildMemoData())
+
+    await renderAsyncContent({})
+
+    expect(mockWeeklyKpiCards).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cards: expect.arrayContaining([
+          expect.objectContaining({ title: "Visits this week", primaryValue: "100" }),
+          expect.objectContaining({ title: "Front desk completion", primaryValue: "67%" }),
+        ]),
+      }),
+      undefined
+    )
+
+    expect(mockTeamLeaderPerformanceTable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        rows: [expect.objectContaining({ leaderName: "TL One", mcf: "missing", wpl: "on-time", wahf: "on-time" })],
+      }),
+      undefined
+    )
+
+    expect(mockScholarFollowUpTable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        rows: [
+          expect.objectContaining({
+            scholarName: "Bob Scholar",
+            flags: expect.arrayContaining(["Low front desk completion", "Low study session completion", "Low grade"]),
+          }),
+        ],
+      }),
+      undefined
+    )
+
+    expect(mockTutoringLogSection).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          badgeText: "1 session",
+          tabs: expect.arrayContaining([
+            expect.objectContaining({ id: "sessions" }),
+            expect.objectContaining({ id: "empty-sessions" }),
+          ]),
+        }),
+      }),
+      undefined
+    )
+
+    expect(mockRecognitionBoardSection).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          items: expect.arrayContaining(["Alice Scholar - Strong completion this week"]),
+        }),
+      }),
+      undefined
+    )
+
+    expect(mockFullAttendanceDetailSection).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          tabs: expect.arrayContaining([
+            expect.objectContaining({ id: "front-desk" }),
+            expect.objectContaining({ id: "study-sessions" }),
+          ]),
+        }),
+      }),
+      undefined
+    )
+
+    expect(mockFormSubmissionsSection).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          summaries: expect.arrayContaining([expect.objectContaining({ form: "MCF", missing: 1 })]),
+        }),
+      }),
+      undefined
+    )
+  })
+})

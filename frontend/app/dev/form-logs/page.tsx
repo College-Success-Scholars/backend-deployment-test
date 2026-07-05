@@ -13,7 +13,7 @@ import {
   getMcfFormLogsForWeekWithLate,
   getWhafFormLogsForWeekWithLate,
   getWplFormLogsForWeekWithLate,
-  buildTeamLeaderFormStatsForWeek,
+  getTeamLeaderFormStatsForWeek,
 } from "@/lib/server/data";
 import {
   FormCompletionOverviewCard,
@@ -64,38 +64,30 @@ export default async function FormLogsTestPage({ searchParams }: PageProps) {
   const everyoneWhafPct =
     totalEveryone > 0 ? Math.round((everyoneWithWhaf / totalEveryone) * 100) : 0;
 
-  const teamLeaderRows = await buildTeamLeaderFormStatsForWeek(
-    teamLeadersRaw,
-    mcfRowsWithLate,
-    whafRows,
-    wplRowsWithLate,
-    weekNum
-  );
+  const teamLeaderRows = await getTeamLeaderFormStatsForWeek(weekNum);
 
-  // Overall completion stats across all team leaders (including late counts for pie charts).
-  // Cap each TL's completed at required so double submissions don't inflate totals (e.g. 45/44).
   const overall = teamLeaderRows.reduce(
     (acc, row) => ({
-      whaf_completed: acc.whaf_completed + Math.min(row.whaf_completed, row.whaf_required),
-      whaf_required: acc.whaf_required + row.whaf_required,
-      whaf_late_count: acc.whaf_late_count + (row.whaf_late ? 1 : 0),
-      mcf_completed: acc.mcf_completed + Math.min(row.mcf_completed, row.mcf_required),
-      mcf_required: acc.mcf_required + row.mcf_required,
-      mcf_late_count: acc.mcf_late_count + (row.mcf_late ? 1 : 0),
-      wpl_completed: acc.wpl_completed + Math.min(row.wpl_completed, row.wpl_required),
-      wpl_required: acc.wpl_required + row.wpl_required,
-      wpl_late_count: acc.wpl_late_count + (row.wpl_late ? 1 : 0),
+      wahfCompleted: acc.wahfCompleted + Math.min(row.wahfCompleted, row.wahfRequired),
+      wahfRequired: acc.wahfRequired + row.wahfRequired,
+      wahfLateCount: acc.wahfLateCount + (row.wahfLate ? 1 : 0),
+      mcfCompleted: acc.mcfCompleted + Math.min(row.mcfCompleted, row.mcfRequired),
+      mcfRequired: acc.mcfRequired + row.mcfRequired,
+      mcfLateCount: acc.mcfLateCount + (row.mcfLate ? 1 : 0),
+      wplCompleted: acc.wplCompleted + Math.min(row.wplCompleted, row.wplRequired),
+      wplRequired: acc.wplRequired + row.wplRequired,
+      wplLateCount: acc.wplLateCount + (row.wplLate ? 1 : 0),
     }),
     {
-      whaf_completed: 0,
-      whaf_required: 0,
-      whaf_late_count: 0,
-      mcf_completed: 0,
-      mcf_required: 0,
-      mcf_late_count: 0,
-      wpl_completed: 0,
-      wpl_required: 0,
-      wpl_late_count: 0,
+      wahfCompleted: 0,
+      wahfRequired: 0,
+      wahfLateCount: 0,
+      mcfCompleted: 0,
+      mcfRequired: 0,
+      mcfLateCount: 0,
+      wplCompleted: 0,
+      wplRequired: 0,
+      wplLateCount: 0,
     }
   );
   return (

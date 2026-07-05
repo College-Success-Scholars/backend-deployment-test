@@ -300,34 +300,26 @@ export async function getWplFormLogsByUidAndWeekWithLate(uid: string, weekNum: n
 
 export type { TeamLeaderFormStatsRow };
 
-export async function buildTeamLeaderFormStatsForWeek(
-  _teamLeaders: TeamLeaderRow[],
-  _mcfRows: FormLogRowWithLate<McfFormLogRow>[],
-  _whafRows: FormLogRowWithLate<WahfFormLogRow>[],
-  _wplRows: FormLogRowWithLate<WplFormLogRow>[],
-  weekNum?: number
-): Promise<TeamLeaderFormStatsRow[]> {
-  if (weekNum == null) return [];
-  return backendPost("/api/form-logs/team-leader-stats", { weekNum });
+export async function getTeamLeaderFormStatsForWeek(weekNumber: number): Promise<TeamLeaderFormStatsRow[]> {
+  return backendPost("/api/form-logs/team-leader-stats", { weekNumber });
 }
 
-export async function getTeamLeaderFormStatsForWeek(weekNum: number): Promise<TeamLeaderFormStatsRow[]> {
-  return backendPost("/api/form-logs/team-leader-stats", { weekNum });
-}
-
-export function scholarUidFromProfile(profile: { student_id?: number | null } | null): string | null {
+export function scholarIdFromProfile(profile: { student_id?: number | null } | null): string | null {
   if (typeof profile?.student_id === "number" && Number.isFinite(profile.student_id)) {
     return String(profile.student_id);
   }
   return null;
 }
 
+/** @deprecated Use scholarIdFromProfile */
+export const scholarUidFromProfile = scholarIdFromProfile;
+
 export async function getRecentFormSubmissions(params: {
   profile: { student_id?: number | null } | null;
 }): Promise<RecentFormSubmission[]> {
-  const uid = scholarUidFromProfile(params.profile);
-  if (!uid) return [];
-  return backendPost("/api/form-logs/recent-submissions", { studentId: Number(uid) });
+  const scholarId = scholarIdFromProfile(params.profile);
+  if (!scholarId) return [];
+  return backendPost("/api/form-logs/recent-submissions", { scholarId });
 }
 
 // ---------------------------------------------------------------------------

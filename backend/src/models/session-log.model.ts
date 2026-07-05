@@ -71,7 +71,7 @@ export interface CleanedAndErroredResult {
 }
 
 export interface ScholarInRoom {
-  scholarUid: string;
+  scholarId: string;
   scholarName: string | null;
   entryTicket: SessionLogRow;
   entryAt: string;
@@ -80,7 +80,7 @@ export interface ScholarInRoom {
 }
 
 export interface ScholarWithCompletedSession {
-  scholarUid: string;
+  scholarId: string;
   scholarName: string | null;
   entryTicket: SessionLogRow;
   exitTicket: SessionLogRow;
@@ -111,7 +111,7 @@ export interface StudySessionLogRow {
 }
 
 export interface DoubleEntry {
-  scholarUid: string;
+  scholarId: string;
   scholarName: string | null;
   studySession: ScholarWithCompletedSession;
   frontDeskSession: ScholarWithCompletedSession;

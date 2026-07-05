@@ -59,10 +59,10 @@ const baseMemoData: MemoPageData = {
   trafficSessions: [] as MemoPageData["trafficSessions"],
   tutorReports: [] as MemoPageData["tutorReports"],
   gradeBreakdown: { low: 0, mid: 0, high: 0 } as unknown as MemoPageData["gradeBreakdown"],
-  whafDonut: { total: 0, completeCount: 0, lateCount: 0, percentComplete: 0 },
+  wahfDonut: { total: 0, completeCount: 0, lateCount: 0, percentComplete: 0 },
   teamLeaderFormStats: [] as MemoPageData["teamLeaderFormStats"],
   weekLabel: "",
-  selectedWeekNum: 12,
+  selectedWeekNumber: 12,
   currentCampusWeek: 12,
 }
 
@@ -70,7 +70,7 @@ const weeklyMemoByWeek: Record<number, WeeklyMemoViewData> = {
   12: {
     ...baseMemoData,
     weekLabel: "Apr 14 - Apr 20, 2026",
-    selectedWeekNum: 12,
+    selectedWeekNumber: 12,
     weekStartLabel: "Apr 14",
     weekEndLabel: "Apr 20, 2026",
     weekNumber: 12,
@@ -183,6 +183,43 @@ const weeklyMemoByWeek: Record<number, WeeklyMemoViewData> = {
         studySessionPct: 82,
       },
     ]),
+    tutoringLog: {
+      badgeText: "28 sessions",
+      rightLabel: "Sessions · Empty sessions",
+      tabs: [
+        {
+          id: "sessions",
+          label: "Sessions",
+          rows: [
+            {
+              id: 1,
+              scholarName: "Leo Pham",
+              dayOfWeek: "Mon",
+              tutorName: "Dr. Smith",
+              courses: ["Calculus I"],
+              startTime: "2:00 PM",
+              endTime: "3:00 PM",
+            },
+            {
+              id: 2,
+              scholarName: "Fatima Diallo",
+              dayOfWeek: "Wed",
+              tutorName: "Dr. Jones",
+              courses: ["Chemistry"],
+              startTime: "4:00 PM",
+              endTime: "5:00 PM",
+            },
+          ],
+        },
+        {
+          id: "empty-sessions",
+          label: "Empty sessions",
+          rows: [
+            { id: 3, scholarName: "EMPTY SESSION", dayOfWeek: "Tue", tutorName: "Dr. Smith", courses: [], startTime: "", endTime: "" },
+          ],
+        },
+      ],
+    },
     recognitionBoard: {
       badgeText: "7 recognized",
       rightLabel: "Scholars · Team leaders",
@@ -248,7 +285,7 @@ const weeklyMemoByWeek: Record<number, WeeklyMemoViewData> = {
   11: {
     ...baseMemoData,
     weekLabel: "Apr 07 - Apr 13, 2026",
-    selectedWeekNum: 11,
+    selectedWeekNumber: 11,
     weekStartLabel: "Apr 07",
     weekEndLabel: "Apr 13, 2026",
     weekNumber: 11,
@@ -313,6 +350,34 @@ const weeklyMemoByWeek: Record<number, WeeklyMemoViewData> = {
         studySessionPct: 14,
       },
     ]),
+    tutoringLog: {
+      badgeText: "25 sessions",
+      rightLabel: "Sessions · Empty sessions",
+      tabs: [
+        {
+          id: "sessions",
+          label: "Sessions",
+          rows: [
+            {
+              id: 4,
+              scholarName: "Marcus Webb",
+              dayOfWeek: "Thu",
+              tutorName: "Dr. Lee",
+              courses: ["Physics"],
+              startTime: "1:00 PM",
+              endTime: "2:00 PM",
+            },
+          ],
+        },
+        {
+          id: "empty-sessions",
+          label: "Empty sessions",
+          rows: [
+            { id: 5, scholarName: "EMPTY SESSION", dayOfWeek: "Fri", tutorName: "Dr. Jones", courses: [], startTime: "", endTime: "" },
+          ],
+        },
+      ],
+    },
     recognitionBoard: {
       badgeText: "5 recognized",
       rightLabel: "Scholars · Team leaders",

@@ -34,7 +34,7 @@ export function PersonalActivityLogClient({ entries }: { entries: RecentFormSubm
   return (
     <>
       <div className="inline-flex rounded-xl border border-border/60 bg-muted/30 p-1">
-        {(["ALL", "WHAF", "WPL", "MCF"] as const).map((option) => (
+        {(["ALL", "WAHF", "WPL", "MCF"] as const).map((option) => (
           <Button
             key={option}
             size="sm"

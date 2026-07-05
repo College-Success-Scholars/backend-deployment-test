@@ -192,7 +192,7 @@ export function SubmissionDetailsModal({ entry }: { entry: RecentFormSubmission 
         </DialogHeader>
 
         <div className="bg-card">
-          {entry.formType === "WHAF" && <WhafRows entry={entry} />}
+          {entry.formType === "WAHF" && <WhafRows entry={entry} />}
           {entry.formType === "WPL" && <WplRows entry={entry} />}
           {entry.formType === "MCF" && <McfRows entry={entry} />}
         </div>

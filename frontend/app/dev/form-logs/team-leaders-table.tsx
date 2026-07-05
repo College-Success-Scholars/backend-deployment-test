@@ -5,7 +5,7 @@ import {
   type ScholarDataTableColumn,
 } from "@/components/scholar-data-table";
 import { ProgressCell } from "@/app/memo/memo-content";
-import type { TeamLeaderFormStatsRow } from "@/lib/server/data";
+import type { TeamLeaderFormStatsRow } from "@/lib/types/form-log";
 
 export function TeamLeadersTable({
   rows,
@@ -26,30 +26,30 @@ export function TeamLeadersTable({
       id: "program_role",
       header: "Program role",
       width: "16%",
-      field: "program_role",
+      field: "programRole",
       cellClassName: "text-muted-foreground",
       sortable: true,
       getSortValue: (row) => {
-        const role = row.program_role ?? "";
+        const role = row.programRole ?? "";
         const idx = programRoleOrder.indexOf(role);
         return idx >= 0 ? idx : programRoleOrder.length;
       },
     },
     {
-      id: "whaf-progress",
-      header: "WHAF",
+      id: "wahf-progress",
+      header: "WAHF",
       width: "16%",
-      field: "whaf_pct",
+      field: "wahfPct",
       sortable: true,
-      sortField: "whaf_latest_at",
+      sortField: "wahfLatestAt",
       renderCell: (row) => (
         <ProgressCell
           mode="count"
-          completed={row.whaf_completed}
-          required={row.whaf_required}
-          label="WHAF"
+          completed={row.wahfCompleted}
+          required={row.wahfRequired}
+          label="WAHF"
           unitLabel="form"
-          isLate={row.whaf_late}
+          isLate={row.wahfLate}
         />
       ),
     },
@@ -57,11 +57,11 @@ export function TeamLeadersTable({
       id: "mcf-progress",
       header: "MCF",
       width: "16%",
-      field: "mcf_pct",
+      field: "mcfPct",
       sortable: true,
-      sortField: "mcf_latest_at",
+      sortField: "mcfLatestAt",
       renderCell: (row) =>
-        row.mcf_required === 0 ? (
+        row.mcfRequired === 0 ? (
           <div
             className="flex items-center gap-2 rounded px-2 py-1 text-xs bg-green-500/20"
             title="MCF. No mentees (0 required). Green: ≥90%, Yellow: 75–90% or late, Red: <75%."
@@ -76,11 +76,11 @@ export function TeamLeadersTable({
         ) : (
           <ProgressCell
             mode="count"
-            completed={row.mcf_completed}
-            required={row.mcf_required}
+            completed={row.mcfCompleted}
+            required={row.mcfRequired}
             label="MCF"
             unitLabel="form"
-            isLate={row.mcf_late}
+            isLate={row.mcfLate}
           />
         ),
     },
@@ -88,17 +88,17 @@ export function TeamLeadersTable({
       id: "wpl-progress",
       header: "WPL",
       width: "16%",
-      field: "wpl_pct",
+      field: "wplPct",
       sortable: true,
-      sortField: "wpl_latest_at",
+      sortField: "wplLatestAt",
       renderCell: (row) => (
         <ProgressCell
           mode="count"
-          completed={row.wpl_completed}
-          required={row.wpl_required}
+          completed={row.wplCompleted}
+          required={row.wplRequired}
           label="WPL"
           unitLabel="form"
-          isLate={row.wpl_late}
+          isLate={row.wplLate}
         />
       ),
     },
@@ -107,16 +107,16 @@ export function TeamLeadersTable({
   return (
     <ScholarDataTable<TeamLeaderFormStatsRow>
       data={rows}
-      rowKeyField="uid"
+      rowKeyField="scholarId"
       defaultSortColumnId="name"
       defaultSortDirection="asc"
-      rowDataAttributes={(row) => ({ "data-uid": row.uid })}
+      rowDataAttributes={(row) => ({ "data-uid": row.scholarId })}
       nameColumn={{
         header: "Name",
         colSpan: 2,
         width: "36%",
         field: "name",
-        fallbackField: "uid",
+        fallbackField: "scholarId",
         sortField: "name",
         cellClassName: "font-medium",
         sortable: true,

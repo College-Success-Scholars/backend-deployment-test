@@ -49,7 +49,7 @@ export interface WplFormLogRow {
 
 export type FormLogRowWithLate<T> = T & { isLate: boolean };
 
-export type ActivityFormType = "WHAF" | "WPL" | "MCF";
+export type ActivityFormType = "WAHF" | "WPL" | "MCF";
 
 export type RecentFormSubmission = {
   id: string;
@@ -74,7 +74,7 @@ export type RecentFormSubmission = {
 };
 
 export type GradeEntry = {
-  scholar_name: string;
+  scholarName: string;
   course: string;
   assessment: string;
   grade: string;
@@ -88,22 +88,22 @@ export type GradeBreakdown = {
 };
 
 export type TeamLeaderFormStatsRow = {
-  uid: string;
+  scholarId: string;
   name: string;
-  program_role: string | null;
-  mcf_completed: number;
-  mcf_required: number;
-  mcf_late: boolean;
-  mcf_pct: number;
-  mcf_latest_at: string;
-  whaf_completed: number;
-  whaf_required: number;
-  whaf_late: boolean;
-  whaf_pct: number;
-  whaf_latest_at: string;
-  wpl_completed: number;
-  wpl_required: number;
-  wpl_late: boolean;
-  wpl_pct: number;
-  wpl_latest_at: string;
+  programRole: string | null;
+  mcfCompleted: number;
+  mcfRequired: number;
+  mcfLate: boolean;
+  mcfPct: number;
+  mcfLatestAt: string;
+  wahfCompleted: number;
+  wahfRequired: number;
+  wahfLate: boolean;
+  wahfPct: number;
+  wahfLatestAt: string;
+  wplCompleted: number;
+  wplRequired: number;
+  wplLate: boolean;
+  wplPct: number;
+  wplLatestAt: string;
 };

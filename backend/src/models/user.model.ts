@@ -8,7 +8,7 @@
  *
  * ## What belongs here
  * - Types derived from Supabase profiles and user_roster tables
- * - APP_ROLE_ORDER constant (defines role hierarchy for access control)
+ * - Re-exports APP_ROLE_ORDER from shared (canonical role hierarchy for access control)
  * - Computed/derived user shapes (MemoUserRow, TeamLeaderRow)
  *
  * ## What does NOT belong here
@@ -29,8 +29,7 @@ export type ProfilesRow = {
   [key: string]: unknown;
 };
 
-export const APP_ROLE_ORDER = [null, "team_leader", "developer"] as const;
-export type AppRole = (typeof APP_ROLE_ORDER)[number];
+export { APP_ROLE_ORDER, type AppRole } from "../../../shared/dist/auth.js";
 
 export type MemoUserRow = {
   uid: string;

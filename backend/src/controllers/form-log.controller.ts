@@ -255,10 +255,14 @@ export async function wplByUidAndWeekWithLate(req: AuthenticatedRequest, res: Re
 // POST /api/form-logs/recent-submissions
 export async function recentSubmissions(req: AuthenticatedRequest, res: Response) {
   try {
-    const { studentId } = req.body as { studentId?: number };
-    // Build a minimal profile-like object for the service
-    const profile = studentId != null ? { student_id: studentId } as { student_id: number; [key: string]: unknown } : null;
-    const data = await getRecentFormSubmissions({ profile: profile as any });
+    const body = req.body as { scholarId?: string; studentId?: number };
+    const scholarId =
+      typeof body.scholarId === "string" && body.scholarId.trim() !== ""
+        ? body.scholarId.trim()
+        : body.studentId != null
+          ? String(body.studentId)
+          : null;
+    const data = await getRecentFormSubmissions({ scholarId });
     res.json({ data });
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : "Failed to fetch recent submissions" });
@@ -355,15 +359,16 @@ export async function getFormLog(req: AuthenticatedRequest, res: Response) {
 // POST /api/form-logs/team-leader-stats
 export async function teamLeaderStats(req: AuthenticatedRequest, res: Response) {
   try {
-    const { weekNum } = req.body as { weekNum?: number };
-    if (typeof weekNum !== "number" || weekNum < 1) {
-      res.status(400).json({ error: "weekNum must be a number >= 1" }); return;
+    const body = req.body as { weekNumber?: number; weekNum?: number };
+    const weekNumber = body.weekNumber ?? body.weekNum;
+    if (typeof weekNumber !== "number" || weekNumber < 1) {
+      res.status(400).json({ error: "weekNumber must be a number >= 1" }); return;
     }
     const [leaders, mcfWithLate, whafWithLate, wplWithLate] = await Promise.all([
       fetchTeamLeaders(),
-      getMcfFormLogsForWeekWithLate(weekNum),
-      getWhafFormLogsForWeekWithLate(weekNum),
-      getWplFormLogsForWeekWithLate(weekNum),
+      getMcfFormLogsForWeekWithLate(weekNumber),
+      getWhafFormLogsForWeekWithLate(weekNumber),
+      getWplFormLogsForWeekWithLate(weekNumber),
     ]);
     const data = buildTeamLeaderFormStatsForWeek(leaders, mcfWithLate, whafWithLate, wplWithLate);
     res.json({ data });

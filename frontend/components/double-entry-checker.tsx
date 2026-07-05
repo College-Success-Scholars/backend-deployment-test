@@ -74,7 +74,7 @@ export function DoubleEntryChecker({
         ) : (
           <ul className="space-y-4">
             {doubleEntries.map((entry, idx) => (
-              <DoubleEntryRow key={`${entry.scholarUid}-${idx}`} entry={entry} />
+              <DoubleEntryRow key={`${entry.scholarId}-${idx}`} entry={entry} />
             ))}
           </ul>
         )}
@@ -87,9 +87,9 @@ function DoubleEntryRow({ entry }: { entry: DoubleEntry }) {
   return (
     <li className="rounded-md border border-amber-500/50 bg-amber-500/5 p-3 text-sm">
       <div className="font-medium">
-        {entry.scholarName ?? entry.scholarUid}
+        {entry.scholarName ?? entry.scholarId}
         <span className="text-muted-foreground font-normal ml-1">
-          (UID {entry.scholarUid})
+          (ID {entry.scholarId})
         </span>
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-2">

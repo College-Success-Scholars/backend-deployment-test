@@ -890,7 +890,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 **Description:** Returns the most recent form submissions for a given student.
 **Request Body:**
 ```json
-{ "studentId": 12345 }  // optional integer; if omitted, uses current user
+{ "scholarId": "12345" }  // optional string; legacy { "studentId": 12345 } also accepted
 ```
 **Response:**
 ```json
@@ -905,7 +905,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 **Description:** Aggregates MCF, WHAF, and WPL form submission stats per team leader for a given week (includes late submissions).
 **Request Body:**
 ```json
-{ "weekNum": 1 }  // required, integer >= 1
+{ "weekNumber": 1 }  // required, integer >= 1; legacy weekNum accepted
 ```
 **Response:**
 ```json
@@ -1148,8 +1148,8 @@ Routes under `/api/memo` have mixed auth requirements as noted per endpoint.
 **Request Body:**
 ```json
 {
-  "week_num": 1,       // required
-  "semester_id": 1     // required
+  "weekNumber": 1,     // required; legacy week_num / weekNum accepted
+  "semesterId": 1      // required; legacy semester_id accepted
 }
 ```
 **Response:**
@@ -1164,7 +1164,7 @@ Routes under `/api/memo` have mixed auth requirements as noted per endpoint.
 **Auth:** requireAuth
 **Description:** Returns all processed data needed to render the memo page for a given week (aggregated in one call).
 **Query Params:**
-- `weekNum` (integer >= 1, required)
+- `weekNumber` (integer >= 1; legacy `weekNum` accepted; defaults to current campus week if omitted)
 
 **Response:**
 ```json
@@ -1196,9 +1196,9 @@ Routes under `/api/memo` have mixed auth requirements as noted per endpoint.
 **Auth:** requireTeamLeaderOrAbove
 **Description:** Returns the traffic entry count for a given week. Response has `Cache-Control: no-store`.
 **Query Params:**
-- `weekNum` (integer >= 1, required)
+- `weekNumber` (integer >= 1, required; legacy `weekNum` query param accepted)
 
 **Response:**
 ```json
-{ "weekNumber": 1, "entryCount": 42 }
+{ "data": { "weekNumber": 1, "entryCount": 42 } }
 ```

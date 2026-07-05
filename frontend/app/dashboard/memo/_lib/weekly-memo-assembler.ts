@@ -1,8 +1,10 @@
 import type { ScholarWithCompletedSession } from "@/lib/types/session-log"
+import type { MemoTutorReportRow } from "@/lib/types/tutor-report-log"
 import type {
   FormStatus,
   MemoPageData,
   TeamLeaderPerformanceRow,
+  TutoringLogRow,
   WeeklyMemoViewData,
 } from "../types"
 import { classifyScholarFollowUpRisk } from "./risk-classifier"
@@ -21,15 +23,19 @@ const formatWeekDateRange = (weekLabel: string) => {
 }
 
 const aggregateSessionMinutes = (sessions: ScholarWithCompletedSession[]) => {
-  const byScholar = new Map<string, { scholarName: string; totalMinutes: number }>()
+  const byScholar = new Map<string, { scholarId: string; scholarName: string; totalMinutes: number }>()
   for (const session of sessions) {
     const scholarName = session.scholarName || "Unknown scholar"
-    const existing = byScholar.get(scholarName)
+    const existing = byScholar.get(session.scholarId)
     const minutes = Math.max(0, Math.round(session.durationMs / 60000))
     if (existing) {
       existing.totalMinutes += minutes
     } else {
-      byScholar.set(scholarName, { scholarName, totalMinutes: minutes })
+      byScholar.set(session.scholarId, {
+        scholarId: session.scholarId,
+        scholarName,
+        totalMinutes: minutes,
+      })
     }
   }
   return byScholar
@@ -38,26 +44,59 @@ const aggregateSessionMinutes = (sessions: ScholarWithCompletedSession[]) => {
 const buildTeamLeaderRows = (data: MemoPageData): TeamLeaderPerformanceRow[] =>
   data.teamLeaderFormStats.map((row) => ({
     leaderName: row.name,
-    mcf: getFormStatus(row.mcf_completed, row.mcf_required, row.mcf_late),
-    wpl: getFormStatus(row.wpl_completed, row.wpl_required, row.wpl_late),
-    wahf: getFormStatus(row.whaf_completed, row.whaf_required, row.whaf_late),
-    menteesOk: row.whaf_pct >= 90 && row.wpl_pct >= 90 && row.mcf_pct >= 90 ? ("yes" as const) : ("check" as const),
+    mcf: getFormStatus(row.mcfCompleted, row.mcfRequired, row.mcfLate),
+    wpl: getFormStatus(row.wplCompleted, row.wplRequired, row.wplLate),
+    wahf: getFormStatus(row.wahfCompleted, row.wahfRequired, row.wahfLate),
+    menteesOk: row.wahfPct >= 90 && row.wplPct >= 90 && row.mcfPct >= 90 ? ("yes" as const) : ("check" as const),
   }))
+
+const mapTutoringLogRow = (report: MemoTutorReportRow): TutoringLogRow => ({
+  id: report.id,
+  scholarName: report.scholarName,
+  dayOfWeek: report.dayOfWeek,
+  tutorName: report.tutorName,
+  courses: report.courses,
+  startTime: report.startTime,
+  endTime: report.endTime,
+})
+
+const buildTutoringLog = (tutorReports: MemoTutorReportRow[]) => {
+  const sessions = tutorReports
+    .filter((report) => report.scholarName !== "EMPTY SESSION")
+    .map(mapTutoringLogRow)
+  const emptySessions = tutorReports
+    .filter((report) => report.scholarName === "EMPTY SESSION")
+    .map(mapTutoringLogRow)
+
+  return {
+    badgeText: `${sessions.length} session${sessions.length === 1 ? "" : "s"}`,
+    rightLabel: "Sessions · Empty sessions",
+    tabs: [
+      { id: "sessions" as const, label: "Sessions", rows: sessions },
+      { id: "empty-sessions" as const, label: "Empty sessions", rows: emptySessions },
+    ],
+  }
+}
 
 export const assembleWeeklyMemo = (data: MemoPageData): WeeklyMemoViewData => {
   const weekDates = formatWeekDateRange(data.weekLabel)
-  const visitsLastWeek = data.trafficWeeklyData.find((entry) => entry.weekNumber === data.selectedWeekNum - 1)?.entryCount ?? 0
+  const visitsLastWeek = data.trafficWeeklyData.find((entry) => entry.weekNumber === data.selectedWeekNumber - 1)?.entryCount ?? 0
   const visitsTrend = data.trafficEntryCountForSelectedWeek - visitsLastWeek
 
   const teamLeaderRows = buildTeamLeaderRows(data)
   const scholarRows = classifyScholarFollowUpRisk(data)
+  const tutoringLog = buildTutoringLog(data.tutorReports)
+  const emptySessionCount = tutoringLog.tabs.find((tab) => tab.id === "empty-sessions")?.rows.length ?? 0
 
   const fdByScholar = aggregateSessionMinutes(data.completedFd)
   const studyByScholar = aggregateSessionMinutes(data.completedStudy)
 
-  const makeAttendanceRows = (minuteMap: Map<string, { scholarName: string; totalMinutes: number }>, requiredKey: "fd_required" | "ss_required") =>
+  const makeAttendanceRows = (
+    minuteMap: Map<string, { scholarId: string; scholarName: string; totalMinutes: number }>,
+    requiredKey: "fdRequired" | "ssRequired"
+  ) =>
     Array.from(minuteMap.values()).map((entry) => {
-      const scholar = data.scholars.find((s) => s.scholar_name === entry.scholarName)
+      const scholar = data.scholars.find((s) => s.scholarId === entry.scholarId)
       const requiredMinutes = scholar?.[requiredKey] ?? 0
       const completionPct = requiredMinutes > 0 ? Math.round((entry.totalMinutes / requiredMinutes) * 100) : 0
       return {
@@ -73,7 +112,7 @@ export const assembleWeeklyMemo = (data: MemoPageData): WeeklyMemoViewData => {
     ...data,
     weekStartLabel: weekDates.weekStartLabel,
     weekEndLabel: weekDates.weekEndLabel,
-    weekNumber: data.selectedWeekNum,
+    weekNumber: data.selectedWeekNumber,
     kpis: [
       {
         title: "Visits this week",
@@ -86,14 +125,14 @@ export const assembleWeeklyMemo = (data: MemoPageData): WeeklyMemoViewData => {
         title: "Front desk completion",
         primaryValue: `${Math.round(
           (
-            (data.formCompletionOverall.whaf_required > 0
-              ? (data.formCompletionOverall.whaf_completed / data.formCompletionOverall.whaf_required) * 100
+            (data.formCompletionOverall.wahfRequired > 0
+              ? (data.formCompletionOverall.wahfCompleted / data.formCompletionOverall.wahfRequired) * 100
               : 0) +
-            (data.formCompletionOverall.wpl_required > 0
-              ? (data.formCompletionOverall.wpl_completed / data.formCompletionOverall.wpl_required) * 100
+            (data.formCompletionOverall.wplRequired > 0
+              ? (data.formCompletionOverall.wplCompleted / data.formCompletionOverall.wplRequired) * 100
               : 0) +
-            (data.formCompletionOverall.mcf_required > 0
-              ? (data.formCompletionOverall.mcf_completed / data.formCompletionOverall.mcf_required) * 100
+            (data.formCompletionOverall.mcfRequired > 0
+              ? (data.formCompletionOverall.mcfCompleted / data.formCompletionOverall.mcfRequired) * 100
               : 0)
           ) / 3
         )}%`,
@@ -104,7 +143,7 @@ export const assembleWeeklyMemo = (data: MemoPageData): WeeklyMemoViewData => {
       {
         title: "Study session completion",
         primaryValue: `${Math.round(
-          data.scholars.reduce((acc, row) => acc + (row.ss_pct ?? 0), 0) / Math.max(1, data.scholars.length)
+          data.scholars.reduce((acc, row) => acc + (row.ssPct ?? 0), 0) / Math.max(1, data.scholars.length)
         )}%`,
         secondaryText: `${data.completedStudy.length} completed records`,
         trendText: "",
@@ -113,21 +152,22 @@ export const assembleWeeklyMemo = (data: MemoPageData): WeeklyMemoViewData => {
       {
         title: "Tutoring sessions held",
         primaryValue: String(data.tutorReports.length),
-        secondaryText: `${data.gradeBreakdown.low.length} low-grade alerts`,
+        secondaryText: `${emptySessionCount} empty session${emptySessionCount === 1 ? "" : "s"}`,
         trendText: "",
         subStats: [],
       },
     ],
     teamLeaderRows,
     scholarRows,
+    tutoringLog,
     recognitionBoard: {
       badgeText: `${Math.min(5, data.scholars.length)} recognized`,
       rightLabel: "Scholars · Team leaders",
       items: [
         ...data.scholars
-          .filter((row) => (row.fd_pct ?? 0) >= 90 && (row.ss_pct ?? 0) >= 90)
+          .filter((row) => (row.fdPct ?? 0) >= 90 && (row.ssPct ?? 0) >= 90)
           .slice(0, 3)
-          .map((row) => `${row.scholar_name} - Strong completion this week`),
+          .map((row) => `${row.scholarName} - Strong completion this week`),
         ...teamLeaderRows
           .filter((row) => row.mcf === "on-time" && row.wpl === "on-time" && row.wahf === "on-time")
           .slice(0, 2)
@@ -137,8 +177,8 @@ export const assembleWeeklyMemo = (data: MemoPageData): WeeklyMemoViewData => {
     fullAttendanceDetail: {
       rightLabel: "Front desk · Study sessions",
       tabs: [
-        { id: "front-desk", label: "Front desk", rows: makeAttendanceRows(fdByScholar, "fd_required") },
-        { id: "study-sessions", label: "Study sessions", rows: makeAttendanceRows(studyByScholar, "ss_required") },
+        { id: "front-desk", label: "Front desk", rows: makeAttendanceRows(fdByScholar, "fdRequired") },
+        { id: "study-sessions", label: "Study sessions", rows: makeAttendanceRows(studyByScholar, "ssRequired") },
       ],
     },
     formSubmissions: {

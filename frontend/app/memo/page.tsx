@@ -22,11 +22,11 @@ type MemoPageData = {
   trafficSessions: TrafficSession[];
   tutorReports: MemoTutorReportRow[];
   gradeBreakdown: GradeBreakdown;
-  whafDonut: { total: number; completeCount: number; lateCount: number; percentComplete: number };
+  wahfDonut: { total: number; completeCount: number; lateCount: number; percentComplete: number };
   teamLeaderFormStats: TeamLeaderFormStatsRow[];
   weekLabel: string;
   currentCampusWeek: number | null;
-  selectedWeekNum: number;
+  selectedWeekNumber: number;
 };
 
 type PageProps = {
@@ -37,8 +37,7 @@ export default async function MemoPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const weekParam = params.week;
 
-  // Backend defaults to current campus week when weekNum is omitted
-  const query = weekParam ? `?weekNum=${weekParam}` : "";
+  const query = weekParam ? `?weekNumber=${weekParam}` : "";
   const data = await backendGet<MemoPageData>(`/api/memo/page-data${query}`);
 
   return (
@@ -54,11 +53,11 @@ export default async function MemoPage({ searchParams }: PageProps) {
       trafficSessions={data.trafficSessions}
       tutorReports={data.tutorReports}
       gradeBreakdown={data.gradeBreakdown}
-      whafDonut={data.whafDonut}
+      wahfDonut={data.wahfDonut}
       teamLeaderFormStats={data.teamLeaderFormStats}
       weekLabel={data.weekLabel}
       currentCampusWeek={data.currentCampusWeek}
-      selectedWeekNum={data.selectedWeekNum}
+      selectedWeekNum={data.selectedWeekNumber}
       trafficCardSpan="half"
       trafficCardTitle="Traffic log"
       trafficCardDescription={null}

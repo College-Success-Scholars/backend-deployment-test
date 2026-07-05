@@ -109,8 +109,8 @@ export async function getMemoPageData(weekNum: number) {
     getTutorReportLogsForWeek(weekNum),
   ]);
 
-  // Grade breakdown — parse assignment_grades from all WHAF submissions this week
-  type GradeEntry = { scholar_name: string; course: string; assessment: string; grade: string; percent: number };
+  // Grade breakdown — parse assignment_grades from all WAHF submissions this week
+  type GradeEntry = { scholarName: string; course: string; assessment: string; grade: string; percent: number };
   const gradeHigh: GradeEntry[] = [];
   const gradeMid: GradeEntry[] = [];
   const gradeLow: GradeEntry[] = [];
@@ -125,7 +125,7 @@ export async function getMemoPageData(weekNum: number) {
         const match = String(gradeStr).match(/(\d+(?:\.\d+)?)/);
         if (!match) continue;
         const percent = parseFloat(match[1]!);
-        const entry: GradeEntry = { scholar_name: scholarName, course, assessment, grade: String(gradeStr), percent };
+        const entry: GradeEntry = { scholarName, course, assessment, grade: String(gradeStr), percent };
         if (percent >= 90) gradeHigh.push(entry);
         else if (percent >= 70) gradeMid.push(entry);
         else gradeLow.push(entry);
@@ -144,7 +144,7 @@ export async function getMemoPageData(weekNum: number) {
   const whafSubmittedCount = allUsers.filter((u) => whafSubmitterUids.has(u.uid)).length;
   const whafLateCount = whafRowsWithLate.filter((r) => r.isLate).length;
   const whafPct = totalUsers > 0 ? Math.round((whafSubmittedCount / totalUsers) * 100) : 0;
-  const whafDonut = {
+  const wahfDonut = {
     total: totalUsers,
     completeCount: whafSubmittedCount,
     lateCount: whafLateCount,
@@ -160,20 +160,20 @@ export async function getMemoPageData(weekNum: number) {
 
   const formCompletionOverall = teamLeaderFormRows.reduce(
     (acc, row) => ({
-      whaf_completed: acc.whaf_completed + Math.min(row.whaf_completed, row.whaf_required),
-      whaf_required: acc.whaf_required + row.whaf_required,
-      whaf_late_count: acc.whaf_late_count + (row.whaf_late ? 1 : 0),
-      mcf_completed: acc.mcf_completed + Math.min(row.mcf_completed, row.mcf_required),
-      mcf_required: acc.mcf_required + row.mcf_required,
-      mcf_late_count: acc.mcf_late_count + (row.mcf_late ? 1 : 0),
-      wpl_completed: acc.wpl_completed + Math.min(row.wpl_completed, row.wpl_required),
-      wpl_required: acc.wpl_required + row.wpl_required,
-      wpl_late_count: acc.wpl_late_count + (row.wpl_late ? 1 : 0),
+      wahfCompleted: acc.wahfCompleted + Math.min(row.wahfCompleted, row.wahfRequired),
+      wahfRequired: acc.wahfRequired + row.wahfRequired,
+      wahfLateCount: acc.wahfLateCount + (row.wahfLate ? 1 : 0),
+      mcfCompleted: acc.mcfCompleted + Math.min(row.mcfCompleted, row.mcfRequired),
+      mcfRequired: acc.mcfRequired + row.mcfRequired,
+      mcfLateCount: acc.mcfLateCount + (row.mcfLate ? 1 : 0),
+      wplCompleted: acc.wplCompleted + Math.min(row.wplCompleted, row.wplRequired),
+      wplRequired: acc.wplRequired + row.wplRequired,
+      wplLateCount: acc.wplLateCount + (row.wplLate ? 1 : 0),
     }),
     {
-      whaf_completed: 0, whaf_required: 0, whaf_late_count: 0,
-      mcf_completed: 0, mcf_required: 0, mcf_late_count: 0,
-      wpl_completed: 0, wpl_required: 0, wpl_late_count: 0,
+      wahfCompleted: 0, wahfRequired: 0, wahfLateCount: 0,
+      mcfCompleted: 0, mcfRequired: 0, mcfLateCount: 0,
+      wplCompleted: 0, wplRequired: 0, wplLateCount: 0,
     }
   );
 
@@ -200,11 +200,11 @@ export async function getMemoPageData(weekNum: number) {
   );
 
   const scholars: Array<{
-    uid: string; scholar_name: string; cohort: number | null;
-    fd_total: number; ss_total: number;
-    fd_required: number | null; ss_required: number | null;
-    fd_excuse_min: number; ss_excuse_min: number;
-    fd_pct: number | null; ss_pct: number | null;
+    scholarId: string; scholarName: string; cohort: number | null;
+    fdTotal: number; ssTotal: number;
+    fdRequired: number | null; ssRequired: number | null;
+    fdExcuseMin: number; ssExcuseMin: number;
+    fdPct: number | null; ssPct: number | null;
   }> = [];
   const cohort2024 = { total: 0, fdCompleteCount: 0, ssCompleteCount: 0 };
   const cohort2025 = { total: 0, fdCompleteCount: 0, ssCompleteCount: 0 };
@@ -222,11 +222,11 @@ export async function getMemoPageData(weekNum: number) {
     const name = [u.first_name, u.last_name].filter(Boolean).join(" ").trim() || u.uid;
 
     scholars.push({
-      uid: u.uid, scholar_name: name, cohort: u.cohort ?? null,
-      fd_total: fd.total, ss_total: study.total,
-      fd_required: fdReq, ss_required: ssReq,
-      fd_excuse_min: fd.excuse_min, ss_excuse_min: study.excuse_min,
-      fd_pct, ss_pct,
+      scholarId: u.uid, scholarName: name, cohort: u.cohort ?? null,
+      fdTotal: fd.total, ssTotal: study.total,
+      fdRequired: fdReq, ssRequired: ssReq,
+      fdExcuseMin: fd.excuse_min, ssExcuseMin: study.excuse_min,
+      fdPct: fd_pct, ssPct: ss_pct,
     });
 
     const fdComplete = fd_pct != null && fd_pct >= 100;
@@ -265,13 +265,13 @@ export async function getMemoPageData(weekNum: number) {
     const mcf = mcfByTlUid.get(u.uid) ?? { count: 0, hasLate: false, latestAt: null };
     const mcf_pct = MCF_REQUIRED_PER_WEEK > 0 ? Math.round((mcf.count / MCF_REQUIRED_PER_WEEK) * 100) : null;
     return {
-      uid: u.uid,
+      scholarId: u.uid,
       name: [u.first_name, u.last_name].filter(Boolean).join(" ").trim() || u.uid,
-      mcf_completed: mcf.count,
-      mcf_required: MCF_REQUIRED_PER_WEEK,
-      mcf_late: mcf.hasLate,
-      mcf_pct,
-      mcf_latest_at: mcf.latestAt ?? endDate?.toISOString() ?? "",
+      mcfCompleted: mcf.count,
+      mcfRequired: MCF_REQUIRED_PER_WEEK,
+      mcfLate: mcf.hasLate,
+      mcfPct: mcf_pct,
+      mcfLatestAt: mcf.latestAt ?? endDate?.toISOString() ?? "",
     };
   });
 
@@ -281,24 +281,24 @@ export async function getMemoPageData(weekNum: number) {
   );
   const tutorReports = tutorReportLogs.map(log => {
     // Derive day of week from created_at in Eastern time
-    let day_of_week: string = "—";
+    let dayOfWeek: string = "—";
     if (log.created_at) {
-      day_of_week = new Date(log.created_at).toLocaleDateString("en-US", {
+      dayOfWeek = new Date(log.created_at).toLocaleDateString("en-US", {
         weekday: "short",
         timeZone: "America/New_York",
       });
     }
     return {
       id: log.id,
-      scholar_uid: log.scholar_uid,
-      scholar_name: (!log.scholar_uid || log.scholar_uid.toLowerCase() === "n/a")
+      scholarId: log.scholar_uid,
+      scholarName: (!log.scholar_uid || log.scholar_uid.toLowerCase() === "n/a")
         ? "EMPTY SESSION"
         : (userNameByUid.get(log.scholar_uid) ?? log.scholar_uid),
-      tutor_name: log.tutor_name,
+      tutorName: log.tutor_name,
       courses: log.courses,
-      start_time: log.start_time,
-      end_time: log.end_time,
-      day_of_week,
+      startTime: log.start_time,
+      endTime: log.end_time,
+      dayOfWeek,
     };
   });
 
@@ -319,9 +319,9 @@ export async function getMemoPageData(weekNum: number) {
     tutorReports,
     teamLeaderFormStats: teamLeaderFormRows,
     gradeBreakdown,
-    whafDonut,
+    wahfDonut,
     weekLabel,
     currentCampusWeek,
-    selectedWeekNum: weekNum,
+    selectedWeekNumber: weekNum,
   };
 }

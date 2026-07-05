@@ -82,7 +82,7 @@ export async function backendFetch<T>(
   }
 
   logApiResponse("client", method, requestUrl, res.status, durationMs);
-  // Unwrap { data: ... } wrapper
+  // Unwrap { data: ... } — returns { ok, data } | { ok: false, error, status } (unlike server client which throws)
   const payload = json != null && typeof json === "object" && "data" in json ? json.data : json;
   return { data: payload as T, ok: true };
 }

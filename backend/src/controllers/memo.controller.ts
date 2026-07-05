@@ -23,11 +23,18 @@ import { syncMemo, getWeeklyMemo, triggerRefreshStats } from "../services/memo.s
 import { getTrafficEntryCountForWeek } from "../services/traffic.service.js";
 import { getMemoPageData } from "../services/memo-page.service.js";
 
+function parseWeekNumberFromBody(body: { weekNumber?: number; weekNum?: number }): number | null {
+  const weekNumber = body.weekNumber ?? body.weekNum;
+  if (typeof weekNumber !== "number" || weekNumber < 1) return null;
+  return weekNumber;
+}
+
 // POST /api/memo/sync
 export async function sync(req: AuthenticatedRequest, res: Response) {
-  const { weekNum, mode } = req.body as { weekNum?: number; mode?: string };
-  if (typeof weekNum !== "number" || weekNum < 1) {
-    res.status(400).json({ error: "weekNum must be a number >= 1" });
+  const { mode } = req.body as { weekNumber?: number; weekNum?: number; mode?: string };
+  const weekNumber = parseWeekNumberFromBody(req.body as { weekNumber?: number; weekNum?: number });
+  if (weekNumber == null) {
+    res.status(400).json({ error: "weekNumber must be a number >= 1" });
     return;
   }
   if (mode !== "light" && mode !== "heavy") {
@@ -35,23 +42,24 @@ export async function sync(req: AuthenticatedRequest, res: Response) {
     return;
   }
   try {
-    const data = await syncMemo(weekNum, mode);
+    const data = await syncMemo(weekNumber, mode);
     res.json({ data });
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : "Sync failed" });
   }
 }
 
-// GET /api/memo/weekly?semesterId=X&weekNum=Y
+// GET /api/memo/weekly?semesterId=X&weekNumber=Y
 export async function weeklyMemo(req: AuthenticatedRequest, res: Response) {
   const semesterId = parseInt(req.query.semesterId as string, 10);
-  const weekNum = parseInt(req.query.weekNum as string, 10);
-  if (Number.isNaN(semesterId) || Number.isNaN(weekNum) || weekNum < 1) {
-    res.status(400).json({ error: "semesterId and weekNum are required" });
+  const weekParam = (req.query.weekNumber ?? req.query.weekNum) as string;
+  const weekNumber = parseInt(weekParam, 10);
+  if (Number.isNaN(semesterId) || Number.isNaN(weekNumber) || weekNumber < 1) {
+    res.status(400).json({ error: "semesterId and weekNumber are required" });
     return;
   }
   try {
-    const data = await getWeeklyMemo(semesterId, weekNum);
+    const data = await getWeeklyMemo(semesterId, weekNumber);
     res.json({ data });
   } catch (e) {
     console.error(e);
@@ -61,36 +69,44 @@ export async function weeklyMemo(req: AuthenticatedRequest, res: Response) {
 
 // POST /api/memo/refresh-stats
 export async function refreshStats(req: AuthenticatedRequest, res: Response) {
-  const { week_num, semester_id } = req.body as { week_num?: number; semester_id?: number };
-  if (!week_num || !semester_id) {
-    res.status(400).json({ error: "week_num and semester_id are required" });
+  const body = req.body as {
+    weekNumber?: number;
+    weekNum?: number;
+    week_num?: number;
+    semesterId?: number;
+    semester_id?: number;
+  };
+  const weekNumber = body.weekNumber ?? body.weekNum ?? body.week_num;
+  const semesterId = body.semesterId ?? body.semester_id;
+  if (!weekNumber || !semesterId) {
+    res.status(400).json({ error: "weekNumber and semesterId are required" });
     return;
   }
   try {
-    triggerRefreshStats(week_num, semester_id);
+    triggerRefreshStats(weekNumber, semesterId);
     res.json({ data: { ok: true } });
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : "Failed to trigger refresh" });
   }
 }
 
-// GET /api/memo/page-data?weekNum=X  (weekNum optional — defaults to current campus week)
+// GET /api/memo/page-data?weekNumber=X  (weekNumber optional — defaults to current campus week)
 export async function pageData(req: AuthenticatedRequest, res: Response) {
-  const weekParam = req.query.weekNum as string | undefined;
-  let weekNum: number;
+  const weekParam = (req.query.weekNumber ?? req.query.weekNum) as string | undefined;
+  let weekNumber: number;
   if (weekParam != null && weekParam !== "") {
-    weekNum = parseInt(weekParam, 10);
-    if (Number.isNaN(weekNum) || weekNum < 1) {
-      res.status(400).json({ error: "weekNum must be a number >= 1" });
+    weekNumber = parseInt(weekParam, 10);
+    if (Number.isNaN(weekNumber) || weekNumber < 1) {
+      res.status(400).json({ error: "weekNumber must be a number >= 1" });
       return;
     }
   } else {
     const { dateToCampusWeek } = await import("../services/time.service.js");
     const current = dateToCampusWeek(new Date());
-    weekNum = current ?? 1;
+    weekNumber = current ?? 1;
   }
   try {
-    const data = await getMemoPageData(weekNum);
+    const data = await getMemoPageData(weekNumber);
     res.json({ data });
   } catch (e) {
     console.error(e);
@@ -98,15 +114,15 @@ export async function pageData(req: AuthenticatedRequest, res: Response) {
   }
 }
 
-// GET /api/memo/traffic-count?weekNum=X
+// GET /api/memo/traffic-count?weekNumber=X
 export async function trafficCount(req: AuthenticatedRequest, res: Response) {
-  const weekParam = req.query.weekNum as string | undefined;
-  const weekNum = weekParam != null ? parseInt(weekParam, 10) : NaN;
-  if (Number.isNaN(weekNum) || weekNum < 1) {
-    res.status(400).json({ error: "weekNum must be a number >= 1" });
+  const weekParam = (req.query.weekNumber ?? req.query.weekNum) as string | undefined;
+  const weekNumber = weekParam != null ? parseInt(weekParam, 10) : NaN;
+  if (Number.isNaN(weekNumber) || weekNumber < 1) {
+    res.status(400).json({ error: "weekNumber must be a number >= 1" });
     return;
   }
-  const entryCount = await getTrafficEntryCountForWeek(weekNum);
+  const entryCount = await getTrafficEntryCountForWeek(weekNumber);
   res.set("Cache-Control", "no-store, max-age=0");
-  res.json({ weekNumber: weekNum, entryCount });
+  res.json({ data: { weekNumber, entryCount } });
 }

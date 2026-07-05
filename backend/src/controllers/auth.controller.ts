@@ -26,8 +26,8 @@
 import type { Request, Response, NextFunction } from "express";
 import { getSupabaseClient, getSupabaseAuthClient, runWithToken } from "../services/supabase.service.js";
 import { getMyMentees } from "../services/mentee.service.js";
-import { APP_ROLE_ORDER } from "../models/user.model.js";
 import type { ProfilesRow } from "../models/user.model.js";
+import { hasRoleAtLeast, mergeProfileWithRoster } from "../../../shared/dist/auth.js";
 
 export interface AuthenticatedRequest extends Request {
   authUser?: { id: string; email?: string };
@@ -63,25 +63,11 @@ async function extractUser(req: AuthenticatedRequest): Promise<boolean> {
     .eq("id", user.id)
     .maybeSingle();
 
-  let merged = profile as ProfilesRow | null;
-  if (merged) {
-    const roster = (merged as Record<string, unknown>).user_roster as Record<string, unknown> | null;
-    if (roster) {
-      if (!merged.program_role) merged.program_role = (roster.program_role as string) ?? null;
-      if (!merged.last_name) merged.last_name = (roster.last_name as string) ?? null;
-      if (!merged.first_name) merged.first_name = (roster.first_name as string) ?? null;
-    }
-  }
+  const merged = profile ? mergeProfileWithRoster(profile as ProfilesRow) : null;
 
   req.authUser = { id: user.id, email: user.email };
   req.profile = merged;
   return true;
-}
-
-function hasRoleAtLeast(role: string | null, minRole: "team_leader" | "developer"): boolean {
-  const idx = APP_ROLE_ORDER.indexOf(role as (typeof APP_ROLE_ORDER)[number]);
-  const minIdx = APP_ROLE_ORDER.indexOf(minRole);
-  return idx >= 0 && idx >= minIdx;
 }
 
 /**

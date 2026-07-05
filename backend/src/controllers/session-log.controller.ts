@@ -112,17 +112,19 @@ export async function frontDeskCleaned(req: AuthenticatedRequest, res: Response)
 // POST /api/session-logs/front-desk/in-room
 export async function frontDeskInRoom(req: AuthenticatedRequest, res: Response) {
   try {
-    const { startDate, endDate, scholarUids, sessionType } = req.body as {
+    const { startDate, endDate, scholarUids, sessionType, asOf } = req.body as {
       startDate?: string;
       endDate?: string;
       scholarUids?: string[];
       sessionType?: string;
+      asOf?: string;
     };
     const data = await getFrontDeskScholarsInRoom({
       startDate: parseDateOrUndefined(startDate),
       endDate: parseDateOrUndefined(endDate),
       scholarUids,
       sessionType,
+      asOf: parseDateOrUndefined(asOf),
     });
     res.json({ data });
   } catch (e) {
@@ -186,17 +188,19 @@ export async function studyCleaned(req: AuthenticatedRequest, res: Response) {
 // POST /api/session-logs/study/in-room
 export async function studyInRoom(req: AuthenticatedRequest, res: Response) {
   try {
-    const { startDate, endDate, scholarUids, sessionType } = req.body as {
+    const { startDate, endDate, scholarUids, sessionType, asOf } = req.body as {
       startDate?: string;
       endDate?: string;
       scholarUids?: string[];
       sessionType?: string;
+      asOf?: string;
     };
     const data = await getStudySessionScholarsInRoom({
       startDate: parseDateOrUndefined(startDate),
       endDate: parseDateOrUndefined(endDate),
       scholarUids,
       sessionType,
+      asOf: parseDateOrUndefined(asOf),
     });
     res.json({ data });
   } catch (e) {

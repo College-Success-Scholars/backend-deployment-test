@@ -106,55 +106,55 @@ export function FormCompletionDonut({
 }
 
 export type FormCompletionOverall = {
-  whaf_completed: number;
-  whaf_required: number;
-  whaf_late_count: number;
-  mcf_completed: number;
-  mcf_required: number;
-  mcf_late_count: number;
-  wpl_completed: number;
-  wpl_required: number;
-  wpl_late_count: number;
+  wahfCompleted: number;
+  wahfRequired: number;
+  wahfLateCount: number;
+  mcfCompleted: number;
+  mcfRequired: number;
+  mcfLateCount: number;
+  wplCompleted: number;
+  wplRequired: number;
+  wplLateCount: number;
 };
 
 function FormCompletionPieChartsInner({ overall }: { overall: FormCompletionOverall }) {
-  const whafPct =
-    overall.whaf_required > 0
-      ? (overall.whaf_completed / overall.whaf_required) * 100
+  const wahfPct =
+    overall.wahfRequired > 0
+      ? (overall.wahfCompleted / overall.wahfRequired) * 100
       : null;
   const mcfPct =
-    overall.mcf_required > 0
-      ? (overall.mcf_completed / overall.mcf_required) * 100
+    overall.mcfRequired > 0
+      ? (overall.mcfCompleted / overall.mcfRequired) * 100
       : null;
   const wplPct =
-    overall.wpl_required > 0
-      ? (overall.wpl_completed / overall.wpl_required) * 100
+    overall.wplRequired > 0
+      ? (overall.wplCompleted / overall.wplRequired) * 100
       : null;
 
   return (
     <div className="flex flex-row flex-wrap items-center justify-center gap-6 sm:gap-8">
       <FormCompletionDonut
-        label="WHAF"
-        percentComplete={whafPct}
-        total={overall.whaf_required}
-        completeCount={overall.whaf_completed}
-        lateCount={overall.whaf_late_count}
+        label="WAHF"
+        percentComplete={wahfPct}
+        total={overall.wahfRequired}
+        completeCount={overall.wahfCompleted}
+        lateCount={overall.wahfLateCount}
         strokeColor={WHAF_CHART_COLOR}
       />
       <FormCompletionDonut
         label="MCF"
         percentComplete={mcfPct}
-        total={overall.mcf_required}
-        completeCount={overall.mcf_completed}
-        lateCount={overall.mcf_late_count}
+        total={overall.mcfRequired}
+        completeCount={overall.mcfCompleted}
+        lateCount={overall.mcfLateCount}
         strokeColor={MCF_CHART_COLOR}
       />
       <FormCompletionDonut
         label="WPL"
         percentComplete={wplPct}
-        total={overall.wpl_required}
-        completeCount={overall.wpl_completed}
-        lateCount={overall.wpl_late_count}
+        total={overall.wplRequired}
+        completeCount={overall.wplCompleted}
+        lateCount={overall.wplLateCount}
         strokeColor={WPL_CHART_COLOR}
       />
     </div>

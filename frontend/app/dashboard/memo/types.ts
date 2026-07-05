@@ -1,9 +1,49 @@
-import type { MemoScholarRow, MemoTLRow, MemoPieData } from "@/app/memo/memo-content"
 import type { ScholarWithCompletedSession } from "@/lib/types/session-log"
 import type { TrafficSession } from "@/lib/types/traffic"
 import type { FormCompletionOverall } from "@/components/form-completion-overview-card"
 import type { MemoTutorReportRow } from "@/lib/types/tutor-report-log"
 import type { GradeBreakdown, TeamLeaderFormStatsRow } from "@/lib/types/form-log"
+
+export type MemoScholarRow = {
+  scholarId: string
+  scholarName: string
+  cohort: number | null
+  fdTotal: number
+  ssTotal: number
+  fdRequired: number | null
+  ssRequired: number | null
+  fdExcuseMin: number
+  ssExcuseMin: number
+  fdPct: number | null
+  ssPct: number | null
+}
+
+export type MemoTLRow = {
+  scholarId: string
+  name: string
+  mcfCompleted: number
+  mcfRequired: number
+  mcfLate: boolean
+  mcfPct: number | null
+  mcfLatestAt: string | null
+}
+
+export type MemoPieData = {
+  cohort2024: {
+    total: number
+    fdCompleteCount: number
+    ssCompleteCount: number
+    fdPercent: number
+    ssPercent: number
+  }
+  cohort2025: {
+    total: number
+    fdCompleteCount: number
+    ssCompleteCount: number
+    fdPercent: number
+    ssPercent: number
+  }
+}
 
 export type MemoPageData = {
   scholars: MemoScholarRow[]
@@ -17,7 +57,7 @@ export type MemoPageData = {
   trafficSessions: TrafficSession[]
   tutorReports: MemoTutorReportRow[]
   gradeBreakdown: GradeBreakdown
-  whafDonut: {
+  wahfDonut: {
     total: number
     completeCount: number
     lateCount: number
@@ -26,7 +66,7 @@ export type MemoPageData = {
   teamLeaderFormStats: TeamLeaderFormStatsRow[]
   weekLabel: string
   currentCampusWeek: number | null
-  selectedWeekNum: number
+  selectedWeekNumber: number
 }
 
 export type FormStatus = "submitted" | "on-time" | "missing" | "late" | "check-mentees"
@@ -113,6 +153,28 @@ export type FormSubmissionsSectionData = {
   rows: FormSubmissionRow[]
 }
 
+export type TutoringLogRow = {
+  id: number
+  scholarName: string
+  dayOfWeek: string
+  tutorName: string
+  courses: string[]
+  startTime: string
+  endTime: string
+}
+
+export type TutoringLogTab = {
+  id: "sessions" | "empty-sessions"
+  label: string
+  rows: TutoringLogRow[]
+}
+
+export type TutoringLogSectionData = {
+  badgeText: string
+  rightLabel: string
+  tabs: TutoringLogTab[]
+}
+
 export type WeeklyMemoViewData = MemoPageData & {
   weekStartLabel: string
   weekEndLabel: string
@@ -120,6 +182,7 @@ export type WeeklyMemoViewData = MemoPageData & {
   kpis: WeeklyKpiCard[]
   teamLeaderRows: TeamLeaderPerformanceRow[]
   scholarRows: ScholarFollowUpRow[]
+  tutoringLog: TutoringLogSectionData
   recognitionBoard: RecognitionBoardSectionData
   fullAttendanceDetail: FullAttendanceDetailSectionData
   formSubmissions: FormSubmissionsSectionData
