@@ -177,7 +177,7 @@ export type CreateScholarProfileInput = {
   email: string;
   first_name: string;
   last_name: string;
-  student_id: string;
+  student_id: number;
   phone_number?: string | null;
   cohort: number;
 };

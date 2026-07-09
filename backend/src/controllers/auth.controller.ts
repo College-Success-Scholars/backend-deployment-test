@@ -175,7 +175,7 @@ type CreateProfileBody = {
 function parseCreateProfileBody(body: unknown): {
   first_name: string;
   last_name: string;
-  student_id: string;
+  student_id: number;
   phone_number: string | null;
   cohort: number;
 } | null {
@@ -183,7 +183,12 @@ function parseCreateProfileBody(body: unknown): {
   const b = body as CreateProfileBody;
   const first_name = typeof b.first_name === "string" ? b.first_name.trim() : "";
   const last_name = typeof b.last_name === "string" ? b.last_name.trim() : "";
-  const student_id = typeof b.student_id === "string" ? b.student_id.trim() : "";
+  const student_id =
+    typeof b.student_id === "number"
+      ? b.student_id
+      : typeof b.student_id === "string"
+        ? Number.parseInt(b.student_id.trim(), 10)
+        : NaN;
   const phone_number =
     b.phone_number == null || b.phone_number === ""
       ? null
@@ -197,11 +202,39 @@ function parseCreateProfileBody(body: unknown): {
         ? Number.parseInt(b.cohort, 10)
         : NaN;
 
-  if (!first_name || !last_name || !student_id || !Number.isFinite(cohort) || cohort < 1) {
+  if (
+    !first_name ||
+    !last_name ||
+    !Number.isFinite(student_id) ||
+    student_id < 1 ||
+    !Number.isFinite(cohort) ||
+    cohort < 1
+  ) {
     return null;
   }
 
   return { first_name, last_name, student_id, phone_number, cohort };
+}
+
+function formatSupabaseError(error: unknown): string {
+  if (error && typeof error === "object" && "message" in error) {
+    const e = error as { message?: string; details?: string; hint?: string; code?: string };
+    const parts = [e.message, e.details, e.hint, e.code ? `(${e.code})` : ""].filter(Boolean);
+    if (parts.length > 0) return parts.join(" — ");
+  }
+  if (error instanceof Error) return error.message;
+  return "Failed to create profile";
+}
+
+function supabaseErrorStatus(error: unknown): number {
+  if (error && typeof error === "object" && "code" in error) {
+    const code = String((error as { code?: string }).code ?? "");
+    // PostgREST data/format errors (e.g. invalid type, unknown column)
+    if (code.startsWith("22") || code.startsWith("23") || code === "PGRST204") {
+      return 400;
+    }
+  }
+  return 500;
 }
 
 // POST /api/auth/profile — self-service scholar onboarding
@@ -220,7 +253,7 @@ export async function createProfile(req: AuthenticatedRequest, res: Response) {
   const parsed = parseCreateProfileBody(req.body);
   if (!parsed) {
     res.status(400).json({
-      error: "Invalid body: first_name, last_name, student_id, and cohort are required",
+      error: "Invalid body: first_name, last_name, student_id (numeric), and cohort are required",
     });
     return;
   }
@@ -233,8 +266,8 @@ export async function createProfile(req: AuthenticatedRequest, res: Response) {
     });
     res.status(201).json({ data });
   } catch (e) {
-    res.status(500).json({
-      error: e instanceof Error ? e.message : "Failed to create profile",
+    res.status(supabaseErrorStatus(e)).json({
+      error: formatSupabaseError(e),
     });
   }
 }
@@ -243,7 +276,7 @@ export async function createProfile(req: AuthenticatedRequest, res: Response) {
 export async function getMentees(req: AuthenticatedRequest, res: Response) {
   try {
     const data = await getMyMentees(req.authUser!.id);
-    
+
     res.json({ data });
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : "Failed to fetch mentees" });
