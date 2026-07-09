@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { backendPost } from "@/lib/client/api-client";
+import { createScholarProfile } from "@/lib/server/actions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -40,7 +40,7 @@ export function CompleteProfileForm({
       return;
     }
 
-    const result = await backendPost<Record<string, unknown>>("/api/auth/profile", {
+    const result = await createScholarProfile({
       first_name: firstName.trim(),
       last_name: lastName.trim(),
       student_id: studentId.trim(),
@@ -48,7 +48,7 @@ export function CompleteProfileForm({
       cohort: cohortNum,
     });
 
-    if (!result.ok) {
+    if ("error" in result && result.error) {
       setError(result.error);
       setIsLoading(false);
       return;

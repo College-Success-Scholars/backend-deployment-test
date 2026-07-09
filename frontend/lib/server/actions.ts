@@ -22,6 +22,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { backendPost } from "@/lib/server/api-client"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
@@ -50,4 +51,33 @@ export async function updateBasicInfo(formData: unknown) {
 
   revalidatePath("/settings")
   return { success: true }
+}
+
+const scholarProfileSchema = z.object({
+  first_name: z.string().min(1).max(100),
+  last_name: z.string().min(1).max(100),
+  student_id: z.string().min(1).max(50),
+  phone_number: z.string().max(20).nullable().optional(),
+  cohort: z.number().int().positive(),
+})
+
+export async function createScholarProfile(formData: unknown) {
+  const parsed = scholarProfileSchema.safeParse(formData)
+  if (!parsed.success) {
+    return { error: "Invalid input" }
+  }
+
+  try {
+    await backendPost("/api/auth/profile", {
+      ...parsed.data,
+      phone_number: parsed.data.phone_number ?? null,
+    })
+    revalidatePath("/dashboard")
+    revalidatePath("/auth/complete-profile")
+    return { success: true as const }
+  } catch (e) {
+    return {
+      error: e instanceof Error ? e.message : "Failed to create profile",
+    }
+  }
 }
