@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 import { buildScholarProfileInsertRow } from "../services/user.service.js";
 
 describe("buildScholarProfileInsertRow", () => {
-  it("sets full_name and explicit defaults for all profile columns", () => {
+  it("sets explicit defaults for all writable profile columns (full_name is DB-generated)", () => {
     const row = buildScholarProfileInsertRow({
       userId: "user-uuid",
       email: "student@umd.edu",
       first_name: "Jane",
       last_name: "Doe",
-      student_id: 123456789,
+      student_id: "123456789",
       phone_number: "3015550100",
       cohort: 2025,
     });
@@ -17,8 +17,7 @@ describe("buildScholarProfileInsertRow", () => {
       id: "user-uuid",
       first_name: "Jane",
       last_name: "Doe",
-      full_name: "Jane Doe",
-      student_id: 123456789,
+      student_id: "123456789",
       phone_number: "3015550100",
       cohort: 2025,
       program_role: "scholar",
@@ -30,7 +29,6 @@ describe("buildScholarProfileInsertRow", () => {
       mentee_count: 0,
       majors: [],
       minors: [],
-      mentee_uids: [],
       teams: [],
     });
   });

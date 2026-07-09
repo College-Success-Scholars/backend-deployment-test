@@ -177,19 +177,17 @@ export type CreateScholarProfileInput = {
   email: string;
   first_name: string;
   last_name: string;
-  student_id: number;
+  student_id: string;
   phone_number?: string | null;
   cohort: number;
 };
 
-/** All `public.profiles` columns written on self-service scholar create (except `created_at`). */
+/** Writable `public.profiles` columns on self-service scholar create (excludes `created_at`, `full_name`). */
 export function buildScholarProfileInsertRow(input: CreateScholarProfileInput) {
-  const full_name = `${input.first_name} ${input.last_name}`.trim();
   return {
     id: input.userId,
     first_name: input.first_name,
     last_name: input.last_name,
-    full_name,
     student_id: input.student_id,
     phone_number: input.phone_number ?? null,
     cohort: input.cohort,
@@ -201,7 +199,8 @@ export function buildScholarProfileInsertRow(input: CreateScholarProfileInput) {
     ss_required: null,
     mentee_count: 0,
     majors: [] as string[],
-    minors: [] as string[]
+    minors: [] as string[],
+    teams: [] as string[]
   };
 }
 
