@@ -175,7 +175,7 @@ type CreateProfileBody = {
 function parseCreateProfileBody(body: unknown): {
   first_name: string;
   last_name: string;
-  student_id: number;
+  student_id: string;
   phone_number: string | null;
   cohort: number;
 } | null {
@@ -183,7 +183,7 @@ function parseCreateProfileBody(body: unknown): {
   const b = body as CreateProfileBody;
   const first_name = typeof b.first_name === "string" ? b.first_name.trim() : "";
   const last_name = typeof b.last_name === "string" ? b.last_name.trim() : "";
-  const student_id =
+  const studentIdNum =
     typeof b.student_id === "number"
       ? b.student_id
       : typeof b.student_id === "string"
@@ -205,15 +205,15 @@ function parseCreateProfileBody(body: unknown): {
   if (
     !first_name ||
     !last_name ||
-    !Number.isFinite(student_id) ||
-    student_id < 1 ||
+    !Number.isFinite(studentIdNum) ||
+    studentIdNum < 1 ||
     !Number.isFinite(cohort) ||
     cohort < 1
   ) {
     return null;
   }
 
-  return { first_name, last_name, student_id, phone_number, cohort };
+  return { first_name, last_name, student_id: String(studentIdNum), phone_number, cohort };
 }
 
 function formatSupabaseError(error: unknown): string {

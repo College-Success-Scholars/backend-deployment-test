@@ -182,14 +182,12 @@ export type CreateScholarProfileInput = {
   cohort: number;
 };
 
-/** All `public.profiles` columns written on self-service scholar create (except `created_at`). */
+/** Writable `public.profiles` columns on self-service scholar create (excludes `created_at`, `full_name`). */
 export function buildScholarProfileInsertRow(input: CreateScholarProfileInput) {
-  const full_name = `${input.first_name} ${input.last_name}`.trim();
   return {
     id: input.userId,
     first_name: input.first_name,
     last_name: input.last_name,
-    full_name: null,
     student_id: input.student_id,
     phone_number: input.phone_number ?? null,
     cohort: input.cohort,
