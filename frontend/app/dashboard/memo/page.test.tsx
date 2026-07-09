@@ -23,6 +23,10 @@ vi.mock("./_components/weekly-memo-nav-context", () => ({
   WeeklyMemoNavProvider: ({ children }: { children: React.ReactNode }) => children,
 }))
 
+vi.mock("@/lib/supabase/server", () => ({
+  requireTeamLeaderOrAbove: vi.fn().mockResolvedValue({ id: "user-1" }),
+}))
+
 import WeeklyMemoPage from "./page"
 
 const renderPage = async (searchParams: { week?: string }) => {

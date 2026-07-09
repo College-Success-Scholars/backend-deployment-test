@@ -1,5 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { hasRoleAtLeast, mergeProfileWithRoster } from "./auth.js";
+import { hasRoleAtLeast, isUmdEmail, mergeProfileWithRoster } from "./auth.js";
+
+describe("isUmdEmail", () => {
+  it("accepts @umd.edu and @terpmail.umd.edu", () => {
+    expect(isUmdEmail("student@umd.edu")).toBe(true);
+    expect(isUmdEmail("student@terpmail.umd.edu")).toBe(true);
+    expect(isUmdEmail("  Student@UMD.EDU  ")).toBe(true);
+  });
+
+  it("rejects other domains and malformed addresses", () => {
+    expect(isUmdEmail("student@notumd.edu")).toBe(false);
+    expect(isUmdEmail("student@mail.umd.edu")).toBe(false);
+    expect(isUmdEmail("not-an-email")).toBe(false);
+    expect(isUmdEmail("@umd.edu")).toBe(false);
+  });
+});
 
 describe("hasRoleAtLeast", () => {
   it("denies null and unknown roles for team_leader minimum", () => {

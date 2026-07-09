@@ -171,3 +171,39 @@ export async function fetchScholarUids(): Promise<string[]> {
   if (error) throw error;
   return (data ?? []).map((r) => String(r.uid)).filter(Boolean);
 }
+
+export type CreateScholarProfileInput = {
+  userId: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  student_id: string;
+  phone_number?: string | null;
+  cohort: number;
+};
+
+export async function createScholarProfile(input: CreateScholarProfileInput) {
+  const supabase = getSupabaseClient();
+  const full_name = `${input.first_name} ${input.last_name}`.trim();
+  const row = {
+    id: input.userId,
+    first_name: input.first_name,
+    last_name: input.last_name,
+    full_name,
+    student_id: input.student_id,
+    phone_number: input.phone_number ?? null,
+    cohort: input.cohort,
+    program_role: "scholar",
+    app_role: null,
+    emails: [input.email],
+  };
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .insert(row)
+    .select("*")
+    .single();
+
+  if (error) throw error;
+  return data;
+}

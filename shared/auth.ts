@@ -17,6 +17,20 @@ export function hasRoleAtLeast(role: string | null, minRole: MinAppRole): boolea
   return idx >= 0 && idx >= minIdx;
 }
 
+const UMD_EMAIL_DOMAINS = ["umd.edu", "terpmail.umd.edu"] as const;
+
+/**
+ * Returns true when the email belongs to an allowed UMD domain.
+ * Accepts @umd.edu and @terpmail.umd.edu (case-insensitive).
+ */
+export function isUmdEmail(email: string): boolean {
+  const normalized = email.trim().toLowerCase();
+  const at = normalized.lastIndexOf("@");
+  if (at <= 0 || at === normalized.length - 1) return false;
+  const domain = normalized.slice(at + 1);
+  return (UMD_EMAIL_DOMAINS as readonly string[]).includes(domain);
+}
+
 type RosterFields = {
   program_role?: string | null;
   cohort?: unknown;

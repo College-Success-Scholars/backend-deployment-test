@@ -16,6 +16,7 @@
 
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { isUmdEmail } from "../../shared/dist/auth.js";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -53,6 +54,12 @@ export function SignUpForm({
       return;
     }
 
+    if (!isUmdEmail(email)) {
+      setError("Use your @umd.edu or @terpmail.umd.edu email address");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -75,7 +82,9 @@ export function SignUpForm({
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Sign up</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
+          <CardDescription>
+            Create a new account with your UMD email (@umd.edu or @terpmail.umd.edu)
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignUp}>

@@ -27,7 +27,8 @@ import type { Request, Response, NextFunction } from "express";
 import { getSupabaseClient, getSupabaseAuthClient, runWithToken } from "../services/supabase.service.js";
 import { getMyMentees } from "../services/mentee.service.js";
 import type { ProfilesRow } from "../models/user.model.js";
-import { hasRoleAtLeast, mergeProfileWithRoster } from "../../../shared/dist/auth.js";
+import { hasRoleAtLeast, isUmdEmail, mergeProfileWithRoster } from "../../../shared/dist/auth.js";
+import { createScholarProfile } from "../services/user.service.js";
 
 export interface AuthenticatedRequest extends Request {
   authUser?: { id: string; email?: string };
@@ -150,11 +151,91 @@ export async function getMe(req: AuthenticatedRequest, res: Response) {
 export async function getProfile(req: AuthenticatedRequest, res: Response) {
   try {
     const supabase = getSupabaseClient();
-    const { data, error } = await supabase.from("profiles").select("*").eq("id", req.authUser!.id).single();
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", req.authUser!.id)
+      .maybeSingle();
     if (error) { res.status(500).json({ error: error.message }); return; }
+    if (!data) { res.status(404).json({ error: "Profile not found" }); return; }
     res.json({ data });
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : "Failed to fetch profile" });
+  }
+}
+
+type CreateProfileBody = {
+  first_name?: unknown;
+  last_name?: unknown;
+  student_id?: unknown;
+  phone_number?: unknown;
+  cohort?: unknown;
+};
+
+function parseCreateProfileBody(body: unknown): {
+  first_name: string;
+  last_name: string;
+  student_id: string;
+  phone_number: string | null;
+  cohort: number;
+} | null {
+  if (body == null || typeof body !== "object") return null;
+  const b = body as CreateProfileBody;
+  const first_name = typeof b.first_name === "string" ? b.first_name.trim() : "";
+  const last_name = typeof b.last_name === "string" ? b.last_name.trim() : "";
+  const student_id = typeof b.student_id === "string" ? b.student_id.trim() : "";
+  const phone_number =
+    b.phone_number == null || b.phone_number === ""
+      ? null
+      : typeof b.phone_number === "string"
+        ? b.phone_number.trim()
+        : null;
+  const cohort =
+    typeof b.cohort === "number"
+      ? b.cohort
+      : typeof b.cohort === "string"
+        ? Number.parseInt(b.cohort, 10)
+        : NaN;
+
+  if (!first_name || !last_name || !student_id || !Number.isFinite(cohort) || cohort < 1) {
+    return null;
+  }
+
+  return { first_name, last_name, student_id, phone_number, cohort };
+}
+
+// POST /api/auth/profile — self-service scholar onboarding
+export async function createProfile(req: AuthenticatedRequest, res: Response) {
+  if (req.profile) {
+    res.status(409).json({ error: "Profile already exists" });
+    return;
+  }
+
+  const email = req.authUser?.email;
+  if (!email || !isUmdEmail(email)) {
+    res.status(403).json({ error: "A UMD email address is required to create a profile" });
+    return;
+  }
+
+  const parsed = parseCreateProfileBody(req.body);
+  if (!parsed) {
+    res.status(400).json({
+      error: "Invalid body: first_name, last_name, student_id, and cohort are required",
+    });
+    return;
+  }
+
+  try {
+    const data = await createScholarProfile({
+      userId: req.authUser!.id,
+      email,
+      ...parsed,
+    });
+    res.status(201).json({ data });
+  } catch (e) {
+    res.status(500).json({
+      error: e instanceof Error ? e.message : "Failed to create profile",
+    });
   }
 }
 

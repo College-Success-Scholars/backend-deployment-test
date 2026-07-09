@@ -26,6 +26,7 @@ Authentication UI routes. All pages in this directory handle unauthenticated flo
 | `set-password/page.tsx` | [source](../../../../../frontend/app/auth/set-password/page.tsx) | `/auth/set-password` | Set initial password (new account from invite) |
 | `update-password/page.tsx` | [source](../../../../../frontend/app/auth/update-password/page.tsx) | `/auth/update-password` | Change existing password |
 | `confirm/route.ts` | [source](../../../../../frontend/app/auth/confirm/route.ts) | `/auth/confirm` | Email confirmation callback handler (GET with token) |
+| `complete-profile/page.tsx` | [source](../../../../../frontend/app/auth/complete-profile/page.tsx) | `/auth/complete-profile` | Scholar self-service profile creation after sign-up |
 | `error/page.tsx` | [source](../../../../../frontend/app/auth/error/page.tsx) | `/auth/error` | Auth error display page |
 
 ---
@@ -61,10 +62,33 @@ Create a personal access token at [supabase.com/dashboard/account/tokens](https:
 
 ---
 
+## Scholar onboarding (complete profile)
+
+After email confirmation, users without a `profiles` row are redirected from `/dashboard` to `/auth/complete-profile`. The form calls `POST /api/auth/profile`, which creates a row with `program_role: "scholar"` and `app_role: null`.
+
+**Sign-up constraints:** only `@umd.edu` and `@terpmail.umd.edu` emails (validated client-side and on profile create).
+
+### Supabase RLS (profiles INSERT)
+
+Allow authenticated users to insert their own profile row:
+
+```sql
+CREATE POLICY "Users can insert own profile"
+ON public.profiles FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() = id);
+```
+
+Without this policy, `POST /api/auth/profile` fails at the database layer.
+
+Agent overview (provisional): [`docs/agents/general-sign-up-flow.md`](../../../../agents/general-sign-up-flow.md)
+
+---
+
 ## Standards
 
-- **No auth guards here** — these routes are deliberately public.
-- **Use form components from `components/`** — `LoginForm`, `SignUpForm`, `ForgotPasswordForm`, `UpdatePasswordForm` live in `frontend/components/`.
-- **Redirect to `/dashboard` on success** — all successful auth flows redirect there.
+- **No auth guards here** — these routes are deliberately public (except complete-profile requires auth session).
+- **Use form components from `components/`** — `LoginForm`, `SignUpForm`, `CompleteProfileForm`, `ForgotPasswordForm`, `UpdatePasswordForm` live in `frontend/components/`.
+- **Redirect to `/dashboard` on success** — confirm and login redirect there; dashboard layout sends users without a profile to complete-profile.
 - **`confirm/route.ts` is a route handler, not a page** — it handles the Supabase email confirmation callback (`token_hash` + `type`) and redirects.
 - **Invite links** — handled by `components/auth/invite-from-hash-redirect.tsx` which reads the hash fragment from the email magic link.

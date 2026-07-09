@@ -15,7 +15,17 @@
  * - Dashboard UI components (those are in components/dashboard/)
  */
 import { TeamLeaderDashboard } from "@/components/dashboard/team-leader-dashboard";
+import { ScholarDashboard } from "@/components/dashboard/scholar-dashboard";
+import { getCurrentUser } from "@/lib/server/queries";
+import { resolveUserRole } from "@/lib/auth";
 
-export default function Page() {
+export default async function Page() {
+  const me = await getCurrentUser();
+  const role = resolveUserRole(me?.profile as { app_role?: string | null; program_role?: string | null } | null);
+
+  if (role === "scholar") {
+    return <ScholarDashboard />;
+  }
+
   return <TeamLeaderDashboard />;
 }

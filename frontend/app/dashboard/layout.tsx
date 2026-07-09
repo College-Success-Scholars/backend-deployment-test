@@ -29,8 +29,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { redirect } from "next/navigation";
-import { backendGet } from "@/lib/server/api-client";
-import { getCurrentProfile } from "@/lib/server/queries";
+import { getCurrentUser } from "@/lib/server/queries";
 import { ProfilesRow } from "@/lib/supabase/server";
 
 export default async function DashboardLayout({
@@ -38,19 +37,21 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  // Check auth via backend — redirects to login if not authenticated
-  const meResult = await backendGet<{ user: { id: string; email: string | null }; profile: Record<string, unknown> }>("/api/auth/me").catch(() => null);
-  console.log("meResult");
-  console.log(meResult);
-  if (!meResult) {
+  // Check auth and profile via backend — redirects handled below
+  const meResult = await getCurrentUser().catch(() => null);
+  if (!meResult?.user?.id) {
     redirect("/auth/login");
   }
 
-  const profile = await getCurrentProfile() as ProfilesRow;
+  if (!meResult.profile) {
+    redirect("/auth/complete-profile");
+  }
+
+  const profile = meResult.profile as ProfilesRow;
 
   return (
     <SidebarProvider>
-      <AppSidebar profile={profile}/>
+      <AppSidebar profile={profile} />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2">
           <div className="flex items-center gap-2 px-4">
