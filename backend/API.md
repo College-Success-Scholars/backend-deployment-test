@@ -40,6 +40,29 @@ All routes under `/api/auth` require **requireAuth**.
 ```json
 { "data": { /* profiles row */ } }
 ```
+**Errors:** `404` when no profile row exists for the user.
+
+---
+
+### `POST /api/auth/profile`
+
+**Auth:** requireAuth
+**Description:** Self-service scholar onboarding — creates a `profiles` row for the authenticated user. Requires a UMD email (`@umd.edu` or `@terpmail.umd.edu`). Sets `program_role: "scholar"` and `app_role: null`.
+**Request Body:**
+```json
+{
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "student_id": "123456789",
+  "phone_number": "3015550100",
+  "cohort": 2025
+}
+```
+**Response:** `201`
+```json
+{ "data": { /* profiles row */ } }
+```
+**Errors:** `409` if profile already exists; `403` if auth email is not UMD; `400` for invalid body.
 
 ---
 
@@ -1124,11 +1147,11 @@ All routes under `/api/dev` require **requireDeveloper**.
 
 ## Memo
 
-Routes under `/api/memo` have mixed auth requirements as noted per endpoint.
+Routes under `/api/memo` require **requireTeamLeaderOrAbove** unless noted otherwise.
 
 ### `GET /api/memo/weekly`
 
-**Auth:** requireAuth
+**Auth:** requireTeamLeaderOrAbove
 **Description:** Returns the weekly memo data by calling the `get_weekly_memo` Supabase RPC.
 **Query Params:**
 - `semesterId` (integer, required) -- The semester ID
@@ -1143,7 +1166,7 @@ Routes under `/api/memo` have mixed auth requirements as noted per endpoint.
 
 ### `POST /api/memo/refresh-stats`
 
-**Auth:** requireAuth
+**Auth:** requireTeamLeaderOrAbove
 **Description:** Triggers a fire-and-forget call to the `refresh_weekly_stats` Supabase Edge Function. Returns immediately.
 **Request Body:**
 ```json
@@ -1161,7 +1184,7 @@ Routes under `/api/memo` have mixed auth requirements as noted per endpoint.
 
 ### `GET /api/memo/page-data`
 
-**Auth:** requireAuth
+**Auth:** requireTeamLeaderOrAbove
 **Description:** Returns all processed data needed to render the memo page for a given week (aggregated in one call).
 **Query Params:**
 - `weekNumber` (integer >= 1; legacy `weekNum` accepted; defaults to current campus week if omitted)

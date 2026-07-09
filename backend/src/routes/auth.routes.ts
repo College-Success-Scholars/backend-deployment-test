@@ -8,6 +8,7 @@
  * Routes:
  *   GET /api/auth/me            → getMe
  *   GET /api/auth/profile       → getProfile
+ *   POST /api/auth/profile      → createProfile
  *   GET /api/auth/mentees       → getMentees
  *   GET /api/auth/semester      → getActiveSemester
  *   GET /api/auth/active-semester → getActiveSemester
@@ -25,6 +26,7 @@ import {
   requireTeamLeaderOrAbove,
   getMe,
   getProfile,
+  createProfile,
   getMentees,
   getActiveSemester,
 } from "../controllers/auth.controller.js";
@@ -35,6 +37,7 @@ router.use(requireAuth);
 
 router.get("/me", getMe);
 router.get("/profile", getProfile);
+router.post("/profile", createProfile);
 router.get("/mentees", getMentees);
 router.get("/semester", getActiveSemester);
 router.get("/active-semester", getActiveSemester);

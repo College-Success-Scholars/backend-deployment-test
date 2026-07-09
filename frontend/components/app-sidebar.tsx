@@ -54,7 +54,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { UserRole } from "@/lib/auth"
+import { UserRole, resolveUserRole } from "@/lib/auth"
 
 const defaultData = {
   user: {
@@ -420,7 +420,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ profile, ...props }: AppSidebarProps) {
-  const userRole = profile?.app_role as UserRole ?? 'teamleader';
+  const userRole = resolveUserRole(profile as { app_role?: string | null; program_role?: string | null });
   const roleNavMain = getRoleBasedNav(userRole)
   const roleNavSecondary = getRoleBasedSecondaryNav(userRole)
   const roleNavResources = getRoleBasedResources(userRole)

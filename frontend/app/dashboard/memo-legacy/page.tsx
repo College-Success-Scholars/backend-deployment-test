@@ -1,4 +1,5 @@
 import { backendGet } from "@/lib/server/api-client"
+import { requireTeamLeaderOrAbove } from "@/lib/supabase/server"
 import { FormSubmissionsSection } from "../memo/_components/form-submissions-section"
 import { FullAttendanceDetailSection } from "../memo/_components/full-attendance-detail-section"
 import { RecognitionBoardSection } from "../memo/_components/recognition-board-section"
@@ -18,6 +19,7 @@ type PageProps = {
 }
 
 export default async function DashboardMemoPage({ searchParams }: PageProps) {
+  await requireTeamLeaderOrAbove();
   const params = await searchParams
   const weekParam = params.week
 

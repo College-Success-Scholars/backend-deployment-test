@@ -13,17 +13,17 @@
  * - Business logic (that's controllers/memo.controller.ts)
  */
 import { Router } from "express";
-import { requireAuth, requireTeamLeaderOrAbove } from "../controllers/auth.controller.js";
+import { requireTeamLeaderOrAbove } from "../controllers/auth.controller.js";
 import * as memoController from "../controllers/memo.controller.js";
 
 const router = Router();
 
-// Weekly memo data — any authenticated user
-router.get("/weekly", requireAuth, memoController.weeklyMemo);
-router.post("/refresh-stats", requireAuth, memoController.refreshStats);
+// Weekly memo data — team leader or above
+router.get("/weekly", requireTeamLeaderOrAbove, memoController.weeklyMemo);
+router.post("/refresh-stats", requireTeamLeaderOrAbove, memoController.refreshStats);
 
 // Full memo page data (all the processing in one call)
-router.get("/page-data", requireAuth, memoController.pageData);
+router.get("/page-data", requireTeamLeaderOrAbove, memoController.pageData);
 
 // These require team leader or above
 router.post("/sync", requireTeamLeaderOrAbove, memoController.sync);

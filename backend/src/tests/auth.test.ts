@@ -7,17 +7,18 @@ import { app } from "../app.js";
 
 const AUTH_PROTECTED_ROUTES = [
   "/api/auth/me",
+  "/api/auth/profile",
   "/api/users",
   "/api/session-logs",
   "/api/session-records",
   "/api/traffic",
   "/api/form-logs",
   "/api/daily-activity",
-  "/api/memo/weekly",
-  "/api/memo/page-data",
 ] as const;
 
 const TEAM_LEADER_ROUTES = [
+  "/api/memo/weekly",
+  "/api/memo/page-data",
   "/api/memo/traffic-count",
   "/api/tutor-reports",
 ] as const;
@@ -36,6 +37,16 @@ describe("Auth gating — unauthenticated requests", () => {
       expect(res.status).toBe(401);
     });
   }
+
+  it("POST /api/auth/profile returns 401 without token", async () => {
+    const res = await request(app).post("/api/auth/profile").send({
+      first_name: "Jane",
+      last_name: "Doe",
+      student_id: "123",
+      cohort: 2025,
+    });
+    expect(res.status).toBe(401);
+  });
 
   it("GET /api/auth/me returns 401 with malformed Bearer token", async () => {
     const res = await request(app)
