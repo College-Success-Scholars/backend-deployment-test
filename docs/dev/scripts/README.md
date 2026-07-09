@@ -23,6 +23,7 @@ Shell scripts for deployment validation and operational tasks. These run outside
 | `alert.sh` | [source](../../../scripts/alert.sh) | Records an architectural alert to `docs/agents/alerts/` |
 | `resolve-alert.sh` | [source](../../../scripts/resolve-alert.sh) | Resolves an alert: logs the fix session via `log-agent-session.sh`, then deletes the alert file |
 | `log-agent-session.sh` | [source](../../../scripts/log-agent-session.sh) | Records an agent/AI session to `docs/agents/logs/`: who ran it, raw user prompt, stated purpose, agent response summary, and changed files |
+| `configure-supabase-confirm-email-template.sh` | [source](../../../scripts/configure-supabase-confirm-email-template.sh) | Patches Supabase **Confirm signup** email template so links use `token_hash` + `type` for `/auth/confirm` |
 
 ---
 
@@ -61,4 +62,7 @@ bash scripts/resolve-alert.sh \
   --alert docs/agents/alerts/2026-06-26T055650Z-auth-role-hierarchy-duplication.md \
   --summary-text "Extracted APP_ROLE_ORDER, hasRoleAtLeast, and mergeProfileWithRoster into shared/auth.ts" \
   --changes "shared/auth.ts,frontend/lib/supabase/server.ts,backend/src/controllers/auth.controller.ts,backend/src/models/user.model.ts"
+
+# Patch Supabase confirm-signup email template (requires personal access token)
+SUPABASE_ACCESS_TOKEN=... SUPABASE_PROJECT_REF=... ./scripts/configure-supabase-confirm-email-template.sh
 ```
