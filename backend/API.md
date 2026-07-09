@@ -47,7 +47,7 @@ All routes under `/api/auth` require **requireAuth**.
 ### `POST /api/auth/profile`
 
 **Auth:** requireAuth
-**Description:** Self-service scholar onboarding — creates a `profiles` row for the authenticated user. Requires a UMD email (`@umd.edu` or `@terpmail.umd.edu`). Sets `program_role: "scholar"` and `app_role: null`.
+**Description:** Self-service scholar onboarding — creates a `profiles` row for the authenticated user. Requires a UMD email (`@umd.edu` or `@terpmail.umd.edu`). Sets `program_role: "scholar"`, `app_role: null`, `full_name`, and explicit defaults for all other profile columns (see `buildScholarProfileInsertRow` in `user.service.ts`).
 **Request Body:**
 ```json
 {

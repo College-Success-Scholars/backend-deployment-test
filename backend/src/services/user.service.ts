@@ -182,10 +182,10 @@ export type CreateScholarProfileInput = {
   cohort: number;
 };
 
-export async function createScholarProfile(input: CreateScholarProfileInput) {
-  const supabase = getSupabaseClient();
+/** All `public.profiles` columns written on self-service scholar create (except `created_at`). */
+export function buildScholarProfileInsertRow(input: CreateScholarProfileInput) {
   const full_name = `${input.first_name} ${input.last_name}`.trim();
-  const row = {
+  return {
     id: input.userId,
     first_name: input.first_name,
     last_name: input.last_name,
@@ -196,7 +196,20 @@ export async function createScholarProfile(input: CreateScholarProfileInput) {
     program_role: "scholar",
     app_role: null,
     emails: [input.email],
+    status: null,
+    fd_required: null,
+    ss_required: null,
+    mentee_count: 0,
+    majors: [] as string[],
+    minors: [] as string[],
+    mentee_uids: [] as string[],
+    teams: [] as string[],
   };
+}
+
+export async function createScholarProfile(input: CreateScholarProfileInput) {
+  const supabase = getSupabaseClient();
+  const row = buildScholarProfileInsertRow(input);
 
   const { data, error } = await supabase
     .from("profiles")
