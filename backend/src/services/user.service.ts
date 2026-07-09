@@ -191,7 +191,7 @@ export function buildScholarProfileInsertRow(input: CreateScholarProfileInput) {
     student_id: input.student_id,
     phone_number: input.phone_number ?? null,
     cohort: input.cohort,
-    program_role: "scholar",
+    program_role: "Scholar",
     app_role: null,
     emails: [input.email],
     status: null,
