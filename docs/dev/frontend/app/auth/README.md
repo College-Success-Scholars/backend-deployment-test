@@ -30,10 +30,41 @@ Authentication UI routes. All pages in this directory handle unauthenticated flo
 
 ---
 
+## Supabase email template (required for sign-up confirmation)
+
+`/auth/confirm` expects `token_hash` and `type` query parameters and exchanges them server-side via `verifyOtp()`. The default Supabase **Confirm signup** template uses `{{ .ConfirmationURL }}`, which redirects with a PKCE `code` (or hash tokens) that this route does not handle — users see `No token hash or type` after clicking the email link.
+
+### Dashboard setup
+
+1. Open [Authentication → Email Templates → Confirm signup](https://supabase.com/dashboard/project/_/auth/templates).
+2. Replace the confirmation link with the version-controlled template in [`email-templates/confirm-signup.html`](email-templates/confirm-signup.html):
+
+   ```html
+   <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/dashboard">
+     Confirm your email address
+   </a>
+   ```
+
+3. Under [Authentication → URL Configuration](https://supabase.com/dashboard/project/_/auth/url-configuration):
+   - **Site URL:** production origin (e.g. `https://cssatlas.org`)
+   - **Redirect URLs:** include `https://cssatlas.org/auth/confirm**` (and local dev if needed)
+
+### Scripted setup (Management API)
+
+```bash
+SUPABASE_ACCESS_TOKEN=... \
+SUPABASE_PROJECT_REF=... \
+./scripts/configure-supabase-confirm-email-template.sh
+```
+
+Create a personal access token at [supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens). The script reads the HTML from `email-templates/confirm-signup.html` and PATCHes `mailer_templates_confirmation_content`.
+
+---
+
 ## Standards
 
 - **No auth guards here** — these routes are deliberately public.
 - **Use form components from `components/`** — `LoginForm`, `SignUpForm`, `ForgotPasswordForm`, `UpdatePasswordForm` live in `frontend/components/`.
 - **Redirect to `/dashboard` on success** — all successful auth flows redirect there.
-- **`confirm/route.ts` is a route handler, not a page** — it handles the Supabase email confirmation callback and redirects.
+- **`confirm/route.ts` is a route handler, not a page** — it handles the Supabase email confirmation callback (`token_hash` + `type`) and redirects.
 - **Invite links** — handled by `components/auth/invite-from-hash-redirect.tsx` which reads the hash fragment from the email magic link.

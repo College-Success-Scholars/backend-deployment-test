@@ -31,6 +31,9 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // redirect the user to an error page with some instructions
-  redirect(`/auth/error?error=No token hash or type`);
+  redirect(
+    `/auth/error?error=${encodeURIComponent(
+      "Missing token_hash or type. Update the Supabase Confirm signup email template to link directly to /auth/confirm with token_hash and type (see docs/dev/frontend/app/auth/README.md).",
+    )}`,
+  );
 }
