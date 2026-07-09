@@ -27,6 +27,11 @@ type ProfileRoleFields = {
   program_role?: string | null;
 };
 
+/** Weekly memo and traffic analytics require team_leader or developer in profiles.app_role. */
+export function canAccessWeeklyMemo(profile: ProfileRoleFields | null | undefined): boolean {
+  return hasRoleAtLeast(profile?.app_role ?? null, "team_leader");
+}
+
 /**
  * Maps merged profile fields to the UI role used for nav and dashboard variants.
  * Scholars have app_role null and program_role "scholar".

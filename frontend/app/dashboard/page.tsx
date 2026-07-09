@@ -16,6 +16,7 @@
  */
 import { TeamLeaderDashboard } from "@/components/dashboard/team-leader-dashboard";
 import { ScholarDashboard } from "@/components/dashboard/scholar-dashboard";
+import { DefaultDashboard } from "@/components/dashboard/default-dashboard";
 import { getCurrentUser } from "@/lib/server/queries";
 import { resolveUserRole } from "@/lib/auth";
 
@@ -27,5 +28,9 @@ export default async function Page() {
     return <ScholarDashboard />;
   }
 
-  return <TeamLeaderDashboard />;
+  if (role === "team-leader" || role === "developer") {
+    return <TeamLeaderDashboard />;
+  }
+
+  return <DefaultDashboard />;
 }

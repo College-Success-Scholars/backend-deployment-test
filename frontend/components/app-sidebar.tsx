@@ -54,7 +54,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { UserRole, resolveUserRole } from "@/lib/auth"
+import { UserRole, resolveUserRole, canAccessWeeklyMemo } from "@/lib/auth"
 
 const defaultData = {
   user: {
@@ -176,7 +176,7 @@ const defaultData = {
 }
 
 // Role-specific navigation data
-const getRoleBasedNav = (role: UserRole) => {
+const getRoleBasedNav = (role: UserRole, showMemo: boolean) => {
   switch (role) {
     case 'scholar':
       return [
@@ -213,16 +213,15 @@ const getRoleBasedNav = (role: UserRole) => {
           url: "/dashboard/mentee",
           icon: Users,
         },
-        // {
-        //   title: "Room Monitoring",
-        //   url: "/dashboard/room",
-        //   icon: Building,
-        // },
-        {
-          title: "Memo",
-          url: "/dashboard/memo",
-          icon: FileText,
-        },
+        ...(showMemo
+          ? [
+              {
+                title: "Memo",
+                url: "/dashboard/memo",
+                icon: FileText,
+              },
+            ]
+          : []),
       ]
     
     case 'exec':
@@ -420,8 +419,10 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ profile, ...props }: AppSidebarProps) {
-  const userRole = resolveUserRole(profile as { app_role?: string | null; program_role?: string | null });
-  const roleNavMain = getRoleBasedNav(userRole)
+  const roleFields = profile as { app_role?: string | null; program_role?: string | null };
+  const userRole = resolveUserRole(roleFields);
+  const showMemo = canAccessWeeklyMemo(roleFields);
+  const roleNavMain = getRoleBasedNav(userRole, showMemo)
   const roleNavSecondary = getRoleBasedSecondaryNav(userRole)
   const roleNavResources = getRoleBasedResources(userRole)
 

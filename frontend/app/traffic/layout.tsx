@@ -1,17 +1,22 @@
 import { IdleResetProvider } from "@/components/idle-reset-provider";
+import { canAccessWeeklyMemo } from "@/lib/auth";
+import { getCurrentUserWithProfile } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 /**
  * Traffic route layout.
- * This layout wraps all pages under the /traffic route.
+ * Public kiosk when logged out; logged-in users without team_leader+ app_role
+ * are redirected to the dashboard.
  */
-export default function TrafficLayout({
+export default async function TrafficLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <IdleResetProvider>
-      {children}
-    </IdleResetProvider>
-  );
+  const { user, profile } = await getCurrentUserWithProfile();
+  if (user && !canAccessWeeklyMemo(profile)) {
+    redirect("/dashboard");
+  }
+
+  return <IdleResetProvider>{children}</IdleResetProvider>;
 }

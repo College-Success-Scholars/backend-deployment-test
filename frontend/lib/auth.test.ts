@@ -1,5 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { resolveUserRole } from "./auth";
+import { canAccessWeeklyMemo, resolveUserRole } from "./auth";
+
+describe("canAccessWeeklyMemo", () => {
+  it("allows team_leader and developer app_role", () => {
+    expect(canAccessWeeklyMemo({ app_role: "team_leader" })).toBe(true);
+    expect(canAccessWeeklyMemo({ app_role: "developer" })).toBe(true);
+  });
+
+  it("denies null app_role scholars", () => {
+    expect(canAccessWeeklyMemo({ program_role: "scholar", app_role: null })).toBe(false);
+  });
+});
 
 describe("resolveUserRole", () => {
   it("returns scholar when program_role is scholar and app_role is null", () => {
