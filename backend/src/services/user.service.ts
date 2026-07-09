@@ -201,9 +201,7 @@ export function buildScholarProfileInsertRow(input: CreateScholarProfileInput) {
     ss_required: null,
     mentee_count: 0,
     majors: [] as string[],
-    minors: [] as string[],
-    mentee_uids: [] as string[],
-    teams: [] as string[],
+    minors: [] as string[]
   };
 }
 
