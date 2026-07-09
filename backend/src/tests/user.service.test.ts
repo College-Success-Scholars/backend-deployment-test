@@ -8,7 +8,7 @@ describe("buildScholarProfileInsertRow", () => {
       email: "student@umd.edu",
       first_name: "Jane",
       last_name: "Doe",
-      student_id: "123456789",
+      student_id: 123456789,
       phone_number: "3015550100",
       cohort: 2025,
     });
@@ -18,7 +18,7 @@ describe("buildScholarProfileInsertRow", () => {
       first_name: "Jane",
       last_name: "Doe",
       full_name: "Jane Doe",
-      student_id: "123456789",
+      student_id: 123456789,
       phone_number: "3015550100",
       cohort: 2025,
       program_role: "scholar",
