@@ -64,9 +64,13 @@ Create a personal access token at [supabase.com/dashboard/account/tokens](https:
 
 ## Scholar onboarding (complete profile)
 
-After email confirmation, users without a `profiles` row are redirected from `/dashboard` to `/auth/complete-profile`. The form calls `POST /api/auth/profile`, which creates a row with `program_role: "scholar"` and `app_role: null`.
+After email confirmation, users without a `profiles` row are redirected from `/dashboard` to `/auth/complete-profile`. The form calls `POST /api/auth/profile`, which creates a full `profiles` row via `buildScholarProfileInsertRow()` (including `full_name` and explicit defaults for all other columns).
 
 **Sign-up constraints:** only `@umd.edu` and `@terpmail.umd.edu` emails (validated client-side and on profile create).
+
+### Profile columns
+
+See [`docs/agents/general-sign-up-flow.md`](../../../../agents/general-sign-up-flow.md) for the full column matrix and instructions for fields **not** collected at onboarding (`status`, `fd_required`, `ss_required`, `majors`, `minors`, `teams`, `mentee_uids`, `mentee_count`, role promotions).
 
 ### Supabase RLS (profiles INSERT)
 
