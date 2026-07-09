@@ -177,7 +177,7 @@ export type CreateScholarProfileInput = {
   email: string;
   first_name: string;
   last_name: string;
-  student_id: number;
+  student_id: string;
   phone_number?: string | null;
   cohort: number;
 };
@@ -189,7 +189,7 @@ export function buildScholarProfileInsertRow(input: CreateScholarProfileInput) {
     id: input.userId,
     first_name: input.first_name,
     last_name: input.last_name,
-    full_name,
+    full_name: null,
     student_id: input.student_id,
     phone_number: input.phone_number ?? null,
     cohort: input.cohort,
@@ -201,7 +201,8 @@ export function buildScholarProfileInsertRow(input: CreateScholarProfileInput) {
     ss_required: null,
     mentee_count: 0,
     majors: [] as string[],
-    minors: [] as string[]
+    minors: [] as string[],
+    teams: [] as string[]
   };
 }
 
