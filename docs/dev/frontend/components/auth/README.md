@@ -26,6 +26,7 @@ All authentication UI: login/sign-up forms, password flows, profile completion, 
 | `complete-profile-form.tsx` | Scholar profile completion |
 | `logout-button.tsx` | Sign-out button |
 | `auth-button.tsx` | Login/logout toggle (landing/debug use) |
+| `invite-from-hash-redirect.tsx` | Magic-link invite hash → set-password redirect |
 
 ---
 
