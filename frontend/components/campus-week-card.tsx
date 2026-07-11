@@ -42,7 +42,6 @@ export function CampusWeekCard({
   selectedWeek,
 }: CampusWeekCardProps) {
   const currentCampusWeek = dateToCampusWeek(new Date());
-  console.log(currentCampusWeek)
   const maxWeek = (currentCampusWeek ?? 1) + 1;
   const weekNumbers = Array.from({ length: maxWeek }, (_, i) => i + 1);
 

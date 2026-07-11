@@ -232,7 +232,6 @@ interface ProfileCardProps {
 function ProfileCard({ profile }: ProfileCardProps) {
   const handleProfileClick = () => {
     // Handle profile click - could navigate to profile page or open modal
-    console.log(`Clicked on profile: ${profile.name}`)
     // TODO: Implement profile navigation or modal
   }
 
@@ -283,9 +282,8 @@ export function DirectoryDashboard() {
     setFilteredProfiles(filtered)
   }
 
-  const handleFilter = (filterType: string, value: string) => {
+  const handleFilter = (_filterType: string, _value: string) => {
     // This would implement the actual filtering logic
-    console.log(`Filter ${filterType}: ${value}`)
   }
 
   return (

@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import {
   Table,
   TableBody,
@@ -35,16 +34,19 @@ export default function SettingsClient({
 }) {
   const [activeTab, setActiveTab] = useState<TabId>("personal")
 
+  const displayName =
+    [profile.first_name, profile.last_name].filter(Boolean).join(" ") || "Profile"
+
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-8 max-w-2xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Profile settings</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          View your current profile information.
+        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
+        <p className="text-sm text-muted-foreground">
+          {displayName} &middot; View your profile information
         </p>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-6">
+      <div className="flex flex-col sm:flex-row gap-6 sm:gap-8">
         <nav
           role="tablist"
           aria-label="Settings sections"
@@ -121,12 +123,9 @@ function TagList({ label, items }: { label: string; items: string[] | null | und
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <div className="space-y-3">
-      <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        {children}
-      </h2>
-      <Separator />
-    </div>
+    <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+      {children}
+    </h2>
   )
 }
 
