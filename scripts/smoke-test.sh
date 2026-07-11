@@ -52,6 +52,9 @@ do
   check "GET $ROUTE is auth-gated" "401" "$STATUS"
 done
 
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/api/dev/test-profiles")
+check "GET /api/dev/test-profiles is auth-gated" "401" "$STATUS"
+
 # CORS header present on health check
 CORS_HEADER=$(curl -s -o /dev/null -D - -H "Origin: http://localhost:3002" "$BASE_URL/" | grep -i "access-control-allow-origin" | tr -d '\r\n' || true)
 if [ -n "$CORS_HEADER" ]; then

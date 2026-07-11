@@ -18,7 +18,9 @@
  * - Role enforcement / access guards (use requireTeamLeaderOrAbove, requireDeveloper)
  */
 
-import { hasRoleAtLeast } from "../../shared/dist/auth.js";
+import { hasRoleAtLeast, isDeveloperProfile } from "../../shared/dist/auth.js";
+
+export { isDeveloperProfile };
 
 export type UserRole = "admin" | "exec" | "scholar" | "team-leader" | "developer" | "default";
 

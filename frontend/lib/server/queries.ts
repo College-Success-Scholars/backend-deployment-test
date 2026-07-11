@@ -21,16 +21,37 @@
 import { cache } from "react";
 import { backendGet } from "./api-client";
 
+export type CurrentUserResponse = {
+  user: { id: string; email: string | null };
+  profile: Record<string, unknown> | null;
+  realProfile?: Record<string, unknown> | null;
+  activeTestProfileId?: string | null;
+  isActingAsTestProfile?: boolean;
+};
+
+export type DevTestProfileListItem = {
+  id: string;
+  label: string;
+  roster_uid: string;
+  program_role: string | null;
+  app_role: string | null;
+};
+
 export const getActiveSemester = cache(async () => {
   return backendGet<{ id: number; iso_week_offset: number; start_date: string; end_date: string }>("/api/auth/semester");
 });
 
-export const getCurrentUser = cache(async () => {
-  return backendGet<{ user: { id: string; email: string | null }; profile: Record<string, unknown> | null }>("/api/auth/me");
+export const getCurrentUser = cache(async (): Promise<CurrentUserResponse | null> => {
+  try {
+    return await backendGet<CurrentUserResponse>("/api/auth/me");
+  } catch {
+    return null;
+  }
 });
 
 export const getCurrentProfile = cache(async () => {
-  return backendGet<Record<string, unknown>>("/api/auth/profile");
+  const me = await getCurrentUser();
+  return me?.profile ?? null;
 });
 
 export const getMyMentees = cache(async () => {

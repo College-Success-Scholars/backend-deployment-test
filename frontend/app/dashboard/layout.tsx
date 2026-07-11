@@ -29,7 +29,9 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/server/queries";
+import { getCurrentUser, type DevTestProfileListItem } from "@/lib/server/queries";
+import { backendGet } from "@/lib/server/api-client";
+import { isDeveloperProfile } from "@/lib/auth";
 import { ProfilesRow } from "@/lib/supabase/server";
 
 export default async function DashboardLayout({
@@ -43,15 +45,30 @@ export default async function DashboardLayout({
     redirect("/auth/login");
   }
 
-  if (!meResult.profile) {
+  if (!(meResult.realProfile ?? meResult.profile)) {
     redirect("/auth/complete-profile");
   }
 
   const profile = meResult.profile as ProfilesRow;
+  const isDeveloper = isDeveloperProfile(meResult.realProfile ?? null);
+  let testProfiles: DevTestProfileListItem[] = [];
+  if (isDeveloper) {
+    try {
+      testProfiles = await backendGet<DevTestProfileListItem[]>("/api/dev/test-profiles");
+    } catch {
+      testProfiles = [];
+    }
+  }
 
   return (
     <SidebarProvider>
-      <AppSidebar profile={profile} />
+      <AppSidebar
+        profile={profile}
+        realProfile={meResult.realProfile ?? null}
+        isActingAsTestProfile={meResult.isActingAsTestProfile ?? false}
+        activeTestProfileId={meResult.activeTestProfileId ?? null}
+        testProfiles={testProfiles}
+      />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2">
           <div className="flex items-center gap-2 px-4">

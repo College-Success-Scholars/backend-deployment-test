@@ -20,7 +20,7 @@ describe("buildScholarProfileInsertRow", () => {
       student_id: "123456789",
       phone_number: "3015550100",
       cohort: 2025,
-      program_role: "scholar",
+      program_role: "Scholar",
       app_role: null,
       emails: ["student@umd.edu"],
       status: null,

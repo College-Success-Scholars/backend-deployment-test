@@ -30,6 +30,10 @@ import {
   logApiRequest,
   logApiResponse,
 } from "@/lib/api-log";
+import {
+  DEV_ACTIVE_PROFILE_COOKIE,
+  DEV_ACTIVE_PROFILE_HEADER,
+} from "../../../shared/dist/auth.js";
 
 const BACKEND_URL =
   process.env.BACKEND_URL ??
@@ -123,11 +127,14 @@ export async function backendFetch<T>(
   logApiRequest("server", method, requestUrl);
 
   const token = await getAccessToken();
+  const cookieStore = await cookies();
+  const devActiveProfile = cookieStore.get(DEV_ACTIVE_PROFILE_COOKIE)?.value ?? null;
   const res = await fetch(requestUrl, {
     method,
     headers: {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(devActiveProfile ? { [DEV_ACTIVE_PROFILE_HEADER]: devActiveProfile } : {}),
     },
     ...(options?.body !== undefined ? { body: JSON.stringify(options.body) } : {}),
     cache: "no-store",

@@ -45,6 +45,10 @@ import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
+import { ProfileSwitcher } from "@/components/dev/profile-switcher"
+import { DevActingBanner } from "@/components/dev/dev-acting-banner"
+import type { DevTestProfileListItem } from "@/lib/server/queries"
+import { isDeveloperProfile } from "@/lib/auth"
 import {
   Sidebar,
   SidebarContent,
@@ -415,11 +419,29 @@ const getRoleBasedSecondaryNav = (role: UserRole) => {
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   profile: Record<string, unknown>;
+  realProfile?: Record<string, unknown> | null;
+  isActingAsTestProfile?: boolean;
+  activeTestProfileId?: string | null;
+  testProfiles?: DevTestProfileListItem[];
   userRole?: UserRole
 }
 
-export function AppSidebar({ profile, ...props }: AppSidebarProps) {
+export function AppSidebar({
+  profile,
+  realProfile,
+  isActingAsTestProfile = false,
+  activeTestProfileId = null,
+  testProfiles = [],
+  ...props
+}: AppSidebarProps) {
   const roleFields = profile as { app_role?: string | null; program_role?: string | null };
+  const isDeveloper = isDeveloperProfile(
+    (realProfile ?? profile) as { app_role?: string | null },
+  );
+  const actingLabel =
+    typeof profile._devTestProfileLabel === "string"
+      ? profile._devTestProfileLabel
+      : "Test profile";
   const userRole = resolveUserRole(roleFields);
   const showMemo = canAccessWeeklyMemo(roleFields);
   const roleNavMain = getRoleBasedNav(userRole, showMemo)
@@ -446,11 +468,25 @@ export function AppSidebar({ profile, ...props }: AppSidebarProps) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        {isActingAsTestProfile && (
+          <div className="px-2 pb-2">
+            <DevActingBanner label={actingLabel} />
+          </div>
+        )}
         <NavMain items={roleNavMain} />
         <NavProjects projects={roleNavResources} />
         <NavSecondary items={roleNavSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
+        {isDeveloper && testProfiles.length > 0 && (
+          <div className="px-2 pb-2">
+            <ProfileSwitcher
+              testProfiles={testProfiles}
+              activeTestProfileId={activeTestProfileId}
+              compact
+            />
+          </div>
+        )}
         <NavUser user={{
           name: profile?.first_name + " " + profile?.last_name,
           email: profile?.email as string,

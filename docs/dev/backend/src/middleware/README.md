@@ -20,10 +20,28 @@ Express middleware that runs on every request (or a broad set of requests). Dist
 | File | Source Link | Description |
 |------|-------------|-------------|
 | `request-logger.ts` | [source](../../../../../backend/src/middleware/request-logger.ts) | Logs each incoming request: HTTP method, URL, response status code, and duration in milliseconds |
+| `reject-writes-when-acting.ts` | [source](../../../../../backend/src/middleware/reject-writes-when-acting.ts) | Denylist of mutation routes blocked while a developer acts as a test profile (see below) |
 
 ---
 
-## Standards
+## `rejectWritesWhenActing` — read-only acting
+
+When `req.isActingAsTestProfile` is true, this middleware runs inside `requireAuth` / `requireTeamLeaderOrAbove` (see `auth.controller.ts`).
+
+**Not all POSTs are writes.** Many read endpoints use POST with a JSON body (`/by-uids`, `recent-submissions`, session-log fetches). The middleware uses a **denylist** of true mutations:
+
+| Blocked when acting | Method |
+|---------------------|--------|
+| `/api/auth/profile` | POST |
+| `/api/session-records/front-desk/sync`, `.../sync-all` | POST |
+| `/api/session-records/study/sync`, `.../sync-all` | POST |
+| `/api/memo/sync`, `/api/memo/refresh-stats` | POST |
+| Any non-`/api/dev` route | PATCH, PUT, DELETE |
+
+**Allowed when acting:** GET; POST read endpoints (form logs, session logs, users, traffic); all `/api/dev/*` routes.
+
+When adding a **new mutation** endpoint, add its full path to `ACTING_BLOCKED_POST_PATHS` in `reject-writes-when-acting.ts` (or rely on PATCH/PUT/DELETE blocking). Read-only POSTs need no change.
+
 
 - **Application-wide middleware here** — middleware that applies to all or most routes belongs in this directory and is registered in `app.ts` via `app.use(middleware)`.
 - **Route-specific middleware belongs in routes** — if middleware only applies to one route group, pass it as an argument to the route definition in `routes/*.routes.ts`.

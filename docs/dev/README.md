@@ -158,3 +158,15 @@ See [`docs/agents/ubiquitous_language.md`](../agents/ubiquitous_language.md) for
 6. **API responses wrap data** — all backend routes return `{ data: ... }` or `{ error: "..." }`.
 7. **No logic in routes** — routes only wire middleware → controller. All business logic is in services.
 8. **`server-only` guard** in any frontend module that must not run on the client.
+
+---
+
+## Developer test profiles
+
+Developers (`app_role === developer`) can switch to curated **test personas** stored in `public.dev_test_profiles` (cloud Supabase). This emulates another user's roles and `roster_uid` for read-only debugging without their credentials.
+
+- **My profile** — default; full write access as the developer.
+- **Acting as test profile** — true API mutations blocked via a **denylist** in `rejectWritesWhenActing` (not all POSTs); `/api/dev/*` stays writable. See [`docs/dev/backend/src/middleware/README.md`](backend/src/middleware/README.md).
+- **Security** — clients send only `dev_test_profiles.id` (cookie → `X-Dev-Active-Profile` header); server resolves `roster_uid` from DB.
+
+Setup: [`docs/dev/supabase/README.md`](supabase/README.md). CI: [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml).

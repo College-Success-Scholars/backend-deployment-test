@@ -25,14 +25,21 @@
  */
 import type { Request, Response, NextFunction } from "express";
 import { getSupabaseClient, getSupabaseAuthClient, runWithToken } from "../services/supabase.service.js";
-import { getMyMentees } from "../services/mentee.service.js";
+import { getMenteesByMentorKey } from "../services/mentee.service.js";
 import type { ProfilesRow } from "../models/user.model.js";
-import { hasRoleAtLeast, isUmdEmail, mergeProfileWithRoster } from "../../../shared/dist/auth.js";
+import { hasRoleAtLeast, isDeveloperProfile, isUmdEmail, mergeProfileWithRoster } from "../../../shared/dist/auth.js";
 import { createScholarProfile } from "../services/user.service.js";
+import { resolveEffectiveProfile } from "../services/dev-profile.service.js";
+import { rejectWritesWhenActing } from "../middleware/reject-writes-when-acting.js";
 
 export interface AuthenticatedRequest extends Request {
   authUser?: { id: string; email?: string };
+  /** Effective profile (real or test overlay). */
   profile?: ProfilesRow | null;
+  /** Developer's own merged profile — never overlaid. */
+  realProfile?: ProfilesRow | null;
+  activeTestProfileId?: string | null;
+  isActingAsTestProfile?: boolean;
   /** Raw bearer token — available after auth middleware runs. */
   accessToken?: string;
 }
@@ -67,7 +74,13 @@ async function extractUser(req: AuthenticatedRequest): Promise<boolean> {
   const merged = profile ? mergeProfileWithRoster(profile as ProfilesRow) : null;
 
   req.authUser = { id: user.id, email: user.email };
-  req.profile = merged;
+  req.realProfile = merged;
+
+  const effective = await resolveEffectiveProfile(req.headers, merged);
+  req.profile = effective.profile;
+  req.activeTestProfileId = effective.activeTestProfileId;
+  req.isActingAsTestProfile = effective.isActingAsTestProfile;
+
   return true;
 }
 
@@ -87,10 +100,16 @@ function nextWithToken(req: AuthenticatedRequest, next: NextFunction) {
 export async function requireDeveloper(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const ok = await runWithToken(req.headers.authorization?.slice(7) ?? "", () => extractUser(req));
   if (!ok) { res.status(401).json({ error: "Unauthorized" }); return; }
-  if (req.profile?.app_role !== "developer") {
+  if (!isDeveloperProfile(req.realProfile)) {
     res.status(403).json({ error: "Forbidden: Developer access required" }); return;
   }
   nextWithToken(req, next);
+}
+
+export async function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  const ok = await runWithToken(req.headers.authorization?.slice(7) ?? "", () => extractUser(req));
+  if (!ok) { res.status(401).json({ error: "Unauthorized" }); return; }
+  rejectWritesWhenActing(req, res, () => nextWithToken(req, next));
 }
 
 export async function requireTeamLeaderOrAbove(req: AuthenticatedRequest, res: Response, next: NextFunction) {
@@ -99,13 +118,7 @@ export async function requireTeamLeaderOrAbove(req: AuthenticatedRequest, res: R
   if (!hasRoleAtLeast(req.profile?.app_role ?? null, "team_leader")) {
     res.status(403).json({ error: "Forbidden: Team leader or above required" }); return;
   }
-  nextWithToken(req, next);
-}
-
-export async function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  const ok = await runWithToken(req.headers.authorization?.slice(7) ?? "", () => extractUser(req));
-  if (!ok) { res.status(401).json({ error: "Unauthorized" }); return; }
-  nextWithToken(req, next);
+  rejectWritesWhenActing(req, res, () => nextWithToken(req, next));
 }
 
 /**
@@ -141,9 +154,17 @@ export function requireSelfOrTeamLeader(req: AuthenticatedRequest, res: Response
 
 // GET /api/auth/me
 export async function getMe(req: AuthenticatedRequest, res: Response) {
+  const isDev = isDeveloperProfile(req.realProfile);
   res.json({
     user: { id: req.authUser?.id ?? null, email: req.authUser?.email ?? null },
     profile: req.profile ?? null,
+    ...(isDev
+      ? {
+          realProfile: req.realProfile ?? null,
+          activeTestProfileId: req.activeTestProfileId ?? null,
+          isActingAsTestProfile: req.isActingAsTestProfile ?? false,
+        }
+      : {}),
   });
 }
 
@@ -239,7 +260,7 @@ function supabaseErrorStatus(error: unknown): number {
 
 // POST /api/auth/profile — self-service scholar onboarding
 export async function createProfile(req: AuthenticatedRequest, res: Response) {
-  if (req.profile) {
+  if (req.realProfile) {
     res.status(409).json({ error: "Profile already exists" });
     return;
   }
@@ -275,7 +296,11 @@ export async function createProfile(req: AuthenticatedRequest, res: Response) {
 // GET /api/auth/mentees
 export async function getMentees(req: AuthenticatedRequest, res: Response) {
   try {
-    const data = await getMyMentees(req.authUser!.id);
+    const mentorKey =
+      req.isActingAsTestProfile && req.profile?.student_id != null
+        ? String(req.profile.student_id)
+        : req.authUser!.id;
+    const data = await getMenteesByMentorKey(mentorKey);
 
     res.json({ data });
   } catch (e) {

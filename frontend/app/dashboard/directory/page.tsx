@@ -30,9 +30,12 @@ export default async function DirectoryPage() {
   // REMEMBER TO UNCOMMENT THIS WHEN DONE TESTING and add import
   const userRole = 'scholar' as UserRole;
   const profile = await getCurrentProfile();
+  if (!profile) {
+    redirect("/auth/complete-profile");
+  }
   return (
     <SidebarProvider>
-      <AppSidebar userRole={userRole} profile={profile}/>
+      <AppSidebar userRole={userRole} profile={profile} />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2">
           <div className="flex items-center gap-2 px-4">

@@ -24,6 +24,9 @@ router.use(requireDeveloper);
 
 router.get("/test", devController.test);
 router.get("/me", devController.me);
+router.get("/test-profiles", devController.getTestProfiles);
+router.get("/test-profiles/:id", devController.getTestProfile);
+router.post("/active-profile", devController.setActiveProfile);
 
 // Front desk records
 router.get("/session-records/front-desk", devController.getFrontDesk);

@@ -73,3 +73,82 @@ export function mergeProfileWithRoster<T extends ProfileWithRoster>(profile: T):
 
   return profile;
 }
+
+export function isDeveloperProfile(profile: { app_role?: string | null } | null | undefined): boolean {
+  return profile?.app_role === "developer";
+}
+
+/** Row shape from public.dev_test_profiles (subset used for overlay). */
+export type DevTestProfileRow = {
+  id: string;
+  label: string;
+  roster_uid: string;
+  program_role?: string | null;
+  app_role?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  cohort?: number | null;
+  fd_required?: number | null;
+  ss_required?: number | null;
+  teams?: string[] | null;
+  mentee_uids?: string[] | null;
+  mentee_count?: number | null;
+};
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export function isValidUuid(value: string): boolean {
+  return UUID_RE.test(value);
+}
+
+/** Maps roster_uid to profiles.student_id (numeric when possible). */
+function rosterUidToStudentId(rosterUid: string): number | string {
+  const trimmed = rosterUid.trim();
+  const asNum = Number.parseInt(trimmed, 10);
+  if (Number.isFinite(asNum) && String(asNum) === trimmed) return asNum;
+  return trimmed;
+}
+
+/**
+ * Overlays a dev test profile onto the developer's real profile for effective identity.
+ * Preserves the developer's auth id; student_id becomes roster_uid for data queries.
+ */
+export function mapTestProfileToEffectiveRow<T extends Record<string, unknown>>(
+  realProfile: T,
+  testProfile: DevTestProfileRow,
+): T {
+  const studentId = rosterUidToStudentId(testProfile.roster_uid);
+  return {
+    ...realProfile,
+    program_role: testProfile.program_role ?? null,
+    app_role: testProfile.app_role ?? null,
+    first_name: testProfile.first_name ?? realProfile.first_name ?? null,
+    last_name: testProfile.last_name ?? realProfile.last_name ?? null,
+    cohort: testProfile.cohort ?? realProfile.cohort ?? null,
+    fd_required: testProfile.fd_required ?? realProfile.fd_required ?? null,
+    ss_required: testProfile.ss_required ?? realProfile.ss_required ?? null,
+    teams: testProfile.teams ?? [],
+    mentee_uids: testProfile.mentee_uids ?? [],
+    mentee_count: testProfile.mentee_count ?? 0,
+    student_id: studentId,
+    _devTestProfileLabel: testProfile.label,
+  } as T;
+}
+
+/** Effective scholar/roster uid from profile.student_id (string or number). */
+export function getEffectiveScholarId(
+  profile: { student_id?: unknown } | null | undefined,
+): string | null {
+  if (profile?.student_id == null) return null;
+  if (typeof profile.student_id === "number" && Number.isFinite(profile.student_id)) {
+    return String(profile.student_id);
+  }
+  if (typeof profile.student_id === "string" && profile.student_id.trim() !== "") {
+    return profile.student_id.trim();
+  }
+  return null;
+}
+
+export const DEV_ACTIVE_PROFILE_HEADER = "x-dev-active-profile";
+export const DEV_ACTIVE_PROFILE_COOKIE = "dev-active-profile";
