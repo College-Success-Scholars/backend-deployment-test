@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canAccessWeeklyMemo, resolveUserRole } from "./auth";
+import { canAccessWeeklyMemo, formatUserRoleLabel, resolveUserRole } from "./auth";
 
 describe("canAccessWeeklyMemo", () => {
   it("allows team_leader and developer app_role", () => {
@@ -31,5 +31,14 @@ describe("resolveUserRole", () => {
 
   it("does not treat null app_role as team-leader", () => {
     expect(resolveUserRole({ program_role: "scholar", app_role: null })).not.toBe("team-leader");
+  });
+});
+
+describe("formatUserRoleLabel", () => {
+  it("maps UI roles to display labels", () => {
+    expect(formatUserRoleLabel("team-leader")).toBe("Team Leader");
+    expect(formatUserRoleLabel("scholar")).toBe("Scholar");
+    expect(formatUserRoleLabel("developer")).toBe("Developer");
+    expect(formatUserRoleLabel("default")).toBe("Dashboard");
   });
 });

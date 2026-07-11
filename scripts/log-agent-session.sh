@@ -2,8 +2,14 @@
 # log-agent-session.sh
 #
 # Records an agent/AI session to docs/agents/logs/.
-# Captures: who ran it, the raw user prompt, the stated purpose,
-# the agent response summary, and the code changes made.
+# Captures: who ran it, verbatim user prompt(s), stated purpose,
+# agent response summary, and code changes made.
+#
+# User Prompt rules:
+#   - Verbatim only — never summarize or paraphrase user input.
+#   - Multi-turn: separate each exact user message with a line containing only "---".
+# Agent Response Summary:
+#   - Summarize what the agent did, not what the user asked.
 #
 # Usage:
 #   ./scripts/log-agent-session.sh [OPTIONS]
@@ -12,10 +18,10 @@
 #   -t, --title STR        Short session title (used in filename + heading)
 #   -U, --user STR         Who ran the session (defaults to git user.email)
 #   -u, --purpose STR      One-sentence purpose of the agent call
-#   -p, --prompt FILE      Path to a file containing the raw user prompt
-#       --prompt-text STR  Inline prompt text (use quotes)
+#   -p, --prompt FILE      Path to a file containing verbatim user prompt(s)
+#       --prompt-text STR  Inline verbatim user prompt(s); use "---" between messages
 #   -s, --summary FILE     Path to a file with the agent response summary
-#       --summary-text STR Inline summary of what the agent returned
+#       --summary-text STR What the agent did (not a recap of user input)
 #   -c, --changes STR      Comma-separated list of files changed
 #                          (auto-detected from git diff if omitted)
 #   -h, --help             Show this help message
@@ -76,19 +82,20 @@ if [[ -z "$PURPOSE" ]]; then
   read -r -p "Purpose of this agent call (one sentence): " PURPOSE
 fi
 if [[ -z "$PROMPT_TEXT" && -z "$PROMPT_FILE" ]]; then
-  echo "Enter the raw user prompt (end with a line containing only '---'):"
+  echo "Enter verbatim user message(s) — do not summarize (end input with a line containing only '==='):"
+  echo "  Separate multiple messages with a line containing only '---'."
   lines=()
   while IFS= read -r line; do
-    [[ "$line" == "---" ]] && break
+    [[ "$line" == "===" ]] && break
     lines+=("$line")
   done
   PROMPT_TEXT="$(printf '%s\n' "${lines[@]}")"
 fi
 if [[ -z "$SUMMARY_TEXT" && -z "$SUMMARY_FILE" ]]; then
-  echo "Enter a summary of what the agent returned (end with a line containing only '---'):"
+  echo "Enter what the agent did — not a recap of user input (end with a line containing only '==='):"
   lines=()
   while IFS= read -r line; do
-    [[ "$line" == "---" ]] && break
+    [[ "$line" == "===" ]] && break
     lines+=("$line")
   done
   SUMMARY_TEXT="$(printf '%s\n' "${lines[@]}")"
@@ -136,6 +143,8 @@ cat > "$FILENAME" <<EOF
 
 ## User Prompt
 
+_Verbatim user input. Multiple messages are separated by `---`._
+
 \`\`\`
 ${PROMPT_CONTENT}
 \`\`\`
@@ -149,6 +158,8 @@ ${PURPOSE}
 ---
 
 ## Agent Response Summary
+
+_What the agent did (not a recap of user input)._
 
 ${SUMMARY_CONTENT}
 

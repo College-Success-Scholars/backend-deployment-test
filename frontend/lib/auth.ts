@@ -50,3 +50,21 @@ export function resolveUserRole(profile: ProfileRoleFields | null | undefined): 
 
   return "default";
 }
+
+/** Human-readable label for dashboard chrome (breadcrumb, sidebar subtitle). */
+export function formatUserRoleLabel(role: UserRole): string {
+  switch (role) {
+    case "scholar":
+      return "Scholar";
+    case "team-leader":
+      return "Team Leader";
+    case "developer":
+      return "Developer";
+    case "exec":
+      return "Executive";
+    case "admin":
+      return "Admin";
+    default:
+      return "Dashboard";
+  }
+}

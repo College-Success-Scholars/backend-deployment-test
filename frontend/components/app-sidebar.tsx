@@ -58,7 +58,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { UserRole, resolveUserRole, canAccessWeeklyMemo } from "@/lib/auth"
+import { UserRole, resolveUserRole, canAccessWeeklyMemo, formatUserRoleLabel } from "@/lib/auth"
 
 const defaultData = {
   user: {
@@ -460,7 +460,7 @@ export function AppSidebar({
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">CSS Atlas</span>
-                  <span className="truncate text-xs">{userRole.charAt(0).toUpperCase() + userRole.slice(1)}</span>
+                  <span className="truncate text-xs">{formatUserRoleLabel(userRole)}</span>
                 </div>
               </a>
             </SidebarMenuButton>

@@ -17,7 +17,6 @@ import {
   MapPin,
   Globe,
   Calendar,
-  User
 } from "lucide-react"
 
 // Sample data based on the screenshot
@@ -290,15 +289,14 @@ export function DirectoryDashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <User className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-bold tracking-tight">Directory</h1>
+    <div className="space-y-12 p-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Directory</h1>
+        </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="relative">
+      <div className="space-y-4">
         <div className="relative">
           <Input
             placeholder="Search by name or email..."
@@ -307,51 +305,49 @@ export function DirectoryDashboard() {
             className="pl-10 h-10"
           />
         </div>
+
+        {/* Filter Row */}
+        <div className="flex flex-wrap gap-2">
+          <FilterDropdown
+            label="Company"
+            icon={<Briefcase className="h-4 w-4" />}
+            options={filterOptions.company}
+            onSelect={(value) => handleFilter("company", value)}
+          />
+          <FilterDropdown
+            label="Location"
+            icon={<MapPin className="h-4 w-4" />}
+            options={filterOptions.location}
+            onSelect={(value) => handleFilter("location", value)}
+          />
+          <FilterDropdown
+            label="Ethnicity"
+            icon={<Globe className="h-4 w-4" />}
+            options={filterOptions.ethnicity}
+            onSelect={(value) => handleFilter("ethnicity", value)}
+          />
+          <FilterDropdown
+            label="Graduation Year"
+            icon={<Calendar className="h-4 w-4" />}
+            options={filterOptions.graduationYear}
+            onSelect={(value) => handleFilter("graduationYear", value)}
+          />
+          <FilterDropdown
+            label="Hometown"
+            icon={<MapPin className="h-4 w-4" />}
+            options={filterOptions.hometown}
+            onSelect={(value) => handleFilter("hometown", value)}
+          />
+        </div>
       </div>
 
-      {/* Filter Row */}
-      <div className="flex flex-wrap gap-2">
-        <FilterDropdown
-          label="Company"
-          icon={<Briefcase className="h-4 w-4" />}
-          options={filterOptions.company}
-          onSelect={(value) => handleFilter("company", value)}
-        />
-        <FilterDropdown
-          label="Location"
-          icon={<MapPin className="h-4 w-4" />}
-          options={filterOptions.location}
-          onSelect={(value) => handleFilter("location", value)}
-        />
-        <FilterDropdown
-          label="Ethnicity"
-          icon={<Globe className="h-4 w-4" />}
-          options={filterOptions.ethnicity}
-          onSelect={(value) => handleFilter("ethnicity", value)}
-        />
-        <FilterDropdown
-          label="Graduation Year"
-          icon={<Calendar className="h-4 w-4" />}
-          options={filterOptions.graduationYear}
-          onSelect={(value) => handleFilter("graduationYear", value)}
-        />
-        <FilterDropdown
-          label="Hometown"
-          icon={<MapPin className="h-4 w-4" />}
-          options={filterOptions.hometown}
-          onSelect={(value) => handleFilter("hometown", value)}
-        />
-      </div>
-
-      {/* Profile Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {filteredProfiles.map((profile) => (
           <ProfileCard key={profile.id} profile={profile} />
         ))}
       </div>
 
-      {/* Results Count */}
-      <div className="text-sm text-muted-foreground text-center">
+      <div className="text-center text-sm text-muted-foreground">
         Showing {filteredProfiles.length} of {sampleProfiles.length} profiles
       </div>
     </div>
