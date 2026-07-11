@@ -22,7 +22,9 @@ Role-specific dashboard views and shared activity components used across the mai
 | `team-leader-dashboard.tsx` | [source](../../../../../frontend/components/dashboard/team-leader-dashboard.tsx) | Dashboard view for team leaders — shows mentee overview, form stats, activity |
 | `scholar-dashboard.tsx` | [source](../../../../../frontend/components/dashboard/scholar-dashboard.tsx) | Dashboard view for regular scholars |
 | `admin-dashboard.tsx` | [source](../../../../../frontend/components/dashboard/admin-dashboard.tsx) | Dashboard view for admin users |
-| `executive-dashboard.tsx` | [source](../../../../../frontend/components/dashboard/executive-dashboard.tsx) | Dashboard view for executives |
+| `exec-dashboard.tsx` | [source](../../../../../frontend/components/dashboard/exec-dashboard.tsx) | Dashboard view for executives |
+| `dashboard-header.tsx` | [source](../../../../../frontend/components/dashboard/dashboard-header.tsx) | Dashboard top bar — sidebar trigger + breadcrumb |
+| `dashboard-breadcrumb.tsx` | [source](../../../../../frontend/components/dashboard/dashboard-breadcrumb.tsx) | Client breadcrumb component using `resolveDashboardBreadcrumb()` |
 | `default-dashboard.tsx` | [source](../../../../../frontend/components/dashboard/default-dashboard.tsx) | Fallback dashboard when role is unrecognized |
 | `directory-dashboard.tsx` | [source](../../../../../frontend/components/dashboard/directory-dashboard.tsx) | Scholar directory view |
 | `activity-log.tsx` | [source](../../../../../frontend/components/dashboard/activity-log.tsx) | Server component — fetches and passes activity data |

@@ -20,6 +20,7 @@ The only layer that touches Supabase. Services contain all database queries, dat
 | File | Source Link | Description |
 |------|-------------|-------------|
 | `supabase.service.ts` | [source](../../../../../backend/src/services/supabase.service.ts) | Supabase client factory using `AsyncLocalStorage` for per-request JWT binding; exports `getSupabaseClient()`, `getSupabaseAuthClient()`, `runWithToken()` |
+| `dev-profile.service.ts` | [source](../../../../../backend/src/services/dev-profile.service.ts) | Developer test profile lookup and effective identity resolution: `listTestProfiles()`, `getTestProfileById()`, `resolveEffectiveProfile()` |
 | `user.service.ts` | [source](../../../../../backend/src/services/user.service.ts) | User/profile queries: scholar names, required hours, eligible scholars, all UIDs, memo users, team leaders, scholar UIDs, single user lookup |
 | `session-log.service.ts` | [source](../../../../../backend/src/services/session-log.service.ts) | Raw session log queries: fetch, cleaned/errored pairs, in-room open sessions, completed sessions — for both front-desk and study session types |
 | `session-record.service.ts` | [source](../../../../../backend/src/services/session-record.service.ts) | Weekly aggregated record queries and sync operations: get by UID/week, sync for week (single or all UIDs), update excuse |

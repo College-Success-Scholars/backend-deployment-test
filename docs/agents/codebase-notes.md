@@ -11,7 +11,7 @@
 This repository is a two-app setup:
 
 - `backend/`: Express + TypeScript API service.
-- `frontend/`: Next.js 15 (App Router) web app.
+- `frontend/`: Next.js 16 (App Router) web app.
 
 Core data/auth platform is Supabase. The frontend obtains user session/JWT and calls backend endpoints with `Authorization: Bearer <token>`. The backend validates that JWT and then performs user-scoped Supabase queries.
 
@@ -19,8 +19,8 @@ Core data/auth platform is Supabase. The frontend obtains user session/JWT and c
 
 Entry point: `backend/src/server.ts`.
 
-- Registers CORS (`http://localhost:3002`), JSON parsing, request logger, route groups, and a global error handler.
-- Routes are mounted under `/api/*` with domain-specific modules (`auth`, `users`, `session-logs`, `session-records`, `traffic`, `form-logs`, `daily-activity`, `memo`, `dev`).
+- Registers CORS (comma-separated `CORS_ORIGIN`, default `http://localhost:3002` — must match the frontend origin), JSON parsing, request logger, route groups, and a global error handler.
+- Routes are mounted under `/api/*` with domain-specific modules (`auth`, `users`, `session-logs`, `session-records`, `traffic`, `form-logs`, `daily-activity`, `memo`, `tutor-reports`, `dev`).
 
 Request flow pattern:
 
@@ -48,8 +48,9 @@ Important backend domains:
 
 Frontend uses Next.js App Router with route groups in `frontend/app/`.
 
-- `frontend/middleware.ts` wires Supabase session update middleware.
-- App includes dashboard routes, auth routes, and developer pages under `app/dev/*`.
+- `frontend/middleware.ts` wires Supabase session update middleware (`lib/supabase/middleware.ts` → `updateSession`).
+- Middleware redirects unauthenticated users to `/auth/login`, with public exceptions for `/`, `/auth/*`, and `/traffic` (kiosk check-in).
+- App includes dashboard routes, auth routes, standalone `/memo` and `/traffic` views, and developer pages under `app/dev/*`.
 - Theme, fonts, and toaster are initialized in `app/layout.tsx`.
 
 Data access pattern:
@@ -71,6 +72,7 @@ For an authenticated session record request:
 
 ## Operational notes
 
-- No backend test suite is configured currently (`backend/package.json` has placeholder `test` script).
+- Backend tests: `npm --prefix backend run test` (Vitest + supertest).
 - API reference is documented in `backend/API.md` and is comprehensive.
-- The current setup assumes local frontend/backend CORS origin during development.
+- Set `CORS_ORIGIN` to the actual frontend URL in each environment (Docker defaults to `http://localhost:3000`; bare `app.ts` default is `http://localhost:3002`).
+- Developers can switch to curated test personas via `dev_test_profiles` (see `docs/dev/supabase/README.md`).

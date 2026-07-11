@@ -4,7 +4,7 @@ export type DashboardBreadcrumbItem = {
 };
 
 const DASHBOARD_PAGE_TITLES: Record<string, string> = {
-  "/dashboard": "Home",
+  "/dashboard": "Dashboard",
   "/dashboard/directory": "Directory",
   "/dashboard/personal": "Personal",
   "/dashboard/mentee": "Mentees",
@@ -46,7 +46,7 @@ function resolvePageLabel(path: string): string {
   }
 
   const segment = path.split("/").pop();
-  return segment ? formatPathSegment(segment) : "Home";
+  return segment ? formatPathSegment(segment) : "Dashboard";
 }
 
 /** Breadcrumb trail for the current dashboard route. */
@@ -54,11 +54,20 @@ export function resolveDashboardBreadcrumb(pathname: string): DashboardBreadcrum
   const path = pathname.replace(/\/$/, "") || "/dashboard";
 
   if (path === "/dashboard") {
-    return [{ label: "Home" }];
+    return [{ label: "Dashboard" }];
   }
 
-  return [
-    { label: "Dashboard", href: "/dashboard" },
-    { label: resolvePageLabel(path) },
-  ];
+  const routeSegments = path.split("/").filter(Boolean).slice(1);
+  const items: DashboardBreadcrumbItem[] = [{ label: "Dashboard", href: "/dashboard" }];
+
+  let cumulativePath = "/dashboard";
+  for (let index = 0; index < routeSegments.length; index++) {
+    cumulativePath += `/${routeSegments[index]}`;
+    const label = resolvePageLabel(cumulativePath);
+    const isLast = index === routeSegments.length - 1;
+
+    items.push(isLast ? { label } : { label, href: cumulativePath });
+  }
+
+  return items;
 }

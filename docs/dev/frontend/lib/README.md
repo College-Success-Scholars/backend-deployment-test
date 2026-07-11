@@ -7,7 +7,7 @@
 
 [← Root](../../README.md) › [Frontend](../README.md) › lib
 
-Children: [server/](server/README.md) · [client/](client/README.md) · [supabase/](supabase/README.md) · [types/](types/README.md) · [format/](format/README.md)
+Children: [server/](server/README.md) · [client/](client/README.md) · [supabase/](supabase/README.md) · [auth/](auth/README.md) · [types/](types/README.md) · [format/](format/README.md) · dev _(inline below)_
 
 ---
 
@@ -22,9 +22,10 @@ All non-component TypeScript utilities for the frontend. Organized by execution 
 | File | Source Link | Description |
 |------|-------------|-------------|
 | `api-log.ts` | [source](../../../../frontend/lib/api-log.ts) | Logging helpers for API requests/responses (`logApiRequest`, `logApiResponse`, `logApiError`, `buildBackendRequestUrl`) |
-| `auth.ts` | [source](../../../../frontend/lib/auth.ts) | `UserRole` union type for role-based UI rendering in sidebar and dashboard components |
+| `auth.ts` | [source](../../../../frontend/lib/auth.ts) | UI role helpers: `resolveUserRole`, `isDeveloperProfile`, `hasAssignedMentees`, `canAccessMenteeMonitoring`, `canAccessWeeklyMemo`, `formatUserRoleLabel` |
+| `dashboard-breadcrumb.ts` | [source](../../../../frontend/lib/dashboard-breadcrumb.ts) | `resolveDashboardBreadcrumb()` — breadcrumb trail for dashboard routes |
 | `nav-active.ts` | [source](../../../../frontend/lib/nav-active.ts) | Navigation state helpers — determines which nav item is active based on the current path |
-| `utils.ts` | [source](../../../../frontend/lib/utils.ts) | General-purpose utilities (e.g., `cn()` Tailwind class merger) |
+| `utils.ts` | [source](../../../../frontend/lib/utils.ts) | General-purpose utilities: `cn()` Tailwind class merger |
 
 ---
 
@@ -38,6 +39,13 @@ All non-component TypeScript utilities for the frontend. Organized by execution 
 | `supabase/` | [supabase/README.md](supabase/README.md) | Server + Client | Supabase client factories and auth helpers |
 | `types/` | [types/README.md](types/README.md) | Both | Shared TypeScript type definitions |
 | `format/` | [format/README.md](format/README.md) | Both | Display formatting utilities |
+| `dev/` | _(inline below)_ | Both | Developer helpers (`effective-uid.ts`) |
+
+### `dev/`
+
+| File | Source Link | Description |
+|------|-------------|-------------|
+| `effective-uid.ts` | [source](../../../../frontend/lib/dev/effective-uid.ts) | Resolves effective scholar UID when a developer is acting as a test profile |
 
 ---
 

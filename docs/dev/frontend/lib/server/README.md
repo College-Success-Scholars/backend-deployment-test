@@ -23,6 +23,7 @@ Server-only modules for the frontend. All files here include `import "server-onl
 | `data.ts` | [source](../../../../../frontend/lib/server/data.ts) | Typed wrapper functions for every backend endpoint — the preferred way for pages to fetch data |
 | `actions.ts` | [source](../../../../../frontend/lib/server/actions.ts) | Next.js Server Actions for form submissions and mutations |
 | `queries.ts` | [source](../../../../../frontend/lib/server/queries.ts) | Query parameter builders / URL helpers for backend endpoints |
+| `dev-profile-actions.ts` | [source](../../../../../frontend/lib/server/dev-profile-actions.ts) | Server Action `setActiveTestProfile()` — sets/clears dev test profile cookie (developer only) |
 
 ---
 
@@ -31,8 +32,9 @@ Server-only modules for the frontend. All files here include `import "server-onl
 1. Reads the Supabase auth cookie from the request using `next/headers`.
 2. Decodes the base64-encoded session JSON to extract `access_token`.
 3. Attaches the token as `Authorization: Bearer <token>` on the fetch request.
-4. Calls the backend URL (from `BACKEND_URL` env var or auto-detected from `VERCEL_URL`).
-5. Unwraps `{ data: ... }` from the response automatically.
+4. Forwards the dev test-profile cookie as `x-dev-active-profile` when set (developer acting as a test persona).
+5. Calls the backend URL (from `BACKEND_URL` env var or auto-detected from `VERCEL_URL`).
+6. Unwraps `{ data: ... }` from the response automatically.
 
 ---
 

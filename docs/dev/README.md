@@ -9,7 +9,7 @@
 |------|--------|------|
 | [Backend](backend/README.md) | [`backend/`](../../backend/) | Express + TypeScript API |
 | [Shared](shared/README.md) | [`shared/`](../../shared/) | Shared TypeScript utilities |
-| [Frontend](frontend/README.md) | [`frontend/`](../../frontend/) | Next.js 15 web app |
+| [Frontend](frontend/README.md) | [`frontend/`](../../frontend/) | Next.js 16 web app |
 | [Scripts](scripts/README.md) | [`scripts/`](../../scripts/) | Dev/ops shell scripts |
 | [Agent Docs](agents/README.md) | [`docs/agents/`](../agents/) | AI agent knowledge base |
 
@@ -24,7 +24,7 @@
 ```
 repo root
 ├── backend/       Express + TypeScript REST API (port 3001)
-├── frontend/      Next.js 15 web application (port 3000)
+├── frontend/      Next.js 16 web application (port 3000)
 ├── shared/        TypeScript library shared by both
 ├── docs/          Documentation (agents/ + dev/)
 ├── scripts/       Shell scripts for deployment/testing
@@ -38,7 +38,7 @@ repo root
 | Layer | Technology |
 |-------|-----------|
 | Backend runtime | Node.js 22, Express 5, TypeScript |
-| Frontend | Next.js 15 (App Router), React, Tailwind CSS |
+| Frontend | Next.js App Router (16.x), React, Tailwind CSS |
 | Shared utilities | TypeScript compiled library |
 | Database + Auth | Supabase (PostgreSQL + JWT) |
 | Component library | Radix UI / shadcn-ui |
@@ -94,14 +94,15 @@ Roles are stored in `profiles.app_role` (or `user_roster.app_role`).
 | `SUPABASE_URL` | Yes | Supabase project URL |
 | `SUPABASE_PUBLISHABLE_KEY` | Yes | Supabase anon/publishable key |
 | `PORT` | No | Server port (default: `3001`) |
-| `CORS_ORIGIN` | No | Comma-separated allowed origins (default: `http://localhost:3002`) |
+| `CORS_ORIGIN` | No | Comma-separated allowed origins. Default in `app.ts` is `http://localhost:3002`; Docker Compose defaults to `http://localhost:3000`. **Must match the frontend URL.** |
 
 ### Frontend (`.env.local` in `frontend/`)
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes | Supabase anon/publishable key |
-| `BACKEND_URL` | No | Backend URL (default: auto-detected from Vercel env or `http://localhost:3001`) |
+| `BACKEND_URL` | No | Server-side backend URL (default: auto-detected from `VERCEL_URL` → `/_/backend`, else `http://localhost:3001`) |
+| `NEXT_PUBLIC_BACKEND_URL` | No | Browser-side backend URL (default: `http://localhost:3001`; set in Docker/production builds) |
 
 ---
 
@@ -127,7 +128,7 @@ npm run dev --prefix frontend   # port 3000
 
 ## Campus Week System
 
-The app uses a **campus week** numbering system (not ISO weeks), defined in `shared/src/time-config.ts`. Week 1 starts on a configurable `FALL_SEMESTER_FIRST_DAY`. Most data queries take a `weekNum` parameter (integer).
+The app uses a **campus week** numbering system (not ISO weeks), defined in `shared/time-config.ts`. Week 1 starts on a configurable `FALL_SEMESTER_FIRST_DAY`. Most data queries take a `weekNum` parameter (integer).
 
 ---
 
@@ -150,7 +151,7 @@ See [`docs/agents/ubiquitous_language.md`](../agents/ubiquitous_language.md) for
 
 ## Standards Across the Whole Codebase
 
-1. **TypeScript everywhere** — no plain `.js` source files in `backend/src/`, `shared/src/`, or `frontend/` (except compiled output in `dist/`).
+1. **TypeScript everywhere** — no plain `.js` source files in `backend/src/`, `shared/`, or `frontend/` (except compiled output in `dist/`).
 2. **Imports use `.js` extension** in backend source — required for Node ESM compatibility even though files are `.ts`.
 3. **Shared code lives in `shared/`** — anything used by both backend and frontend must go there, never duplicated.
 4. **No Supabase in `shared/`** — shared utilities must be pure TypeScript with no server-side dependencies.

@@ -27,7 +27,7 @@ Express request handlers. A controller receives a validated `AuthenticatedReques
 | `memo.controller.ts` | [source](../../../../../backend/src/controllers/memo.controller.ts) | Memo aggregation handlers: sync, weeklyMemo, refreshStats, pageData, trafficCount |
 | `traffic.controller.ts` | [source](../../../../../backend/src/controllers/traffic.controller.ts) | Traffic entry counting handlers: sessions for week, entry count, batch entry counts |
 | `activity.controller.ts` | [source](../../../../../backend/src/controllers/activity.controller.ts) | Daily scholar activity handler: total minutes by menteeUid, weekNum, logSource |
-| `dev.controller.ts` | [source](../../../../../backend/src/controllers/dev.controller.ts) | Developer-only diagnostic handlers: test, me, front-desk ops, study ops, form log lookups |
+| `dev.controller.ts` | [source](../../../../../backend/src/controllers/dev.controller.ts) | Developer-only diagnostic handlers: test, me, front-desk ops, study ops, form log lookups; test-profile endpoints `getTestProfiles`, `getTestProfile`, `setActiveProfile` |
 | `tutor-report-log.controller.ts` | [source](../../../../../backend/src/controllers/tutor-report-log.controller.ts) | Tutoring report handlers: by week, by UID, by UID+week, attendance check |
 
 ---

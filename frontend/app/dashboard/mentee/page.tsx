@@ -1,10 +1,17 @@
 import { getISOWeek } from "date-fns";
+import { redirect } from "next/navigation";
 import { MenteeMonitoringClient } from "@/components/mentee-monitoring/mentee-monitoring-client";
-import { getActiveSemester, getMyMentees } from "@/lib/server/queries";
+import { canAccessMenteeMonitoring } from "@/lib/auth";
+import { getActiveSemester, getCurrentProfile, getMyMentees } from "@/lib/server/queries";
 import { backendPost } from "@/lib/server/api-client";
 import type { ActivityRow, WahfRow, TutoringRow, MenteeRow, SemesterRow } from "@/lib/types/supabase";
 
 export default async function MenteePage() {
+  const profile = await getCurrentProfile();
+  if (!canAccessMenteeMonitoring(profile)) {
+    redirect("/dashboard");
+  }
+
   const [semester, mentees] = await Promise.all([
     getActiveSemester(),
     getMyMentees(),
@@ -27,13 +34,6 @@ export default async function MenteePage() {
   ]);
 
   const currentIsoWeek = getISOWeek(new Date(Date.now()));
-
-  console.log(mentees);
-  console.log(activity);
-  console.log(wahf);
-  console.log(tutoring);
-  console.log(semester);
-  console.log(currentIsoWeek);
 
   return (
     <div className="space-y-6">

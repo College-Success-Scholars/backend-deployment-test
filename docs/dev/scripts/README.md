@@ -19,6 +19,7 @@ Shell scripts for deployment validation and operational tasks. These run outside
 
 | File | Source Link | Description |
 |------|-------------|-------------|
+| `dev.sh` | [source](../../../scripts/dev.sh) | Start local full-stack development (shared watch + backend + frontend) |
 | `smoke-test.sh` | [source](../../../scripts/smoke-test.sh) | Deployment health-check: tests health endpoint, auth gating, and CORS headers |
 | `alert.sh` | [source](../../../scripts/alert.sh) | Records an architectural alert to `docs/agents/alerts/` |
 | `resolve-alert.sh` | [source](../../../scripts/resolve-alert.sh) | Resolves an alert: logs the fix session via `log-agent-session.sh`, then deletes the alert file |
@@ -39,6 +40,11 @@ Shell scripts for deployment validation and operational tasks. These run outside
 ## Usage
 
 ```bash
+# Start local full-stack dev (frontend :3000, backend :3001)
+./scripts/dev.sh
+./scripts/dev.sh --install     # npm install in shared, backend, frontend first
+./scripts/dev.sh --no-watch    # build shared once; skip tsc --watch
+
 # Run against local backend
 BASE_URL=http://localhost:3001 bash scripts/smoke-test.sh
 

@@ -7,7 +7,7 @@
 
 [← Root](../README.md) › Shared
 
-Children: [src/](src/README.md)
+Children: [time & auth source files](src/README.md) (files live at the `shared/` root, not in a `src/` subdirectory)
 
 ---
 
@@ -30,8 +30,9 @@ A compiled TypeScript library shared between the backend and frontend. Contains 
 
 | Directory | Docs | Description |
 |-----------|------|-------------|
-| `src/` | [src/README.md](src/README.md) | TypeScript source files |
 | `dist/` | _(generated)_ | Compiled output — do not edit manually |
+
+Source files (`time.ts`, `auth.ts`, `campus-calendar.ts`, etc.) live at the **`shared/` root**. See [src/README.md](src/README.md) for the file index.
 
 ---
 

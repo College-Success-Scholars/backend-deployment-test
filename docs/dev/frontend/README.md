@@ -13,7 +13,7 @@ Children: [app/](app/README.md) · [components/](components/README.md) · [lib/]
 
 ## Purpose
 
-The Next.js 15 (App Router) web application. Provides the UI for scholars, team leaders, and developers. Authenticates users via Supabase, reads domain data by calling the Express backend, and never queries Supabase directly for domain data (only for auth session management).
+The Next.js App Router web application. Provides the UI for scholars, team leaders, and developers. Authenticates users via Supabase, reads domain data by calling the Express backend, and never queries Supabase directly for domain data (only for auth session management).
 
 ---
 
@@ -24,7 +24,7 @@ The Next.js 15 (App Router) web application. Provides the UI for scholars, team 
 | `package.json` | [source](../../../frontend/package.json) | Dependencies, scripts, workspace config |
 | `tsconfig.json` | [source](../../../frontend/tsconfig.json) | TypeScript config with path aliases (`@/`) |
 | `next.config.ts` | [source](../../../frontend/next.config.ts) | Next.js config (externalDir, turbopack root for shared) |
-| `middleware.ts` | [source](../../../frontend/middleware.ts) | Supabase session refresh middleware (runs on every request) |
+| `middleware.ts` | [source](../../../frontend/middleware.ts) | Thin re-export of `updateSession` from `lib/supabase/middleware.ts` |
 | `eslint.config.mjs` | [source](../../../frontend/eslint.config.mjs) | ESLint configuration |
 | `vitest.config.ts` | [source](../../../frontend/vitest.config.ts) | Vitest test runner (TZ=America/New_York required) |
 | `postcss.config.mjs` | [source](../../../frontend/postcss.config.mjs) | PostCSS config for Tailwind CSS |

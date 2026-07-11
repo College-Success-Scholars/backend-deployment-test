@@ -7,7 +7,7 @@
 
 [← Root](../../README.md) › [Frontend](../README.md) › components
 
-Children: [ui/](ui/README.md) · [dashboard/](dashboard/README.md) · [mentee-monitoring/](mentee-monitoring/README.md) · [auth/](auth/README.md) · [marketing/](marketing/README.md) · [settings/](settings/README.md) · [personal/](personal/README.md)
+Children: [ui/](ui/README.md) · [dashboard/](dashboard/README.md) · [mentee-monitoring/](mentee-monitoring/README.md) · [auth/](auth/README.md) · [marketing/](marketing/README.md) · [settings/](settings/README.md) · [personal/](personal/README.md) · dev _(inline below)_
 
 ---
 
@@ -32,6 +32,8 @@ Reusable React components. Split into domain-specific subdirectories and a `ui/`
 | `data-table.tsx` | [source](../../../../frontend/components/data-table.tsx) | Generic sortable/filterable data table (TanStack Table) |
 | `scholar-data-table.tsx` | [source](../../../../frontend/components/scholar-data-table.tsx) | Data table variant for scholar-specific data |
 | `form-completion-overview-card.tsx` | [source](../../../../frontend/components/form-completion-overview-card.tsx) | Card showing form submission completion status |
+| `campus-week-card.tsx` | [source](../../../../frontend/components/campus-week-card.tsx) | Campus week selector card with date range display |
+| `complete-profile-form.tsx` | [source](../../../../frontend/components/complete-profile-form.tsx) | Form for scholars to complete missing profile fields |
 | `double-entry-checker.tsx` | [source](../../../../frontend/components/double-entry-checker.tsx) | Validates check-in/out pairs for duplicates |
 | `completion-meter.tsx` | [source](../../../../frontend/components/completion-meter.tsx) | Progress meter for completion percentages |
 | `chart-radial-stacked.tsx` | [source](../../../../frontend/components/chart-radial-stacked.tsx) | Stacked radial chart component |
@@ -60,6 +62,14 @@ Reusable React components. Split into domain-specific subdirectories and a `ui/`
 | `marketing/` | [marketing/README.md](marketing/README.md) | Landing page marketing components |
 | `settings/` | [settings/README.md](settings/README.md) | Settings page client |
 | `personal/` | [personal/README.md](personal/README.md) | Personal dashboard client and utilities |
+| `dev/` | _(inline below)_ | Developer test-profile UI (profile switcher, acting banner) |
+
+### `dev/`
+
+| File | Source Link | Description |
+|------|-------------|-------------|
+| `profile-switcher.tsx` | [source](../../../../frontend/components/dev/profile-switcher.tsx) | Dropdown to switch between developer's own profile and test personas |
+| `dev-acting-banner.tsx` | [source](../../../../frontend/components/dev/dev-acting-banner.tsx) | Banner shown when a developer is acting as a test profile |
 
 ---
 

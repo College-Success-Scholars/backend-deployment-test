@@ -58,7 +58,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { UserRole, resolveUserRole, canAccessWeeklyMemo, formatUserRoleLabel } from "@/lib/auth"
+import { UserRole, resolveUserRole, canAccessWeeklyMemo, canAccessMenteeMonitoring, formatUserRoleLabel } from "@/lib/auth"
 
 const defaultData = {
   user: {
@@ -180,7 +180,7 @@ const defaultData = {
 }
 
 // Role-specific navigation data
-const getRoleBasedNav = (role: UserRole, showMemo: boolean) => {
+const getRoleBasedNav = (role: UserRole, showMemo: boolean, showMentees: boolean) => {
   switch (role) {
     case 'scholar':
       return [
@@ -212,11 +212,15 @@ const getRoleBasedNav = (role: UserRole, showMemo: boolean) => {
           url: "/dashboard/personal",
           icon: User,
         },
-        {
-          title: "Mentees",
-          url: "/dashboard/mentee",
-          icon: Users,
-        },
+        ...(showMentees
+          ? [
+              {
+                title: "Mentees",
+                url: "/dashboard/mentee",
+                icon: Users,
+              },
+            ]
+          : []),
         ...(showMemo
           ? [
               {
@@ -444,7 +448,8 @@ export function AppSidebar({
       : "Test profile";
   const userRole = resolveUserRole(roleFields);
   const showMemo = canAccessWeeklyMemo(roleFields);
-  const roleNavMain = getRoleBasedNav(userRole, showMemo)
+  const showMentees = canAccessMenteeMonitoring(profile);
+  const roleNavMain = getRoleBasedNav(userRole, showMemo, showMentees)
   const roleNavSecondary = getRoleBasedSecondaryNav(userRole)
   const roleNavResources = getRoleBasedResources(userRole)
 

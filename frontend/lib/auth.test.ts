@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { canAccessWeeklyMemo, formatUserRoleLabel, resolveUserRole } from "./auth";
+import {
+  canAccessMenteeMonitoring,
+  canAccessWeeklyMemo,
+  formatUserRoleLabel,
+  hasAssignedMentees,
+  resolveUserRole,
+} from "./auth";
 
 describe("canAccessWeeklyMemo", () => {
   it("allows team_leader and developer app_role", () => {
@@ -31,6 +37,41 @@ describe("resolveUserRole", () => {
 
   it("does not treat null app_role as team-leader", () => {
     expect(resolveUserRole({ program_role: "scholar", app_role: null })).not.toBe("team-leader");
+  });
+});
+
+describe("hasAssignedMentees", () => {
+  it("is true when mentee_count is positive", () => {
+    expect(hasAssignedMentees({ mentee_count: 2 })).toBe(true);
+  });
+
+  it("is true when mentee_uids is non-empty", () => {
+    expect(hasAssignedMentees({ mentee_uids: ["uid-1"] })).toBe(true);
+  });
+
+  it("reads mentee fields from nested user_roster", () => {
+    expect(hasAssignedMentees({ user_roster: { mentee_count: 1 } })).toBe(true);
+  });
+
+  it("is false when no mentees are assigned", () => {
+    expect(hasAssignedMentees({ mentee_count: 0, mentee_uids: [] })).toBe(false);
+    expect(hasAssignedMentees(null)).toBe(false);
+  });
+});
+
+describe("canAccessMenteeMonitoring", () => {
+  it("allows team leaders with mentees", () => {
+    expect(canAccessMenteeMonitoring({ app_role: "team_leader", mentee_count: 1 })).toBe(true);
+  });
+
+  it("denies team leaders without mentees", () => {
+    expect(canAccessMenteeMonitoring({ app_role: "team_leader", mentee_count: 0 })).toBe(false);
+  });
+
+  it("denies scholars even when mentee_count is set", () => {
+    expect(canAccessMenteeMonitoring({ app_role: null, program_role: "scholar", mentee_count: 1 })).toBe(
+      false,
+    );
   });
 });
 
