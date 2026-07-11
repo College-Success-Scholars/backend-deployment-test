@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from "react"
 
-import { CompletionMeter } from "@/components/completion-meter"
-import { DataTable, type DataTableColumn } from "@/components/data-table"
+import { CompletionMeter } from "@/components/data-display/completion-meter"
+import { DataTable, type DataTableColumn } from "@/components/data-display/data-table"
 import { cn } from "@/lib/utils"
 import { MemoAccordionSection } from "./memo-accordion-section"
 import type { AttendanceDetailRow, FullAttendanceDetailSectionData } from "../types"

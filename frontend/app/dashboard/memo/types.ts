@@ -1,6 +1,6 @@
 import type { ScholarWithCompletedSession } from "@/lib/types/session-log"
 import type { TrafficSession } from "@/lib/types/traffic"
-import type { FormCompletionOverall } from "@/components/form-completion-overview-card"
+import type { FormCompletionOverall } from "@/components/data-display/form-completion-overview-card"
 import type { MemoTutorReportRow } from "@/lib/types/tutor-report-log"
 import type { GradeBreakdown, TeamLeaderFormStatsRow } from "@/lib/types/form-log"
 

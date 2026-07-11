@@ -3,8 +3,8 @@
 import {
   ScholarDataTable,
   type ScholarDataTableColumn,
-} from "@/components/scholar-data-table";
-import { ProgressCell } from "@/app/memo/memo-content";
+} from "@/components/data-display/scholar-data-table";
+import { ProgressCell } from "@/components/data-display/progress-cell";
 import type { TeamLeaderFormStatsRow } from "@/lib/types/form-log";
 
 export function TeamLeadersTable({

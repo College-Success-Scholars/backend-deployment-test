@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { NavSidebarIcon } from "@/components/nav-sidebar-icon"
+import { NavSidebarIcon } from "@/components/layout/nav-sidebar-icon"
 import { isLinkActive } from "@/lib/nav-active"
 import {
   SidebarGroup,

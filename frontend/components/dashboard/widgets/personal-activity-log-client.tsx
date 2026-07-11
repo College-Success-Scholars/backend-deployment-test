@@ -7,7 +7,7 @@ import type { ActivityFormType, RecentFormSubmission } from "@/lib/types/form-lo
 import { cn } from "@/lib/utils"
 import { useMemo, useState } from "react"
 import { SubmissionDetailsModal } from "./submission-details-modal"
-import { buildActivitySummary, formTone } from "./activity-log-dictionary"
+import { buildActivitySummary, formTone } from "@/lib/dashboard/activity-log-dictionary"
 
 type FilterType = "ALL" | ActivityFormType
 

@@ -9,6 +9,8 @@
 
 Children: [app/](app/README.md) · [components/](components/README.md) · [lib/](lib/README.md) · [hooks/](hooks/README.md) · [legacy/](legacy/README.md)
 
+Component subdirs: [layout](components/layout/README.md) · [auth](components/auth/README.md) · [data-display](components/data-display/README.md) · [charts](components/charts/README.md) · [dashboard](components/dashboard/README.md)
+
 ---
 
 ## Purpose

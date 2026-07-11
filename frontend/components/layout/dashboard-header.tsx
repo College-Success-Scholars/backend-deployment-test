@@ -2,7 +2,7 @@
 
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { DashboardBreadcrumb } from "@/components/dashboard/dashboard-breadcrumb";
+import { DashboardBreadcrumb } from "@/components/layout/dashboard-breadcrumb";
 
 export function DashboardHeader() {
   return (

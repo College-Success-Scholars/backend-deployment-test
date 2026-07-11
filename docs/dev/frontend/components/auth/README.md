@@ -11,19 +11,26 @@
 
 ## Purpose
 
-Helper components for authentication flows that don't fit neatly into a single page.
+All authentication UI: login/sign-up forms, password flows, profile completion, and auth-flow helpers.
 
 ---
 
 ## Files
 
-| File | Source Link | Description |
-|------|-------------|-------------|
-| `invite-from-hash-redirect.tsx` | [source](../../../../../frontend/components/auth/invite-from-hash-redirect.tsx) | Handles Supabase magic-link invites where the token is in the URL hash fragment. Reads `#access_token=...` and redirects to the set-password flow. |
+| File | Description |
+|------|-------------|
+| `login-form.tsx` | Email/password login |
+| `sign-up-form.tsx` | Registration form |
+| `forgot-password-form.tsx` | Password reset request |
+| `update-password-form.tsx` | Password update (reset + set-password flows) |
+| `complete-profile-form.tsx` | Scholar profile completion |
+| `logout-button.tsx` | Sign-out button |
+| `auth-button.tsx` | Login/logout toggle (landing/debug use) |
 
 ---
 
 ## Standards
 
-- **Auth helpers only** — components here handle edge cases in the auth flow (hash fragments, token exchange, etc.), not general auth UI.
-- **Auth UI lives in `components/` root** — `LoginForm`, `SignUpForm`, etc. are at the root of `components/`, not here.
+- **All auth UI lives here** — do not add auth forms at `components/` root.
+- **Pages stay thin** — `app/auth/*/page.tsx` imports a form component and renders it.
+- **Supabase client** — use `@/lib/supabase/client` in client forms, `@/lib/supabase/server` in server components.

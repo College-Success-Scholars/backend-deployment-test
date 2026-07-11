@@ -23,7 +23,7 @@ Components for the mentee monitoring page (`/dashboard/mentee`). Team leaders us
 | `hours-card.tsx` | [source](../../../../../frontend/components/mentee-monitoring/hours-card.tsx) | Front desk and study session hours summary |
 | `seminars-card.tsx` | [source](../../../../../frontend/components/mentee-monitoring/seminars-card.tsx) | Seminar attendance status card |
 | `tutoring-card.tsx` | [source](../../../../../frontend/components/mentee-monitoring/tutoring-card.tsx) | Tutoring hours card |
-| `wahf-card.tsx` | [source](../../../../../frontend/components/mentee-monitoring/wahf-card.tsx) | Weekly Activity Hours Form completion card |
+| `wahf-card.tsx` | [source](../../../../../frontend/components/mentee-monitoring/wahf-card.tsx) | Canonical WA HF completion card (used across mentee monitoring) |
 | `utils.ts` | [source](../../../../../frontend/components/mentee-monitoring/utils.ts) | Utility functions for mentee monitoring data formatting |
 | `utils.test.ts` | [source](../../../../../frontend/components/mentee-monitoring/utils.test.ts) | Unit tests for utils |
 
@@ -32,6 +32,7 @@ Components for the mentee monitoring page (`/dashboard/mentee`). Team leaders us
 ## Standards
 
 - **One card per tracking category** — if a new type of mentee data needs to be tracked, add a new `<category>-card.tsx`.
+- **One WA HF card** — use `wahf-card.tsx` only; do not duplicate WA HF UI elsewhere.
 - **Cards are client components** — they receive data as props and handle their own loading/empty states.
 - **`utils.ts` for data formatting** — any calculation or formatting specific to mentee monitoring goes in `utils.ts`, not in the card components.
 - **Test `utils.ts`** — utility functions must have corresponding tests in `utils.test.ts`.

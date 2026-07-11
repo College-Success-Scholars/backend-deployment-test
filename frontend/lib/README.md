@@ -12,6 +12,7 @@ Shared utilities, types, and the server-side data layer for the frontend.
 | **`auth.ts`** | UI role helpers: `resolveUserRole`, `canAccessMenteeMonitoring`, `canAccessWeeklyMemo`, `formatUserRoleLabel` |
 | **`dashboard-breadcrumb.ts`** | Breadcrumb trail for dashboard routes |
 | **`nav-active.ts`** | Sidebar active-link helpers |
+| **`dashboard/`** | Dashboard display dictionaries (`activity-log-dictionary.ts`) |
 | **`api-log.ts`** | API request/response logging for server and client fetch wrappers |
 | **`auth/`** | Open-redirect safety (`getSafeInternalPath`) |
 | **`dev/`** | Developer helpers (`effective-uid`) |

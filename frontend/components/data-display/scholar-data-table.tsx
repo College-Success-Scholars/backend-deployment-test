@@ -1,5 +1,5 @@
 /**
- * @deprecated Import from "@/components/data-table" instead.
+ * @deprecated Import from "@/components/data-display/data-table" instead.
  * This file re-exports everything for backward compatibility.
  */
 export {

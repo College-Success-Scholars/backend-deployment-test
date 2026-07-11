@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
-import type { DailyWeekTile } from "@/components/dashboard/front-desk-chart"
+import type { DailyWeekTile } from "@/components/charts/front-desk-chart"
 
 interface StudySessionChartProps {
   completed: number

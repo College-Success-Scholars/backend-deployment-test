@@ -33,8 +33,8 @@ Next.js App Router directory. Every `page.tsx`, `layout.tsx`, and `route.ts` her
 |-----------|-----------|------|-------------|
 | `auth/` | `/auth/*` | [auth/README.md](auth/README.md) | Login, sign-up, password reset, email confirmation |
 | `dashboard/` | `/dashboard/*` | [dashboard/README.md](dashboard/README.md) | Main authenticated app: memo, personal, mentee, room, directory, settings |
-| `dev/` | `/dev/*` | [dev/README.md](dev/README.md) | Developer-only diagnostic pages |
-| `memo/` | `/memo/*` | _(no docs)_ | Standalone public/shareable memo view |
+| `dev/` | `/dev/*` | [dev/README.md](dev/README.md) | Developer scratchpad for backend integration testing |
+| `memo/` | `/memo` | _(redirect)_ | Redirects to `/dashboard/memo` — retired standalone view in `legacy/app/memo/` |
 | `traffic/` | `/traffic/*` | _(no docs)_ | Standalone public/shareable traffic view |
 
 ---

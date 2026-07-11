@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { CompletionMeter } from "@/components/completion-meter"
+import { CompletionMeter } from "@/components/data-display/completion-meter"
 import { MemoAccordionSection } from "./memo-accordion-section"
 import type { ScholarFollowUpRow } from "../types"
 

@@ -8,7 +8,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { NavSidebarIcon } from "@/components/nav-sidebar-icon"
+import { NavSidebarIcon } from "@/components/layout/nav-sidebar-icon"
 import {
   isNavItemActive,
   isNavSubItemActive,

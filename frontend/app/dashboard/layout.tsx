@@ -13,8 +13,8 @@
  * - Page-specific content or data fetching
  * - Route-specific auth logic (that goes in the individual pages)
  */
-import { AppSidebar } from "@/components/app-sidebar"
-import { DashboardHeader } from "@/components/dashboard/dashboard-header"
+import { AppSidebar } from "@/components/layout/app-sidebar"
+import { DashboardHeader } from "@/components/layout/dashboard-header"
 import {
   SidebarInset,
   SidebarProvider,

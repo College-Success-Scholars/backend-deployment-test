@@ -23,13 +23,13 @@ import {
 } from "@/lib/format/time";
 import { getWeekFetchEnd } from "@/lib/format/time";
 import { SessionHeatMap } from "./session-heat-map";
-import { DoubleEntryChecker } from "@/components/double-entry-checker";
+import { DoubleEntryChecker } from "@/components/data-display/double-entry-checker";
 import {
   ScholarDataTable,
   CollapsibleTableSection,
   type ScholarDataTableColumn,
-} from "@/components/scholar-data-table";
-import { CampusWeekCard } from "@/components/campus-week-card";
+} from "@/components/data-display/scholar-data-table";
+import { CampusWeekCard } from "@/components/data-display/campus-week-card";
 import {
   Card,
   CardContent,

@@ -5,9 +5,9 @@ import {
   GraduationCap
 } from "lucide-react"
 import { backendGet } from "@/lib/server/api-client";
-import { StudySessionChart } from "./study-session-chart"
-import { FrontDeskChart } from "./front-desk-chart"
-import { ActivityLog } from "./activity-log"
+import { StudySessionChart } from "@/components/charts/study-session-chart"
+import { FrontDeskChart } from "@/components/charts/front-desk-chart"
+import { ActivityLog } from "@/components/dashboard/widgets/activity-log"
 
 export async function ScholarDashboard() {
   const me = await backendGet<{ user: { id: string; email: string | null }; profile: { first_name?: string; last_name?: string } | null }>("/api/auth/me");

@@ -50,7 +50,7 @@ Frontend uses Next.js App Router with route groups in `frontend/app/`.
 
 - `frontend/middleware.ts` wires Supabase session update middleware (`lib/supabase/middleware.ts` → `updateSession`).
 - Middleware redirects unauthenticated users to `/auth/login`, with public exceptions for `/`, `/auth/*`, and `/traffic` (kiosk check-in).
-- App includes dashboard routes, auth routes, standalone `/memo` and `/traffic` views, and developer pages under `app/dev/*`.
+- App includes dashboard routes, auth routes, a `/memo` redirect to `/dashboard/memo`, standalone `/traffic`, and developer scratchpad pages under `app/dev/*` (backend testing — not kept in sync with production UI).
 - Theme, fonts, and toaster are initialized in `app/layout.tsx`.
 
 Data access pattern:

@@ -54,7 +54,7 @@ export async function POST(request: Request) {
         syncFrontDeskRecordsForWeek(weekNum),
         syncStudySessionRecordsForWeek(weekNum),
       ]);
-      revalidatePath("/memo", "page");
+      revalidatePath("/dashboard/memo", "page");
       return NextResponse.json({
         data: {
           mode: "light",
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
       syncFrontDeskRecordsForWeekAllUids(weekNum),
       syncStudySessionRecordsForWeekAllUids(weekNum),
     ]);
-    revalidatePath("/memo", "page");
+    revalidatePath("/dashboard/memo", "page");
     return NextResponse.json({
       data: {
         mode: "heavy",

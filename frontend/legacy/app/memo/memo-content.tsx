@@ -6,7 +6,7 @@ import { backendPost } from "@/lib/client/api-client";
 import {
   ScholarDataTable,
   type ScholarDataTableColumn,
-} from "@/components/scholar-data-table";
+} from "@/components/data-display/scholar-data-table";
 import {
   Card,
   CardContent,
@@ -28,8 +28,8 @@ import {
 } from "@/app/dev/traffic/traffic-weekly-line-chart";
 import { TrafficHeatMapSection } from "@/app/dev/traffic/traffic-heat-map-section";
 import type { TrafficSession } from "@/lib/types/traffic";
-import { FormCompletionOverviewCard, FormCompletionDonut, FORM_COMPLETION_WHAF_COLOR } from "@/components/form-completion-overview-card";
-import type { FormCompletionOverall } from "@/components/form-completion-overview-card";
+import { FormCompletionOverviewCard, FormCompletionDonut, FORM_COMPLETION_WHAF_COLOR } from "@/components/data-display/form-completion-overview-card";
+import type { FormCompletionOverall } from "@/components/data-display/form-completion-overview-card";
 import type { MemoTutorReportRow } from "@/lib/types/tutor-report-log";
 import type { GradeBreakdown, GradeEntry, TeamLeaderFormStatsRow } from "@/lib/types/form-log";
 import { Badge } from "@/components/ui/badge";

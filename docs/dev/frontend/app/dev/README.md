@@ -11,29 +11,31 @@
 
 ## Purpose
 
-Developer-only diagnostic pages. Accessible only to users with `app_role = "developer"`. These pages allow developers to inspect raw data, test API integrations, and debug issues without writing one-off scripts.
+Developer-only scratchpad for testing backend API integrations and inspecting raw data. These pages were built to validate Express backend endpoints during the migration away from Next.js API routes. **They are not kept in sync with production UI patterns** and should not be treated as a component library or source of reusable widgets.
+
+For production features, build in `app/dashboard/` and shared components in `components/`.
 
 ---
 
 ## Files
 
-| File | Source Link | URL | Description |
-|------|-------------|-----|-------------|
-| `layout.tsx` | [source](../../../../../frontend/app/dev/layout.tsx) | `/dev/*` | Dev section layout — enforces `requireDeveloper` guard |
-| `page.tsx` | [source](../../../../../frontend/app/dev/page.tsx) | `/dev` | Dev tools home / index |
-| `form-logs/page.tsx` | [source](../../../../../frontend/app/dev/form-logs/page.tsx) | `/dev/form-logs` | Browse raw MCF/WHAF/WPL form submissions |
-| `profiles/page.tsx` | [source](../../../../../frontend/app/dev/profiles/page.tsx) | `/dev/profiles` | User profile lookup by UID |
-| `profiles/[uid]/page.tsx` | [source](../../../../../frontend/app/dev/profiles/[uid]/page.tsx) | `/dev/profiles/:uid` | Per-user detail: session records, logs, and form submissions |
-| `session-logs/page.tsx` | [source](../../../../../frontend/app/dev/session-logs/page.tsx) | `/dev/session-logs` | Raw session check-in/out logs with heat map |
-| `session-records/page.tsx` | [source](../../../../../frontend/app/dev/session-records/page.tsx) | `/dev/session-records` | Aggregated weekly session records |
-| `traffic/page.tsx` | [source](../../../../../frontend/app/dev/traffic/page.tsx) | `/dev/traffic` | Traffic count analytics |
+| File | URL | Description |
+|------|-----|-------------|
+| `layout.tsx` | `/dev/*` | Dev section layout — enforces `requireDeveloper` guard |
+| `page.tsx` | `/dev` | Dev tools home / index |
+| `form-logs/page.tsx` | `/dev/form-logs` | Browse raw MCF/WHAF/WPL form submissions |
+| `profiles/page.tsx` | `/dev/profiles` | User profile lookup by UID |
+| `profiles/[uid]/page.tsx` | `/dev/profiles/:uid` | Per-user detail: session records, logs, and form submissions |
+| `session-logs/page.tsx` | `/dev/session-logs` | Raw session check-in/out logs with heat map |
+| `session-records/page.tsx` | `/dev/session-records` | Aggregated weekly session records |
+| `traffic/page.tsx` | `/dev/traffic` | Traffic count analytics |
 
 ---
 
 ## Standards
 
-- **`requireDeveloper()` must be called in `layout.tsx`** — not in individual pages. The layout enforces access for the entire `/dev/*` subtree.
-- **Read-only by default** — dev pages display data; mutation operations (sync, excuse update) should be clearly labeled and confirmed.
-- **These pages call `/api/dev/*` backend endpoints** — not the standard `/api/*` endpoints. The dev endpoints may return more raw/unfiltered data.
-- **Do not add production features here** — if a feature is needed for team leaders, build it in `dashboard/`, not `dev/`.
-- **No public access** — never remove the developer guard from this route group.
+- **`requireDeveloper()` in `layout.tsx`** — guards the entire `/dev/*` subtree.
+- **Scratchpad quality bar** — large client `page.tsx` files are acceptable here; do not copy this pattern to `dashboard/`.
+- **Do not import from `app/dev/` in production routes** — if a chart or table is needed elsewhere, move it to `components/charts/` or `components/data-display/`.
+- **Calls `/api/dev/*` or standard `/api/*`** — may return more raw/unfiltered data than production pages.
+- **No public access** — never remove the developer guard.

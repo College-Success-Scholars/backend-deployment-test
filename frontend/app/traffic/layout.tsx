@@ -1,4 +1,4 @@
-import { IdleResetProvider } from "@/components/idle-reset-provider";
+import { IdleResetProvider } from "@/components/layout/idle-reset-provider";
 import { canAccessWeeklyMemo } from "@/lib/auth";
 import { getCurrentUserWithProfile } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
