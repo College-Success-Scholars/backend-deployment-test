@@ -1,6 +1,6 @@
 # frontend/hooks
 
-**Location:** [`frontend/hooks/`](../../../../frontend/hooks/)  
+**Location:** [`frontend/hooks/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/hooks)  
 **Docs:** `docs/dev/frontend/hooks/README.md`
 
 ## Navigation
@@ -19,8 +19,8 @@ Custom React hooks for the frontend. Hooks are client-side only — they use bro
 
 | File | Source Link | Description |
 |------|-------------|-------------|
-| `use-idle-reset.ts` | [source](../../../../frontend/hooks/use-idle-reset.ts) | Detects user inactivity (keyboard, mouse, touch) and calls a callback after a configurable timeout. Used by `IdleResetProvider` to sign the user out after prolonged inactivity. |
-| `use-mobile.ts` | [source](../../../../frontend/hooks/use-mobile.ts) | Returns `true` when the viewport width is below the mobile breakpoint. Used to adapt layout for small screens. |
+| `use-idle-reset.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/hooks/use-idle-reset.ts) | Detects user inactivity (keyboard, mouse, touch) and calls a callback after a configurable timeout. Used by `IdleResetProvider` to sign the user out after prolonged inactivity. |
+| `use-mobile.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/hooks/use-mobile.ts) | Returns `true` when the viewport width is below the mobile breakpoint. Used to adapt layout for small screens. |
 
 ---
 

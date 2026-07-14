@@ -15,7 +15,7 @@ import {
   getWplFormLogsByUid,
 } from "@/lib/server/data";
 import type { McfFormLogRow, WahfFormLogRow, WplFormLogRow } from "@/lib/types/form-log";
-import { CampusWeekCard } from "@/components/campus-week-card";
+import { CampusWeekCard } from "@/components/data-display/campus-week-card";
 import { BackButton } from "../back-button";
 import {
   Card,

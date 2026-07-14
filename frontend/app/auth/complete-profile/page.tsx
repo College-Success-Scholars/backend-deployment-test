@@ -1,4 +1,4 @@
-import { CompleteProfileForm } from "@/components/complete-profile-form";
+import { CompleteProfileForm } from "@/components/auth/complete-profile-form";
 import { getCurrentUser } from "@/lib/server/queries";
 import { redirect } from "next/navigation";
 

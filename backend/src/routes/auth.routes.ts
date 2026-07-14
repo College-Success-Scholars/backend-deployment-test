@@ -10,8 +10,8 @@
  *   GET /api/auth/profile       → getProfile
  *   POST /api/auth/profile      → createProfile
  *   GET /api/auth/mentees       → getMentees
- *   GET /api/auth/semester      → getActiveSemester
- *   GET /api/auth/active-semester → getActiveSemester
+ *   GET /api/auth/semester      → getActiveSemester (use sparingly; prefer shared campus calendar)
+ *   GET /api/auth/active-semester → getActiveSemester (alias of /semester)
  *
  * ## What belongs here
  * - Route declarations for auth endpoints

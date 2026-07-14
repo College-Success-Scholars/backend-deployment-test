@@ -1,19 +1,19 @@
 import { getCurrentProfile, getMyMentees } from "@/lib/server/queries";
 import SettingsClient from "@/components/settings/settings-client";
+import type { ProfileRow, MenteeRow } from "@/lib/types/supabase";
 
 export default async function SettingsPage() {
-
-    // Semester is served from Next.js Data Cache (no DB hit after first load).
-    // Profile resolves user internally — also cached, no duplicate auth call.
-    // Both run concurrently.
-    // const [ profile, mentees] = await Promise.all([
-    //   getCurrentProfile() as Promise<Record<string, unknown>>,
-    //   getMyMentees() as Promise<MenteeRow[]>,
-    // ]);
+  const [profile, mentees] = await Promise.all([
+    getCurrentProfile(),
+    getMyMentees(),
+  ]);
 
   return (
     <div className="space-y-6">
-      {/* <SettingsClient profile={profile} mentees={mentees}/> */}
-    </div>	
-  )
+      <SettingsClient
+        profile={profile as ProfileRow}
+        mentees={mentees as MenteeRow[]}
+      />
+    </div>
+  );
 }

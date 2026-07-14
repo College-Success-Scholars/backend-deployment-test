@@ -16,9 +16,21 @@
  */
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { hasEnvVars } from "../utils";
 import { getSupabasePublicKey } from "./public-key";
 
+/**
+ * Refreshes the Supabase auth session from request cookies and enforces login
+ * for protected routes. Unauthenticated requests to non-public paths are
+ * redirected to `/auth/login`. Public paths: `/`, `/auth/*`, `/traffic`, and
+ * static assets (`/_next`, favicon, common image/font extensions).
+ *
+ * Side effects: reads session cookies from the request and may write refreshed
+ * session cookies onto the response.
+ *
+ * @param request - Incoming Next.js request (carries Supabase session cookies)
+ * @returns Next.js response with refreshed session cookies, or a redirect to
+ *   `/auth/login` when the session is missing on a protected path
+ */
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -32,12 +44,6 @@ export async function updateSession(request: NextRequest) {
   // Files from public/ (and next/image internal fetches) must bypass auth — otherwise the
   // optimizer receives a redirect/HTML and fails with "isn't a valid image ... received null".
   if (/\.(ico|png|jpg|jpeg|svg|gif|webp|avif|woff2?|ttf|eot)$/i.test(pathname)) {
-    return supabaseResponse;
-  }
-
-  // If the env vars are not set, skip middleware check. You can remove this
-  // once you setup the project.
-  if (!hasEnvVars) {
     return supabaseResponse;
   }
 

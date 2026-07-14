@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 
-import { DataTable, type DataTableColumn } from "@/components/data-table"
+import { DataTable, type DataTableColumn } from "@/components/data-display/data-table"
 import { cn } from "@/lib/utils"
 import { MemoAccordionSection } from "./memo-accordion-section"
 import type { TutoringLogRow, TutoringLogSectionData } from "../types"

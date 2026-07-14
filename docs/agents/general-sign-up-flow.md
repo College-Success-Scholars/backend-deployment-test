@@ -80,6 +80,8 @@ These are **not** on the complete-profile form. They are initialized to safe sch
 
 Template script: `scripts/configure-supabase-confirm-email-template.sh`
 
+**Developer test profiles** (`public.dev_test_profiles`) are separate from sign-up: they are not `auth.users` rows. Developers switch personas for read-only debugging. See `docs/dev/supabase/README.md`.
+
 ## Key code touchpoints
 
 | Area | Path |

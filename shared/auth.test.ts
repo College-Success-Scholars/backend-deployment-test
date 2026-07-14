@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { hasRoleAtLeast, isUmdEmail, mergeProfileWithRoster } from "./auth.js";
+import {
+  getEffectiveScholarId,
+  hasRoleAtLeast,
+  isUmdEmail,
+  isValidUuid,
+  mapTestProfileToEffectiveRow,
+  mergeProfileWithRoster,
+} from "./auth.js";
 
 describe("isUmdEmail", () => {
   it("accepts @umd.edu and @terpmail.umd.edu", () => {
@@ -65,5 +72,61 @@ describe("mergeProfileWithRoster", () => {
   it("returns profile unchanged when user_roster is absent", () => {
     const profile = { first_name: "Jane", user_roster: null };
     expect(mergeProfileWithRoster(profile)).toBe(profile);
+  });
+});
+
+describe("mapTestProfileToEffectiveRow", () => {
+  it("overlays roster_uid onto student_id and role fields", () => {
+    const real = {
+      id: "dev-uuid",
+      student_id: 999,
+      app_role: "developer",
+      program_role: "developer",
+      first_name: "Dev",
+      last_name: "User",
+    };
+    const test = {
+      id: "test-profile-uuid",
+      label: "Scholar — on track",
+      roster_uid: "12345",
+      program_role: "Scholar",
+      app_role: null,
+      first_name: "Test",
+      last_name: "Scholar",
+      cohort: 2025,
+      fd_required: 3,
+      ss_required: 5,
+      teams: [],
+      mentee_uids: [],
+      mentee_count: 0,
+    };
+    const effective = mapTestProfileToEffectiveRow(real, test);
+    expect(effective.student_id).toBe(12345);
+    expect(effective.program_role).toBe("Scholar");
+    expect(effective.app_role).toBeNull();
+    expect(effective.id).toBe("dev-uuid");
+  });
+});
+
+describe("getEffectiveScholarId", () => {
+  it("returns string for numeric or string student_id", () => {
+    expect(getEffectiveScholarId({ student_id: 12345 })).toBe("12345");
+    expect(getEffectiveScholarId({ student_id: "12345" })).toBe("12345");
+  });
+
+  it("returns null when student_id missing", () => {
+    expect(getEffectiveScholarId(null)).toBeNull();
+    expect(getEffectiveScholarId({})).toBeNull();
+  });
+});
+
+describe("isValidUuid", () => {
+  it("accepts valid uuids", () => {
+    expect(isValidUuid("3f2a1b8c-4d6e-4123-8f9a-123456789abc")).toBe(true);
+  });
+
+  it("rejects invalid values", () => {
+    expect(isValidUuid("not-a-uuid")).toBe(false);
+    expect(isValidUuid("")).toBe(false);
   });
 });

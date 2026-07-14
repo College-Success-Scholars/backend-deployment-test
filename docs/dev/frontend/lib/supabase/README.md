@@ -1,6 +1,6 @@
 # lib/supabase
 
-**Location:** [`frontend/lib/supabase/`](../../../../../frontend/lib/supabase/)  
+**Location:** [`frontend/lib/supabase/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/lib/supabase)  
 **Docs:** `docs/dev/frontend/lib/supabase/README.md`
 
 ## Navigation
@@ -19,10 +19,10 @@ Supabase client factories and authentication helpers. Used **only for auth** (se
 
 | File | Source Link | Environment | Description |
 |------|-------------|-------------|-------------|
-| `server.ts` | [source](../../../../../frontend/lib/supabase/server.ts) | Server only | Server-side Supabase client (PKCE flow) + all auth helper functions |
-| `client.ts` | [source](../../../../../frontend/lib/supabase/client.ts) | Client only | Browser-side Supabase client for session refresh and client-side auth |
-| `middleware.ts` | [source](../../../../../frontend/lib/supabase/middleware.ts) | Middleware | Session refresh logic — called by `frontend/middleware.ts` |
-| `public-key.ts` | [source](../../../../../frontend/lib/supabase/public-key.ts) | Both | Reads `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` from env |
+| `server.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/lib/supabase/server.ts) | Server only | Server-side Supabase client (PKCE flow) + all auth helper functions |
+| `client.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/lib/supabase/client.ts) | Client only | Browser-side Supabase client for session refresh and client-side auth |
+| `middleware.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/lib/supabase/middleware.ts) | Middleware | Session refresh logic — called by `frontend/middleware.ts` |
+| `public-key.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/lib/supabase/public-key.ts) | Both | Reads `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` from env |
 
 ---
 
@@ -55,3 +55,39 @@ Profiles come from `public.profiles` joined with `public.user_roster`. The join 
 - **Never query domain tables here** — `profiles`, `semesters` for auth is OK. `session_logs`, `form_logs`, etc. must go through the backend.
 - **Do not create a Supabase client at module scope** — always call `createClient()` inside the function body (important for Fluid Compute / Edge compatibility).
 - **`middleware.ts` is called from `frontend/middleware.ts`** — do not call it directly from components.
+
+<!-- AUTO-API-REFERENCE:START -->
+
+## API Reference
+
+Generated from TypeScript signatures (parameters and returns on each symbol page). See also the [API Reference hub](../../../../reference/README.md).
+
+| Module | Reference |
+|--------|----------|
+| `client` | [API](../../../../reference/api/frontend/lib/supabase/client/README.md) |
+| `middleware` | [API](../../../../reference/api/frontend/lib/supabase/middleware/README.md) |
+| `public-key` | [API](../../../../reference/api/frontend/lib/supabase/public-key/README.md) |
+| `server` | [API](../../../../reference/api/frontend/lib/supabase/server/README.md) |
+
+<details>
+<summary>All exports (13)</summary>
+
+| Symbol | Kind | Detail |
+|--------|------|--------|
+| `createClient` | functions | [docs](../../../../reference/api/frontend/lib/supabase/client/functions/createClient.md) |
+| `createClient` | functions | [docs](../../../../reference/api/frontend/lib/supabase/server/functions/createClient.md) |
+| `getCurrentUser` | functions | [docs](../../../../reference/api/frontend/lib/supabase/server/functions/getCurrentUser.md) |
+| `getCurrentUserWithProfile` | functions | [docs](../../../../reference/api/frontend/lib/supabase/server/functions/getCurrentUserWithProfile.md) |
+| `getDeveloperUser` | functions | [docs](../../../../reference/api/frontend/lib/supabase/server/functions/getDeveloperUser.md) |
+| `getSupabasePublicKey` | functions | [docs](../../../../reference/api/frontend/lib/supabase/public-key/functions/getSupabasePublicKey.md) |
+| `getTeamLeaderOrAboveUser` | functions | [docs](../../../../reference/api/frontend/lib/supabase/server/functions/getTeamLeaderOrAboveUser.md) |
+| `ProfilesRow` | type-aliases | [docs](../../../../reference/api/frontend/lib/supabase/server/type-aliases/ProfilesRow.md) |
+| `requireDeveloper` | functions | [docs](../../../../reference/api/frontend/lib/supabase/server/functions/requireDeveloper.md) |
+| `requireTeamLeaderOrAbove` | functions | [docs](../../../../reference/api/frontend/lib/supabase/server/functions/requireTeamLeaderOrAbove.md) |
+| `requireUser` | functions | [docs](../../../../reference/api/frontend/lib/supabase/server/functions/requireUser.md) |
+| `requireUserWithProfile` | functions | [docs](../../../../reference/api/frontend/lib/supabase/server/functions/requireUserWithProfile.md) |
+| `updateSession` | functions | [docs](../../../../reference/api/frontend/lib/supabase/middleware/functions/updateSession.md) |
+
+</details>
+
+<!-- AUTO-API-REFERENCE:END -->

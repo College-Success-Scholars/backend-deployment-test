@@ -22,6 +22,7 @@
  */
 import "server-only";
 import { backendGet, backendPost, backendPatch } from "./api-client";
+import { getEffectiveScholarId } from "../../../shared/dist/auth.js";
 import type {
   SessionLogRow,
   SessionType,
@@ -304,11 +305,8 @@ export async function getTeamLeaderFormStatsForWeek(weekNumber: number): Promise
   return backendPost("/api/form-logs/team-leader-stats", { weekNumber });
 }
 
-export function scholarIdFromProfile(profile: { student_id?: number | null } | null): string | null {
-  if (typeof profile?.student_id === "number" && Number.isFinite(profile.student_id)) {
-    return String(profile.student_id);
-  }
-  return null;
+export function scholarIdFromProfile(profile: { student_id?: unknown } | null): string | null {
+  return getEffectiveScholarId(profile);
 }
 
 /** @deprecated Use scholarIdFromProfile */

@@ -14,9 +14,9 @@
  * ## What does NOT belong here
  * - Dashboard UI components (those are in components/dashboard/)
  */
-import { TeamLeaderDashboard } from "@/components/dashboard/team-leader-dashboard";
-import { ScholarDashboard } from "@/components/dashboard/scholar-dashboard";
-import { DefaultDashboard } from "@/components/dashboard/default-dashboard";
+import { TeamLeaderDashboard } from "@/components/dashboard/roles/team-leader-dashboard";
+import { ScholarDashboard } from "@/components/dashboard/roles/scholar-dashboard";
+import { DefaultDashboard } from "@/components/dashboard/roles/default-dashboard";
 import { getCurrentUser } from "@/lib/server/queries";
 import { resolveUserRole } from "@/lib/auth";
 

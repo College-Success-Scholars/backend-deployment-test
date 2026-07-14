@@ -13,23 +13,16 @@
  * - Page-specific content or data fetching
  * - Route-specific auth logic (that goes in the individual pages)
  */
-import { AppSidebar } from "@/components/app-sidebar"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
+import { AppSidebar } from "@/components/layout/app-sidebar"
+import { DashboardHeader } from "@/components/layout/dashboard-header"
 import {
   SidebarInset,
   SidebarProvider,
-  SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/server/queries";
+import { getCurrentUser, type DevTestProfileListItem } from "@/lib/server/queries";
+import { backendGet } from "@/lib/server/api-client";
+import { isDeveloperProfile } from "@/lib/auth";
 import { ProfilesRow } from "@/lib/supabase/server";
 
 export default async function DashboardLayout({
@@ -43,38 +36,32 @@ export default async function DashboardLayout({
     redirect("/auth/login");
   }
 
-  if (!meResult.profile) {
+  if (!(meResult.realProfile ?? meResult.profile)) {
     redirect("/auth/complete-profile");
   }
 
   const profile = meResult.profile as ProfilesRow;
+  const isDeveloper = isDeveloperProfile(meResult.realProfile ?? null);
+  let testProfiles: DevTestProfileListItem[] = [];
+  if (isDeveloper) {
+    try {
+      testProfiles = await backendGet<DevTestProfileListItem[]>("/api/dev/test-profiles");
+    } catch {
+      testProfiles = [];
+    }
+  }
 
   return (
     <SidebarProvider>
-      <AppSidebar profile={profile} />
+      <AppSidebar
+        profile={profile}
+        realProfile={meResult.realProfile ?? null}
+        isActingAsTestProfile={meResult.isActingAsTestProfile ?? false}
+        activeTestProfileId={meResult.activeTestProfileId ?? null}
+        testProfiles={testProfiles}
+      />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2">
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator
-              orientation="vertical"
-              className="mr-2 data-[orientation=vertical]:h-4"
-            />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/dashboard">
-                    Dashboard
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Team Leader</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-        </header>
+        <DashboardHeader />
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           {children}
         </div>

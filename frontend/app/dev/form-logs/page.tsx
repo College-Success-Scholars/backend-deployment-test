@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CampusWeekCard } from "@/components/campus-week-card";
+import { CampusWeekCard } from "@/components/data-display/campus-week-card";
 import {
   Card,
   CardContent,
@@ -19,7 +19,7 @@ import {
   FormCompletionOverviewCard,
   FormCompletionDonut,
   FORM_COMPLETION_WHAF_COLOR,
-} from "@/components/form-completion-overview-card";
+} from "@/components/data-display/form-completion-overview-card";
 import { TeamLeadersTable } from "./team-leaders-table";
 
 export const metadata = {

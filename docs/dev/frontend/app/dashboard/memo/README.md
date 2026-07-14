@@ -1,6 +1,6 @@
 # app/dashboard/memo
 
-**Location:** [`frontend/app/dashboard/memo/`](../../../../../../frontend/app/dashboard/memo/)  
+**Location:** [`frontend/app/dashboard/memo/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo)  
 **Docs:** `docs/dev/frontend/app/dashboard/memo/README.md`
 
 ## Navigation
@@ -19,7 +19,7 @@ The weekly memo page — the most complex view in the application. It aggregates
 
 | File | Source Link | Description |
 |------|-------------|-------------|
-| `page.tsx` | [source](../../../../../../frontend/app/dashboard/memo/page.tsx) | Memo page server component — fetches data, renders memo layout |
+| `page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/page.tsx) | Memo page server component — fetches data, renders memo layout |
 
 ---
 
@@ -34,23 +34,23 @@ The weekly memo page — the most complex view in the application. It aggregates
 
 | File | Source Link | Description |
 |------|-------------|-------------|
-| `form-submissions.tsx` | [source](../../../../../../frontend/app/dashboard/memo/_components/form-submissions.tsx) | Form submission rate display |
-| `full-attendance-detail.tsx` | [source](../../../../../../frontend/app/dashboard/memo/_components/full-attendance-detail.tsx) | Expanded attendance breakdown |
-| `accordion.tsx` | [source](../../../../../../frontend/app/dashboard/memo/_components/accordion.tsx) | Memo section accordion wrapper |
-| `recognition-board.tsx` | [source](../../../../../../frontend/app/dashboard/memo/_components/recognition-board.tsx) | Scholar recognition display |
-| `scholar-follow-up-table.tsx` | [source](../../../../../../frontend/app/dashboard/memo/_components/scholar-follow-up-table.tsx) | Scholars needing follow-up |
-| `team-leader-performance-table.tsx` | [source](../../../../../../frontend/app/dashboard/memo/_components/team-leader-performance-table.tsx) | Team leader performance metrics |
-| `weekly-kpi-cards.tsx` | [source](../../../../../../frontend/app/dashboard/memo/_components/weekly-kpi-cards.tsx) | Weekly KPI summary cards |
-| `weekly-memo-header.tsx` | [source](../../../../../../frontend/app/dashboard/memo/_components/weekly-memo-header.tsx) | Memo header with week selector |
+| `form-submissions.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/form-submissions.tsx) | Form submission rate display |
+| `full-attendance-detail.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/full-attendance-detail.tsx) | Expanded attendance breakdown |
+| `accordion.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/accordion.tsx) | Memo section accordion wrapper |
+| `recognition-board.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/recognition-board.tsx) | Scholar recognition display |
+| `scholar-follow-up-table.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/scholar-follow-up-table.tsx) | Scholars needing follow-up |
+| `team-leader-performance-table.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/team-leader-performance-table.tsx) | Team leader performance metrics |
+| `weekly-kpi-cards.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/weekly-kpi-cards.tsx) | Weekly KPI summary cards |
+| `weekly-memo-header.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/weekly-memo-header.tsx) | Memo header with week selector |
 
 ### `_lib/`
 
 | File | Source Link | Description |
 |------|-------------|-------------|
-| `memo-source.ts` | [source](../../../../../../frontend/app/dashboard/memo/_lib/memo-source.ts) | Data fetching layer for memo page |
-| `risk-classifier.ts` | [source](../../../../../../frontend/app/dashboard/memo/_lib/risk-classifier.ts) | Scholar risk level classification logic |
-| `weekly-memo-assembler.ts` | [source](../../../../../../frontend/app/dashboard/memo/_lib/weekly-memo-assembler.ts) | Assembles all memo data into the final shape for rendering |
-| `weekly-memo-assembler.test.ts` | [source](../../../../../../frontend/app/dashboard/memo/_lib/weekly-memo-assembler.test.ts) | Unit tests for the assembler |
+| `memo-source.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_lib/memo-source.ts) | Data fetching layer for memo page |
+| `risk-classifier.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_lib/risk-classifier.ts) | Scholar risk level classification logic |
+| `weekly-memo-assembler.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_lib/weekly-memo-assembler.ts) | Assembles all memo data into the final shape for rendering |
+| `weekly-memo-assembler.test.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_lib/weekly-memo-assembler.test.ts) | Unit tests for the assembler |
 
 ---
 

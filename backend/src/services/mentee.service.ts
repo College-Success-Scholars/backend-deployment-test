@@ -20,13 +20,13 @@
 import { getSupabaseClient } from "./supabase.service.js";
 import type { MenteeRow } from "../models/mentee.model.js";
 
-export async function getMyMentees(mentorId: string): Promise<MenteeRow[]> {
+export async function getMenteesByMentorKey(mentorKey: string): Promise<MenteeRow[]> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
     .from("mentor_mentee")
     .select("mentee_uid, user_roster(first_name, last_name, fd_required, ss_required)")
-    .eq("mentor_id", mentorId);
+    .eq("mentor_id", mentorKey);
 
   if (error) throw error;
   if (!data) return [];
@@ -41,4 +41,9 @@ export async function getMyMentees(mentorId: string): Promise<MenteeRow[]> {
       ss_required: roster?.ss_required != null ? Number(roster.ss_required) : null,
     };
   });
+}
+
+/** @deprecated Use getMenteesByMentorKey */
+export async function getMyMentees(mentorId: string): Promise<MenteeRow[]> {
+  return getMenteesByMentorKey(mentorId);
 }

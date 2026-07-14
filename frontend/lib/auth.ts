@@ -18,7 +18,9 @@
  * - Role enforcement / access guards (use requireTeamLeaderOrAbove, requireDeveloper)
  */
 
-import { hasRoleAtLeast } from "../../shared/dist/auth.js";
+import { hasRoleAtLeast, isDeveloperProfile } from "../../shared/dist/auth.js";
+
+export { isDeveloperProfile };
 
 export type UserRole = "admin" | "exec" | "scholar" | "team-leader" | "developer" | "default";
 
@@ -26,6 +28,34 @@ type ProfileRoleFields = {
   app_role?: string | null;
   program_role?: string | null;
 };
+
+type MenteeProfileFields = {
+  mentee_count?: number | null;
+  mentee_uids?: string[] | null;
+  user_roster?: {
+    mentee_count?: number | null;
+    mentee_uids?: string[] | null;
+  } | null;
+};
+
+/** True when the profile has at least one assigned mentee. */
+export function hasAssignedMentees(profile: MenteeProfileFields | null | undefined): boolean {
+  if (!profile) return false;
+
+  const count = profile.mentee_count ?? profile.user_roster?.mentee_count ?? 0;
+  if (count > 0) return true;
+
+  const uids = profile.mentee_uids ?? profile.user_roster?.mentee_uids ?? [];
+  return uids.length > 0;
+}
+
+/** Mentee monitoring is for team_leader+ users with at least one assigned mentee. */
+export function canAccessMenteeMonitoring(
+  profile: (ProfileRoleFields & MenteeProfileFields) | null | undefined,
+): boolean {
+  if (!hasRoleAtLeast(profile?.app_role ?? null, "team_leader")) return false;
+  return hasAssignedMentees(profile);
+}
 
 /** Weekly memo and traffic analytics require team_leader or developer in profiles.app_role. */
 export function canAccessWeeklyMemo(profile: ProfileRoleFields | null | undefined): boolean {
@@ -47,4 +77,22 @@ export function resolveUserRole(profile: ProfileRoleFields | null | undefined): 
   if (programRole === "scholar") return "scholar";
 
   return "default";
+}
+
+/** Human-readable label for dashboard chrome (breadcrumb, sidebar subtitle). */
+export function formatUserRoleLabel(role: UserRole): string {
+  switch (role) {
+    case "scholar":
+      return "Scholar";
+    case "team-leader":
+      return "Team Leader";
+    case "developer":
+      return "Developer";
+    case "exec":
+      return "Executive";
+    case "admin":
+      return "Admin";
+    default:
+      return "Dashboard";
+  }
 }

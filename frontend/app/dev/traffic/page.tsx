@@ -7,7 +7,7 @@ import {
 import { dateToCampusWeek } from "@/lib/format/time";
 import { TrafficHeatMapSection } from "./traffic-heat-map-section";
 import { TrafficWeeklyLineChartBySemester } from "./traffic-weekly-line-chart";
-import { CampusWeekCard } from "@/components/campus-week-card";
+import { CampusWeekCard } from "@/components/data-display/campus-week-card";
 import {
   Card,
   CardContent,

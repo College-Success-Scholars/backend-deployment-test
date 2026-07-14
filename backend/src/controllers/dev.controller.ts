@@ -21,6 +21,8 @@
  */
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "./auth.controller.js";
+import { isDeveloperProfile } from "../../../shared/dist/auth.js";
+import { listTestProfiles, getTestProfileById } from "../services/dev-profile.service.js";
 import { getMcfFormLogById, getWplFormLogById } from "../services/form-log.service.js";
 import {
   getFrontDeskRecord,
@@ -51,9 +53,63 @@ export function me(req: AuthenticatedRequest, res: Response) {
       id: req.authUser?.id ?? null,
       email: req.authUser?.email ?? null,
     },
-    profile: req.profile
-      ? { app_role: req.profile.app_role, email: req.profile.emails?.[0] ?? null }
+    profile: req.realProfile
+      ? { app_role: req.realProfile.app_role, email: req.realProfile.emails?.[0] ?? null }
       : null,
+    activeTestProfileId: req.activeTestProfileId ?? null,
+    isActingAsTestProfile: req.isActingAsTestProfile ?? false,
+  });
+}
+
+// GET /api/dev/test-profiles
+export async function getTestProfiles(_req: AuthenticatedRequest, res: Response) {
+  try {
+    const data = await listTestProfiles();
+    res.json({ data });
+  } catch (e) {
+    res.status(500).json({ error: e instanceof Error ? e.message : "Failed to list test profiles" });
+  }
+}
+
+// GET /api/dev/test-profiles/:id
+export async function getTestProfile(req: AuthenticatedRequest, res: Response) {
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  if (!id) {
+    res.status(400).json({ error: "Missing profile id" });
+    return;
+  }
+  try {
+    const data = await getTestProfileById(id);
+    if (!data) {
+      res.status(404).json({ error: "Test profile not found" });
+      return;
+    }
+    res.json({ data });
+  } catch (e) {
+    res.status(500).json({ error: e instanceof Error ? e.message : "Failed to fetch test profile" });
+  }
+}
+
+// POST /api/dev/active-profile — validates testProfileId; client sets httpOnly cookie separately
+export async function setActiveProfile(req: AuthenticatedRequest, res: Response) {
+  const body = req.body as { testProfileId?: string | null };
+  const testProfileId = body.testProfileId ?? null;
+
+  if (testProfileId !== null) {
+    const profile = await getTestProfileById(testProfileId);
+    if (!profile) {
+      res.status(404).json({ error: "Test profile not found" });
+      return;
+    }
+  }
+
+  res.json({
+    user: { id: req.authUser?.id ?? null, email: req.authUser?.email ?? null },
+    profile: req.profile ?? null,
+    realProfile: req.realProfile ?? null,
+    activeTestProfileId: testProfileId,
+    isActingAsTestProfile: testProfileId !== null,
+    isDeveloper: isDeveloperProfile(req.realProfile),
   });
 }
 

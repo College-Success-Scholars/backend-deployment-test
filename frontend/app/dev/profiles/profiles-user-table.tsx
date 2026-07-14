@@ -4,7 +4,7 @@ import Link from "next/link";
 import {
   ScholarDataTable,
   type ScholarDataTableColumn,
-} from "@/components/scholar-data-table";
+} from "@/components/data-display/scholar-data-table";
 import { Badge } from "@/components/ui/badge";
 import type { MemoUserRow } from "@/lib/server/data";
 

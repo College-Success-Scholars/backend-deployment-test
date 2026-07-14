@@ -1,7 +1,7 @@
 "use client"
 
 import { Badge } from "@/components/ui/badge"
-import { DataTable, type DataTableColumn, type DataTableFilter } from "@/components/data-table"
+import { DataTable, type DataTableColumn, type DataTableFilter } from "@/components/data-display/data-table"
 import { MemoAccordionSection } from "./memo-accordion-section"
 import type { FormStatus, TeamLeaderPerformanceRow } from "../types"
 

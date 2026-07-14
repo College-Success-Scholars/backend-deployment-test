@@ -1,6 +1,6 @@
 # frontend/legacy
 
-**Location:** [`frontend/legacy/`](../../../../frontend/legacy/)  
+**Location:** [`frontend/legacy/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/legacy)  
 **Docs:** `docs/dev/frontend/legacy/README.md`
 
 ## Navigation
@@ -11,7 +11,9 @@
 
 ## Purpose
 
-Deprecated code preserved for reference. These were the original Next.js API routes and utility modules before the architecture was refactored to use the dedicated Express backend. **Do not add new code here.** Do not import from `legacy/` in new code.
+Deprecated code preserved for reference. These were the original Next.js API routes, utility modules, and standalone pages before the architecture was refactored to use the dedicated Express backend and `app/dashboard/memo`. **Do not add new code here.** Do not import from `legacy/` in active code.
+
+The `legacy/` directory is excluded from TypeScript compilation (`tsconfig.json` → `"exclude": ["legacy"]`).
 
 ---
 
@@ -20,8 +22,10 @@ Deprecated code preserved for reference. These were the original Next.js API rou
 ```
 legacy/
   api/
-    dev/        ← Old dev API route handlers (form-logs, session-records, me, test)
+    dev/        ← Old dev API route handlers
     memo/       ← Old memo API routes (sync, traffic-count)
+  app/
+    memo/       ← Retired standalone /memo page (superseded by /dashboard/memo)
   lib/
     form-logs/       ← Old form log utilities
     session-logs/    ← Old session log utilities
@@ -30,11 +34,13 @@ legacy/
     traffic/         ← Old traffic utilities
 ```
 
+The active `/memo` URL redirects to `/dashboard/memo` via `app/memo/page.tsx`.
+
 ---
 
 ## Standards
 
-- **Read only** — legacy code exists for historical reference. Do not edit it.
+- **Read only** — legacy code exists for historical reference. Do not edit except to fix broken references during migrations.
 - **Do not import from `legacy/`** — all active code uses the Express backend and `lib/server/`.
-- **Deletion candidate** — this directory can be removed once the team confirms no active dependencies remain. Check for any remaining imports with: `grep -r "from.*legacy" frontend/app frontend/components frontend/lib`
-- **New features** — implement in the Express backend (`backend/src/`) and call via `lib/server/api-client.ts`.
+- **Deletion candidate** — remove once the team confirms no dependencies remain.
+- **New features** — implement in the Express backend (`backend/src/`) and call via `lib/server/api-client.ts`. UI goes in `app/dashboard/` and `components/`.

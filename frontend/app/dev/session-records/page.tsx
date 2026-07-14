@@ -12,12 +12,12 @@ import {
   ScholarDataTable,
   CollapsibleTableSection,
   type ScholarDataTableColumn,
-} from "@/components/scholar-data-table";
+} from "@/components/data-display/scholar-data-table";
 import {
   dateToCampusWeek,
   formatMinutesToHoursAndMinutes,
 } from "@/lib/format/time";
-import { CampusWeekCard } from "@/components/campus-week-card";
+import { CampusWeekCard } from "@/components/data-display/campus-week-card";
 import {
   Card,
   CardContent,

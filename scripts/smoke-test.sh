@@ -4,12 +4,17 @@
 # Usage:
 #   BASE_URL=https://your-backend.railway.app ./scripts/smoke-test.sh
 #   BASE_URL=https://your-app.vercel.app/_/backend ./scripts/smoke-test.sh
+#   SMOKE_ORIGIN=http://localhost:3002 ./scripts/smoke-test.sh   # bare app.ts default CORS
 #
 # Exit codes: 0 = all passed, 1 = at least one check failed
 
 set -euo pipefail
 
 BASE_URL="${BASE_URL:-http://localhost:3001}"
+# Must match an origin allowed by the target (Docker Compose defaults to :3000; bare app.ts defaults to :3002)
+SMOKE_ORIGIN="${SMOKE_ORIGIN:-${CORS_ORIGIN:-http://localhost:3000}}"
+SMOKE_ORIGIN="${SMOKE_ORIGIN%%,*}"
+SMOKE_ORIGIN="${SMOKE_ORIGIN// /}"
 PASS=0
 FAIL=0
 
@@ -38,7 +43,7 @@ check "GET / health check" "200" "$STATUS"
 # Auth gating — all protected routes must return 401 without a token
 for ROUTE in \
   "/api/auth/me" \
-  "/api/memo" \
+  "/api/memo/weekly" \
   "/api/memo/page-data" \
   "/api/users" \
   "/api/session-logs" \
@@ -52,8 +57,11 @@ do
   check "GET $ROUTE is auth-gated" "401" "$STATUS"
 done
 
-# CORS header present on health check
-CORS_HEADER=$(curl -s -o /dev/null -D - -H "Origin: http://localhost:3002" "$BASE_URL/" | grep -i "access-control-allow-origin" | tr -d '\r\n' || true)
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/api/dev/test-profiles")
+check "GET /api/dev/test-profiles is auth-gated" "401" "$STATUS"
+
+# CORS header present on health check (Origin must be in the server's CORS_ORIGIN allowlist)
+CORS_HEADER=$(curl -s -o /dev/null -D - -H "Origin: $SMOKE_ORIGIN" "$BASE_URL/" | grep -i "access-control-allow-origin" | tr -d '\r\n' || true)
 if [ -n "$CORS_HEADER" ]; then
   echo "  PASS  CORS header present on GET /"
   PASS=$((PASS + 1))

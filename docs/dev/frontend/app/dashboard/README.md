@@ -1,6 +1,6 @@
 # app/dashboard
 
-**Location:** [`frontend/app/dashboard/`](../../../../../frontend/app/dashboard/)  
+**Location:** [`frontend/app/dashboard/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard)  
 **Docs:** `docs/dev/frontend/app/dashboard/README.md`
 
 ## Navigation
@@ -21,17 +21,17 @@ The main authenticated application. All routes here require a valid Supabase ses
 
 | File | Source Link | URL | Description |
 |------|-------------|-----|-------------|
-| `layout.tsx` | [source](../../../../../frontend/app/dashboard/layout.tsx) | `/dashboard/*` | Dashboard shell with sidebar — wraps all child pages |
-| `page.tsx` | [source](../../../../../frontend/app/dashboard/page.tsx) | `/dashboard` | Main dashboard — renders `TeamLeaderDashboard` component (or role-appropriate variant) |
-| `directory/page.tsx` | [source](../../../../../frontend/app/dashboard/directory/page.tsx) | `/dashboard/directory` | Scholar directory |
-| `events/page.tsx` | [source](../../../../../frontend/app/dashboard/events/page.tsx) | `/dashboard/events` | Program events |
-| `internship-board/page.tsx` | [source](../../../../../frontend/app/dashboard/internship-board/page.tsx) | `/dashboard/internship-board` | Internship opportunities board |
-| `memo/page.tsx` | [source](../../../../../frontend/app/dashboard/memo/page.tsx) | `/dashboard/memo` | Weekly memo view (complex, see memo/ docs) |
-| `memo-legacy/page.tsx` | [source](../../../../../frontend/app/dashboard/memo-legacy/page.tsx) | `/dashboard/memo-legacy` | Legacy memo view — kept for reference |
-| `personal/page.tsx` | [source](../../../../../frontend/app/dashboard/personal/page.tsx) | `/dashboard/personal` | Personal activity log and stats |
-| `mentee/page.tsx` | [source](../../../../../frontend/app/dashboard/mentee/page.tsx) | `/dashboard/mentee` | Mentee monitoring (team leaders only) |
-| `room/page.tsx` | [source](../../../../../frontend/app/dashboard/room/page.tsx) | `/dashboard/room` | Room/session in-progress view |
-| `settings/page.tsx` | [source](../../../../../frontend/app/dashboard/settings/page.tsx) | `/dashboard/settings` | User account settings |
+| `layout.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/layout.tsx) | `/dashboard/*` | Dashboard shell with sidebar — wraps all child pages |
+| `page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/page.tsx) | `/dashboard` | Main dashboard — renders `TeamLeaderDashboard` component (or role-appropriate variant) |
+| `directory/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/directory/page.tsx) | `/dashboard/directory` | Scholar directory |
+| `events/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/events/page.tsx) | `/dashboard/events` | Program events |
+| `internship-board/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/internship-board/page.tsx) | `/dashboard/internship-board` | Internship opportunities board |
+| `memo/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/page.tsx) | `/dashboard/memo` | Weekly memo view (complex, see memo/ docs) |
+| `memo-legacy/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo-legacy/page.tsx) | `/dashboard/memo-legacy` | Legacy memo view — kept for reference |
+| `personal/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/personal/page.tsx) | `/dashboard/personal` | Personal activity log and stats |
+| `mentee/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/mentee/page.tsx) | `/dashboard/mentee` | Mentee monitoring (team leaders only) |
+| `room/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/room/page.tsx) | `/dashboard/room` | Room/session in-progress view |
+| `settings/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/settings/page.tsx) | `/dashboard/settings` | User account settings |
 
 ---
 
