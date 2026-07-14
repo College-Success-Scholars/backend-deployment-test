@@ -10,7 +10,9 @@
 | [Backend](backend/README.md) | [`backend/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend) | Express + TypeScript API |
 | [Shared](shared/README.md) | [`shared/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/shared) | Shared TypeScript utilities |
 | [Frontend](frontend/README.md) | [`frontend/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend) | Next.js 16 web app |
+| [Deployment](deployment/README.md) | Docker / Railway / Vercel / CI | Hosted topology, env wiring, smoke |
 | [Scripts](scripts/README.md) | [`scripts/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts) | Dev/ops shell scripts |
+| [Supabase](supabase/README.md) | [`docs/dev/supabase/`](supabase/README.md) | Cloud schema scripts (test profiles) |
 | [Agent Docs](agents/README.md) | [`docs/agents/`](../agents/codebase-notes.md) | AI agent knowledge base |
 
 ---
@@ -44,7 +46,7 @@ repo root
 | Component library | Radix UI / shadcn-ui |
 | Charts | Recharts, D3 |
 | Testing | Vitest |
-| Deployment | Railway, Vercel, Docker |
+| Deployment | Railway, Vercel, Docker — see [Deployment](deployment/README.md) |
 
 ---
 

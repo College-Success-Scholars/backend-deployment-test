@@ -88,6 +88,7 @@ nav:
   - Shared:
       - Overview: dev/shared/README.md
       - Source: dev/shared/src/README.md
+  - Deployment: dev/deployment/README.md
   - Scripts: dev/scripts/README.md
   - Supabase: dev/supabase/README.md
   - Agents:

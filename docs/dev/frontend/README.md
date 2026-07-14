@@ -33,7 +33,7 @@ The Next.js App Router web application. Provides the UI for scholars, team leade
 | `components.json` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/components.json) | shadcn/ui component configuration |
 | `d3.d.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/d3.d.ts) | Type declarations for D3 |
 | `recharts.d.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/recharts.d.ts) | Type declarations for Recharts |
-| `railway.toml` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/railway.toml) | Railway deployment configuration |
+| `railway.toml` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/railway.toml) | Railway deployment configuration — see [Deployment](../deployment/README.md) |
 | `README.md` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/README.md) | Original frontend documentation |
 
 ---
