@@ -13,7 +13,7 @@ Children: [memo/](memo/README.md)
 
 ## Purpose
 
-The main authenticated application. All routes here require a valid Supabase session. The dashboard layout provides the sidebar navigation shell; each child page renders specific domain views (memo, personal activity, mentee monitoring, etc.).
+The main authenticated application. All routes here require a valid Supabase session at **AAL2** (MFA verified). The dashboard layout provides the sidebar navigation shell and the AAL2 gate; each child page renders specific domain views (memo, personal activity, mentee monitoring, etc.).
 
 ---
 
@@ -21,7 +21,7 @@ The main authenticated application. All routes here require a valid Supabase ses
 
 | File | Source Link | URL | Description |
 |------|-------------|-----|-------------|
-| `layout.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/layout.tsx) | `/dashboard/*` | Dashboard shell with sidebar — wraps all child pages |
+| `layout.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/layout.tsx) | `/dashboard/*` | Dashboard shell with sidebar; redirects if missing profile or not AAL2 |
 | `page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/page.tsx) | `/dashboard` | Main dashboard — renders `TeamLeaderDashboard` component (or role-appropriate variant) |
 | `directory/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/directory/page.tsx) | `/dashboard/directory` | Scholar directory |
 | `events/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/events/page.tsx) | `/dashboard/events` | Program events |
@@ -45,7 +45,8 @@ The main authenticated application. All routes here require a valid Supabase ses
 
 ## Standards
 
-- **All pages require auth** — call `requireUser()` or a role-specific guard from `lib/supabase/server.ts` at the top of every page.
+- **AAL2 required** — `layout.tsx` redirects non-AAL2 sessions via `getPostAuthRedirectPath` (enroll/verify). Do not soften this for individual pages.
+- **All pages require auth** — call `requireUser()` or a role-specific guard from `lib/supabase/server.ts` at the top of every page when the page needs stronger guarantees than the layout.
 - **Layout owns the sidebar** — `layout.tsx` renders the `AppSidebar` and `SidebarProvider`. Pages must not re-render the sidebar.
 - **Data fetching in the page file** — fetch from `lib/server/data.ts` or `lib/server/api-client.ts` in the server component, pass results as props to client components.
 - **Role-based rendering** — use the user's `profile.app_role` to decide which dashboard component to render (admin, team leader, scholar, default).

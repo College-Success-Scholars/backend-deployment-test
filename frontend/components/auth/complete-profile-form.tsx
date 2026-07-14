@@ -55,7 +55,7 @@ export function CompleteProfileForm({
     }
 
     router.refresh();
-    router.push("/dashboard");
+    router.push("/auth/mfa/enroll");
   };
 
   return (
@@ -123,7 +123,7 @@ export function CompleteProfileForm({
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Continue to dashboard"}
+                {isLoading ? "Saving..." : "Continue to authenticator setup"}
               </Button>
             </div>
           </form>

@@ -4,21 +4,24 @@ Base URL: `/api`
 
 All endpoints require a valid Supabase JWT in the `Authorization: Bearer <token>` header unless otherwise noted. Auth levels:
 
-- **requireAuth** -- Any authenticated user.
-- **requireTeamLeaderOrAbove** -- User must have `app_role` of `team_leader` or higher in the role hierarchy.
-- **requireDeveloper** -- User must have `app_role` of `developer`.
+- **requireAuth** -- Any authenticated user (any AAL).
+- **requireAal2** -- JWT `aal` claim must be `aal2` (MFA verified). Returns `401` with `{ error: "mfa_required", code: "aal2_required" }` when missing. Use after `requireAuth`.
+- **requireTeamLeaderOrAbove** -- User must have `app_role` of `team_leader` or higher, and AAL2.
+- **requireDeveloper** -- User must have `app_role` of `developer`, and AAL2.
 
-All error responses follow the shape `{ error: string }`.
+Unless noted, domain routes that list **requireAuth** also run **requireAal2**. AAL1 is allowed only for onboarding / MFA routing exceptions below.
+
+All error responses follow the shape `{ error: string }` (AAL failures may also include `code`).
 
 ---
 
 ## Auth
 
-All routes under `/api/auth` require **requireAuth**.
+All routes under `/api/auth` require **requireAuth**. After `GET /me` and `POST /profile`, remaining routes also require **requireAal2**.
 
 ### `GET /api/auth/me`
 
-**Auth:** requireAuth
+**Auth:** requireAuth (AAL1 allowed)
 **Description:** Returns the authenticated user's identity and full profile (merged with user_roster data).
 **Request:** None
 **Response:**
@@ -33,7 +36,7 @@ All routes under `/api/auth` require **requireAuth**.
 
 ### `GET /api/auth/profile`
 
-**Auth:** requireAuth
+**Auth:** requireAuth + requireAal2
 **Description:** Returns the raw profile row for the authenticated user from the `profiles` table.
 **Request:** None
 **Response:**
@@ -46,7 +49,7 @@ All routes under `/api/auth` require **requireAuth**.
 
 ### `POST /api/auth/profile`
 
-**Auth:** requireAuth
+**Auth:** requireAuth (AAL1 allowed)
 **Description:** Self-service scholar onboarding — creates a `profiles` row for the authenticated user. Requires a UMD email (`@umd.edu` or `@terpmail.umd.edu`). Sets `program_role: "scholar"`, `app_role: null`, `full_name`, and explicit defaults for all other profile columns (see `buildScholarProfileInsertRow` in `user.service.ts`).
 **Request Body:**
 ```json
@@ -68,7 +71,7 @@ All routes under `/api/auth` require **requireAuth**.
 
 ### `GET /api/auth/mentees`
 
-**Auth:** requireAuth
+**Auth:** requireAuth + requireAal2
 **Description:** Calls the `get_my_mentees` RPC to return the current user's assigned mentees.
 **Request:** None
 **Response:**
@@ -80,7 +83,7 @@ All routes under `/api/auth` require **requireAuth**.
 
 ### `GET /api/auth/semester`
 
-**Auth:** requireAuth
+**Auth:** requireAuth + requireAal2
 **Description:** Returns the currently active semester from the Supabase `semesters` table. Alias: `/api/auth/active-semester`.
 
 **Use sparingly.** Prefer the server-owned time frame — the shared campus week calendar (`shared/time-config.ts` / `shared/campus-calendar`) — for week bounds, navigation, and data queries. Use this endpoint when the server-owned time frame does not make sense (e.g. looking at historical data, or the collection year has not started yet), or when you need the DB semester row (e.g. `semester_id` or legacy ISO-week clamping) — not as the primary calendar source for the current collection year.
@@ -95,7 +98,7 @@ All routes under `/api/auth` require **requireAuth**.
 
 ### `GET /api/auth/active-semester`
 
-**Auth:** requireAuth
+**Auth:** requireAuth + requireAal2
 **Description:** Same as `GET /api/auth/semester` (including the same sparingly / prefer server-owned time frame guidance).
 
 ---

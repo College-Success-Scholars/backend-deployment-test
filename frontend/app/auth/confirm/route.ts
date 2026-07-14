@@ -1,5 +1,6 @@
 import { getSafeInternalPath } from "@/lib/auth/safe-next-path";
 import { createClient } from "@/lib/supabase/server";
+import { getPostAuthRedirectPath, type AalLevel } from "@/lib/supabase/mfa";
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import { type NextRequest } from "next/server";
@@ -24,7 +25,29 @@ export async function GET(request: NextRequest) {
         const baseUrl = request.nextUrl.origin;
         redirect(`${baseUrl}/auth/set-password?${q.toString()}`);
       }
-      redirect(next);
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      let hasProfile = false;
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("id", user.id)
+          .maybeSingle();
+        hasProfile = Boolean(profile);
+      }
+
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      redirect(
+        getPostAuthRedirectPath({
+          currentLevel: (aal?.currentLevel as AalLevel | null) ?? null,
+          nextLevel: (aal?.nextLevel as AalLevel | null) ?? null,
+          hasProfile,
+          preferredNext: next,
+        }),
+      );
     } else {
       // redirect the user to an error page with some instructions
       redirect(`/auth/error?error=${error?.message}`);

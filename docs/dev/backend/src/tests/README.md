@@ -21,6 +21,7 @@ Vitest integration tests for the backend API. Tests import the Express `app` dir
 |------|-------------|-------------|
 | `health.test.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/tests/health.test.ts) | Tests the `GET /` health check endpoint |
 | `auth.test.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/tests/auth.test.ts) | Tests auth middleware behavior (unauthorized, forbidden, valid token) |
+| `jwt-aal.test.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/tests/jwt-aal.test.ts) | Unit tests for `getJwtAal` (JWT `aal` claim parsing) |
 | `user.test.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/tests/user.test.ts) | Tests user data endpoints |
 | `session-log.test.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/tests/session-log.test.ts) | Tests session log endpoints |
 | `memo.test.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/tests/memo.test.ts) | Tests memo endpoints |

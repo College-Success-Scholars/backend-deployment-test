@@ -24,7 +24,7 @@ Entry point: `backend/src/server.ts`.
 
 Request flow pattern:
 
-1. Route-level auth middleware (`requireAuth`, `requireTeamLeaderOrAbove`, or `requireDeveloper`).
+1. Route-level auth middleware (`requireAuth`, then usually `requireAal2`; or `requireTeamLeaderOrAbove` / `requireDeveloper`, which also enforce AAL2).
 2. Controller validates inputs and orchestrates service calls.
 3. Service reads/writes Supabase and returns domain data.
 4. Controller returns `{ data }` or `{ error }`.
@@ -32,7 +32,7 @@ Request flow pattern:
 Auth and Supabase context:
 
 - `auth.controller.ts` extracts JWT from header and verifies with Supabase auth.
-- It stores token/user/profile on `req`.
+- It stores token/user/profile on `req`. MFA assurance uses the JWT `aal` claim (`requireAal2` / `getJwtAal`); AAL1 is allowed for `GET /api/auth/me` and `POST /api/auth/profile` only.
 - `supabase.service.ts` uses `AsyncLocalStorage` to bind the JWT per request via `runWithToken(...)`.
 - `getSupabaseClient()` reads that token and creates a client with `Authorization` header, so RLS is applied consistently.
 

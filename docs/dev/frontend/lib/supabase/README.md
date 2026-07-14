@@ -22,6 +22,9 @@ Supabase client factories and authentication helpers. Used **only for auth** (se
 | `server.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/lib/supabase/server.ts) | Server only | Server-side Supabase client (PKCE flow) + all auth helper functions |
 | `client.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/lib/supabase/client.ts) | Client only | Browser-side Supabase client for session refresh and client-side auth |
 | `middleware.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/lib/supabase/middleware.ts) | Middleware | Session refresh logic — called by `frontend/middleware.ts` |
+| `mfa.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/lib/supabase/mfa.ts) | Both | MFA AAL redirect helpers, unique TOTP friendly names, unverified-factor cleanup |
+| `mfa.test.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/lib/supabase/mfa.test.ts) | Test | Unit tests for `getPostAuthRedirectPath`, friendly names, unenroll helpers |
+| `resolve-post-auth-path.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/lib/supabase/resolve-post-auth-path.ts) | Client only | Resolves post-login destination from AAL + `/api/auth/me` |
 | `public-key.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/lib/supabase/public-key.ts) | Both | Reads `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` from env |
 
 ---
@@ -55,6 +58,7 @@ Profiles come from `public.profiles` joined with `public.user_roster`. The join 
 - **Never query domain tables here** — `profiles`, `semesters` for auth is OK. `session_logs`, `form_logs`, etc. must go through the backend.
 - **Do not create a Supabase client at module scope** — always call `createClient()` inside the function body (important for Fluid Compute / Edge compatibility).
 - **`middleware.ts` is called from `frontend/middleware.ts`** — do not call it directly from components.
+- **MFA helpers stay in `mfa.ts` / `resolve-post-auth-path.ts`** — post-auth destinations and TOTP naming/cleanup; do not duplicate AAL routing in forms.
 
 <!-- AUTO-API-REFERENCE:START -->
 

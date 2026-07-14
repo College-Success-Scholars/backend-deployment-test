@@ -17,6 +17,7 @@
 
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { resolvePostAuthPath } from "@/lib/supabase/resolve-post-auth-path";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -83,8 +84,9 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
+      const dest = await resolvePostAuthPath("/dashboard");
       router.refresh();
-      router.push("/dashboard");
+      router.push(dest);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {

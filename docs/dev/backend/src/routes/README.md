@@ -19,16 +19,16 @@ Express Router definitions. Each route file declares HTTP method + path combinat
 
 | File | Source Link | Mount Path | Auth Level |
 |------|-------------|------------|------------|
-| `auth.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/auth.routes.ts) | `/api/auth` | `requireAuth` |
-| `user.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/user.routes.ts) | `/api/users` | `requireTeamLeaderOrAbove` |
-| `session-log.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/session-log.routes.ts) | `/api/session-logs` | `requireTeamLeaderOrAbove` |
-| `session-record.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/session-record.routes.ts) | `/api/session-records` | `requireAuth` + `requireSelfOrTeamLeader` |
-| `form-log.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/form-log.routes.ts) | `/api/form-logs` | mixed (`requireAuth` / `requireTeamLeaderOrAbove`) |
-| `memo.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/memo.routes.ts) | `/api/memo` | `requireTeamLeaderOrAbove` |
-| `traffic.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/traffic.routes.ts) | `/api/traffic` | `requireTeamLeaderOrAbove` |
-| `activity.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/activity.routes.ts) | `/api/daily-activity` | `requireAuth` |
-| `tutor-report-log.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/tutor-report-log.routes.ts) | `/api/tutor-reports` | `requireTeamLeaderOrAbove` |
-| `dev.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/dev.routes.ts) | `/api/dev` | `requireDeveloper` |
+| `auth.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/auth.routes.ts) | `/api/auth` | `requireAuth`; `GET /me` + `POST /profile` AAL1; rest + `requireAal2` |
+| `user.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/user.routes.ts) | `/api/users` | `requireAuth` + `requireAal2` |
+| `session-log.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/session-log.routes.ts) | `/api/session-logs` | `requireAuth` + `requireAal2` |
+| `session-record.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/session-record.routes.ts) | `/api/session-records` | `requireAuth` + `requireAal2` (+ `requireSelfOrTeamLeader` where used) |
+| `form-log.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/form-log.routes.ts) | `/api/form-logs` | `requireAuth` + `requireAal2` |
+| `memo.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/memo.routes.ts) | `/api/memo` | `requireTeamLeaderOrAbove` (includes AAL2) |
+| `traffic.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/traffic.routes.ts) | `/api/traffic` | `requireAuth` + `requireAal2` |
+| `activity.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/activity.routes.ts) | `/api/daily-activity` | `requireAuth` + `requireAal2` |
+| `tutor-report-log.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/tutor-report-log.routes.ts) | `/api/tutor-reports` | `requireTeamLeaderOrAbove` (includes AAL2) |
+| `dev.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/dev.routes.ts) | `/api/dev` | `requireDeveloper` (includes AAL2) |
 
 All routers are mounted in [`backend/src/app.ts`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/app.ts).
 
@@ -38,12 +38,15 @@ All routers are mounted in [`backend/src/app.ts`](https://github.com/College-Suc
 
 | Middleware | Who can call |
 |-----------|-------------|
-| `requireAuth` | Any authenticated user (any role) |
-| `requireTeamLeaderOrAbove` | `team_leader` or `developer` |
-| `requireDeveloper` | `developer` only |
+| `requireAuth` | Any authenticated user (any role, any AAL) |
+| `requireAal2` | JWT `aal` claim is `aal2` (MFA verified) — use after `requireAuth` |
+| `requireTeamLeaderOrAbove` | `team_leader` or `developer`, and AAL2 |
+| `requireDeveloper` | `developer` only, and AAL2 |
 | `requireSelfOrTeamLeader` | Own data, or `team_leader`/`developer` — use after `requireAuth` |
 
 All auth middleware is exported from `controllers/auth.controller.ts`.
+
+**AAL1 exceptions:** `GET /api/auth/me` and `POST /api/auth/profile` stay reachable before MFA so onboarding and post-login routing can call them.
 
 ---
 

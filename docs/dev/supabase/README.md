@@ -1,4 +1,16 @@
-# Cloud Supabase — dev test profiles
+# Cloud Supabase
+
+Ops docs for the hosted Supabase project. Do **not** commit project refs, API URLs (`https://<project-ref>.supabase.co`), or keys.
+
+| Doc | Purpose |
+|-----|---------|
+| [MFA (TOTP) enable](mfa.md) | Turn on authenticator MFA for the project |
+| [MFA reset walkthrough](mfa-reset.md) | Remove a user’s TOTP factors in the Dashboard |
+| Below | Dev test-profile SQL |
+
+---
+
+# Dev test profiles
 
 Schema for developer test-profile switching is applied **manually** in the [Supabase Dashboard](https://supabase.com/dashboard) → **SQL Editor**. Do not use the repo-root `supabase/` CLI folder.
 

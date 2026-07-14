@@ -8,10 +8,11 @@
  *
  * ## What belongs here
  * - Shared dashboard chrome (sidebar, breadcrumb, header)
+ * - Shared session gates (login, profile, AAL2) for all /dashboard/* routes
  *
  * ## What does NOT belong here
  * - Page-specific content or data fetching
- * - Route-specific auth logic (that goes in the individual pages)
+ * - Page/role-specific auth beyond the shared AAL2 + profile gate
  */
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { DashboardHeader } from "@/components/layout/dashboard-header"
@@ -24,6 +25,8 @@ import { getCurrentUser, type DevTestProfileListItem } from "@/lib/server/querie
 import { backendGet } from "@/lib/server/api-client";
 import { isDeveloperProfile } from "@/lib/auth";
 import { ProfilesRow } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
+import { getPostAuthRedirectPath, type AalLevel } from "@/lib/supabase/mfa";
 
 export default async function DashboardLayout({
   children,
@@ -38,6 +41,18 @@ export default async function DashboardLayout({
 
   if (!(meResult.realProfile ?? meResult.profile)) {
     redirect("/auth/complete-profile");
+  }
+
+  const supabase = await createClient();
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.currentLevel !== "aal2") {
+    redirect(
+      getPostAuthRedirectPath({
+        currentLevel: (aal?.currentLevel as AalLevel | null) ?? null,
+        nextLevel: (aal?.nextLevel as AalLevel | null) ?? null,
+        hasProfile: true,
+      }),
+    );
   }
 
   const profile = meResult.profile as ProfilesRow;

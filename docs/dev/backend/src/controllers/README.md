@@ -19,7 +19,7 @@ Express request handlers. A controller receives a validated `AuthenticatedReques
 
 | File | Source Link | Description |
 |------|-------------|-------------|
-| `auth.controller.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/controllers/auth.controller.ts) | Auth middleware (`requireAuth`, `requireTeamLeaderOrAbove`, `requireDeveloper`, `requireSelfOrTeamLeader`) and auth endpoint handlers (`getMe`, `getProfile`, `getMentees`, `getActiveSemester`) |
+| `auth.controller.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/controllers/auth.controller.ts) | Auth middleware (`requireAuth`, `requireAal2`, `requireTeamLeaderOrAbove`, `requireDeveloper`, `requireSelfOrTeamLeader`), JWT AAL helper (`getJwtAal`), and auth endpoint handlers (`getMe`, `getProfile`, `createProfile`, `getMentees`, `getActiveSemester`) |
 | `user.controller.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/controllers/user.controller.ts) | User data handlers: scholar names, required hours, eligible scholars, all UIDs, memo users, team leaders, scholar UIDs, get by UID |
 | `session-log.controller.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/controllers/session-log.controller.ts) | Raw check-in/out log handlers for front-desk and study sessions (fetch, cleaned, in-room, completed variants) |
 | `session-record.controller.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/controllers/session-record.controller.ts) | Weekly aggregated session record handlers: get, sync, excuse update |

@@ -14,12 +14,13 @@
  * - Business logic (that's controllers/form-log.controller.ts)
  */
 import { Router } from "express";
-import { requireAuth } from "../controllers/auth.controller.js";
+import { requireAuth, requireAal2 } from "../controllers/auth.controller.js";
 import * as formLogController from "../controllers/form-log.controller.js";
 
 const router = Router();
 
 router.use(requireAuth);
+router.use(requireAal2);
 
 // MCF
 router.get("/mcf/week/:weekNum", formLogController.mcfForWeek);

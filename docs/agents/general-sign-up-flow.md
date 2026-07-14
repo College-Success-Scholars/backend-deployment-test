@@ -9,10 +9,12 @@ Self-service scholars sign up with a UMD email, confirm via email link, complete
 ## End-to-end sequence
 
 1. **Sign up** (`/auth/sign-up`) — UMD email only (`@umd.edu`, `@terpmail.umd.edu`); creates `auth.users` row
-2. **Email confirm** (`/auth/confirm`) — `verifyOtp` with `token_hash` + `type=email`; redirects to `/dashboard`
-3. **Dashboard gate** (`/dashboard/layout`) — `GET /api/auth/me`; if `profile` is null → `/auth/complete-profile`
-4. **Complete profile** (`/auth/complete-profile`) — form submits `POST /api/auth/profile`
-5. **Profile created** — `program_role: "scholar"`, `app_role: null`; redirect to `/dashboard`
+2. **Email confirm** (`/auth/confirm`) — `verifyOtp` with `token_hash` + `type=email`; routes via MFA/profile gates (usually complete-profile)
+3. **Complete profile** (`/auth/complete-profile`) — form submits `POST /api/auth/profile` at AAL1
+4. **MFA enroll** (`/auth/mfa/enroll`) — TOTP QR + verify → AAL2
+5. **Dashboard** — profile exists and session is AAL2
+
+Returning users: login → `/auth/mfa/verify` (if enrolled) or enroll / complete-profile as needed.
 
 ## Onboarding fields
 

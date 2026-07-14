@@ -103,6 +103,9 @@ export async function requireDeveloper(req: AuthenticatedRequest, res: Response,
   if (!isDeveloperProfile(req.realProfile)) {
     res.status(403).json({ error: "Forbidden: Developer access required" }); return;
   }
+  if (getJwtAal(req.accessToken) !== "aal2") {
+    res.status(401).json({ error: "mfa_required", code: "aal2_required" }); return;
+  }
   nextWithToken(req, next);
 }
 
@@ -112,11 +115,42 @@ export async function requireAuth(req: AuthenticatedRequest, res: Response, next
   rejectWritesWhenActing(req, res, () => nextWithToken(req, next));
 }
 
+/**
+ * Requires the bearer JWT to have Authenticator Assurance Level 2 (MFA verified).
+ * Use after requireAuth. Exempt routes that must work during onboarding (e.g. POST /profile, GET /me).
+ */
+export function requireAal2(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  const aal = getJwtAal(req.accessToken ?? req.headers.authorization?.slice(7));
+  if (aal !== "aal2") {
+    res.status(401).json({ error: "mfa_required", code: "aal2_required" });
+    return;
+  }
+  next();
+}
+
+/** Decode the `aal` claim from a Supabase JWT without verifying (token already verified via getUser). */
+export function getJwtAal(token: string | null | undefined): string | null {
+  if (!token) return null;
+  try {
+    const parts = token.split(".");
+    const payloadPart = parts[1];
+    if (!payloadPart) return null;
+    const payloadJson = Buffer.from(payloadPart, "base64url").toString("utf8");
+    const payload = JSON.parse(payloadJson) as { aal?: string };
+    return typeof payload.aal === "string" ? payload.aal : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function requireTeamLeaderOrAbove(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const ok = await runWithToken(req.headers.authorization?.slice(7) ?? "", () => extractUser(req));
   if (!ok) { res.status(401).json({ error: "Unauthorized" }); return; }
   if (!hasRoleAtLeast(req.profile?.app_role ?? null, "team_leader")) {
     res.status(403).json({ error: "Forbidden: Team leader or above required" }); return;
+  }
+  if (getJwtAal(req.accessToken) !== "aal2") {
+    res.status(401).json({ error: "mfa_required", code: "aal2_required" }); return;
   }
   rejectWritesWhenActing(req, res, () => nextWithToken(req, next));
 }

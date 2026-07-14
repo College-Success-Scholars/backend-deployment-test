@@ -14,12 +14,13 @@
  * - Business logic (that's controllers/session-log.controller.ts)
  */
 import { Router } from "express";
-import { requireAuth } from "../controllers/auth.controller.js";
+import { requireAuth, requireAal2 } from "../controllers/auth.controller.js";
 import * as sessionLogController from "../controllers/session-log.controller.js";
 
 const router = Router();
 
 router.use(requireAuth);
+router.use(requireAal2);
 
 // Front desk
 router.post("/front-desk", sessionLogController.fetchFrontDesk);

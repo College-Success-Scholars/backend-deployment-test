@@ -19,11 +19,12 @@ Client component for the settings page. Handles user account settings interactio
 
 | File | Source Link | Description |
 |------|-------------|-------------|
-| `settings-client.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/components/settings/settings-client.tsx) | Client component rendering the settings form and handling save/update interactions |
+| `settings-client.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/components/settings/settings-client.tsx) | Profile tabs plus **Security** (list MFA factors, rotate authenticator) |
 
 ---
 
 ## Standards
 
 - **Rendered by `app/dashboard/settings/page.tsx`** — the page fetches current settings and passes them as props.
-- **Mutations go through Supabase client** — use the client-side Supabase client from `lib/supabase/client.ts` for profile updates.
+- **Profile fields are read-only** in this UI; MFA rotation uses the browser Supabase MFA APIs.
+- **MFA cannot be disabled** here — lost-phone recovery is via the Supabase Dashboard ([`mfa-reset.md`](../../../supabase/mfa-reset.md)).

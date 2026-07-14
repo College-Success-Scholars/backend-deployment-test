@@ -14,9 +14,9 @@
  */
 "use client";
 
-import { getSafeInternalPath } from "@/lib/auth/safe-next-path";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { resolvePostAuthPath } from "@/lib/supabase/resolve-post-auth-path";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -71,7 +71,8 @@ export function UpdatePasswordForm({
     try {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
-      router.push(getSafeInternalPath(redirectTo));
+      const dest = await resolvePostAuthPath(redirectTo);
+      router.push(dest);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {

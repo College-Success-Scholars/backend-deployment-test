@@ -13,12 +13,13 @@
  * - Business logic (that's controllers/activity.controller.ts)
  */
 import { Router } from "express";
-import { requireAuth } from "../controllers/auth.controller.js";
+import { requireAuth, requireAal2 } from "../controllers/auth.controller.js";
 import * as activityController from "../controllers/activity.controller.js";
 
 const router = Router();
 
 router.use(requireAuth);
+router.use(requireAal2);
 
 router.get("/minutes", activityController.minutes);
 
