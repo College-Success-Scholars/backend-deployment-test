@@ -42,6 +42,7 @@ When `req.isActingAsTestProfile` is true, this middleware runs inside `requireAu
 
 When adding a **new mutation** endpoint, add its full path to `ACTING_BLOCKED_POST_PATHS` in `reject-writes-when-acting.ts` (or rely on PATCH/PUT/DELETE blocking). Read-only POSTs need no change.
 
+## Standards
 
 - **Application-wide middleware here** — middleware that applies to all or most routes belongs in this directory and is registered in `app.ts` via `app.use(middleware)`.
 - **Route-specific middleware belongs in routes** — if middleware only applies to one route group, pass it as an argument to the route definition in `routes/*.routes.ts`.
@@ -53,22 +54,11 @@ When adding a **new mutation** endpoint, add its full path to `ACTING_BLOCKED_PO
 
 ## API Reference
 
-Generated from TypeScript signatures (parameters and returns on each symbol page). See also the [API Reference hub](../../../../reference/README.md).
+Generated from TypeScript signatures. Module indexes below; full catalog: [API Reference hub](../../../../reference/README.md).
 
 | Module | Reference |
 |--------|----------|
 | `reject-writes-when-acting` | [API](../../../../reference/api/backend/src/middleware/reject-writes-when-acting/README.md) |
 | `request-logger` | [API](../../../../reference/api/backend/src/middleware/request-logger/README.md) |
-
-<details>
-<summary>All exports (3)</summary>
-
-| Symbol | Kind | Detail |
-|--------|------|--------|
-| `isActingWriteRequest` | functions | [docs](../../../../reference/api/backend/src/middleware/reject-writes-when-acting/functions/isActingWriteRequest.md) |
-| `rejectWritesWhenActing` | functions | [docs](../../../../reference/api/backend/src/middleware/reject-writes-when-acting/functions/rejectWritesWhenActing.md) |
-| `requestLogger` | functions | [docs](../../../../reference/api/backend/src/middleware/request-logger/functions/requestLogger.md) |
-
-</details>
 
 <!-- AUTO-API-REFERENCE:END -->

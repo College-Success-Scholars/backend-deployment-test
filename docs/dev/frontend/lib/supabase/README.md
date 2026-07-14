@@ -60,7 +60,7 @@ Profiles come from `public.profiles` joined with `public.user_roster`. The join 
 
 ## API Reference
 
-Generated from TypeScript signatures (parameters and returns on each symbol page). See also the [API Reference hub](../../../../reference/README.md).
+Generated from TypeScript signatures. Module indexes below; full catalog: [API Reference hub](../../../../reference/README.md).
 
 | Module | Reference |
 |--------|----------|
@@ -68,26 +68,5 @@ Generated from TypeScript signatures (parameters and returns on each symbol page
 | `middleware` | [API](../../../../reference/api/frontend/lib/supabase/middleware/README.md) |
 | `public-key` | [API](../../../../reference/api/frontend/lib/supabase/public-key/README.md) |
 | `server` | [API](../../../../reference/api/frontend/lib/supabase/server/README.md) |
-
-<details>
-<summary>All exports (13)</summary>
-
-| Symbol | Kind | Detail |
-|--------|------|--------|
-| `createClient` | functions | [docs](../../../../reference/api/frontend/lib/supabase/client/functions/createClient.md) |
-| `createClient` | functions | [docs](../../../../reference/api/frontend/lib/supabase/server/functions/createClient.md) |
-| `getCurrentUser` | functions | [docs](../../../../reference/api/frontend/lib/supabase/server/functions/getCurrentUser.md) |
-| `getCurrentUserWithProfile` | functions | [docs](../../../../reference/api/frontend/lib/supabase/server/functions/getCurrentUserWithProfile.md) |
-| `getDeveloperUser` | functions | [docs](../../../../reference/api/frontend/lib/supabase/server/functions/getDeveloperUser.md) |
-| `getSupabasePublicKey` | functions | [docs](../../../../reference/api/frontend/lib/supabase/public-key/functions/getSupabasePublicKey.md) |
-| `getTeamLeaderOrAboveUser` | functions | [docs](../../../../reference/api/frontend/lib/supabase/server/functions/getTeamLeaderOrAboveUser.md) |
-| `ProfilesRow` | type-aliases | [docs](../../../../reference/api/frontend/lib/supabase/server/type-aliases/ProfilesRow.md) |
-| `requireDeveloper` | functions | [docs](../../../../reference/api/frontend/lib/supabase/server/functions/requireDeveloper.md) |
-| `requireTeamLeaderOrAbove` | functions | [docs](../../../../reference/api/frontend/lib/supabase/server/functions/requireTeamLeaderOrAbove.md) |
-| `requireUser` | functions | [docs](../../../../reference/api/frontend/lib/supabase/server/functions/requireUser.md) |
-| `requireUserWithProfile` | functions | [docs](../../../../reference/api/frontend/lib/supabase/server/functions/requireUserWithProfile.md) |
-| `updateSession` | functions | [docs](../../../../reference/api/frontend/lib/supabase/middleware/functions/updateSession.md) |
-
-</details>
 
 <!-- AUTO-API-REFERENCE:END -->

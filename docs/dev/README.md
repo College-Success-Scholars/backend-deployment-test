@@ -168,6 +168,13 @@ See [`ubiquitous_language.md`](../agents/ubiquitous_language.md) for the full gl
 8. **`server-only` guard** in any frontend module that must not run on the client.
 9. **Published docs site** — the human-facing handbook is on GitHub Pages (MkDocs). Keep pages **concise at the top** (Purpose, Navigation, Files) and put deep detail / generated API indexes at the **bottom**. In-site navigation must stay under `docs/`; use GitHub blob links for source code.
 
+### Docs depth
+
+- **Handbook vs reference** — `docs/dev/` is the human handbook (standards, placement, ops). Symbol catalogs are generated TypeDoc under [`docs/reference/`](../reference/README.md); link there instead of inventing leaf mirrors.
+- **New README only for a Standards boundary** — add a `docs/dev/**/README.md` when a directory has rules that parent hubs cannot own, not merely because a source folder exists.
+- **Missing leaf READMEs are expected** — walk up to the nearest parent hub; that hub’s Purpose / Standards are authoritative.
+- **Architecture narrative** — humans: this page; agents: [`docs/agents/codebase-notes.md`](../agents/codebase-notes.md). Other handbook pages **link**, do not retell request flow / auth / roles.
+
 ---
 
 ## Developer test profiles

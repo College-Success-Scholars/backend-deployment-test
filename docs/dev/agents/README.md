@@ -13,6 +13,8 @@
 
 Knowledge base for AI coding agents working in this repository. Contains codebase notes, domain vocabulary, and issue-tracking conventions that help agents understand the project context without reading all source files from scratch.
 
+Humans: prefer the [handbook home](../README.md) and [onboarding](../onboarding/README.md). Agents: start with [`codebase-notes.md`](../../agents/codebase-notes.md).
+
 ---
 
 ## Files

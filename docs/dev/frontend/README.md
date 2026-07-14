@@ -7,9 +7,7 @@
 
 [← Root](../README.md) › Frontend
 
-Children: [app/](app/README.md) · [components/](components/README.md) · [lib/](lib/README.md) · [hooks/](hooks/README.md) · [legacy/](legacy/README.md)
-
-Component subdirs: [layout](components/layout/README.md) · [auth](components/auth/README.md) · [data-display](components/data-display/README.md) · [charts](components/charts/README.md) · [dashboard](components/dashboard/README.md)
+Children: [app/](app/README.md) · [components/](components/README.md) · [lib/](lib/README.md) · [legacy/](legacy/README.md)
 
 ---
 
@@ -45,9 +43,9 @@ The Next.js App Router web application. Provides the UI for scholars, team leade
 | `app/` | [app/README.md](app/README.md) | Next.js App Router pages, layouts, and route handlers |
 | `components/` | [components/README.md](components/README.md) | Reusable React components |
 | `lib/` | [lib/README.md](lib/README.md) | Utility modules, API clients, Supabase helpers, type definitions |
-| `hooks/` | [hooks/README.md](hooks/README.md) | Custom React hooks |
-| `public/` | _(no docs)_ | Static assets served at `/` |
-| `scripts/` | _(no docs)_ | Standalone Node scripts for testing/ops |
+| `hooks/` | _(hub)_ | Client-only React hooks — `use-<behavior>.ts`; no data-fetch or domain-logic hooks |
+| `public/` | _(hub)_ | Static assets served at `/` |
+| `scripts/` | _(hub)_ | Standalone Node scripts for testing/ops |
 | `legacy/` | [legacy/README.md](legacy/README.md) | Deprecated API routes and utilities (do not add to) |
 
 ---
@@ -104,3 +102,4 @@ lib/supabase/server.ts  ← auth helpers (getCurrentUser, requireUser, etc.)
 - **Tailwind CSS only** — no inline styles, no CSS modules unless absolutely necessary.
 - **Fonts and global styles** — configured once in `app/layout.tsx` and `app/globals.css`.
 - **Tests run with `TZ=America/New_York`** — required because campus weeks are Eastern-time based.
+- **Hooks** (`hooks/`) — client-side only; single responsibility; no data-fetching hooks (prefer server components / `lib/server/data.ts`); no domain logic.

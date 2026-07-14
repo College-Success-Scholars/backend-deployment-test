@@ -1,5 +1,7 @@
 # Codebase Notes
 
+Agent-oriented architecture map. For the human handbook (env, standards, onboarding), start at [`docs/dev/README.md`](../dev/README.md).
+
 ## Standard check results
 
 - Backend check: `npm --prefix backend run build` passes.
