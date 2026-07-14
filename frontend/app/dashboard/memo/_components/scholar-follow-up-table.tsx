@@ -13,7 +13,7 @@ export function ScholarFollowUpTable({ rows }: ScholarFollowUpTableProps) {
     <MemoAccordionSection
       title="Scholar follow-up"
       badgeText={`${rows.length} need attention`}
-      badgeClassName="bg-rose-50 text-rose-700 border-rose-200"
+      badgeVariant="warning"
       rightLabel="Sorted by severity"
       defaultOpen
     >
@@ -37,7 +37,7 @@ export function ScholarFollowUpTable({ rows }: ScholarFollowUpTableProps) {
               <TableCell className="text-sm">{row.teamLeader}</TableCell>
               <TableCell className="space-x-2 space-y-1 whitespace-normal">
                 {row.flags.map((flag) => (
-                  <Badge key={flag} className="bg-rose-50 text-rose-700 border-rose-200">
+                  <Badge key={flag} variant="warning">
                     {flag}
                   </Badge>
                 ))}

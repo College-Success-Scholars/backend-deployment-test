@@ -85,7 +85,7 @@ export function DoubleEntryChecker({
 
 function DoubleEntryRow({ entry }: { entry: DoubleEntry }) {
   return (
-    <li className="rounded-md border border-amber-500/50 bg-amber-500/5 p-3 text-sm">
+    <li className="rounded-md border border-warning/50 bg-warning-muted/50 p-3 text-sm">
       <div className="font-medium">
         {entry.scholarName ?? entry.scholarId}
         <span className="text-muted-foreground font-normal ml-1">

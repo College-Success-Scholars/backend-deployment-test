@@ -17,6 +17,12 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+        /** Soft status chips — use muted + muted-foreground (not solid foreground). */
+        success:
+          "border-success/40 bg-success-muted text-success-muted-foreground",
+        warning:
+          "border-warning/40 bg-warning-muted text-warning-muted-foreground",
+        info: "border-info/40 bg-info-muted text-info-muted-foreground",
       },
     },
     defaultVariants: {
@@ -31,7 +37,9 @@ function Badge({
   asChild = false,
   ...props
 }: React.ComponentProps<"span"> &
-  VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
+  VariantProps<typeof badgeVariants> & {
+    asChild?: boolean
+  }) {
   const Comp = asChild ? Slot : "span"
 
   return (

@@ -3,9 +3,8 @@
  * @module frontend/app
  *
  * Root Next.js layout — wraps the entire application.
- * Registers global fonts (Geist, Geist_Mono), sets default metadata,
- * mounts the Toaster notification system, Vercel Analytics, and the
- * InviteFromHashRedirect handler for magic-link email invites.
+ * Registers global fonts (Geist, Geist_Mono), theme provider, toaster,
+ * Vercel Analytics, and the InviteFromHashRedirect handler for magic-link email invites.
  *
  * ## What belongs here
  * - App-wide providers, fonts, and metadata
@@ -17,8 +16,9 @@
  */
 import type { Metadata } from "next";
 import { InviteFromHashRedirect } from "@/components/auth/invite-from-hash-redirect";
+import { ThemeProvider } from "@/components/layout/theme-provider";
+import { ThemedToaster } from "@/components/layout/themed-toaster";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
@@ -52,9 +52,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <InviteFromHashRedirect />
-        {children}
-        <Toaster />
+        <ThemeProvider>
+          <InviteFromHashRedirect />
+          {children}
+          <ThemedToaster />
+          <Analytics />
+        </ThemeProvider>
       </body>
     </html>
   );

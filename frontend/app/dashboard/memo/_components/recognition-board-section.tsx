@@ -10,7 +10,7 @@ export function RecognitionBoardSection({ data }: RecognitionBoardSectionProps) 
     <MemoAccordionSection
       title="Recognition board"
       badgeText={data.badgeText}
-      badgeClassName="bg-emerald-50 text-emerald-700 border-emerald-200"
+      badgeClassName="bg-success-muted text-success-muted-foreground border-success/30"
       rightLabel={data.rightLabel}
     >
       <ul className="text-muted-foreground list-disc space-y-1 px-8 py-4 text-sm">

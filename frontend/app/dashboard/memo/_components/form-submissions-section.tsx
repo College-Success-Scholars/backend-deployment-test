@@ -8,9 +8,9 @@ type FormSubmissionsSectionProps = {
 }
 
 const statusClassName: Record<FormSubmissionStatus, string> = {
-  "on-time": "bg-emerald-50 text-emerald-700 border-emerald-200",
-  late: "bg-amber-50 text-amber-700 border-amber-200",
-  missing: "bg-rose-50 text-rose-700 border-rose-200",
+  "on-time": "bg-success-muted text-success-muted-foreground border-success/30",
+  late: "bg-warning-muted text-warning-muted-foreground border-warning/30",
+  missing: "bg-destructive/10 text-destructive border-destructive/30",
 }
 
 function renderStatus(status: FormSubmissionStatus) {
@@ -22,7 +22,7 @@ export function FormSubmissionsSection({ data }: FormSubmissionsSectionProps) {
     <MemoAccordionSection
       title="Form submissions"
       badgeText={data.badgeText}
-      badgeClassName="bg-amber-50 text-amber-700 border-amber-200"
+      badgeClassName="bg-warning-muted text-warning-muted-foreground border-warning/40"
       rightLabel={data.rightLabel}
     >
       <div className="space-y-3 px-3 py-3">
@@ -32,11 +32,11 @@ export function FormSubmissionsSection({ data }: FormSubmissionsSectionProps) {
               <div className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">{summary.form}</div>
               <div className="grid grid-cols-[1fr_auto] gap-y-1 text-sm">
                 <span>On time</span>
-                <span className="font-medium text-emerald-700">{summary.onTime}</span>
+                <span className="font-medium text-success">{summary.onTime}</span>
                 <span>Late</span>
-                <span className="font-medium text-amber-700">{summary.late}</span>
+                <span className="font-medium text-warning-muted-foreground">{summary.late}</span>
                 <span>Missing</span>
-                <span className="font-medium text-rose-700">{summary.missing}</span>
+                <span className="font-medium text-destructive">{summary.missing}</span>
               </div>
             </div>
           ))}

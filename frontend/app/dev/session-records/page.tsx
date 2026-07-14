@@ -143,9 +143,9 @@ function getRequiredBgClass(row: RecordRowWithProgress): string {
   const effectiveTotal = total + excused;
   if (req <= 0) return "bg-muted/50";
   const pct = (effectiveTotal / req) * 100;
-  if (pct >= 90) return "bg-green-500/20";
-  if (pct >= 75) return "bg-yellow-500/20";
-  return "bg-red-500/20";
+  if (pct >= 90) return "bg-success-muted";
+  if (pct >= 75) return "bg-warning-muted";
+  return "bg-destructive/20";
 }
 
 /** Format required minutes as hours (e.g. 60 → "1h", 90 → "1.5h"). */

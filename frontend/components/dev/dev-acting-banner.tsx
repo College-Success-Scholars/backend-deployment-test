@@ -21,7 +21,7 @@ export function DevActingBanner({ label }: DevActingBannerProps) {
   }
 
   return (
-    <div className="bg-amber-50 border border-amber-200 text-amber-950 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-100 flex flex-wrap items-center justify-between gap-2 rounded-md px-3 py-2 text-sm">
+    <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-warning/40 bg-warning-muted px-3 py-2 text-sm text-warning-muted-foreground">
       <span>
         Viewing as: <strong>{label}</strong> (read-only)
       </span>

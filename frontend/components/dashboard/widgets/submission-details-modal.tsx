@@ -98,7 +98,7 @@ function yesNoPill(value: string | null | undefined) {
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-semibold ${
-        isYes ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
+        isYes ? "bg-success-muted text-success-muted-foreground" : "bg-destructive/10 text-destructive"
       }`}
     >
       {isYes ? <CheckCircle2 className="h-3.5 w-3.5" /> : <CircleX className="h-3.5 w-3.5" />}
@@ -178,7 +178,7 @@ export function SubmissionDetailsModal({ entry }: { entry: RecentFormSubmission 
         <DialogHeader className="border-t-4 border-sky-500 bg-card px-5 py-4">
           <DialogTitle className="flex items-start justify-between gap-3 text-left">
             <div className="flex items-center gap-3">
-              <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-sky-50 text-sky-700">
+              <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-info-muted text-info-muted-foreground">
                 <CheckCircle2 className="h-7 w-7" />
               </span>
               <span>

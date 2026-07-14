@@ -53,12 +53,13 @@ The Next.js App Router web application. Provides the UI for scholars, team leade
 ## Scripts
 
 ```bash
-npm run dev        # Next.js dev server with Turbopack (port 3000)
-npm run build      # Production build
-npm run start      # Production server
-npm run lint       # ESLint
-npm run test       # Vitest (TZ=America/New_York)
-npm run test:watch # Vitest watch mode
+npm run dev                 # Next.js dev server with Turbopack (port 3000)
+npm run build               # Production build
+npm run start               # Production server
+npm run lint                # ESLint
+npm run test                # Vitest (TZ=America/New_York)
+npm run test:watch          # Vitest watch mode
+npm run check:theme-safety  # Fail on theme-unsafe patterns in scanned paths (also runs in CI)
 ```
 
 ---
@@ -101,5 +102,9 @@ lib/supabase/server.ts  ← auth helpers (getCurrentUser, requireUser, etc.)
 - **shadcn/ui for UI primitives** — add new primitives via `npx shadcn@latest add <component>`, they land in `components/ui/`.
 - **Tailwind CSS only** — no inline styles, no CSS modules unless absolutely necessary.
 - **Fonts and global styles** — configured once in `app/layout.tsx` and `app/globals.css`.
+- **Colors live in `app/globals.css`** — light/dark CSS custom properties (semantic + domain tokens). Prefer utilities like `bg-background`, `text-muted-foreground`, `bg-success`, `text-destructive`. Do not hardcode product hex or Tailwind palette greens/reds for UI chrome.
+- **Soft status chips** — pair `bg-*-muted` with `text-*-muted-foreground` (never `text-*-foreground`). Prefer `Badge` variants `success` | `warning` | `info`. Solid fills use `bg-*` + `text-*-foreground`.
+- **Theme via `ThemeProvider`** — `next-themes` class strategy (`.dark` on `<html>`); toggle in dashboard header; `disableTransitionOnChange` so theme flips do not interpolate old colors.
+- **Theme-during-animation** — animated overlays/success screens must use semantic tokens (never `bg-white` / palette colors); prefer transform/opacity transitions; do **not** use `transition-all` on theme-dependent surfaces. New animated shells should ship a theme-safety test (`lib/theme/theme-safety.test-helpers.ts`). `/traffic` is the canonical example. CI runs `npm run check:theme-safety`.
 - **Tests run with `TZ=America/New_York`** — required because campus weeks are Eastern-time based.
 - **Hooks** (`hooks/`) — client-side only; single responsibility; no data-fetching hooks (prefer server components / `lib/server/data.ts`); no domain logic.

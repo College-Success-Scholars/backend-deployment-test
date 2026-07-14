@@ -5,11 +5,11 @@ function formatRequiredAsHours(mins: number): string {
 }
 
 function getPctBgClass(pct: number | null, isLate?: boolean): string {
-  if (isLate === true) return "bg-yellow-500/20";
+  if (isLate === true) return "bg-warning-muted";
   if (pct == null) return "bg-muted/50";
-  if (pct >= 90) return "bg-green-500/20";
-  if (pct >= 75) return "bg-yellow-500/20";
-  return "bg-red-500/20";
+  if (pct >= 90) return "bg-success-muted";
+  if (pct >= 75) return "bg-warning-muted";
+  return "bg-destructive/20";
 }
 
 type ProgressCellTimeProps = {

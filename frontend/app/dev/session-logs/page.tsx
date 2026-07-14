@@ -123,7 +123,7 @@ export default async function SessionLogsTestPage({ searchParams }: PageProps) {
       </div>
 
       {!hasLimit && (
-        <Card className="border-amber-500/50 bg-amber-500/5">
+        <Card className="border-warning/50 bg-warning-muted/50">
           <CardContent className="pt-6">
             <p className="text-sm">
               Select a <strong>week</strong> or enter <strong>UIDs</strong> (e.g.{" "}

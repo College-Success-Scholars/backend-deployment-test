@@ -1,6 +1,6 @@
 /**
  * Standalone card for overall form completion (all team leaders) with WHAF/MCF/WPL
- * donut charts. Late submissions are shown in the same yellow as the progress cell (yellow-500).
+ * donut charts. Late submissions use the warning token (same family as progress cell).
  */
 
 import {
@@ -9,14 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { cssColor } from "@/lib/theme/css-color";
 
-/** Red → purple gradient: red, blend, purple */
-const WHAF_CHART_COLOR = "#dc2626";
-const MCF_CHART_COLOR = "#b83d7a";
-const WPL_CHART_COLOR = "#9333ea";
-
-/** Same yellow as progress cell (bg-yellow-500/20 uses yellow-500) */
-const LATE_CHART_COLOR = "#eab308";
+const WHAF_CHART_COLOR = cssColor.formWahf;
+const MCF_CHART_COLOR = cssColor.formMcf;
+const WPL_CHART_COLOR = cssColor.formWpl;
+const LATE_CHART_COLOR = cssColor.warning;
 
 /** WHAF donut color; exported for use in all-scholars WHAF card. */
 export const FORM_COMPLETION_WHAF_COLOR = WHAF_CHART_COLOR;

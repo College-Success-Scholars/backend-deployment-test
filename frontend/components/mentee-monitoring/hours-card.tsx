@@ -8,16 +8,14 @@ import type { DailyHoursEntry } from "./utils"
 
 const COLOR_CONFIG = {
   emerald: {
-    progressIndicator: "[&_[data-slot=progress-indicator]]:bg-emerald-500",
-    bar: "bg-emerald-500",
-    statusDot: "text-emerald-500",
-    badgeBg: "border-amber-500/40 bg-amber-500/20 text-amber-950 dark:text-amber-100",
+    progressIndicator: "[&_[data-slot=progress-indicator]]:bg-success",
+    bar: "bg-success",
+    statusDot: "text-success",
   },
   sky: {
-    progressIndicator: "[&_[data-slot=progress-indicator]]:bg-sky-500",
-    bar: "bg-sky-500",
-    statusDot: "text-sky-500",
-    badgeBg: "border-amber-500/40 bg-amber-500/20 text-amber-950 dark:text-amber-100",
+    progressIndicator: "[&_[data-slot=progress-indicator]]:bg-info",
+    bar: "bg-info",
+    statusDot: "text-info",
   },
 } as const
 
@@ -58,7 +56,7 @@ export function HoursCard({
           <p className="text-2xl font-semibold tracking-tight">
             {fmt(completed)}&thinsp;/&thinsp;{fmt(total)} hrs
           </p>
-          <Badge variant="secondary" className={cn("shrink-0", cfg.badgeBg)}>
+          <Badge variant="warning" className="shrink-0">
             {fmt(remaining)} hrs left
           </Badge>
         </div>
@@ -69,7 +67,7 @@ export function HoursCard({
         />
 
         <p className="text-sm text-muted-foreground">
-          <span className={cn("mr-1 inline-block size-2 rounded-full", onTrack ? "bg-emerald-500" : "bg-orange-500")} />
+          <span className={cn("mr-1 inline-block size-2 rounded-full", onTrack ? "bg-success" : "bg-warning")} />
           {onTrack ? "On track this week" : "Behind target this week"}
         </p>
 
@@ -96,7 +94,7 @@ export function HoursCard({
                   >
                     <div
                       className={cn(
-                        "w-full max-w-8 rounded-sm transition-all",
+                        "w-full max-w-8 rounded-sm transition-[height]",
                         day.hours > 0 ? cfg.bar : "bg-muted",
                       )}
                       style={{ height: barHeight }}

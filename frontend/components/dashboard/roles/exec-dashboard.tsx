@@ -135,7 +135,7 @@ export function ExecDashboard() {
                 <Badge variant="outline">Delayed</Badge>
               </div>
               <div className="w-full bg-muted rounded-full h-2">
-                <div className="bg-yellow-500 h-2 rounded-full" style={{ width: "60%" }} />
+                <div className="bg-warning h-2 rounded-full" style={{ width: "60%" }} />
               </div>
             </div>
             <div className="space-y-2">
@@ -144,7 +144,7 @@ export function ExecDashboard() {
                 <Badge variant="outline">Complete</Badge>
               </div>
               <div className="w-full bg-muted rounded-full h-2">
-                <div className="bg-green-500 h-2 rounded-full" style={{ width: "100%" }} />
+                <div className="bg-success h-2 rounded-full" style={{ width: "100%" }} />
               </div>
             </div>
           </CardContent>

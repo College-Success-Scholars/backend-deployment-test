@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { cssColor, themeIntensity } from "@/lib/theme/css-color";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"] as const;
 /** Minutes from 8am to 10pm ET (14 hours) */
@@ -114,16 +115,7 @@ function slotsPerHour(slotMinutes: number): number {
   return Math.max(1, Math.floor(60 / slotMinutes));
 }
 
-function interpolateColor(hex: string, t: number): string {
-  if (t <= 0) return "#ffffff";
-  if (t >= 1) return hex;
-  const r = Math.round(255 + (parseInt(hex.slice(1, 3), 16) - 255) * t);
-  const g = Math.round(255 + (parseInt(hex.slice(3, 5), 16) - 255) * t);
-  const b = Math.round(255 + (parseInt(hex.slice(5, 7), 16) - 255) * t);
-  return `rgb(${r},${g},${b})`;
-}
-
-const TRAFFIC_COLOR = "#16a34a"; // green
+const TRAFFIC_COLOR = cssColor.traffic;
 const HEADER_ROW_HEIGHT_PX = 20;
 /** Base cell height at 15-min slots; scales up when slot size is larger (30 → 2×, 60 → 4×). */
 const BASE_CELL_ROW_HEIGHT_PX = 12;
@@ -255,18 +247,18 @@ export function TrafficHeatMap({
                     <div
                       key={`${d}-${slot}`}
                       className={`flex min-h-0 min-w-0 items-center justify-center rounded-sm border border-border/50 text-[9px] font-medium transition-colors ${
-                        isEmpty ? "bg-white dark:bg-zinc-900" : ""
+                        isEmpty ? "bg-card" : ""
                       }`}
                       style={
                         !isEmpty
                           ? {
-                              backgroundColor: interpolateColor(
+                              backgroundColor: themeIntensity(
                                 TRAFFIC_COLOR,
                                 maxVal > 0 ? count / maxVal : 0
                               ),
                               color:
                                 count > 0 && count / (maxVal || 1) > 0.5
-                                  ? "white"
+                                  ? "var(--success-foreground)"
                                   : "inherit",
                             }
                           : undefined
@@ -283,13 +275,12 @@ export function TrafficHeatMap({
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
           <span>
-            Scale: white (0) →{" "}
+            Scale: background (0) →{" "}
             <span
-              className="inline-block h-3 w-3 rounded"
-              style={{ backgroundColor: TRAFFIC_COLOR }}
+              className="inline-block h-3 w-3 rounded bg-traffic"
               aria-hidden
             />{" "}
-            traffic (#16a34a). {slotMinutes}-min slots.
+            traffic. {slotMinutes}-min slots.
           </span>
         </div>
       </CardContent>

@@ -197,9 +197,9 @@ function ThisWeekFormCard({
 
   const borderClass =
     status === "done"
-      ? "border-green-200 bg-green-50/30 dark:border-green-900 dark:bg-green-950/20"
+      ? "border-success/40 bg-success-muted/50"
       : status === "overdue"
-        ? "border-red-200 bg-red-50/30 dark:border-red-900 dark:bg-red-950/20"
+        ? "border-destructive/40 bg-destructive/10"
         : ""
 
   return (
@@ -337,10 +337,10 @@ function HistoryFormRow({
 
   const dotColor =
     status === "done" && !isLate
-      ? "bg-green-500"
+      ? "bg-success"
       : status === "done" && isLate
-        ? "bg-yellow-500"
-        : "bg-red-500"
+        ? "bg-warning"
+        : "bg-destructive"
 
   let description: string
   if (status === "done" && submittedAt) {
@@ -381,7 +381,7 @@ function StatusBadge({ status }: { status: FormStatusResult["status"] }) {
   switch (status) {
     case "done":
       return (
-        <Badge className="bg-green-100 text-green-800 border-green-200 dark:bg-green-900/40 dark:text-green-300 dark:border-green-800">
+        <Badge variant="success">
           Done
         </Badge>
       )
@@ -651,7 +651,7 @@ function WahfTabBody({ row }: { row: WahfRow | null }) {
                 key={course}
                 className="overflow-hidden rounded-lg border border-border bg-background"
               >
-                <div className="border-b border-border bg-[#F9F8F3] px-3 py-2 font-semibold dark:bg-muted/50">
+                <div className="border-b border-border bg-muted/50 px-3 py-2 font-semibold">
                   {course}
                 </div>
                 <div className="divide-y divide-border">
@@ -759,7 +759,7 @@ function WplTabBody({ row }: { row: WplRow | null }) {
           Explanation / notes
         </p>
         {explanation ? (
-          <div className="rounded-lg border border-border bg-[#FAF8F0] px-3 py-3 text-foreground dark:bg-muted/40">
+          <div className="rounded-lg border border-border bg-muted/40 px-3 py-3 text-foreground">
             {explanation}
           </div>
         ) : (
@@ -837,7 +837,7 @@ function McfTabBody({ row }: { row: McfRow | null }) {
           Meeting notes
         </p>
         {notes ? (
-          <div className="rounded-lg border border-border bg-[#FAF8F0] px-3 py-3 text-foreground dark:bg-muted/40">
+          <div className="rounded-lg border border-border bg-muted/40 px-3 py-3 text-foreground">
             {notes}
           </div>
         ) : (

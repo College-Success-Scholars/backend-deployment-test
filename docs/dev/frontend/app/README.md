@@ -21,9 +21,9 @@ Next.js App Router directory. Every `page.tsx`, `layout.tsx`, and `route.ts` her
 
 | File | Source Link | Description |
 |------|-------------|-------------|
-| `layout.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/layout.tsx) | Root layout — fonts (Geist), metadata, `<Toaster>`, Vercel Analytics, wraps entire app |
+| `layout.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/layout.tsx) | Root layout — fonts (Geist), `ThemeProvider`, themed Toaster, Vercel Analytics, wraps entire app |
 | `page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/page.tsx) | Landing page — shows hero for unauthenticated users, redirects authenticated users to `/dashboard` |
-| `globals.css` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/globals.css) | Global CSS — Tailwind base, CSS custom properties for theme tokens |
+| `globals.css` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/globals.css) | Global CSS — Tailwind base, light/dark CSS custom properties (semantic + domain theme tokens) |
 
 ---
 
@@ -57,5 +57,7 @@ Next.js App Router directory. Every `page.tsx`, `layout.tsx`, and `route.ts` her
 - **Auth gates in pages** — call `requireUser()`, `requireTeamLeaderOrAbove()`, or `requireDeveloper()` from `lib/supabase/server.ts` at the top of protected pages.
 - **Data fetching in pages/layouts** — pages call `lib/server/data.ts` or `lib/server/api-client.ts`; components receive data as props.
 - **No global state** — do not use React context or global stores for data that can be fetched server-side.
-- **`globals.css` is the only global stylesheet** — all component styles use Tailwind utility classes.
+- **`globals.css` is the only global stylesheet** — all component styles use Tailwind utility classes. Light/dark token pairs (`:root` / `.dark`) own product colors.
+- **Root layout owns theme** — wrap the app in `ThemeProvider` (`attribute="class"`, `disableTransitionOnChange`); mount the themed Sonner toaster here.
+- **`/traffic` is the theme-safe animation reference** — success/check-in UI uses semantic tokens only; theme-safety Vitest coverage + `npm run check:theme-safety` (CI) scan this tree.
 - **`layout.tsx` at root level only** — avoid deep nested layouts unless there is a clear shared UI shell.

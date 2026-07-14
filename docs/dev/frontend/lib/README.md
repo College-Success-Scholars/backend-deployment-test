@@ -43,6 +43,7 @@ Symbol catalogs: [API Reference](../../../reference/README.md).
 | `format/` | _(hub)_ | Both | Display formatting utilities |
 | `dev/` | _(hub)_ | Both | Developer helpers (`effective-uid.ts`) |
 | `dashboard/` | _(hub)_ | Both | Dashboard activity-log presentation helpers |
+| `theme/` | _(hub)_ | Both | Theme CSS var helpers (`css-color.ts`) and theme-safety test helpers |
 
 ---
 
@@ -66,6 +67,7 @@ Symbol catalogs: [API Reference](../../../reference/README.md).
 - **`import "server-only"` in server modules** — any module in `lib/server/` and `lib/supabase/server.ts` must have this as its first import.
 - **No Supabase domain queries outside `lib/server/`** — Supabase client from `lib/supabase/` is for auth only (session, user identity). Domain data comes from the backend via `lib/server/api-client.ts`.
 - **`lib/utils.ts` is for generic utilities only** — `cn()`, type guards, etc. Domain logic goes in subdirectories.
+- **`lib/theme/`** — `css-color.ts` exports `var(--…)` references for charts; `theme-safety.test-helpers.ts` asserts animated/product UI stays free of hardcoded palette/`transition-all` patterns (pair with `npm run check:theme-safety`).
 - **Types in `lib/types/`** — types only (no runtime logic); one file per domain; match backend model names where possible; update when API response shapes change; do not blind-generate from Supabase schema.
 - **Formatting in `lib/format/`** — pure display helpers (no React, no business totals/status/risk); prefer `shared/dist/time.js` for time.
 - **`lib/client/`** — browser only (no `server-only`, no `next/headers`); token via Supabase browser `getSession()`; mirror `lib/server/data.ts` names when adding client equivalents.
