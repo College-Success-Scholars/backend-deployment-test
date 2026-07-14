@@ -67,7 +67,7 @@ These are **not** on the complete-profile form. They are initialized to safe sch
 
 - **UI role** — `resolveUserRole()` in `frontend/lib/auth.ts` maps `program_role: "scholar"` + `app_role: null` → scholar nav (no Memo link)
 - **Memo API** — `GET /api/memo/page-data`, `/weekly`, `POST /refresh-stats` require `requireTeamLeaderOrAbove`
-- **Memo pages** — `/dashboard/memo`, `/dashboard/memo-legacy` call `requireTeamLeaderOrAbove()` server-side
+- **Memo pages** — `/dashboard/memo`, `/dashboard/memo-legacy` redirect to `/dashboard` when `canAccessWeeklyMemo(getCurrentProfile())` is false (effective `/api/auth/me` role, including acting-as)
 
 ## Supabase dependencies
 

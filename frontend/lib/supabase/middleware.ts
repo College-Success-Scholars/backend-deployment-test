@@ -21,7 +21,8 @@ import { getSupabasePublicKey } from "./public-key";
 /**
  * Refreshes the Supabase auth session from request cookies and enforces login
  * for protected routes. Unauthenticated requests to non-public paths are
- * redirected to `/auth/login`. Public paths: `/`, `/auth/*`, `/traffic`, and
+ * redirected to `/auth/login`. Public paths: `/`, `/auth/*`, `/traffic` (kiosk
+ * check-in for anyone, signed-in or not — no role redirect on this path), and
  * static assets (`/_next`, favicon, common image/font extensions).
  *
  * Side effects: reads session cookies from the request and may write refreshed

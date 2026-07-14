@@ -33,6 +33,7 @@ Flow reminder:
 | CORS / browser blocks API | `CORS_ORIGIN` ≠ page origin | `backend/.env` → `CORS_ORIGIN=http://localhost:3000` ([Day 0](day-0-setup.md)) |
 | Mutation fails while “acting as” someone | `rejectWritesWhenActing` denylist | Switch to **My profile** for writes; see [middleware README](../backend/src/middleware/README.md) |
 | Scholar can’t open Memo / gets redirected | Role gate (`requireTeamLeaderOrAbove` or frontend guard) | Expected for scholars — not a broken JWT |
+| Scholar / anyone blocked from `/traffic` | Incorrect auth or role redirect on the kiosk | **`/traffic` is always public** — remove any gate; see [app/traffic README](../frontend/app/traffic/README.md) |
 | Sign-up confirm link “No token hash or type” | Supabase email template not using `token_hash` + `type` | [Auth README — email template](../frontend/app/auth/README.md) |
 | Profile create / complete-profile errors | UMD email rules or profiles insert shape | [Sign-up flow](../../agents/general-sign-up-flow.md) |
 

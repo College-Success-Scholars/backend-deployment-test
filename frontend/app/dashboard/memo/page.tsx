@@ -4,7 +4,6 @@ import { WeeklyMemoAsyncContent } from "./_components/weekly-memo-async-content"
 import { WeeklyMemoDataSkeleton } from "./_components/weekly-memo-data-skeleton"
 import { WeeklyMemoHeaderShell } from "./_components/weekly-memo-header-shell"
 import { WeeklyMemoNavProvider } from "./_components/weekly-memo-nav-context"
-import { requireTeamLeaderOrAbove } from "@/lib/supabase/server"
 
 export const dynamic = "force-dynamic"
 
@@ -13,7 +12,7 @@ type PageProps = {
 }
 
 export default async function WeeklyMemoPage({ searchParams }: PageProps) {
-  await requireTeamLeaderOrAbove();
+  // Access redirect: app/dashboard/memo/layout.tsx
   const { week } = await searchParams
 
   return (

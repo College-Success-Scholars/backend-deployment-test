@@ -7,6 +7,7 @@ Schema for developer test-profile switching is applied **manually** in the [Supa
 1. [`001_dev_test_profiles.sql`](001_dev_test_profiles.sql) — `is_developer()`, `dev_test_profiles` table, RLS
 2. [`002_rls_developer_read.sql`](002_rls_developer_read.sql) — developer SELECT policies on data tables
 3. [`003_seed_test_profiles.sql`](003_seed_test_profiles.sql) — five persona rows (edit `REPLACE_*` uids first)
+4. [`004_traffic_public_insert.sql`](004_traffic_public_insert.sql) — optional: INSERT-only RLS for public `/traffic` kiosk (no anon SELECT)
 
 ## Before seeding
 

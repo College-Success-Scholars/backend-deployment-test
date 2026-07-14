@@ -1,6 +1,15 @@
-import { requireTeamLeaderOrAbove } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { canAccessWeeklyMemo } from "@/lib/auth";
+import { getCurrentProfile } from "@/lib/server/queries";
 
-export default async function MemoLayout({ children }: { children: React.ReactNode }) {
-  await requireTeamLeaderOrAbove();
-  return <>{children}</>;
+export default async function LegacyMemoLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const profile = await getCurrentProfile();
+  if (!canAccessWeeklyMemo(profile)) {
+    redirect("/dashboard");
+  }
+  return children;
 }

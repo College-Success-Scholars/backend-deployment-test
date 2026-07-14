@@ -13,9 +13,10 @@
  * - requireUser(): get user or throw (hard auth gate)
  * - requireUserWithProfile(): get user + profile or throw
  * - requireTeamLeaderOrAbove(): get user or redirect to /dashboard
+ *   (effective role via /api/auth/me so acting-as personas redirect correctly)
  * - requireDeveloper(): get developer user or redirect to /dashboard
  * - getDeveloperUser(): soft check for developer role
- * - getTeamLeaderOrAboveUser(): soft check for team_leader+ role
+ * - getTeamLeaderOrAboveUser(): soft check for team_leader+ role (effective profile)
  *
  * ## What belongs here
  * - Server-side Supabase auth client and all auth helper functions
@@ -30,8 +31,10 @@ import { createServerClient } from "@supabase/ssr";
 import type { User } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { canAccessWeeklyMemo } from "@/lib/auth";
+import { getCurrentUser as getAuthMe } from "@/lib/server/queries";
 import { getSupabasePublicKey } from "./public-key";
-import { hasRoleAtLeast, mergeProfileWithRoster } from "../../../shared/dist/auth.js";
+import { mergeProfileWithRoster } from "../../../shared/dist/auth.js";
 
 /** Row shape from `public.profiles` (and joined `user_roster`) as returned by getCurrentUserWithProfile(). */
 export type ProfilesRow = {
@@ -154,11 +157,21 @@ export async function requireUser(): Promise<User> {
 /**
  * Returns the current user if they have team_leader access or higher, or null.
  * Hierarchy: null < team_leader < developer. Use for routes that require team_leader or developer.
+ *
+ * Role is taken from GET /api/auth/me (effective profile) so developer "acting as"
+ * personas are honored the same way as sidebar gating and backend middleware.
+ * Falls back to the Supabase profiles row when /api/auth/me is unavailable.
  */
 export async function getTeamLeaderOrAboveUser(): Promise<User | null> {
-  const { user, profile } = await getCurrentUserWithProfile();
+  const { user, profile: supabaseProfile } = await getCurrentUserWithProfile();
   if (!user) return null;
-  return hasRoleAtLeast(profile?.app_role ?? null, "team_leader") ? user : null;
+
+  const me = await getAuthMe();
+  const effectiveProfile = (me?.profile ?? supabaseProfile) as {
+    app_role?: string | null;
+  } | null;
+
+  return canAccessWeeklyMemo(effectiveProfile) ? user : null;
 }
 
 /**

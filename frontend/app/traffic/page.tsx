@@ -1,10 +1,9 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { createClient } from "@supabase/supabase-js"
-import { getSupabasePublicKey } from "@/lib/supabase/public-key"
 import { toast } from "sonner"
 
+import { recordTrafficEntry } from "@/lib/server/actions"
 import {
   TrafficCheckInForm,
   type DurationChoice,
@@ -25,10 +24,6 @@ export default function TrafficPage() {
   const [successExitMinutes, setSuccessExitMinutes] = useState<number | null>(null)
 
   const uidInputRef = useRef<HTMLInputElement>(null)
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = getSupabasePublicKey()
-  const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null
 
   useEffect(() => {
     uidInputRef.current?.focus()
@@ -82,23 +77,13 @@ export default function TrafficPage() {
 
     setIsSubmitting(true)
     try {
-      if (!supabase) {
-        toast.error("Supabase is not configured. Please check environment variables.")
-        return
-      }
+      const result = await recordTrafficEntry({
+        uid,
+        duration_min: durationMin,
+      })
 
-      const { error } = await supabase.from("traffic").insert([
-        {
-          uid: uid,
-          created_at: new Date().toISOString(),
-          traffic_type: "entry",
-          duration_min: durationMin,
-        },
-      ])
-
-      if (error) {
-        console.error("Error inserting traffic row:", error)
-        toast.error("Failed to submit traffic entry. Please try again.")
+      if ("error" in result && result.error) {
+        toast.error(result.error)
         return
       }
 

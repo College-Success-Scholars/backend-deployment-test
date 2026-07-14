@@ -96,7 +96,7 @@ lib/supabase/server.ts  ← auth helpers (getCurrentUser, requireUser, etc.)
 
 - **Server Components by default** — only add `"use client"` when you need browser APIs, event handlers, or React state.
 - **Domain data comes from the backend** — use `lib/server/api-client.ts` (server) or `lib/client/api-client.ts` (client). Do not query Supabase tables directly for domain data.
-- **Auth via `lib/supabase/server.ts`** — use `requireUser()`, `requireTeamLeaderOrAbove()`, `requireDeveloper()` in page components that need auth guards.
+- **Auth via `lib/supabase/server.ts`** — use `requireUser()`, `requireTeamLeaderOrAbove()`, `requireDeveloper()` in page components that need auth guards. **Do not** apply these (or role redirects) to `/traffic` — that route is a public foot-traffic kiosk ([app/traffic README](app/traffic/README.md)).
 - **`server-only`** — add `import "server-only"` to any module that must not be bundled for the client.
 - **No business logic in pages** — pages orchestrate data fetching and render components. Logic belongs in `lib/` or components.
 - **shadcn/ui for UI primitives** — add new primitives via `npx shadcn@latest add <component>`, they land in `components/ui/`.
