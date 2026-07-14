@@ -1,6 +1,6 @@
 # tests/
 
-**Location:** [`backend/src/tests/`](../../../../../backend/src/tests/)  
+**Location:** [`backend/src/tests/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/tests)  
 **Docs:** `docs/dev/backend/src/tests/README.md`
 
 ## Navigation
@@ -19,11 +19,11 @@ Vitest integration tests for the backend API. Tests import the Express `app` dir
 
 | File | Source Link | Description |
 |------|-------------|-------------|
-| `health.test.ts` | [source](../../../../../backend/src/tests/health.test.ts) | Tests the `GET /` health check endpoint |
-| `auth.test.ts` | [source](../../../../../backend/src/tests/auth.test.ts) | Tests auth middleware behavior (unauthorized, forbidden, valid token) |
-| `user.test.ts` | [source](../../../../../backend/src/tests/user.test.ts) | Tests user data endpoints |
-| `session-log.test.ts` | [source](../../../../../backend/src/tests/session-log.test.ts) | Tests session log endpoints |
-| `memo.test.ts` | [source](../../../../../backend/src/tests/memo.test.ts) | Tests memo endpoints |
+| `health.test.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/tests/health.test.ts) | Tests the `GET /` health check endpoint |
+| `auth.test.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/tests/auth.test.ts) | Tests auth middleware behavior (unauthorized, forbidden, valid token) |
+| `user.test.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/tests/user.test.ts) | Tests user data endpoints |
+| `session-log.test.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/tests/session-log.test.ts) | Tests session log endpoints |
+| `memo.test.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/tests/memo.test.ts) | Tests memo endpoints |
 
 ---
 
@@ -34,7 +34,7 @@ npm run test          # vitest run (single pass)
 npm run test:watch    # vitest (watch mode)
 ```
 
-Tests are configured in [`backend/vitest.config.ts`](../../../../../backend/vitest.config.ts).
+Tests are configured in [`backend/vitest.config.ts`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/vitest.config.ts).
 
 ---
 

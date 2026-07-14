@@ -1,6 +1,6 @@
 # Scripts
 
-**Location:** [`scripts/`](../../../scripts/)  
+**Location:** [`scripts/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts)  
 **Docs:** `docs/dev/scripts/README.md`
 
 ## Navigation
@@ -19,12 +19,12 @@ Shell scripts for deployment validation and operational tasks. These run outside
 
 | File | Source Link | Description |
 |------|-------------|-------------|
-| `dev.sh` | [source](../../../scripts/dev.sh) | Start local full-stack development (shared watch + backend + frontend) |
-| `smoke-test.sh` | [source](../../../scripts/smoke-test.sh) | Deployment health-check: tests health endpoint, auth gating, and CORS headers |
-| `alert.sh` | [source](../../../scripts/alert.sh) | Records an architectural alert to `docs/agents/alerts/` |
-| `resolve-alert.sh` | [source](../../../scripts/resolve-alert.sh) | Resolves an alert: logs the fix session via `log-agent-session.sh`, then deletes the alert file |
-| `log-agent-session.sh` | [source](../../../scripts/log-agent-session.sh) | Records an agent/AI session to `docs/agents/logs/`: who ran it, raw user prompt, stated purpose, agent response summary, and changed files |
-| `configure-supabase-confirm-email-template.sh` | [source](../../../scripts/configure-supabase-confirm-email-template.sh) | Patches Supabase **Confirm signup** email template so links use `token_hash` + `type` for `/auth/confirm` |
+| `dev.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/dev.sh) | Start local full-stack development (shared watch + backend + frontend) |
+| `smoke-test.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/smoke-test.sh) | Deployment health-check: tests health endpoint, auth gating, and CORS headers |
+| `alert.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/alert.sh) | Records an architectural alert to `docs/agents/alerts/` |
+| `resolve-alert.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/resolve-alert.sh) | Resolves an alert: logs the fix session via `log-agent-session.sh`, then deletes the alert file |
+| `log-agent-session.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/log-agent-session.sh) | Records an agent/AI session to `docs/agents/logs/`: who ran it, raw user prompt, stated purpose, agent response summary, and changed files |
+| `configure-supabase-confirm-email-template.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/configure-supabase-confirm-email-template.sh) | Patches Supabase **Confirm signup** email template so links use `token_hash` + `type` for `/auth/confirm` |
 
 ---
 

@@ -81,7 +81,10 @@ All routes under `/api/auth` require **requireAuth**.
 ### `GET /api/auth/semester`
 
 **Auth:** requireAuth
-**Description:** Returns the currently active semester. Alias: `/api/auth/active-semester`.
+**Description:** Returns the currently active semester from the Supabase `semesters` table. Alias: `/api/auth/active-semester`.
+
+**Use sparingly.** Prefer the server-owned time frame — the shared campus week calendar (`shared/time-config.ts` / `shared/campus-calendar`) — for week bounds, navigation, and data queries. Use this endpoint when the server-owned time frame does not make sense (e.g. looking at historical data, or the collection year has not started yet), or when you need the DB semester row (e.g. `semester_id` or legacy ISO-week clamping) — not as the primary calendar source for the current collection year.
+
 **Request:** None
 **Response:**
 ```json
@@ -93,7 +96,7 @@ All routes under `/api/auth` require **requireAuth**.
 ### `GET /api/auth/active-semester`
 
 **Auth:** requireAuth
-**Description:** Same as `GET /api/auth/semester`.
+**Description:** Same as `GET /api/auth/semester` (including the same sparingly / prefer server-owned time frame guidance).
 
 ---
 

@@ -37,6 +37,12 @@ export type DevTestProfileListItem = {
   app_role: string | null;
 };
 
+/**
+ * Fetches GET /api/auth/semester. Use sparingly — prefer the server-owned time
+ * frame (shared campus week calendar) for week bounds and navigation. Use this
+ * when that time frame does not make sense (e.g. historical data, or the
+ * collection year has not started yet).
+ */
 export const getActiveSemester = cache(async () => {
   return backendGet<{ id: number; iso_week_offset: number; start_date: string; end_date: string }>("/api/auth/semester");
 });

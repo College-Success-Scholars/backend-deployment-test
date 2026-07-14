@@ -1,6 +1,6 @@
 # Backend
 
-**Location:** `[backend/](../../../backend/)`  
+**Location:** [`backend/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend)  
 **Docs:** `docs/dev/backend/README.md`
 
 ## Navigation
@@ -22,11 +22,11 @@ The Express + TypeScript REST API server. It validates user JWTs from Supabase, 
 
 | File               | Source Link                                 | Description                                                           |
 | ------------------ | ------------------------------------------- | --------------------------------------------------------------------- |
-| `package.json`     | [source](../../../backend/package.json)     | NPM workspace config, scripts, and dependencies                       |
-| `tsconfig.json`    | [source](../../../backend/tsconfig.json)    | TypeScript compiler config (ESM, Node 22 target)                      |
-| `vitest.config.ts` | [source](../../../backend/vitest.config.ts) | Vitest test runner configuration                                      |
-| `railway.toml`     | [source](../../../backend/railway.toml)     | Railway deployment configuration                                      |
-| `API.md`           | [source](../../../backend/API.md)           | Comprehensive REST API reference (all endpoints, auth levels, params) |
+| `package.json`     | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/package.json)     | NPM workspace config, scripts, and dependencies                       |
+| `tsconfig.json`    | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/tsconfig.json)    | TypeScript compiler config (ESM, Node 22 target)                      |
+| `vitest.config.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/vitest.config.ts) | Vitest test runner configuration                                      |
+| `railway.toml`     | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/railway.toml)     | Railway deployment configuration                                      |
+| `API.md`           | [REST API (Pages)](api.md) · [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/API.md) | Comprehensive REST API reference (all endpoints, auth levels, params) |
 
 
 ---

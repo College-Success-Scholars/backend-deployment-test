@@ -1,0 +1,82 @@
+name: Docs
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - "docs/**"
+      - "shared/**/*.ts"
+      - "backend/src/**"
+      - "backend/API.md"
+      - "frontend/lib/**"
+      - "frontend/components/personal/utils.ts"
+      - "frontend/components/mentee-monitoring/utils.ts"
+      - "mkdocs.yml"
+      - "typedoc.json"
+      - "tsconfig.docs.json"
+      - "requirements-docs.txt"
+      - "package.json"
+      - "package-lock.json"
+      - "scripts/docs-*.mjs"
+      - "scripts/check-docs-api-coverage.mjs"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Node docs tooling
+        run: npm ci
+
+      - name: Install MkDocs
+        run: pip install -r requirements-docs.txt
+
+      - name: Build shared (types for imports)
+        run: |
+          npm ci --prefix shared
+          npm run build --prefix shared
+
+      - name: Prepare docs (API mirror, link rewrite, TypeDoc, indexes)
+        run: npm run docs:prepare
+
+      - name: API coverage check
+        run: npm run docs:coverage
+
+      - name: MkDocs build
+        run: mkdocs build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

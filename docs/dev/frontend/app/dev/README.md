@@ -1,6 +1,6 @@
 # app/dev
 
-**Location:** [`frontend/app/dev/`](../../../../../frontend/app/dev/)  
+**Location:** [`frontend/app/dev/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dev)  
 **Docs:** `docs/dev/frontend/app/dev/README.md`
 
 ## Navigation

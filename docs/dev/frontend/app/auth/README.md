@@ -1,6 +1,6 @@
 # app/auth
 
-**Location:** [`frontend/app/auth/`](../../../../../frontend/app/auth/)  
+**Location:** [`frontend/app/auth/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/auth)  
 **Docs:** `docs/dev/frontend/app/auth/README.md`
 
 ## Navigation
@@ -19,15 +19,15 @@ Authentication UI routes. All pages in this directory handle unauthenticated flo
 
 | File | Source Link | URL | Description |
 |------|-------------|-----|-------------|
-| `login/page.tsx` | [source](../../../../../frontend/app/auth/login/page.tsx) | `/auth/login` | Login form with university image background |
-| `sign-up/page.tsx` | [source](../../../../../frontend/app/auth/sign-up/page.tsx) | `/auth/sign-up` | New user registration |
-| `sign-up-success/page.tsx` | [source](../../../../../frontend/app/auth/sign-up-success/page.tsx) | `/auth/sign-up-success` | Post-signup confirmation message |
-| `forgot-password/page.tsx` | [source](../../../../../frontend/app/auth/forgot-password/page.tsx) | `/auth/forgot-password` | Send password reset email |
-| `set-password/page.tsx` | [source](../../../../../frontend/app/auth/set-password/page.tsx) | `/auth/set-password` | Set initial password (new account from invite) |
-| `update-password/page.tsx` | [source](../../../../../frontend/app/auth/update-password/page.tsx) | `/auth/update-password` | Change existing password |
-| `confirm/route.ts` | [source](../../../../../frontend/app/auth/confirm/route.ts) | `/auth/confirm` | Email confirmation callback handler (GET with token) |
-| `complete-profile/page.tsx` | [source](../../../../../frontend/app/auth/complete-profile/page.tsx) | `/auth/complete-profile` | Scholar self-service profile creation after sign-up |
-| `error/page.tsx` | [source](../../../../../frontend/app/auth/error/page.tsx) | `/auth/error` | Auth error display page |
+| `login/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/auth/login/page.tsx) | `/auth/login` | Login form with university image background |
+| `sign-up/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/auth/sign-up/page.tsx) | `/auth/sign-up` | New user registration |
+| `sign-up-success/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/auth/sign-up-success/page.tsx) | `/auth/sign-up-success` | Post-signup confirmation message |
+| `forgot-password/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/auth/forgot-password/page.tsx) | `/auth/forgot-password` | Send password reset email |
+| `set-password/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/auth/set-password/page.tsx) | `/auth/set-password` | Set initial password (new account from invite) |
+| `update-password/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/auth/update-password/page.tsx) | `/auth/update-password` | Change existing password |
+| `confirm/route.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/auth/confirm/route.ts) | `/auth/confirm` | Email confirmation callback handler (GET with token) |
+| `complete-profile/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/auth/complete-profile/page.tsx) | `/auth/complete-profile` | Scholar self-service profile creation after sign-up |
+| `error/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/auth/error/page.tsx) | `/auth/error` | Auth error display page |
 
 ---
 

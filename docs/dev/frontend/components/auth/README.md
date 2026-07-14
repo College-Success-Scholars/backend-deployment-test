@@ -1,6 +1,6 @@
 # components/auth
 
-**Location:** [`frontend/components/auth/`](../../../../../frontend/components/auth/)  
+**Location:** [`frontend/components/auth/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/components/auth)  
 **Docs:** `docs/dev/frontend/components/auth/README.md`
 
 ## Navigation

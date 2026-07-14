@@ -1,0 +1,101 @@
+site_name: CSS Atlas Docs
+site_description: Developer handbook and API reference for CSS Atlas
+site_url: https://college-success-scholars.github.io/css-atlas-v2/
+repo_url: https://github.com/College-Success-Scholars/css-atlas-v2
+repo_name: css-atlas-v2
+edit_uri: edit/develop/docs/
+
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - search.suggest
+    - content.code.copy
+    - toc.follow
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+exclude_docs: |
+  agents/logs/**
+  agents/alerts/**
+  **/pr_template/**
+  **/*.sql
+  **/*.html
+
+nav:
+  - Home: dev/README.md
+  - Backend:
+      - Overview: dev/backend/README.md
+      - REST API: dev/backend/api.md
+      - src: dev/backend/src/README.md
+      - Controllers: dev/backend/src/controllers/README.md
+      - Services: dev/backend/src/services/README.md
+      - Routes: dev/backend/src/routes/README.md
+      - Models: dev/backend/src/models/README.md
+      - Middleware: dev/backend/src/middleware/README.md
+      - Tests: dev/backend/src/tests/README.md
+  - Frontend:
+      - Overview: dev/frontend/README.md
+      - App:
+          - Overview: dev/frontend/app/README.md
+          - Auth: dev/frontend/app/auth/README.md
+          - Dashboard: dev/frontend/app/dashboard/README.md
+          - Memo: dev/frontend/app/dashboard/memo/README.md
+          - Dev routes: dev/frontend/app/dev/README.md
+      - Components:
+          - Overview: dev/frontend/components/README.md
+          - UI: dev/frontend/components/ui/README.md
+          - Layout: dev/frontend/components/layout/README.md
+          - Auth: dev/frontend/components/auth/README.md
+          - Data display: dev/frontend/components/data-display/README.md
+          - Charts: dev/frontend/components/charts/README.md
+          - Dashboard: dev/frontend/components/dashboard/README.md
+          - Roles: dev/frontend/components/dashboard/roles/README.md
+          - Widgets: dev/frontend/components/dashboard/widgets/README.md
+          - Mentee monitoring: dev/frontend/components/mentee-monitoring/README.md
+          - Personal: dev/frontend/components/personal/README.md
+          - Settings: dev/frontend/components/settings/README.md
+          - Marketing: dev/frontend/components/marketing/README.md
+          - Dev: dev/frontend/components/dev/README.md
+      - Lib:
+          - Overview: dev/frontend/lib/README.md
+          - Server: dev/frontend/lib/server/README.md
+          - Client: dev/frontend/lib/client/README.md
+          - Supabase: dev/frontend/lib/supabase/README.md
+          - Auth: dev/frontend/lib/auth/README.md
+          - Types: dev/frontend/lib/types/README.md
+          - Format: dev/frontend/lib/format/README.md
+          - Dev: dev/frontend/lib/dev/README.md
+          - Dashboard: dev/frontend/lib/dashboard/README.md
+      - Hooks: dev/frontend/hooks/README.md
+      - Legacy: dev/frontend/legacy/README.md
+  - Shared:
+      - Overview: dev/shared/README.md
+      - Source: dev/shared/src/README.md
+  - Scripts: dev/scripts/README.md
+  - Supabase: dev/supabase/README.md
+  - Agents:
+      - Index: dev/agents/README.md
+      - Codebase notes: agents/codebase-notes.md
+      - Domain: agents/domain.md
+      - Ubiquitous language: agents/ubiquitous_language.md
+      - Issue tracker: agents/issue-tracker.md
+      - Triage labels: agents/triage-labels.md
+      - Sign-up flow: agents/general-sign-up-flow.md
+  - API Reference: reference/README.md

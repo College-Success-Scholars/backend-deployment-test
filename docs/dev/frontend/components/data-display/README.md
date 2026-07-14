@@ -1,6 +1,6 @@
 # components/data-display
 
-**Location:** [`frontend/components/data-display/`](../../../../../frontend/components/data-display/)  
+**Location:** [`frontend/components/data-display/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/components/data-display)  
 **Docs:** `docs/dev/frontend/components/data-display/README.md`
 
 ## Navigation

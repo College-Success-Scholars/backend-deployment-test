@@ -1,6 +1,6 @@
 # components/dashboard/widgets
 
-**Location:** [`frontend/components/dashboard/widgets/`](../../../../../../frontend/components/dashboard/widgets/)  
+**Location:** [`frontend/components/dashboard/widgets/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/components/dashboard/widgets)  
 **Docs:** `docs/dev/frontend/components/dashboard/widgets/README.md`
 
 ## Navigation

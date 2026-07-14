@@ -1,6 +1,6 @@
 # frontend/app
 
-**Location:** [`frontend/app/`](../../../../frontend/app/)  
+**Location:** [`frontend/app/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app)  
 **Docs:** `docs/dev/frontend/app/README.md`
 
 ## Navigation
@@ -21,9 +21,9 @@ Next.js App Router directory. Every `page.tsx`, `layout.tsx`, and `route.ts` her
 
 | File | Source Link | Description |
 |------|-------------|-------------|
-| `layout.tsx` | [source](../../../../frontend/app/layout.tsx) | Root layout — fonts (Geist), metadata, `<Toaster>`, Vercel Analytics, wraps entire app |
-| `page.tsx` | [source](../../../../frontend/app/page.tsx) | Landing page — shows hero for unauthenticated users, redirects authenticated users to `/dashboard` |
-| `globals.css` | [source](../../../../frontend/app/globals.css) | Global CSS — Tailwind base, CSS custom properties for theme tokens |
+| `layout.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/layout.tsx) | Root layout — fonts (Geist), metadata, `<Toaster>`, Vercel Analytics, wraps entire app |
+| `page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/page.tsx) | Landing page — shows hero for unauthenticated users, redirects authenticated users to `/dashboard` |
+| `globals.css` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/globals.css) | Global CSS — Tailwind base, CSS custom properties for theme tokens |
 
 ---
 

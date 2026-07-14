@@ -1,6 +1,6 @@
 # backend/src
 
-**Location:** [`backend/src/`](../../../../backend/src/)  
+**Location:** [`backend/src/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src)  
 **Docs:** `docs/dev/backend/src/README.md`
 
 ## Navigation
@@ -21,8 +21,8 @@ The root of all backend TypeScript source code. Contains the application entry p
 
 | File | Source Link | Description |
 |------|-------------|-------------|
-| `server.ts` | [source](../../../../backend/src/server.ts) | Process entry point — validates env vars, starts HTTP server, handles graceful shutdown |
-| `app.ts` | [source](../../../../backend/src/app.ts) | Express app factory — registers CORS, JSON parsing, middleware, all route groups, global error handler |
+| `server.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/server.ts) | Process entry point — validates env vars, starts HTTP server, handles graceful shutdown |
+| `app.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/app.ts) | Express app factory — registers CORS, JSON parsing, middleware, all route groups, global error handler |
 
 ---
 

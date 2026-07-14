@@ -1,6 +1,6 @@
 # Agent Documentation
 
-**Location:** [`docs/agents/`](../../../docs/agents/)  
+**Location:** [`docs/agents/`](../../agents/codebase-notes.md)  
 **Docs:** `docs/dev/agents/README.md`
 
 ## Navigation
@@ -17,13 +17,14 @@ Knowledge base for AI coding agents working in this repository. Contains codebas
 
 ## Files
 
-| File | Source Link | Description |
+| File | Docs Link | Description |
 |------|-------------|-------------|
-| `codebase-notes.md` | [source](../../../docs/agents/codebase-notes.md) | Architecture overview, request flow, auth pattern, backend/frontend how-it-works |
-| `domain.md` | [source](../../../docs/agents/domain.md) | How to read and use domain documentation files |
-| `ubiquitous_language.md` | [source](../../../docs/agents/ubiquitous_language.md) | Domain glossary — authoritative definitions for all domain terms |
-| `issue-tracker.md` | [source](../../../docs/agents/issue-tracker.md) | Issue tracking conventions |
-| `triage-labels.md` | [source](../../../docs/agents/triage-labels.md) | Issue triage label definitions |
+| `codebase-notes.md` | [codebase-notes](../../agents/codebase-notes.md) | Architecture overview, request flow, auth pattern, backend/frontend how-it-works |
+| `domain.md` | [domain](../../agents/domain.md) | How to read and use domain documentation files |
+| `ubiquitous_language.md` | [ubiquitous_language](../../agents/ubiquitous_language.md) | Domain glossary — authoritative definitions for all domain terms |
+| `issue-tracker.md` | [issue-tracker](../../agents/issue-tracker.md) | Issue tracking conventions |
+| `triage-labels.md` | [triage-labels](../../agents/triage-labels.md) | Issue triage label definitions |
+| `general-sign-up-flow.md` | [general-sign-up-flow](../../agents/general-sign-up-flow.md) | Scholar onboarding / profile column matrix |
 
 ---
 

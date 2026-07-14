@@ -1,6 +1,6 @@
 # components/settings
 
-**Location:** [`frontend/components/settings/`](../../../../../frontend/components/settings/)  
+**Location:** [`frontend/components/settings/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/components/settings)  
 **Docs:** `docs/dev/frontend/components/settings/README.md`
 
 ## Navigation
@@ -19,7 +19,7 @@ Client component for the settings page. Handles user account settings interactio
 
 | File | Source Link | Description |
 |------|-------------|-------------|
-| `settings-client.tsx` | [source](../../../../../frontend/components/settings/settings-client.tsx) | Client component rendering the settings form and handling save/update interactions |
+| `settings-client.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/components/settings/settings-client.tsx) | Client component rendering the settings form and handling save/update interactions |
 
 ---
 

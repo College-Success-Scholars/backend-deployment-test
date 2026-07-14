@@ -308,7 +308,15 @@ export async function getMentees(req: AuthenticatedRequest, res: Response) {
   }
 }
 
-// GET /api/auth/active-semester
+/**
+ * GET /api/auth/semester and GET /api/auth/active-semester.
+ *
+ * Use sparingly — prefer the server-owned time frame (shared campus week calendar
+ * in shared/time-config + campus-calendar) for week bounds and queries. Use this
+ * when the server-owned time frame does not make sense (e.g. historical data, or
+ * the collection year has not started yet), or when you need the Supabase
+ * `semesters` row (semester_id / legacy ISO-week needs).
+ */
 export async function getActiveSemester(_req: AuthenticatedRequest, res: Response) {
   try {
     const supabase = getSupabaseClient();

@@ -1,6 +1,6 @@
 # components/dashboard/roles
 
-**Location:** [`frontend/components/dashboard/roles/`](../../../../../../frontend/components/dashboard/roles/)  
+**Location:** [`frontend/components/dashboard/roles/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/components/dashboard/roles)  
 **Docs:** `docs/dev/frontend/components/dashboard/roles/README.md`
 
 ## Navigation

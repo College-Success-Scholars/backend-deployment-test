@@ -1,6 +1,6 @@
 # frontend/legacy
 
-**Location:** [`frontend/legacy/`](../../../../frontend/legacy/)  
+**Location:** [`frontend/legacy/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/legacy)  
 **Docs:** `docs/dev/frontend/legacy/README.md`
 
 ## Navigation

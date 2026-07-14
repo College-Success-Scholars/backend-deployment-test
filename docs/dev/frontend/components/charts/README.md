@@ -1,6 +1,6 @@
 # components/charts
 
-**Location:** [`frontend/components/charts/`](../../../../../frontend/components/charts/)  
+**Location:** [`frontend/components/charts/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/components/charts)  
 **Docs:** `docs/dev/frontend/components/charts/README.md`
 
 ## Navigation

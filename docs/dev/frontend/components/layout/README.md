@@ -1,6 +1,6 @@
 # components/layout
 
-**Location:** [`frontend/components/layout/`](../../../../../frontend/components/layout/)  
+**Location:** [`frontend/components/layout/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/components/layout)  
 **Docs:** `docs/dev/frontend/components/layout/README.md`
 
 ## Navigation

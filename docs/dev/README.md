@@ -7,11 +7,11 @@
 
 | Area | Source | Docs |
 |------|--------|------|
-| [Backend](backend/README.md) | [`backend/`](../../backend/) | Express + TypeScript API |
-| [Shared](shared/README.md) | [`shared/`](../../shared/) | Shared TypeScript utilities |
-| [Frontend](frontend/README.md) | [`frontend/`](../../frontend/) | Next.js 16 web app |
-| [Scripts](scripts/README.md) | [`scripts/`](../../scripts/) | Dev/ops shell scripts |
-| [Agent Docs](agents/README.md) | [`docs/agents/`](../agents/) | AI agent knowledge base |
+| [Backend](backend/README.md) | [`backend/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend) | Express + TypeScript API |
+| [Shared](shared/README.md) | [`shared/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/shared) | Shared TypeScript utilities |
+| [Frontend](frontend/README.md) | [`frontend/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend) | Next.js 16 web app |
+| [Scripts](scripts/README.md) | [`scripts/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts) | Dev/ops shell scripts |
+| [Agent Docs](agents/README.md) | [`docs/agents/`](../agents/codebase-notes.md) | AI agent knowledge base |
 
 ---
 
@@ -130,11 +130,13 @@ npm run dev --prefix frontend   # port 3000
 
 The app uses a **campus week** numbering system (not ISO weeks), defined in `shared/time-config.ts`. Week 1 starts on a configurable `FALL_SEMESTER_FIRST_DAY`. Most data queries take a `weekNum` parameter (integer).
 
+This shared campus calendar is the **server-owned time frame** — use it for week bounds, navigation, and queries. Prefer it over `GET /api/auth/semester` / `GET /api/auth/active-semester` (and `getActiveSemester`), which should be used sparingly: when the server-owned time frame does not make sense (e.g. historical data, or the collection year has not started yet), or when a Supabase `semesters` row is required.
+
 ---
 
 ## Domain Vocabulary
 
-See [`docs/agents/ubiquitous_language.md`](../agents/ubiquitous_language.md) for the full glossary. Key terms:
+See [`ubiquitous_language.md`](../agents/ubiquitous_language.md) for the full glossary. Key terms:
 
 | Term | Meaning |
 |------|---------|
@@ -159,6 +161,7 @@ See [`docs/agents/ubiquitous_language.md`](../agents/ubiquitous_language.md) for
 6. **API responses wrap data** — all backend routes return `{ data: ... }` or `{ error: "..." }`.
 7. **No logic in routes** — routes only wire middleware → controller. All business logic is in services.
 8. **`server-only` guard** in any frontend module that must not run on the client.
+9. **Published docs site** — the human-facing handbook is on GitHub Pages (MkDocs). Keep pages **concise at the top** (Purpose, Navigation, Files) and put deep detail / generated API indexes at the **bottom**. In-site navigation must stay under `docs/`; use GitHub blob links for source code.
 
 ---
 
@@ -170,4 +173,4 @@ Developers (`app_role === developer`) can switch to curated **test personas** st
 - **Acting as test profile** — true API mutations blocked via a **denylist** in `rejectWritesWhenActing` (not all POSTs); `/api/dev/*` stays writable. See [`docs/dev/backend/src/middleware/README.md`](backend/src/middleware/README.md).
 - **Security** — clients send only `dev_test_profiles.id` (cookie → `X-Dev-Active-Profile` header); server resolves `roster_uid` from DB.
 
-Setup: [`docs/dev/supabase/README.md`](supabase/README.md). CI: [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml).
+Setup: [`docs/dev/supabase/README.md`](supabase/README.md). CI: [`.github/workflows/ci.yml`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/.github/workflows/ci.yml).
