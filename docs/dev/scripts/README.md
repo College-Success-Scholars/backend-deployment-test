@@ -45,11 +45,14 @@ Shell scripts for deployment validation and operational tasks. These run outside
 ./scripts/dev.sh --install     # npm install in shared, backend, frontend first
 ./scripts/dev.sh --no-watch    # build shared once; skip tsc --watch
 
-# Run against local backend
+# Run against local backend (Docker Compose CORS — Origin :3000)
 BASE_URL=http://localhost:3001 bash scripts/smoke-test.sh
 
+# Bare backend with app.ts default CORS (:3002)
+SMOKE_ORIGIN=http://localhost:3002 BASE_URL=http://localhost:3001 bash scripts/smoke-test.sh
+
 # Run against production
-BASE_URL=https://your-backend.railway.app bash scripts/smoke-test.sh
+BASE_URL=https://your-backend.railway.app SMOKE_ORIGIN=https://your-frontend.example bash scripts/smoke-test.sh
 
 # Log an agent session (interactive — prompts for all fields)
 bash scripts/log-agent-session.sh
