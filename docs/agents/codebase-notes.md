@@ -72,6 +72,7 @@ For an authenticated session record request:
 
 ## Operational notes
 
+- New-developer guided path: `docs/dev/onboarding/` (Day 0, golden-path first PR, roles, campus weeks, auth/RLS runbook). PR descriptions use `docs/dev/pr/TEMPLATE.md`.
 - Backend tests: `npm --prefix backend run test` (Vitest + supertest).
 - API reference is documented in `backend/API.md` and is comprehensive.
 - Set `CORS_ORIGIN` to the actual frontend URL in each environment (Docker defaults to `http://localhost:3000`; bare `app.ts` default is `http://localhost:3002`).

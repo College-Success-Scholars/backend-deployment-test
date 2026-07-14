@@ -40,6 +40,15 @@ exclude_docs: |
 
 nav:
   - Home: dev/README.md
+  - Onboarding:
+      - Overview: dev/onboarding/README.md
+      - Day 0 setup: dev/onboarding/day-0-setup.md
+      - Golden path (first PR): dev/onboarding/golden-path-first-pr.md
+      - Roles & personas: dev/onboarding/roles-and-personas.md
+      - Campus weeks: dev/onboarding/campus-weeks.md
+      - Auth & RLS runbook: dev/onboarding/auth-rls-runbook.md
+      - Ask / don’t touch: dev/onboarding/ask-and-dont-touch.md
+      - PR template: dev/pr/TEMPLATE.md
   - Backend:
       - Overview: dev/backend/README.md
       - REST API: dev/backend/api.md
