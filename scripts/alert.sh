@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # alert.sh
 #
-# Records an architectural or runtime alert to docs/agents/alerts/.
-# Captures: title, severity, category, description, affected files, and recommendation.
+# Records an architectural or runtime alert as a GitHub Issue (label: architecture-alert).
+# Requires: gh CLI authenticated to this repository. There is no markdown fallback —
+# open work lives only on GitHub Issues.
 #
 # Usage:
 #   ./scripts/alert.sh [OPTIONS]
 #
 # Options:
-#   -t, --title STR          Short alert title (used in filename + heading)
+#   -t, --title STR          Short alert title (issue title)
 #   -S, --severity STR       Severity level: info | warning | error  (default: warning)
 #   -C, --category STR       Category: auth | security | performance | integrity | config
 #   -d, --description STR    Full description of the issue
@@ -17,23 +18,20 @@
 #   -r, --recommendation STR  Recommended action or fix
 #   -h, --help               Show this help message
 #
-# Example (fully scripted):
+# Example:
 #   ./scripts/alert.sh \
 #     --title "auth-role-hierarchy-duplication" \
 #     --severity warning \
 #     --category auth \
-#     --description "ROLE_ORDER duplicated between frontend and backend with different implementations." \
+#     --description "ROLE_ORDER duplicated between frontend and backend." \
 #     --files "frontend/lib/supabase/server.ts,backend/src/controllers/auth.controller.ts" \
 #     --recommendation "Extract role hierarchy into a shared source of truth."
 #
-# Example (interactive — prompts for all fields):
-#   ./scripts/alert.sh
+# List open architectural alerts:
+#   gh issue list --label architecture-alert --state open
 
 set -euo pipefail
 
-ALERTS_DIR="docs/agents/alerts"
-
-# ── Parse arguments ────────────────────────────────────────────────────────────
 TITLE=""
 SEVERITY="warning"
 CATEGORY=""
@@ -52,21 +50,24 @@ while [[ $# -gt 0 ]]; do
     -f|--files)            FILES="$2";            shift 2 ;;
     -r|--recommendation)   RECOMMENDATION="$2";   shift 2 ;;
     -h|--help)
-      sed -n '/^# alert.sh/,/^[^#]/p' "$0" | head -n -1 | sed 's/^# \?//'
+      awk '/^# alert.sh/{p=1} p && /^[^#]/{exit} p{sub(/^# ?/,""); print}' "$0"
       exit 0 ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
 done
 
-# ── Validate severity ──────────────────────────────────────────────────────────
+if ! command -v gh >/dev/null 2>&1; then
+  echo "Error: gh CLI is required. Install https://cli.github.com/ and run: gh auth login" >&2
+  exit 1
+fi
+
 case "$SEVERITY" in
   info|warning|error) ;;
   *) echo "Error: --severity must be one of: info, warning, error" >&2; exit 1 ;;
 esac
 
-# ── Interactive fallbacks ───────────────────────────────────────────────────────
 if [[ -z "$TITLE" ]]; then
-  read -r -p "Alert title (short, used in filename): " TITLE
+  read -r -p "Alert title (short): " TITLE
 fi
 if [[ -z "$CATEGORY" ]]; then
   read -r -p "Category (auth | security | performance | integrity | config): " CATEGORY
@@ -81,67 +82,60 @@ if [[ -z "$DESCRIPTION" && -z "$DESCRIPTION_FILE" ]]; then
   DESCRIPTION="$(printf '%s\n' "${lines[@]}")"
 fi
 if [[ -z "$RECOMMENDATION" ]]; then
-  read -r -p "Recommendation (one sentence): " RECOMMENDATION
+  read -r -p "Recommendation: " RECOMMENDATION
 fi
 
-# ── Resolve description content ────────────────────────────────────────────────
 if [[ -n "$DESCRIPTION_FILE" ]]; then
   DESCRIPTION_CONTENT="$(cat "$DESCRIPTION_FILE")"
 else
   DESCRIPTION_CONTENT="$DESCRIPTION"
 fi
 
-# ── Resolve affected files ─────────────────────────────────────────────────────
+FILES_SECTION="_No files specified._"
 if [[ -n "$FILES" ]]; then
-  FILES_LIST="$(echo "$FILES" | tr ',' '\n' | sed 's/^ *//;s/ *$//')"
-else
-  FILES_LIST=""
+  FILES_SECTION=""
+  while IFS= read -r f; do
+    [[ -z "$f" ]] && continue
+    FILES_SECTION+="- \`${f}\`
+"
+  done <<< "$(echo "$FILES" | tr ',' '\n' | sed 's/^ *//;s/ *$//')"
 fi
 
-# ── Build output filename ───────────────────────────────────────────────────────
-TIMESTAMP="$(date -u +%Y-%m-%dT%H%M%SZ)"
-SLUG="$(echo "$TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')"
-FILENAME="${ALERTS_DIR}/${TIMESTAMP}-${SLUG}.md"
+ISSUE_TITLE="Alert: ${TITLE}"
 
-mkdir -p "$ALERTS_DIR"
+BODY="$(cat <<EOF
+## Severity
 
-# ── Write alert file ────────────────────────────────────────────────────────────
-cat > "$FILENAME" <<EOF
-# ${TITLE}
+${SEVERITY}
 
-**Date:** ${TIMESTAMP}
-**Severity:** ${SEVERITY}
-**Category:** ${CATEGORY}
+## Category
 
----
+${CATEGORY}
 
 ## Description
 
 ${DESCRIPTION_CONTENT}
 
----
+## Affected files
 
-## Affected Files
-
-EOF
-
-if [[ -n "$FILES_LIST" ]]; then
-  while IFS= read -r f; do
-    [[ -z "$f" ]] && continue
-    echo "- \`${f}\`" >> "$FILENAME"
-  done <<< "$FILES_LIST"
-else
-  echo "_No files specified._" >> "$FILENAME"
-fi
-
-cat >> "$FILENAME" <<EOF
-
----
+${FILES_SECTION}
 
 ## Recommendation
 
 ${RECOMMENDATION}
+
+---
+_Opened via \`scripts/alert.sh\`. List with: \`gh issue list --label architecture-alert --state open\`._
 EOF
+)"
+
+URL="$(gh issue create \
+  --title "$ISSUE_TITLE" \
+  --body "$BODY" \
+  --label "architecture-alert" \
+  --label "chore" \
+  --label "needs-triage")"
 
 echo ""
-echo "Alert logged to: $FILENAME"
+echo "Architectural alert opened: $URL"
+echo "List open alerts: gh issue list --label architecture-alert --state open"

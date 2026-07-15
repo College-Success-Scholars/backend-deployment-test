@@ -1,0 +1,67 @@
+name: Bug
+description: Something is broken or incorrect for a role or flow.
+title: "fix: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        File a clear repro. Maintainers will triage (`needs-triage` → Ready). Do not mark Ready yourself.
+  - type: textarea
+    id: symptom
+    attributes:
+      label: Symptom
+      description: What went wrong in one or two sentences.
+    validations:
+      required: true
+  - type: dropdown
+    id: persona
+    attributes:
+      label: Persona / role
+      options:
+        - scholar
+        - team_leader
+        - developer
+        - unauthenticated / public
+        - unknown
+        - other (describe in Notes)
+    validations:
+      required: true
+  - type: input
+    id: surface
+    attributes:
+      label: Surface
+      description: UI path (e.g. /dashboard/memo) or API route (e.g. /api/session-records/...).
+      placeholder: /dashboard/... or /api/...
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Repro steps
+      description: Numbered steps. Note if acting-as / test persona was active.
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Campus week, screenshots, related PRs, error text.
+    validations:
+      required: false

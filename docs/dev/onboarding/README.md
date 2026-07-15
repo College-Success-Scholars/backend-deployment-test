@@ -15,6 +15,7 @@
 | [Auth & RLS runbook](auth-rls-runbook.md) | Empty data, 401s, acting-as blocks |
 | [Ask / don’t touch](ask-and-dont-touch.md) | Who to contact; high-risk areas |
 | [PR template](../pr/TEMPLATE.md) | Required shape for every pull request |
+| [Issue tracker](../../agents/issue-tracker.md) | File tickets (Bug / Feature / Chore / Architecture alert); triage labels |
 
 ---
 
@@ -52,9 +53,13 @@ Full don’t-touch list and when to ping: [Ask / don’t touch](ask-and-dont-tou
 
 ---
 
+## Tickets
+
+Product/behavior changes need a GitHub Issue first (use the **Bug**, **Feature**, **Chore**, or **Architecture alert** templates). Conventions and architectural-alert CLI: [`docs/agents/issue-tracker.md`](../../agents/issue-tracker.md). Requires `gh` for scripted alerts (`gh auth login`).
+
 ## Pull requests
 
-Every PR description should follow **[`docs/dev/pr/TEMPLATE.md`](../pr/TEMPLATE.md)** (Summary, Changelog, Test plan with the package scripts you actually ran). There is no auto-injected `.github` PR template yet — copy from that file when opening the PR.
+Every PR description should follow **[`docs/dev/pr/TEMPLATE.md`](../pr/TEMPLATE.md)** (Summary, Changelog, Test plan with the package scripts you actually ran). There is no auto-injected `.github` PR template yet — copy from that file when opening the PR. Link with `Fixes #<n>`.
 
 ---
 

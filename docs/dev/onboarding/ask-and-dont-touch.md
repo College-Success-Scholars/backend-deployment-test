@@ -46,6 +46,8 @@ Safe default for a first week: UI copy, display wiring of existing API fields, t
 - One-off personal experiment routes without a ticket
 - Drive-by refactors mixed into a feature PR
 
+Structural findings (schema drift, duplicated auth, dead domain modules): open an **Architecture alert** issue (UI template or `./scripts/alert.sh`) — do not add files under `docs/agents/alerts/`. See [issue tracker](../../agents/issue-tracker.md).
+
 ---
 
 ## PR reminder
