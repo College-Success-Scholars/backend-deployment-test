@@ -35,8 +35,8 @@ Auth and Supabase context:
 
 - `auth.controller.ts` extracts JWT from header and verifies with Supabase auth.
 - It stores token/user/profile on `req`.
-- `supabase.service.ts` uses `AsyncLocalStorage` to bind the JWT per request via `runWithToken(...)`.
-- `getSupabaseClient()` reads that token and creates a client with `Authorization` header, so RLS is applied consistently.
+- `backend/src/supabase/client.ts` uses `AsyncLocalStorage` to bind the JWT per request via `runWithToken(...)`.
+- `getSupabaseClient()` reads that token and creates a typed client (`Database`) with `Authorization` header, so RLS is applied consistently.
 
 Important backend domains:
 

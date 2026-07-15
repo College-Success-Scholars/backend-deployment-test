@@ -21,7 +21,7 @@
  * - Weekly record aggregation (that's session-record.service.ts)
  * - HTTP request/response logic
  */
-import { getSupabaseClient } from "./supabase.service.js";
+import { getSupabaseClient } from "../supabase/client.js";
 import { getStartOfDayEastern } from "./time.service.js";
 import { fetchScholarNamesByUids } from "./user.service.js";
 import {

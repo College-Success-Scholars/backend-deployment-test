@@ -11,6 +11,7 @@
     "backend/src/services",
     "backend/src/middleware",
     "backend/src/models",
+    "backend/src/supabase/client.ts",
     "frontend/lib",
     "frontend/components/personal/utils.ts",
     "frontend/components/mentee-monitoring/utils.ts"
@@ -24,6 +25,7 @@
     "**/*.{test,spec}.ts",
     "**/node_modules/**",
     "backend/src/tests/**",
+    "backend/src/supabase/database.types.ts",
     "frontend/legacy/**",
     "frontend/components/ui/**"
   ],

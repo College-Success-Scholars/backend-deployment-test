@@ -18,7 +18,7 @@
  * - Session log queries (that's session-log.service.ts)
  * - HTTP request/response logic
  */
-import { getSupabaseClient } from "./supabase.service.js";
+import { getSupabaseClient } from "../supabase/client.js";
 import type { DailyScholarActivityMinutesRow } from "../models/daily-scholar-activity.model.js";
 
 const MINUTES_COLUMN = "duration_minutes" as const;
@@ -45,7 +45,7 @@ export async function getTotalMinutesForMenteeWeek(params: {
   const { data, error } = await supabase
     .from("daily_scholar_activity")
     .select(MINUTES_COLUMN)
-    .eq("mentee_uid", menteeUid)
+    .eq("scholar_uid", menteeUid)
     .eq("week_num", weekNum)
     .eq("log_source", logSource);
 

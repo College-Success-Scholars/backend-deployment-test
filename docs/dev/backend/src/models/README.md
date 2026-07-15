@@ -11,7 +11,7 @@
 
 ## Purpose
 
-TypeScript type definitions and constants that describe the shape of domain data. Models have **zero runtime logic** — they exist only to give the compiler and developers a shared vocabulary for data structures returned from Supabase or passed between layers.
+TypeScript type definitions and constants that describe the shape of domain / API data. Models have **zero runtime logic**. Prefer API-oriented shapes (what controllers return) over copying every Postgres column. Raw table types come from generated [`Database`](../supabase/README.md) when you need them.
 
 ---
 
@@ -25,7 +25,8 @@ One `*.model.ts` per domain (user, session-log, session-record, form-log, traffi
 
 - **Types only** — no functions, no class methods, no runtime logic.
 - **No Supabase imports** — models must not import from `@supabase/supabase-js`.
-- **Mirror Supabase column names** — row type fields should match the actual database column names unless a transformation is intentional and documented.
+- **Mirror column names when the type is a table row** — otherwise name fields for the API contract.
+- **Do not treat models as the schema source of truth** — regenerate [`database.types.ts`](../supabase/README.md) after migrations; fix code to match Postgres, not the reverse.
 - **Constants here if type-adjacent** — `APP_ROLE_ORDER` is re-exported from `shared/auth.ts` (canonical source); `user.model.ts` keeps the re-export for backward compatibility.
 - **Naming** — row types end in `Row` (e.g., `ProfilesRow`). Computed/aggregated shapes use descriptive names (e.g., `MemoUserRow`, `TeamLeaderRow`).
 - **One model file per domain** — align with the corresponding service and controller files.

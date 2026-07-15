@@ -4,7 +4,7 @@
  *
  * Developer test profile lookup and effective identity resolution.
  */
-import { getSupabaseClient } from "./supabase.service.js";
+import { getSupabaseClient } from "../supabase/client.js";
 import type { ProfilesRow } from "../models/user.model.js";
 import {
   type DevTestProfileRow,

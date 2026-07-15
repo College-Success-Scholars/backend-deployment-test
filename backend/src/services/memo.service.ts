@@ -20,7 +20,7 @@
  * - Memo page data assembly (that's memo-page.service.ts)
  * - HTTP request/response logic
  */
-import { getSupabaseClient } from "./supabase.service.js";
+import { getSupabaseClient } from "../supabase/client.js";
 import {
   syncFrontDeskRecordsForWeek,
   syncFrontDeskRecordsForWeekAllUids,

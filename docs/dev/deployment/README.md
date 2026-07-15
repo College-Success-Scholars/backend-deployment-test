@@ -37,6 +37,7 @@ Supabase (Postgres + Auth + RLS)
 
 - Domain data goes **frontend → backend → Supabase**. The frontend does not run domain queries against Supabase.
 - Auth signup/login/session stay on the frontend Supabase client; the backend only **verifies** the JWT and applies RLS via `runWithToken` / `getSupabaseClient()`.
+- Backend talks to Postgres (tables + RPCs) only — **no Supabase Edge Functions** in this stack. See [`docs/dev/supabase/README.md`](../supabase/README.md#access-pattern).
 
 ---
 
@@ -73,7 +74,7 @@ Server-side frontend then resolves the API as `https://<VERCEL_URL>/_/backend` w
 | Piece | Role |
 |-------|------|
 | Cloud Supabase | Source of truth for Postgres, Auth, RLS |
-| Schema changes | Manual Dashboard SQL today — see [`docs/dev/supabase/README.md`](../supabase/README.md) (no repo-root CLI `supabase/` migrations yet) |
+| Schema changes | Baseline in [`supabase/migrations/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/supabase/migrations) (history aligned with linked remote); new DDL via migration PRs — see [`docs/dev/supabase/README.md`](../supabase/README.md). Never re-push the baseline onto prod. |
 
 ---
 
@@ -134,4 +135,4 @@ Never commit real `.env` files; inject secrets in Railway / Vercel / CI.
 - **Root Dockerfiles for container deploys** — needed because `shared/` is outside `backend/` and `frontend/`.
 - **Compose is CI/parity** — prefer `scripts/dev.sh` for iterative development.
 - **Smoke is shallow by design** — unit/integration tests live under `backend/src/tests/` and `frontend/`; deepen smoke only with a safe staging token / project.
-- **Schema deploys are separate from app deploys** — until migrations live in git, treat Dashboard SQL as a coordinated ops step before relying on new columns/RPCs in a release.
+- **Schema deploys are separate from app deploys** — ship DDL via `supabase/migrations/` (staging → prod) before relying on new columns/RPCs in an app release; Dashboard SQL remains emergency-only.

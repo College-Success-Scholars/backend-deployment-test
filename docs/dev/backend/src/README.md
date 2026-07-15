@@ -7,7 +7,7 @@
 
 [← Root](../../README.md) › [Backend](../README.md) › src
 
-Children: [controllers/](controllers/README.md) · [models/](models/README.md) · [services/](services/README.md) · [routes/](routes/README.md) · [middleware/](middleware/README.md)
+Children: [controllers/](controllers/README.md) · [models/](models/README.md) · [services/](services/README.md) · [routes/](routes/README.md) · [middleware/](middleware/README.md) · [supabase/](supabase/README.md)
 
 ---
 
@@ -35,6 +35,7 @@ The root of all backend TypeScript source code. Contains the application entry p
 | `services/` | [services/README.md](services/README.md) | Business logic and all Supabase database access |
 | `routes/` | [routes/README.md](routes/README.md) | Express Router definitions — wire middleware to controllers |
 | `middleware/` | [middleware/README.md](middleware/README.md) | Express middleware (logging, acting denylist) |
+| `supabase/` | [supabase/README.md](supabase/README.md) | Generated `Database` types + typed JWT-bound client |
 | `tests/` | _(hub)_ | Vitest + supertest integration tests (see below) |
 
 ---

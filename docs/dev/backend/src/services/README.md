@@ -11,13 +11,15 @@
 
 ## Purpose
 
-The only layer that touches Supabase. Services contain all database queries, data transformation, and business logic. They are called by controllers and return typed domain objects. They never import `express` or touch `req`/`res`.
+The only layer that touches Supabase. Services contain all database queries (including Postgres RPCs via `.rpc()`), data transformation, and business logic. They are called by controllers and return typed domain objects. They never import `express` or touch `req`/`res`.
+
+**No Supabase Edge Functions** — do not deploy or call Deno edge functions. Keep function-style logic either as Postgres RPCs invoked from these services or as TypeScript in the Express backend. See [`docs/dev/supabase/README.md`](../../../supabase/README.md#access-pattern).
 
 ---
 
 ## Modules
 
-One `*.service.ts` per domain, plus `supabase.service.ts` (JWT-bound client) and `dev-profile.service.ts`. Source: [`backend/src/services/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/services). Symbol docs: [API Reference](../../../../reference/README.md).
+One `*.service.ts` per domain, plus `dev-profile.service.ts`. Supabase client infrastructure lives in [`../supabase/`](../supabase/README.md) (`client.ts`) — import `getSupabaseClient` / `runWithToken` from there. Source: [`backend/src/services/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/services). Symbol docs: [API Reference](../../../../reference/README.md).
 
 ---
 
@@ -48,7 +50,9 @@ The JWT reaches `getSupabaseClient()` via:
 - **Return typed values** — use the model types from `models/`.
 - **Throw on fatal errors** — services throw `Error` on unexpected failures; controllers catch and convert to HTTP responses.
 - **One service file per domain** — aligns with controllers and models.
-- **`supabase.service.ts` is not a domain service** — it is infrastructure. Do not add domain logic there.
+- **No Edge Functions** — query tables/RPCs through `getSupabaseClient()` only; do not invoke Supabase Edge Functions from services.
+- **Prefer mapping to route DTOs** — services may select full rows internally, then return only fields the API/page needs (frontend types need not match table Rows).
+- **Import Supabase client from `../supabase/client.js`** — not from a services wrapper.
 
 <!-- AUTO-API-REFERENCE:START -->
 
@@ -66,7 +70,6 @@ Generated from TypeScript signatures. Module indexes below; full catalog: [API R
 | `mentee.service` | [API](../../../../reference/api/backend/src/services/mentee.service/README.md) |
 | `session-log.service` | [API](../../../../reference/api/backend/src/services/session-log.service/README.md) |
 | `session-record.service` | [API](../../../../reference/api/backend/src/services/session-record.service/README.md) |
-| `supabase.service` | [API](../../../../reference/api/backend/src/services/supabase.service/README.md) |
 | `time.service` | [API](../../../../reference/api/backend/src/services/time.service/README.md) |
 | `traffic.service` | [API](../../../../reference/api/backend/src/services/traffic.service/README.md) |
 | `tutor-report-log.service` | [API](../../../../reference/api/backend/src/services/tutor-report-log.service/README.md) |

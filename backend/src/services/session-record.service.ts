@@ -20,7 +20,7 @@
  * - Raw log fetching (that's session-log.service.ts)
  * - HTTP request/response logic
  */
-import { getSupabaseClient } from "./supabase.service.js";
+import { getSupabaseClient } from "../supabase/client.js";
 import { campusWeekToDateRange, getEasternDayOfWeek, getWeekFetchEnd } from "./time.service.js";
 import {
   getFrontDeskCompletedSessions,
@@ -122,10 +122,11 @@ export async function getStudySessionRecord(
 
 export async function getFrontDeskRecordsByUid(uid: string): Promise<FrontDeskRecordRow[]> {
   const supabase = getSupabaseClient();
+  const uidNum = Number(uid);
   const { data, error } = await supabase
     .from("front_desk_records")
     .select("*")
-    .eq("uid", uid)
+    .eq("uid", uidNum)
     .order("week_num", { ascending: true });
   if (error) throw error;
   return (data ?? []) as FrontDeskRecordRow[];
@@ -133,10 +134,11 @@ export async function getFrontDeskRecordsByUid(uid: string): Promise<FrontDeskRe
 
 export async function getStudySessionRecordsByUid(uid: string): Promise<StudySessionRecordRow[]> {
   const supabase = getSupabaseClient();
+  const uidNum = Number(uid);
   const { data, error } = await supabase
     .from("study_session_records")
     .select("*")
-    .eq("uid", uid)
+    .eq("uid", uidNum)
     .order("week_num", { ascending: true });
   if (error) throw error;
   return (data ?? []) as StudySessionRecordRow[];

@@ -58,6 +58,7 @@ nav:
       - Routes: dev/backend/src/routes/README.md
       - Models: dev/backend/src/models/README.md
       - Middleware: dev/backend/src/middleware/README.md
+      - Supabase: dev/backend/src/supabase/README.md
   - Frontend:
       - Overview: dev/frontend/README.md
       - App:

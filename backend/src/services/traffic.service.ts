@@ -18,7 +18,7 @@
  * - Session log cleaning/pairing (that's session-log.service.ts)
  * - HTTP request/response logic
  */
-import { getSupabaseClient } from "./supabase.service.js";
+import { getSupabaseClient } from "../supabase/client.js";
 import { campusWeekToDateRange, dateToCampusWeek, getWeekFetchEnd } from "./time.service.js";
 import type { TrafficRow, TrafficSession, WeekEntryCount } from "../models/traffic.model.js";
 

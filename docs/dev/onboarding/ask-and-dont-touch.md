@@ -31,6 +31,7 @@ Prefer GitHub review comments or issues for async design discussion so the trail
 | Area | Why |
 |------|-----|
 | Supabase migrations / Dashboard SQL / RLS policies | Easy to lock out roles or drift from seeded environments |
+| Supabase Edge Functions (`supabase/functions/`) | Out of stack — domain access is Express → Postgres only ([Supabase access pattern](../supabase/README.md#access-pattern)) |
 | Auth middleware (`requireAuth`, role gates) or JWT / `AsyncLocalStorage` binding | Breaks the whole API surface |
 | `rejectWritesWhenActing` denylist semantics | Security boundary for persona switching |
 | `shared/time-config.ts` academic calendar constants | Year-wide data alignment (Memo, records, forms) |
