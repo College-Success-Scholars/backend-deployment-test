@@ -26,6 +26,7 @@ Humans: prefer the [handbook home](../README.md) and [onboarding](../onboarding/
 | `ubiquitous_language.md` | [ubiquitous_language](../../agents/ubiquitous_language.md) | Domain glossary — authoritative definitions for all domain terms |
 | `issue-tracker.md` | [issue-tracker](../../agents/issue-tracker.md) | Issue tracking conventions |
 | `triage-labels.md` | [triage-labels](../../agents/triage-labels.md) | Issue triage label definitions |
+| `github-project-board.md` | [github-project-board](../../agents/github-project-board.md) | Optional Project Kanban ↔ triage label mapping |
 | `general-sign-up-flow.md` | [general-sign-up-flow](../../agents/general-sign-up-flow.md) | Scholar onboarding / profile column matrix |
 
 ---

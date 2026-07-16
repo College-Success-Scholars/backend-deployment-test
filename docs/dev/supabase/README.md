@@ -6,12 +6,15 @@ Dashboard SQL Editor is **emergency / one-off ops only** — every lasting schem
 
 ## Access pattern
 
-Domain data reaches Postgres **only through the Express backend** via `getSupabaseClient()` (table queries and Postgres RPCs such as `get_mentee_activity`).
+**App reads and app-owned mutations** reach Postgres through the Express backend via `getSupabaseClient()` (table queries and Postgres RPCs such as `get_mentee_activity`).
+
+**Operational form / log population is already handled outside the app:** Google Forms write into Supabase tables (see [Form / log intake](#form--log-intake-google-forms)). Do not plan in-app “data entry” or seed pipelines for those weekly forms — treat the `*_form_logs` / session log tables as externally fed sources of truth the backend reads and aggregates.
 
 | Do | Don’t |
 |----|--------|
 | Call Supabase from `backend/src/services/*` (`.from(…)`, `.rpc(…)`) | Deploy or invoke **Supabase Edge Functions** |
 | Keep business logic in the Express app | Put domain logic in Deno edge functions under `supabase/functions/` |
+| Read form/session log tables; sync derived records via services/RPCs | Rebuild Google Form → Postgres intake inside Next.js / Express |
 
 Auth session management on the frontend still uses the Supabase JS client; that is not domain data access. PostgreSQL functions/triggers in migrations are fine — they are database objects, not Edge Functions.
 
@@ -34,6 +37,26 @@ Captured with `supabase db dump --linked --schema public` → [`supabase/migrati
 ### Inventory — tables in dump
 
 `am_pm_form_logs`, `daily_scholar_activity`, `dev_test_profiles`, `front_desk_logs`, `front_desk_records`, `mcf_form_logs`, `mentor_mentee`, `profiles`, `scholar_weekly_stats`, `semester_breaks`, `semesters`, `study_session_logs`, `study_session_records`, `traffic`, `traffic_weekly_summary`, `tutor_report_logs`, `user_roster`, `whaf_form_logs`, `wpl_form_logs`
+
+### Form / log intake (Google Forms)
+
+Program staff already submit weekly and session forms via **Google Forms**, which insert into Supabase. That pipeline is **in place** — the app consumes rows; it does not own form collection.
+
+Likely intake targets from the baseline migration (`*_form_logs`, log tables with `submitted_by_email`, and the tutoring form table):
+
+| Table | Role (domain) |
+|-------|----------------|
+| `whaf_form_logs` | **WAHF** (Weekly Academic Honors Form) — table name uses `whaf` |
+| `wpl_form_logs` | **WPL** (Weekly Project List) |
+| `mcf_form_logs` | **MCF** (Mentee Check-in Form) |
+| `am_pm_form_logs` | AM/PM shift / task completion logs |
+| `tutor_report_logs` | Tutoring form (table comment: “Tutoring form”) |
+| `front_desk_logs` | Front-desk check-in/out style logs (`submitted_by_email`) |
+| `study_session_logs` | Study-session check-in/out style logs (`submitted_by_email`) |
+
+**Not** Google Form intake (app- or DB-derived): `front_desk_records` / `study_session_records` (synced totals), `daily_scholar_activity` / `scholar_weekly_stats` (aggregates), `traffic` / `traffic_weekly_summary` (kiosk + analytics), `profiles` / `user_roster` / `mentor_mentee` / `dev_test_profiles` / semester tables.
+
+When debugging empty dashboards, check whether the linked project has recent rows in the form/log tables above before assuming a missing “populate data” feature.
 
 ### Inventory — notable RPCs / functions
 

@@ -27,4 +27,4 @@ supabase db push                    # staging first, then prod
 supabase migration list --linked    # confirm local/remote match
 ```
 
-See also: [`docs/dev/supabase/README.md`](../docs/dev/supabase/README.md) (access pattern, drift checklist, test-profile runbooks).
+See also: [`docs/dev/supabase/README.md`](../docs/dev/supabase/README.md) (access pattern, Google Form intake tables, drift checklist, test-profile runbooks).

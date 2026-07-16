@@ -44,7 +44,7 @@ File issue (template or alert.sh)
 
 Only **Ready** labels mean pull-to-work. Do not self-apply Ready on intake.
 
-Optional Kanban (GitHub Project, manual): Backlog → Ready → In progress → In review → Blocked → Done.
+Optional Kanban board (columns ↔ triage labels): [github-project-board.md](github-project-board.md).
 
 ## Architectural alerts (GitHub only)
 

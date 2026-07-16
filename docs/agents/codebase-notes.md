@@ -17,6 +17,8 @@ This repository is a two-app setup:
 
 Core data/auth platform is Supabase. The frontend obtains user session/JWT and calls backend endpoints with `Authorization: Bearer <token>`. The backend validates that JWT and then performs user-scoped Supabase queries.
 
+Operational form and session-log rows (WAHF/WPL/MCF, tutoring, front desk, study sessions, etc.) are **populated by an existing Google Forms → Supabase intake**, not by in-app forms. The Express API mostly **reads** those tables and derives aggregates; see [`docs/dev/supabase/README.md`](../dev/supabase/README.md#form--log-intake-google-forms).
+
 ## Backend how it works
 
 Entry point: `backend/src/server.ts`.

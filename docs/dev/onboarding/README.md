@@ -16,6 +16,7 @@
 | [Ask / don’t touch](ask-and-dont-touch.md) | Who to contact; high-risk areas |
 | [PR template](../pr/TEMPLATE.md) | Required shape for every pull request |
 | [Issue tracker](../../agents/issue-tracker.md) | File tickets (Bug / Feature / Chore / Architecture alert); triage labels |
+| [Project board](../../agents/github-project-board.md) | Optional Kanban columns ↔ triage labels |
 
 ---
 
