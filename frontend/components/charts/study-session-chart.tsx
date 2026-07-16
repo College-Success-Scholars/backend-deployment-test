@@ -30,10 +30,7 @@ export function StudySessionChart({ completed, total, dailyWeek }: StudySessionC
           <p className="text-2xl font-semibold tracking-tight">
             {formatHours(completed)} of {formatHours(total)} hrs completed
           </p>
-          <Badge
-            variant="secondary"
-            className="shrink-0 border-amber-500/40 bg-amber-500/20 text-amber-950 dark:text-amber-100"
-          >
+          <Badge variant="warning" className="shrink-0">
             {formatHours(remaining)} hrs left
           </Badge>
         </div>
@@ -41,7 +38,7 @@ export function StudySessionChart({ completed, total, dailyWeek }: StudySessionC
           value={percentage}
           className={cn(
             "h-2.5 bg-muted",
-            "[&_[data-slot=progress-indicator]]:bg-emerald-500"
+            "[&_[data-slot=progress-indicator]]:bg-success"
           )}
         />
         <p className="text-sm text-muted-foreground">

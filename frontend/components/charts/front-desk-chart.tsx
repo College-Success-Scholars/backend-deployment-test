@@ -37,10 +37,7 @@ export function FrontDeskChart({ completed, total, dailyWeek }: FrontDeskChartPr
           <p className="text-2xl font-semibold tracking-tight">
             {formatHours(completed)} of {formatHours(total)} hrs completed
           </p>
-          <Badge
-            variant="secondary"
-            className="shrink-0 border-emerald-500/40 bg-emerald-500/20 text-emerald-950 dark:text-emerald-100"
-          >
+          <Badge variant="success" className="shrink-0">
             {formatHours(remaining)} hrs left
           </Badge>
         </div>
@@ -48,7 +45,7 @@ export function FrontDeskChart({ completed, total, dailyWeek }: FrontDeskChartPr
           value={percentage}
           className={cn(
             "h-2.5 bg-muted",
-            "[&_[data-slot=progress-indicator]]:bg-sky-500"
+            "[&_[data-slot=progress-indicator]]:bg-info"
           )}
         />
         <p className="text-sm text-muted-foreground">

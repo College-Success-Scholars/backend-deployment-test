@@ -1,9 +1,9 @@
 import type { ActivityFormType, RecentFormSubmission } from "@/lib/types/form-log"
 
 export const formTone: Record<ActivityFormType, string> = {
-  WAHF: "text-sky-700 bg-sky-100",
-  WPL: "text-teal-700 bg-teal-100",
-  MCF: "text-amber-700 bg-amber-100",
+  WAHF: "text-info-muted-foreground bg-info-muted",
+  WPL: "text-success-muted-foreground bg-success-muted",
+  MCF: "text-warning-muted-foreground bg-warning-muted",
 }
 
 function isEmptyValue(value: unknown) {

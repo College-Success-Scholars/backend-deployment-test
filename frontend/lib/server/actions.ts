@@ -8,6 +8,7 @@
  *
  * ## Responsibilities
  * - Handle profile update mutations (basic info, etc.)
+ * - Public `/traffic` kiosk check-in (`recordTrafficEntry`) — no auth, Zod-validated write
  * - Validate inputs with Zod before writing to Supabase or calling the backend
  * - Revalidate Next.js cache paths after mutations
  *
@@ -18,6 +19,7 @@
  * ## What does NOT belong here
  * - Data fetching (use data.ts or api-client.ts instead)
  * - Client-side logic
+ * - Traffic analytics reads (auth-gated `/api/traffic` / `/dev/traffic`)
  */
 "use server"
 
@@ -80,4 +82,35 @@ export async function createScholarProfile(formData: unknown) {
       error: e instanceof Error ? e.message : "Failed to create profile",
     }
   }
+}
+
+/** Public kiosk check-in: 9-digit UID + stay length only. */
+const trafficEntrySchema = z.object({
+  uid: z.string().regex(/^\d{9}$/),
+  duration_min: z.number().int().min(1).max(720),
+})
+
+/**
+ * Record a foot-traffic entry from the public `/traffic` kiosk.
+ * No auth required. Rejects extra fields; forces `traffic_type: "entry"`;
+ * leaves `created_at` to the database default (no client-controlled timestamps).
+ */
+export async function recordTrafficEntry(input: unknown) {
+  const parsed = trafficEntrySchema.safeParse(input)
+  if (!parsed.success) {
+    return { error: "Invalid traffic entry" }
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.from("traffic").insert({
+    uid: parsed.data.uid,
+    duration_min: parsed.data.duration_min,
+    traffic_type: "entry",
+  })
+
+  if (error) {
+    return { error: "Failed to submit traffic entry" }
+  }
+
+  return { success: true as const }
 }

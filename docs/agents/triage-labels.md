@@ -10,6 +10,28 @@ The skills speak in terms of five canonical triage roles. This file maps those r
 | `ready-for-human`          | `ready-for-human`    | Requires human implementation            |
 | `wontfix`                  | `wontfix`            | Will not be actioned                     |
 
-When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the corresponding label string from this table.
+**Pull work only from Ready labels** (`ready-for-agent` / `ready-for-human`). Intake and type labels are not permission to start.
 
-Edit the right-hand column to match whatever vocabulary you actually use.
+## Type labels
+
+| Label | Meaning |
+| ----- | ------- |
+| `bug` | Incorrect behavior |
+| `feature` | New or changed product behavior |
+| `chore` | Tooling, cleanup, docs, CI |
+
+## Architectural alerts
+
+| Label | Meaning |
+| ----- | ------- |
+| `architecture-alert` | Structural/runtime finding; backlog is GitHub Issues only |
+
+List open architectural alerts:
+
+```bash
+gh issue list --label architecture-alert --state open
+```
+
+Ensure labels exist: `./scripts/ensure-issue-labels.sh`.
+
+When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the corresponding label string from the triage table.

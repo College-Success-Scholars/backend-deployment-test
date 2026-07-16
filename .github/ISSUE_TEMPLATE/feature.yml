@@ -1,0 +1,66 @@
+name: Feature
+description: New or changed product behavior with clear acceptance criteria.
+title: "Add: "
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        One outcome per issue. Maintainers triage before Ready. Ask-before areas (auth, RLS, time-config, deploy) need a human.
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: What should be true when this ships.
+    validations:
+      required: true
+  - type: dropdown
+    id: who
+    attributes:
+      label: Who benefits (role)
+      options:
+        - scholar
+        - team_leader
+        - developer
+        - all authenticated
+        - public
+        - other (describe below)
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Checkboxes someone else could verify.
+      value: |
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+  - type: checkboxes
+    id: touches
+    attributes:
+      label: Touches
+      options:
+        - label: frontend
+        - label: backend
+        - label: shared
+        - label: Supabase (SQL / RLS / Dashboard)
+        - label: docs / scripts / CI
+  - type: dropdown
+    id: ask_before
+    attributes:
+      label: Hits ask-before areas?
+      description: Auth middleware, RLS, shared/time-config, production deploy/secrets.
+      options:
+        - "no"
+        - "yes (describe in Outcome / Notes)"
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Design links, constraints, out of scope.
+    validations:
+      required: false

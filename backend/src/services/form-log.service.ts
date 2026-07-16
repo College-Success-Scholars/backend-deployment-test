@@ -22,7 +22,7 @@
  * - Form display formatting (that's frontend lib/format/)
  * - HTTP request/response logic
  */
-import { getSupabaseClient } from "./supabase.service.js";
+import { getSupabaseClient } from "../supabase/client.js";
 import { campusWeekToDateRange, dateToCampusWeek, getWeekFetchEnd, ONE_DAY_MS } from "./time.service.js";
 import type {
   McfFormLogRow,

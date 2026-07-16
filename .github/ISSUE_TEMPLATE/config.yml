@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Developer onboarding
+    url: https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/docs/dev/onboarding/README.md
+    about: Day 0 setup, golden path, and when to ask before changing high-risk areas.
+  - name: Issue tracker conventions
+    url: https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/docs/agents/issue-tracker.md
+    about: How we triage, labels, and architectural alerts on GitHub.

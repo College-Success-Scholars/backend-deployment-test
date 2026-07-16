@@ -7,7 +7,7 @@
 
 [← Root](../../README.md) › [Frontend](../README.md) › components
 
-Children: [ui/](ui/README.md) · [layout/](layout/README.md) · [auth/](auth/README.md) · [data-display/](data-display/README.md) · [charts/](charts/README.md) · [dashboard/](dashboard/README.md) · [mentee-monitoring/](mentee-monitoring/README.md) · [marketing/](marketing/README.md) · [settings/](settings/README.md) · [personal/](personal/README.md) · [dev/](dev/README.md)
+Children: [dashboard/](dashboard/README.md)
 
 ---
 
@@ -61,11 +61,19 @@ Non-component utilities (dictionaries, assemblers, formatters) belong in `lib/`,
 - **Shared components only** — single-route components go in `_components/`.
 - **Props over context** — pass data from server components via props.
 - **Client components are explicit** — add `"use client"` only when needed.
-- **`ui/` is managed by shadcn** — do not hand-edit; add via CLI.
+- **`ui/` is managed by shadcn** — do not hand-edit; add via CLI. Customize look via CSS variables / theme in `app/globals.css`. Soft status chips use Badge variants `success` | `warning` | `info` (`bg-*-muted` + `text-*-muted-foreground`).
 - **No data fetching in components** — fetch in pages; pass data as props.
 - **kebab-case file names** — e.g. `data-table.tsx`, not `DataTable.tsx`.
 - **No imports from `legacy/`** — deprecated code is excluded from the build.
 - **No imports from `app/dev/` in production routes** — dev pages are scratchpads for backend testing, not a component library.
+- **Layout chrome** — no domain fetching; role-aware nav via `lib/auth.ts`; register new dashboard breadcrumb labels in `lib/dashboard-breadcrumb.ts`; `ThemeToggle` lives in the dashboard header (`layout/theme-toggle.tsx`).
+- **Auth UI** — all auth forms live in `auth/`; pages stay thin; use `@/lib/supabase/client` in client forms and `@/lib/supabase/server` in server components; errors use `text-destructive`.
+- **Charts** — shared Recharts + `ChartContainer` here (not under `app/dev/`); charts need `"use client"`; consume CSS vars from `lib/theme/css-color.ts` instead of local hex.
+- **Mentee monitoring** — one card per tracking category; single WA HF card (`wahf-card.tsx`); card-local formatting in `utils.ts` with tests; client distributes props to cards.
+- **Personal** — page-private; transforms in `utils.ts`. Promote to shared only when reused.
+- **Settings** — page owns data; mutations via `lib/supabase/client.ts`.
+- **Marketing** — no auth/API; assets in `frontend/public/`.
+- **Dev UI** — mount only for developers; profile switches via `lib/server/dev-profile-actions`.
 
 ---
 

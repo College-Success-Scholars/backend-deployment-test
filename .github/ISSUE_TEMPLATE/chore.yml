@@ -1,0 +1,32 @@
+name: Chore
+description: Non-feature work — tooling, cleanup, docs, CI (not an architectural alert).
+title: "Chore: "
+labels: ["chore"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For structural findings (schema drift, duplicated auth, dead domain modules), use the **Architecture alert** template or `./scripts/alert.sh` instead.
+  - type: textarea
+    id: why
+    attributes:
+      label: Why now
+      description: What pain or risk this removes.
+    validations:
+      required: true
+  - type: textarea
+    id: blast
+    attributes:
+      label: Blast radius
+      description: What could break if this goes wrong.
+    validations:
+      required: true
+  - type: textarea
+    id: success
+    attributes:
+      label: Success checks
+      description: Observable done criteria (commands, smoke paths).
+      value: |
+        - [ ]
+    validations:
+      required: true

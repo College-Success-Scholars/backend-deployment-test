@@ -30,7 +30,7 @@
 | **Scholar follow-up** | A prioritized scholar row with risk flags and completion percentages that indicates intervention need. | Student risk list, action list |
 | **Recognition board** | A curated list of scholars and team leaders highlighted for strong weekly performance. | Shout-outs, highlights |
 | **Attendance detail** | Tabular minutes-based completion details by scholar for front desk and study session requirements. | Attendance table, minutes log |
-| **Form submissions** | Weekly status summary for required forms across on-time, late, and missing states. | Form compliance, forms status |
+| **Form submissions** | Weekly status summary for required forms across on-time, late, and missing states. Submissions are collected via Google Forms into Supabase form-log tables; the app aggregates status, it does not own intake. | Form compliance, forms status |
 | **Scholar follow-up risk** | The finalized weekly decision that a scholar requires active support follow-up. | Risk list |
 
 ## Compliance and data terms

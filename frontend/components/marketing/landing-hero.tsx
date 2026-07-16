@@ -39,7 +39,7 @@ export function LandingHero({ className }: { className?: string }) {
         <div className="flex flex-col items-center gap-4">
           <Button
             asChild
-            className="h-11 rounded-full border-0 bg-white px-8 text-base font-medium text-foreground shadow-none hover:bg-white/90"
+            className="h-11 rounded-full border-0 bg-card px-8 text-base font-medium text-foreground shadow-none hover:bg-card/90"
           >
             <Link href="/auth/login">
               Sign in

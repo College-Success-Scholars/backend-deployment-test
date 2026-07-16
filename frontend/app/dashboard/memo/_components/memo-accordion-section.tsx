@@ -10,6 +10,8 @@ type MemoAccordionSectionProps = {
   title: string
   badgeText?: ReactNode
   badgeClassName?: string
+  /** Prefer semantic Badge variants for soft chips (success|warning|info). */
+  badgeVariant?: "default" | "secondary" | "destructive" | "outline" | "success" | "warning" | "info"
   rightLabel?: string
   defaultOpen?: boolean
   children: ReactNode
@@ -19,6 +21,7 @@ export function MemoAccordionSection({
   title,
   badgeText,
   badgeClassName,
+  badgeVariant,
   rightLabel,
   defaultOpen = false,
   children,
@@ -32,7 +35,9 @@ export function MemoAccordionSection({
               <CardTitle className="text-base font-semibold">{title}</CardTitle>
               {badgeText ? (
                 typeof badgeText === "string" ? (
-                  <Badge className={badgeClassName}>{badgeText}</Badge>
+                  <Badge variant={badgeVariant} className={badgeClassName}>
+                    {badgeText}
+                  </Badge>
                 ) : (
                   badgeText
                 )

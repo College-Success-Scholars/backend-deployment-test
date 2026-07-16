@@ -22,7 +22,7 @@
  * - HTTP request/response logic
  * - Authentication (that's auth.controller.ts)
  */
-import { getSupabaseClient } from "./supabase.service.js";
+import { getSupabaseClient } from "../supabase/client.js";
 import type { MemoUserRow, TeamLeaderRow } from "../models/user.model.js";
 
 function uniqueNonEmptyStrings(values: string[]): string[] {

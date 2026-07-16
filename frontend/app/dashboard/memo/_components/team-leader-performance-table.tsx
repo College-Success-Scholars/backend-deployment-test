@@ -10,11 +10,11 @@ type TeamLeaderPerformanceTableProps = {
 }
 
 const statusClassName: Record<FormStatus, string> = {
-  submitted: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  "on-time": "bg-emerald-50 text-emerald-700 border-emerald-200",
-  missing: "bg-rose-50 text-rose-700 border-rose-200",
-  late: "bg-amber-50 text-amber-700 border-amber-200",
-  "check-mentees": "bg-amber-50 text-amber-700 border-amber-200",
+  submitted: "bg-success-muted text-success-muted-foreground border-success/30",
+  "on-time": "bg-success-muted text-success-muted-foreground border-success/30",
+  missing: "bg-destructive/10 text-destructive border-destructive/30",
+  late: "bg-warning-muted text-warning-muted-foreground border-warning/30",
+  "check-mentees": "bg-warning-muted text-warning-muted-foreground border-warning/30",
 }
 
 const STATUS_SORT_ORDER: Record<FormStatus, number> = {
@@ -112,7 +112,7 @@ export function TeamLeaderPerformanceTable({ rows }: TeamLeaderPerformanceTableP
     <MemoAccordionSection
       title="Team leader performance"
       badgeText={`${followUpCount} need follow-up`}
-      badgeClassName="bg-rose-50 text-rose-700 border-rose-200"
+      badgeVariant="warning"
       rightLabel="MCF · WPL · WAHF"
       defaultOpen
     >

@@ -17,7 +17,7 @@
  *
  * ## What does NOT belong here
  * - Form log aggregation logic (that's in form-log.service.ts)
- * - Supabase queries (except incidental profile lookups via supabase.service.ts)
+ * - Supabase queries (those belong in form-log.service.ts / other services)
  */
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "./auth.controller.js";

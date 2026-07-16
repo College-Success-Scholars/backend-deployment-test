@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { WINTER_BREAK_CAMPUS_WEEK_NUMBER } from "@/lib/format/time";
+import { cssColor } from "@/lib/theme/css-color";
 import type { WeekEntryCount } from "@/lib/types/traffic";
 
 export type { WeekEntryCount };
@@ -42,7 +43,7 @@ const SIDE_BY_SIDE_WIDTH = 460;
 /** Height per chart in half view so card profile is roughly square. */
 const HALF_VIEW_CHART_HEIGHT = 180;
 /** Same green as the traffic heat map */
-const TRAFFIC_COLOR = "#16a34a";
+const TRAFFIC_COLOR = cssColor.traffic;
 
 const DEFAULT_TITLE = "Entry count by week";
 const DEFAULT_DESCRIPTION = "Line graph of entry tickets per campus week (aggregate).";
@@ -141,13 +142,13 @@ export function TrafficWeeklyLineChart({
     g.append("g")
       .attr("transform", `translate(0,${height})`)
       .call(xAxis)
-      .attr("color", "hsl(var(--muted-foreground))")
+      .attr("color", cssColor.mutedForeground)
       .selectAll("text")
       .attr("font-size", "11px");
 
     g.append("g")
       .call(d3.axisLeft(y))
-      .attr("color", "hsl(var(--muted-foreground))")
+      .attr("color", cssColor.mutedForeground)
       .selectAll("text")
       .attr("font-size", "11px");
 

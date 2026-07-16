@@ -87,7 +87,7 @@ export function TutoringLogSection({ data }: TutoringLogSectionProps) {
     <MemoAccordionSection
       title="Tutoring log"
       badgeText={data.badgeText}
-      badgeClassName="bg-sky-50 text-sky-700 border-sky-200"
+      badgeClassName="bg-info-muted text-info-muted-foreground border-info/30"
       rightLabel={data.rightLabel}
     >
       <div className="space-y-3 px-3 py-3">

@@ -24,7 +24,7 @@
  * - Domain data queries unrelated to auth identity
  */
 import type { Request, Response, NextFunction } from "express";
-import { getSupabaseClient, getSupabaseAuthClient, runWithToken } from "../services/supabase.service.js";
+import { getSupabaseClient, getSupabaseAuthClient, runWithToken } from "../supabase/client.js";
 import { getMenteesByMentorKey } from "../services/mentee.service.js";
 import type { ProfilesRow } from "../models/user.model.js";
 import { hasRoleAtLeast, isDeveloperProfile, isUmdEmail, mergeProfileWithRoster } from "../../../shared/dist/auth.js";

@@ -1,34 +1,35 @@
 #!/usr/bin/env bash
 # resolve-alert.sh
 #
-# Resolves an architectural alert in docs/agents/alerts/ by logging the fix
-# session and deleting the alert file.
+# Resolves an architectural alert tracked as a GitHub Issue: logs the fix session,
+# then closes the issue if it is still open (comment-only if already closed).
+#
+# Requires: gh CLI authenticated to this repository.
 #
 # Usage:
 #   ./scripts/resolve-alert.sh [OPTIONS]
 #
 # Options:
-#   -a, --alert FILE         Path to the alert markdown file (required)
+#   -i, --issue N            GitHub issue number (required)
 #   -s, --summary FILE       Path to a file with the resolution summary
 #       --summary-text STR   Inline resolution summary
-#   -u, --purpose STR        Override purpose (defaults to alert description)
+#   -u, --purpose STR        Override purpose (defaults from issue title)
 #   -c, --changes STR        Comma-separated list of files changed
 #                            (auto-detected from git diff if omitted)
-#       --dry-run            Show what would happen without logging or deleting
+#       --dry-run            Show what would happen without logging or closing
 #   -h, --help               Show this help message
 #
 # Example:
 #   ./scripts/resolve-alert.sh \
-#     --alert docs/agents/alerts/2026-06-26T055650Z-auth-role-hierarchy-duplication.md \
-#     --summary-text "Extracted APP_ROLE_ORDER, hasRoleAtLeast, and mergeProfileWithRoster into shared/auth.ts" \
-#     --changes "shared/auth.ts,frontend/lib/supabase/server.ts,backend/src/controllers/auth.controller.ts"
+#     --issue 42 \
+#     --summary-text "Extracted APP_ROLE_ORDER into shared/auth.ts" \
+#     --changes "shared/auth.ts,backend/src/controllers/auth.controller.ts"
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ALERTS_DIR="docs/agents/alerts"
 
-ALERT_FILE=""
+ISSUE=""
 SUMMARY_FILE=""
 SUMMARY_TEXT=""
 PURPOSE=""
@@ -37,56 +38,34 @@ DRY_RUN=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -a|--alert)         ALERT_FILE="$2";      shift 2 ;;
+    -i|--issue)         ISSUE="$2";           shift 2 ;;
+    -a|--alert)
+      echo "Error: --alert <file> is retired. Architectural alerts are GitHub Issues only." >&2
+      echo "Use: $0 --issue <N> --summary-text \"...\"" >&2
+      echo "List: gh issue list --label architecture-alert --state open" >&2
+      exit 1 ;;
     -s|--summary)       SUMMARY_FILE="$2";    shift 2 ;;
     --summary-text)     SUMMARY_TEXT="$2";    shift 2 ;;
     -u|--purpose)       PURPOSE="$2";         shift 2 ;;
     -c|--changes)       CHANGES="$2";         shift 2 ;;
     --dry-run)          DRY_RUN=true;         shift ;;
     -h|--help)
-      sed -n '/^# resolve-alert.sh/,/^[^#]/p' "$0" | head -n -1 | sed 's/^# \?//'
+      awk '/^# resolve-alert.sh/{p=1} p && /^[^#]/{exit} p{sub(/^# ?/,""); print}' "$0"
       exit 0 ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
 done
 
-if [[ -z "$ALERT_FILE" ]]; then
-  echo "Error: --alert is required" >&2
+if [[ -z "$ISSUE" ]]; then
+  echo "Error: --issue <N> is required" >&2
   exit 1
 fi
 
-if [[ ! -f "$ALERT_FILE" ]]; then
-  echo "Error: alert file not found: $ALERT_FILE" >&2
+if ! command -v gh >/dev/null 2>&1; then
+  echo "Error: gh CLI is required. Install https://cli.github.com/ and run: gh auth login" >&2
   exit 1
 fi
 
-case "$ALERT_FILE" in
-  "${ALERTS_DIR}/"*) ;;
-  *)
-    echo "Error: alert file must be under ${ALERTS_DIR}/" >&2
-    exit 1
-    ;;
-esac
-
-# ── Extract title from first heading ───────────────────────────────────────────
-TITLE="$(sed -n 's/^# //p' "$ALERT_FILE" | head -n 1)"
-if [[ -z "$TITLE" ]]; then
-  TITLE="$(basename "$ALERT_FILE" .md)"
-fi
-
-# ── Extract description (between ## Description and next ---) ──────────────────
-if [[ -z "$PURPOSE" ]]; then
-  PURPOSE="$(awk '
-    /^## Description$/ { found=1; next }
-    found && /^---$/ { exit }
-    found { print }
-  ' "$ALERT_FILE" | sed '/^$/d' | head -n 1)"
-  if [[ -z "$PURPOSE" ]]; then
-    PURPOSE="Resolve alert: ${TITLE}"
-  fi
-fi
-
-# ── Resolve summary content ────────────────────────────────────────────────────
 if [[ -n "$SUMMARY_FILE" ]]; then
   RESOLVED_SUMMARY="$(cat "$SUMMARY_FILE")"
 elif [[ -n "$SUMMARY_TEXT" ]]; then
@@ -96,21 +75,34 @@ else
   exit 1
 fi
 
-PROMPT_TEXT="Fix ${TITLE} alert"
+ISSUE_TITLE="$(gh issue view "$ISSUE" --json title --jq '.title')"
+ISSUE_STATE="$(gh issue view "$ISSUE" --json state --jq '.state')"
+ISSUE_URL="$(gh issue view "$ISSUE" --json url --jq '.url')"
+
+if [[ -z "$PURPOSE" ]]; then
+  PURPOSE="Resolve architectural alert: ${ISSUE_TITLE}"
+fi
+
+PROMPT_TEXT="Fix architectural alert #${ISSUE}: ${ISSUE_TITLE}"
 
 if [[ "$DRY_RUN" == true ]]; then
-  echo "Dry run — would resolve alert: $ALERT_FILE"
-  echo "  Title:    $TITLE"
+  echo "Dry run — would resolve issue #${ISSUE}"
+  echo "  Title:    $ISSUE_TITLE"
+  echo "  State:    $ISSUE_STATE"
+  echo "  URL:      $ISSUE_URL"
   echo "  Purpose:  $PURPOSE"
   echo "  Summary:  $RESOLVED_SUMMARY"
   echo "  Changes:  ${CHANGES:-<auto-detect from git>}"
-  echo "  Action:   log session via log-agent-session.sh, then delete alert file"
+  if [[ "$ISSUE_STATE" == "OPEN" ]]; then
+    echo "  Action:   log session, then gh issue close #${ISSUE}"
+  else
+    echo "  Action:   log session, then comment on already-closed #${ISSUE} (no re-close)"
+  fi
   exit 0
 fi
 
-# ── Log the resolution session ─────────────────────────────────────────────────
 LOG_ARGS=(
-  --title "resolve-${TITLE}"
+  --title "resolve-issue-${ISSUE}"
   --purpose "$PURPOSE"
   --prompt-text "$PROMPT_TEXT"
   --summary-text "$RESOLVED_SUMMARY"
@@ -121,8 +113,19 @@ fi
 
 "${SCRIPT_DIR}/log-agent-session.sh" "${LOG_ARGS[@]}"
 
-# ── Delete the alert file ──────────────────────────────────────────────────────
-rm "$ALERT_FILE"
+COMMENT="$(cat <<EOF
+Resolved via \`scripts/resolve-alert.sh\`.
 
-echo ""
-echo "Alert resolved and deleted: $ALERT_FILE"
+${RESOLVED_SUMMARY}
+EOF
+)"
+
+if [[ "$ISSUE_STATE" == "OPEN" ]]; then
+  gh issue close "$ISSUE" --comment "$COMMENT"
+  echo ""
+  echo "Architectural alert closed: $ISSUE_URL"
+else
+  gh issue comment "$ISSUE" --body "$COMMENT"
+  echo ""
+  echo "Issue #${ISSUE} already ${ISSUE_STATE}; left resolution comment: $ISSUE_URL"
+fi

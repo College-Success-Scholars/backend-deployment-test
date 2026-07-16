@@ -1,0 +1,57 @@
+name: Architecture alert
+description: Structural or runtime finding that needs scheduled work (former docs/agents/alerts backlog).
+title: "Alert: "
+labels: ["architecture-alert", "chore"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Architectural alerts live **only** as GitHub Issues. Prefer `./scripts/alert.sh` from a clone when scripting. Requires `gh` auth.
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - info
+        - warning
+        - error
+      default: 1
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - auth
+        - security
+        - performance
+        - integrity
+        - config
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What is wrong and why it matters.
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: Affected files
+      description: One path per line.
+      placeholder: |
+        backend/src/...
+        frontend/...
+    validations:
+      required: false
+  - type: textarea
+    id: recommendation
+    attributes:
+      label: Recommendation
+      description: Preferred fix direction or phases.
+    validations:
+      required: true

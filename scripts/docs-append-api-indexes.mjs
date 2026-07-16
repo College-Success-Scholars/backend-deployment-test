@@ -25,21 +25,7 @@ const MAP = [
   { readme: "docs/dev/backend/src/routes/README.md", custom: "routes" },
   { readme: "docs/dev/frontend/lib/README.md", apiRel: "frontend/lib" },
   { readme: "docs/dev/frontend/lib/server/README.md", apiRel: "frontend/lib/server" },
-  { readme: "docs/dev/frontend/lib/client/README.md", apiRel: "frontend/lib/client" },
-  { readme: "docs/dev/frontend/lib/auth/README.md", apiRel: "frontend/lib/auth" },
-  { readme: "docs/dev/frontend/lib/format/README.md", apiRel: "frontend/lib/format" },
   { readme: "docs/dev/frontend/lib/supabase/README.md", apiRel: "frontend/lib/supabase" },
-  { readme: "docs/dev/frontend/lib/types/README.md", apiRel: "frontend/lib/types" },
-  { readme: "docs/dev/frontend/lib/dev/README.md", apiRel: "frontend/lib/dev" },
-  { readme: "docs/dev/frontend/lib/dashboard/README.md", apiRel: "frontend/lib/dashboard" },
-  {
-    readme: "docs/dev/frontend/components/personal/README.md",
-    apiRel: "frontend/components/personal/utils",
-  },
-  {
-    readme: "docs/dev/frontend/components/mentee-monitoring/README.md",
-    apiRel: "frontend/components/mentee-monitoring/utils",
-  },
 ];
 
 const KIND_DIRS = ["functions", "variables", "classes", "interfaces", "type-aliases", "enumerations"];
@@ -112,14 +98,66 @@ function buildRoutesSection(readmeAbs) {
   return md;
 }
 
+function listChildModules(apiDirAbs) {
+  if (!fs.existsSync(apiDirAbs)) return [];
+  return fs
+    .readdirSync(apiDirAbs, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && !KIND_DIRS.includes(d.name))
+    .map((d) => d.name)
+    .sort();
+}
+
+function listDocumentedModules(apiDirAbs, prefix = "") {
+  const rows = [];
+  for (const child of listChildModules(apiDirAbs)) {
+    const childDir = path.join(apiDirAbs, child);
+    const childReadme = path.join(childDir, "README.md");
+    const name = prefix ? `${prefix}/${child}` : child;
+    if (fs.existsSync(childReadme) && !moduleIsDefaultOnly(childDir)) {
+      rows.push({ name, readme: childReadme, dir: childDir });
+      continue;
+    }
+    // Nested packages often lack a folder README — flatten one+ levels.
+    rows.push(...listDocumentedModules(childDir, name));
+  }
+  return rows;
+}
+
+function buildModuleTable(readmeAbs, modules) {
+  let md = `| Module | Reference |\n|--------|----------|\n`;
+  for (const { name, readme } of modules) {
+    md += `| \`${name}\` | [API](${relLink(readmeAbs, readme)}) |\n`;
+  }
+  return md + `\n`;
+}
+
 function buildSection(readmeAbs, apiDirAbs) {
+  const hubLink = relLink(readmeAbs, path.join(ROOT, "docs/reference/README.md"));
+  const folderReadme = path.join(apiDirAbs, "README.md");
+  const hasFolderReadme = fs.existsSync(folderReadme);
+  const modules = listDocumentedModules(apiDirAbs);
+
+  // Hub folders: short module index only (no giant "All exports" dump).
+  if (modules.length > 0) {
+    let md =
+      `${START}\n\n## API Reference\n\n` +
+      `Generated from TypeScript signatures. Module indexes below; full catalog: [API Reference hub](${hubLink}).` +
+      (hasFolderReadme
+        ? ` Folder index: [browse](${relLink(readmeAbs, folderReadme)}).`
+        : "") +
+      `\n\n`;
+    md += buildModuleTable(readmeAbs, modules);
+    md += `${END}\n`;
+    return md;
+  }
+
   const symbols = walkSymbolPages(apiDirAbs)
     .filter((s) => s.name !== "default")
     .sort((a, b) => a.name.localeCompare(b.name));
   if (symbols.length === 0) {
     return (
       `${START}\n\n## API Reference\n\n` +
-      `No generated callable exports for this folder. See the [API Reference hub](${relLink(readmeAbs, path.join(ROOT, "docs/reference/README.md"))}).\n\n` +
+      `No generated callable exports for this folder. See the [API Reference hub](${hubLink}).\n\n` +
       `${END}\n`
     );
   }
@@ -139,10 +177,6 @@ function buildSection(readmeAbs, apiDirAbs) {
     enumerations: "Enumerations",
   };
 
-  const hubLink = relLink(readmeAbs, path.join(ROOT, "docs/reference/README.md"));
-  const folderReadme = path.join(apiDirAbs, "README.md");
-  const hasFolderReadme = fs.existsSync(folderReadme);
-
   let md =
     `${START}\n\n## API Reference\n\n` +
     `Generated from TypeScript signatures (parameters and returns on each symbol page). ` +
@@ -150,30 +184,6 @@ function buildSection(readmeAbs, apiDirAbs) {
       ? `Module index: [browse folder](${relLink(readmeAbs, folderReadme)}).`
       : `See also the [API Reference hub](${hubLink}).`) +
     `\n\n`;
-
-  // Prefer linking module README if present at leaf; otherwise list child modules.
-  if (!hasFolderReadme) {
-    const children = fs
-      .readdirSync(apiDirAbs, { withFileTypes: true })
-      .filter((d) => d.isDirectory())
-      .map((d) => d.name)
-      .sort();
-    md += `| Module | Reference |\n|--------|----------|\n`;
-    for (const child of children) {
-      const childDir = path.join(apiDirAbs, child);
-      const childReadme = path.join(childDir, "README.md");
-      if (!fs.existsSync(childReadme)) continue;
-      if (moduleIsDefaultOnly(childDir)) continue;
-      md += `| \`${child}\` | [API](${relLink(readmeAbs, childReadme)}) |\n`;
-    }
-    md += `\n<details>\n<summary>All exports (${symbols.length})</summary>\n\n`;
-    md += `| Symbol | Kind | Detail |\n|--------|------|--------|\n`;
-    for (const s of symbols) {
-      md += `| \`${s.name}\` | ${s.kind} | [docs](${relLink(readmeAbs, s.file)}) |\n`;
-    }
-    md += `\n</details>\n\n${END}\n`;
-    return md;
-  }
 
   for (const [kind, list] of byKind) {
     md += `### ${kindTitle[kind] || kind}\n\n`;

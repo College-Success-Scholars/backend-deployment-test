@@ -50,12 +50,13 @@ export interface WahfFormLogRow {
 }
 
 export interface WplFormLogRow {
-  id: string;
+  /** Matches `wpl_form_logs.id` (bigint). */
+  id: number;
   created_at: string | null;
   full_name: string | null;
   scholar_uid: string | null;
   hours_worked: number | null;
-  projects: unknown[] | null;
+  projects: unknown;
   met_with_all: string | null;
   explanation: string | null;
   submitted_by_email: string | null;

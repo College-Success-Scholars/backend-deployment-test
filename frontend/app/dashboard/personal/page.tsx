@@ -1,5 +1,7 @@
 import { getISOWeek } from "date-fns";
+import { redirect } from "next/navigation";
 import { PersonalClient } from "@/components/personal/personal-client";
+import { canAccessWeeklyMemo } from "@/lib/auth";
 import { getActiveSemester, getCurrentProfile } from "@/lib/server/queries";
 import { backendPost } from "@/lib/server/api-client";
 import { WahfFormLogRow, McfFormLogRow, WplFormLogRow } from "@/lib/types/form-log";
@@ -10,6 +12,11 @@ export default async function PersonalPage() {
     getActiveSemester(),
     getCurrentProfile(),
   ]);
+
+  // Personal monitoring is team_leader+ (same effective-role gate as Memo).
+  if (!canAccessWeeklyMemo(profile)) {
+    redirect("/dashboard");
+  }
 
   const uid = String((profile as Record<string, unknown>).student_id ?? "");
   const uids = uid ? [uid] : [];

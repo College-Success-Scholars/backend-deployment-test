@@ -1,5 +1,7 @@
 # Codebase Notes
 
+Agent-oriented architecture map. For the human handbook (env, standards, onboarding), start at [`docs/dev/README.md`](../dev/README.md).
+
 ## Standard check results
 
 - Backend check: `npm --prefix backend run build` passes.
@@ -14,6 +16,8 @@ This repository is a two-app setup:
 - `frontend/`: Next.js 16 (App Router) web app.
 
 Core data/auth platform is Supabase. The frontend obtains user session/JWT and calls backend endpoints with `Authorization: Bearer <token>`. The backend validates that JWT and then performs user-scoped Supabase queries.
+
+Operational form and session-log rows (WAHF/WPL/MCF, tutoring, front desk, study sessions, etc.) are **populated by an existing Google Forms → Supabase intake**, not by in-app forms. The Express API mostly **reads** those tables and derives aggregates; see [`docs/dev/supabase/README.md`](../dev/supabase/README.md#form--log-intake-google-forms).
 
 ## Backend how it works
 
@@ -33,8 +37,8 @@ Auth and Supabase context:
 
 - `auth.controller.ts` extracts JWT from header and verifies with Supabase auth.
 - It stores token/user/profile on `req`.
-- `supabase.service.ts` uses `AsyncLocalStorage` to bind the JWT per request via `runWithToken(...)`.
-- `getSupabaseClient()` reads that token and creates a client with `Authorization` header, so RLS is applied consistently.
+- `backend/src/supabase/client.ts` uses `AsyncLocalStorage` to bind the JWT per request via `runWithToken(...)`.
+- `getSupabaseClient()` reads that token and creates a typed client (`Database`) with `Authorization` header, so RLS is applied consistently.
 
 Important backend domains:
 
@@ -49,9 +53,9 @@ Important backend domains:
 Frontend uses Next.js App Router with route groups in `frontend/app/`.
 
 - `frontend/middleware.ts` wires Supabase session update middleware (`lib/supabase/middleware.ts` → `updateSession`).
-- Middleware redirects unauthenticated users to `/auth/login`, with public exceptions for `/`, `/auth/*`, and `/traffic` (kiosk check-in).
-- App includes dashboard routes, auth routes, a `/memo` redirect to `/dashboard/memo`, standalone `/traffic`, and developer scratchpad pages under `app/dev/*` (backend testing — not kept in sync with production UI).
-- Theme, fonts, and toaster are initialized in `app/layout.tsx`.
+- Middleware redirects unauthenticated users to `/auth/login`, with public exceptions for `/`, `/auth/*`, and `/traffic` (foot-traffic kiosk — no login, no role gate for signed-in users either).
+- App includes dashboard routes, auth routes, a `/memo` redirect to `/dashboard/memo`, standalone public `/traffic` (writes via `recordTrafficEntry` server action; analytics stay on `/dev/traffic` + auth-gated `/api/traffic`), and developer scratchpad pages under `app/dev/*` (backend testing — not kept in sync with production UI).
+- Theme (`ThemeProvider` / `next-themes` class strategy), fonts, and themed toaster are initialized in `app/layout.tsx`. Color tokens (light/dark) live in `app/globals.css`; dashboard header hosts the theme toggle.
 
 Data access pattern:
 
@@ -72,7 +76,9 @@ For an authenticated session record request:
 
 ## Operational notes
 
+- New-developer guided path: `docs/dev/onboarding/` (Day 0, golden-path first PR, roles, campus weeks, auth/RLS runbook). PR descriptions use `docs/dev/pr/TEMPLATE.md`.
 - Backend tests: `npm --prefix backend run test` (Vitest + supertest).
 - API reference is documented in `backend/API.md` and is comprehensive.
 - Set `CORS_ORIGIN` to the actual frontend URL in each environment (Docker defaults to `http://localhost:3000`; bare `app.ts` default is `http://localhost:3002`).
+- Deployment topology (Railway / Vercel / Docker Compose / CI smoke): `docs/dev/deployment/README.md`.
 - Developers can switch to curated test personas via `dev_test_profiles` (see `docs/dev/supabase/README.md`).

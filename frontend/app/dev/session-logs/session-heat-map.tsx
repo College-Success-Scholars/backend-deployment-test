@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { cssColor, themeIntensity } from "@/lib/theme/css-color";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"] as const;
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 8); // 8–19
@@ -85,18 +86,9 @@ function aggregate(
   return { study, fd };
 }
 
-function interpolateColor(hex: string, t: number): string {
-  if (t <= 0) return "#ffffff";
-  if (t >= 1) return hex;
-  const r = Math.round(255 + (parseInt(hex.slice(1, 3), 16) - 255) * t);
-  const g = Math.round(255 + (parseInt(hex.slice(3, 5), 16) - 255) * t);
-  const b = Math.round(255 + (parseInt(hex.slice(5, 7), 16) - 255) * t);
-  return `rgb(${r},${g},${b})`;
-}
-
-const FRONT_DESK_COLOR = "#f46524";
-const STUDY_COLOR = "#5c95f9";
-const BOTH_COLOR = "#dc2626"; // red
+const FRONT_DESK_COLOR = cssColor.frontDesk;
+const STUDY_COLOR = cssColor.study;
+const BOTH_COLOR = cssColor.formWahf;
 
 export function SessionHeatMap({
   completedStudy,
@@ -273,19 +265,19 @@ export function SessionHeatMap({
                     <div
                       key={`${d}-${h}`}
                       className={`flex min-h-0 min-w-0 items-center justify-center rounded border border-border/50 text-[10px] font-medium transition-colors ${
-                        isEmpty ? "bg-white dark:bg-zinc-900" : ""
+                        isEmpty ? "bg-card" : ""
                       }`}
                       style={
                         !isEmpty
                           ? {
-                              backgroundColor: interpolateColor(
+                              backgroundColor: themeIntensity(
                                 color,
                                 maxVal > 0 ? cell.count / maxVal : 0
                               ),
                               color:
                                 cell.count > 0 &&
                                 (cell.count / (maxVal || 1)) > 0.5
-                                  ? "white"
+                                  ? "var(--success-foreground)"
                                   : "inherit",
                             }
                           : undefined
@@ -302,7 +294,7 @@ export function SessionHeatMap({
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
           <span>
-            Scale: white (0) →{" "}
+            Scale: background (0) →{" "}
             <span
               className="inline-block h-3 w-3 rounded"
               style={{
@@ -316,10 +308,10 @@ export function SessionHeatMap({
               aria-hidden
             />{" "}
             {mode === "front-desk"
-              ? "Front Desk (#f46524)"
+              ? "Front Desk"
               : mode === "study-session"
-                ? "Study Session (#5c95f9)"
-                : "Both overlap (red)"}
+                ? "Study Session"
+                : "Both overlap"}
           </span>
         </div>
       </CardContent>

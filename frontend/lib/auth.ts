@@ -57,7 +57,10 @@ export function canAccessMenteeMonitoring(
   return hasAssignedMentees(profile);
 }
 
-/** Weekly memo and traffic analytics require team_leader or developer in profiles.app_role. */
+/**
+ * Weekly memo and other team-leader dashboards require team_leader or developer.
+ * Public `/traffic` kiosk check-in is ungated (anyone may use it without signing in).
+ */
 export function canAccessWeeklyMemo(profile: ProfileRoleFields | null | undefined): boolean {
   return hasRoleAtLeast(profile?.app_role ?? null, "team_leader");
 }

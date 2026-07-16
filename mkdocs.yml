@@ -40,6 +40,16 @@ exclude_docs: |
 
 nav:
   - Home: dev/README.md
+  - Onboarding:
+      - Overview: dev/onboarding/README.md
+      - Day 0 setup: dev/onboarding/day-0-setup.md
+      - Branching & reviews: dev/onboarding/branching-and-reviews.md
+      - Golden path (first PR): dev/onboarding/golden-path-first-pr.md
+      - Roles & personas: dev/onboarding/roles-and-personas.md
+      - Campus weeks: dev/onboarding/campus-weeks.md
+      - Auth & RLS runbook: dev/onboarding/auth-rls-runbook.md
+      - Ask / don’t touch: dev/onboarding/ask-and-dont-touch.md
+      - PR template: dev/pr/TEMPLATE.md
   - Backend:
       - Overview: dev/backend/README.md
       - REST API: dev/backend/api.md
@@ -49,7 +59,7 @@ nav:
       - Routes: dev/backend/src/routes/README.md
       - Models: dev/backend/src/models/README.md
       - Middleware: dev/backend/src/middleware/README.md
-      - Tests: dev/backend/src/tests/README.md
+      - Supabase: dev/backend/src/supabase/README.md
   - Frontend:
       - Overview: dev/frontend/README.md
       - App:
@@ -60,34 +70,16 @@ nav:
           - Dev routes: dev/frontend/app/dev/README.md
       - Components:
           - Overview: dev/frontend/components/README.md
-          - UI: dev/frontend/components/ui/README.md
-          - Layout: dev/frontend/components/layout/README.md
-          - Auth: dev/frontend/components/auth/README.md
-          - Data display: dev/frontend/components/data-display/README.md
-          - Charts: dev/frontend/components/charts/README.md
           - Dashboard: dev/frontend/components/dashboard/README.md
-          - Roles: dev/frontend/components/dashboard/roles/README.md
-          - Widgets: dev/frontend/components/dashboard/widgets/README.md
-          - Mentee monitoring: dev/frontend/components/mentee-monitoring/README.md
-          - Personal: dev/frontend/components/personal/README.md
-          - Settings: dev/frontend/components/settings/README.md
-          - Marketing: dev/frontend/components/marketing/README.md
-          - Dev: dev/frontend/components/dev/README.md
       - Lib:
           - Overview: dev/frontend/lib/README.md
           - Server: dev/frontend/lib/server/README.md
-          - Client: dev/frontend/lib/client/README.md
           - Supabase: dev/frontend/lib/supabase/README.md
-          - Auth: dev/frontend/lib/auth/README.md
-          - Types: dev/frontend/lib/types/README.md
-          - Format: dev/frontend/lib/format/README.md
-          - Dev: dev/frontend/lib/dev/README.md
-          - Dashboard: dev/frontend/lib/dashboard/README.md
-      - Hooks: dev/frontend/hooks/README.md
       - Legacy: dev/frontend/legacy/README.md
   - Shared:
       - Overview: dev/shared/README.md
       - Source: dev/shared/src/README.md
+  - Deployment: dev/deployment/README.md
   - Scripts: dev/scripts/README.md
   - Supabase: dev/supabase/README.md
   - Agents:

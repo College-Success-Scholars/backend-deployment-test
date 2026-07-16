@@ -60,13 +60,14 @@ Do not call `backendGet` / `backendFetch` directly in pages — add a typed wrap
 - **Add new endpoints to `data.ts`** — when a new backend endpoint is created, add a corresponding typed function in `data.ts` rather than calling `backendGet` directly from pages.
 - **No React imports** — this is plain TypeScript, not a component module.
 - **Server Actions go in `actions.ts`** — do not add `"use server"` functions to other files.
+- **Public traffic check-in** — `recordTrafficEntry` is intentionally unauthenticated; validate with Zod, force `traffic_type: "entry"`, never trust client `created_at`. Pair with Supabase INSERT-only RLS (`docs/dev/supabase/004_traffic_public_insert.sql`).
 - **Error handling** — `backendFetch` throws on non-OK responses. Pages and actions should handle errors with try/catch or error boundaries.
 
 <!-- AUTO-API-REFERENCE:START -->
 
 ## API Reference
 
-Generated from TypeScript signatures (parameters and returns on each symbol page). See also the [API Reference hub](../../../../reference/README.md).
+Generated from TypeScript signatures. Module indexes below; full catalog: [API Reference hub](../../../../reference/README.md).
 
 | Module | Reference |
 |--------|----------|
@@ -75,87 +76,5 @@ Generated from TypeScript signatures (parameters and returns on each symbol page
 | `data` | [API](../../../../reference/api/frontend/lib/server/data/README.md) |
 | `dev-profile-actions` | [API](../../../../reference/api/frontend/lib/server/dev-profile-actions/README.md) |
 | `queries` | [API](../../../../reference/api/frontend/lib/server/queries/README.md) |
-
-<details>
-<summary>All exports (74)</summary>
-
-| Symbol | Kind | Detail |
-|--------|------|--------|
-| `backendFetch` | functions | [docs](../../../../reference/api/frontend/lib/server/api-client/functions/backendFetch.md) |
-| `backendGet` | functions | [docs](../../../../reference/api/frontend/lib/server/api-client/functions/backendGet.md) |
-| `backendPatch` | functions | [docs](../../../../reference/api/frontend/lib/server/api-client/functions/backendPatch.md) |
-| `backendPost` | functions | [docs](../../../../reference/api/frontend/lib/server/api-client/functions/backendPost.md) |
-| `createScholarProfile` | functions | [docs](../../../../reference/api/frontend/lib/server/actions/functions/createScholarProfile.md) |
-| `CurrentUserResponse` | type-aliases | [docs](../../../../reference/api/frontend/lib/server/queries/type-aliases/CurrentUserResponse.md) |
-| `DevTestProfileListItem` | type-aliases | [docs](../../../../reference/api/frontend/lib/server/queries/type-aliases/DevTestProfileListItem.md) |
-| `fetchAllUsersForMemo` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/fetchAllUsersForMemo.md) |
-| `fetchAllUserUids` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/fetchAllUserUids.md) |
-| `fetchEligibleScholarUids` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/fetchEligibleScholarUids.md) |
-| `fetchFrontDeskLogs` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/fetchFrontDeskLogs.md) |
-| `fetchRequiredHoursByUids` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/fetchRequiredHoursByUids.md) |
-| `fetchScholarNamesByUids` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/fetchScholarNamesByUids.md) |
-| `fetchScholarUids` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/fetchScholarUids.md) |
-| `fetchStudySessionLogs` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/fetchStudySessionLogs.md) |
-| `fetchTeamLeaders` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/fetchTeamLeaders.md) |
-| `FrontDeskRecordWithName` | type-aliases | [docs](../../../../reference/api/frontend/lib/server/data/type-aliases/FrontDeskRecordWithName.md) |
-| `getActiveSemester` | variables | [docs](../../../../reference/api/frontend/lib/server/queries/variables/getActiveSemester.md) |
-| `getCurrentProfile` | variables | [docs](../../../../reference/api/frontend/lib/server/queries/variables/getCurrentProfile.md) |
-| `getCurrentUser` | variables | [docs](../../../../reference/api/frontend/lib/server/queries/variables/getCurrentUser.md) |
-| `getFrontDeskCleanedAndErrored` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getFrontDeskCleanedAndErrored.md) |
-| `getFrontDeskCompletedSessions` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getFrontDeskCompletedSessions.md) |
-| `getFrontDeskRecord` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getFrontDeskRecord.md) |
-| `getFrontDeskRecordsByUid` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getFrontDeskRecordsByUid.md) |
-| `getFrontDeskRecordsForWeek` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getFrontDeskRecordsForWeek.md) |
-| `getFrontDeskRecordsForWeekAll` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getFrontDeskRecordsForWeekAll.md) |
-| `getFrontDeskScholarsInRoom` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getFrontDeskScholarsInRoom.md) |
-| `getMcfFormLogsByUid` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getMcfFormLogsByUid.md) |
-| `getMcfFormLogsByUidAndWeek` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getMcfFormLogsByUidAndWeek.md) |
-| `getMcfFormLogsByUidAndWeekWithLate` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getMcfFormLogsByUidAndWeekWithLate.md) |
-| `getMcfFormLogsByUidWithLate` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getMcfFormLogsByUidWithLate.md) |
-| `getMcfFormLogsForWeek` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getMcfFormLogsForWeek.md) |
-| `getMcfFormLogsForWeekWithLate` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getMcfFormLogsForWeekWithLate.md) |
-| `getMyMentees` | variables | [docs](../../../../reference/api/frontend/lib/server/queries/variables/getMyMentees.md) |
-| `getRecentFormSubmissions` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getRecentFormSubmissions.md) |
-| `getStudySessionCleanedAndErrored` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getStudySessionCleanedAndErrored.md) |
-| `getStudySessionCompletedSessions` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getStudySessionCompletedSessions.md) |
-| `getStudySessionRecord` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getStudySessionRecord.md) |
-| `getStudySessionRecordsByUid` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getStudySessionRecordsByUid.md) |
-| `getStudySessionRecordsForWeek` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getStudySessionRecordsForWeek.md) |
-| `getStudySessionRecordsForWeekAll` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getStudySessionRecordsForWeekAll.md) |
-| `getStudySessionScholarsInRoom` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getStudySessionScholarsInRoom.md) |
-| `getTeamLeaderFormStatsForWeek` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getTeamLeaderFormStatsForWeek.md) |
-| `getTotalMinutesForMenteeWeek` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getTotalMinutesForMenteeWeek.md) |
-| `getTrafficEntryCountForWeek` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getTrafficEntryCountForWeek.md) |
-| `getTrafficEntryCountsForWeeks` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getTrafficEntryCountsForWeeks.md) |
-| `getTrafficSessionsForWeek` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getTrafficSessionsForWeek.md) |
-| `getUserByUid` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getUserByUid.md) |
-| `getWhafFormLogsByUid` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getWhafFormLogsByUid.md) |
-| `getWhafFormLogsForWeek` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getWhafFormLogsForWeek.md) |
-| `getWhafFormLogsForWeekWithLate` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getWhafFormLogsForWeekWithLate.md) |
-| `getWplFormLogsByUid` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getWplFormLogsByUid.md) |
-| `getWplFormLogsByUidAndWeek` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getWplFormLogsByUidAndWeek.md) |
-| `getWplFormLogsByUidAndWeekWithLate` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getWplFormLogsByUidAndWeekWithLate.md) |
-| `getWplFormLogsByUidWithLate` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getWplFormLogsByUidWithLate.md) |
-| `getWplFormLogsForWeek` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getWplFormLogsForWeek.md) |
-| `getWplFormLogsForWeekWithLate` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/getWplFormLogsForWeekWithLate.md) |
-| `McfFormLogRowWithLate` | type-aliases | [docs](../../../../reference/api/frontend/lib/server/data/type-aliases/McfFormLogRowWithLate.md) |
-| `MemoUserRow` | type-aliases | [docs](../../../../reference/api/frontend/lib/server/data/type-aliases/MemoUserRow.md) |
-| `RecordKind` | type-aliases | [docs](../../../../reference/api/frontend/lib/server/data/type-aliases/RecordKind.md) |
-| `scholarIdFromProfile` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/scholarIdFromProfile.md) |
-| `scholarUidFromProfile` | variables | [docs](../../../../reference/api/frontend/lib/server/data/variables/scholarUidFromProfile.md) |
-| `setActiveTestProfile` | functions | [docs](../../../../reference/api/frontend/lib/server/dev-profile-actions/functions/setActiveTestProfile.md) |
-| `StudySessionRecordWithName` | type-aliases | [docs](../../../../reference/api/frontend/lib/server/data/type-aliases/StudySessionRecordWithName.md) |
-| `syncFrontDeskRecordsForWeek` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/syncFrontDeskRecordsForWeek.md) |
-| `syncFrontDeskRecordsForWeekAllUids` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/syncFrontDeskRecordsForWeekAllUids.md) |
-| `syncStudySessionRecordsForWeek` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/syncStudySessionRecordsForWeek.md) |
-| `syncStudySessionRecordsForWeekAllUids` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/syncStudySessionRecordsForWeekAllUids.md) |
-| `TeamLeaderRow` | type-aliases | [docs](../../../../reference/api/frontend/lib/server/data/type-aliases/TeamLeaderRow.md) |
-| `updateBasicInfo` | functions | [docs](../../../../reference/api/frontend/lib/server/actions/functions/updateBasicInfo.md) |
-| `UpdateExcusePayload` | interfaces | [docs](../../../../reference/api/frontend/lib/server/data/interfaces/UpdateExcusePayload.md) |
-| `updateRecordExcuse` | functions | [docs](../../../../reference/api/frontend/lib/server/data/functions/updateRecordExcuse.md) |
-| `WahfFormLogRowWithLate` | type-aliases | [docs](../../../../reference/api/frontend/lib/server/data/type-aliases/WahfFormLogRowWithLate.md) |
-| `WplFormLogRowWithLate` | type-aliases | [docs](../../../../reference/api/frontend/lib/server/data/type-aliases/WplFormLogRowWithLate.md) |
-
-</details>
 
 <!-- AUTO-API-REFERENCE:END -->

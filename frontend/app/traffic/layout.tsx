@@ -1,22 +1,16 @@
 import { IdleResetProvider } from "@/components/layout/idle-reset-provider";
-import { canAccessWeeklyMemo } from "@/lib/auth";
-import { getCurrentUserWithProfile } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 
 /**
- * Traffic route layout.
- * Public kiosk when logged out; logged-in users without team_leader+ app_role
- * are redirected to the dashboard.
+ * Public kiosk layout for `/traffic`.
+ * No auth or role gate — anyone (signed in or not) can record foot traffic.
+ * Session middleware already treats `/traffic` as a public path.
+ *
+ * @see docs/dev/frontend/app/traffic/README.md — do not reintroduce gating
  */
-export default async function TrafficLayout({
+export default function TrafficLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user, profile } = await getCurrentUserWithProfile();
-  if (user && !canAccessWeeklyMemo(profile)) {
-    redirect("/dashboard");
-  }
-
   return <IdleResetProvider>{children}</IdleResetProvider>;
 }

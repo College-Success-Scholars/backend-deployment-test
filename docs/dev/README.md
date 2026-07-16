@@ -7,10 +7,13 @@
 
 | Area | Source | Docs |
 |------|--------|------|
+| [Onboarding](onboarding/README.md) | Guided path for new developers | Day 0 → branching → first PR, roles, campus weeks, auth runbook |
 | [Backend](backend/README.md) | [`backend/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend) | Express + TypeScript API |
 | [Shared](shared/README.md) | [`shared/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/shared) | Shared TypeScript utilities |
 | [Frontend](frontend/README.md) | [`frontend/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend) | Next.js 16 web app |
+| [Deployment](deployment/README.md) | Docker / Railway / Vercel / CI | Hosted topology, env wiring, smoke |
 | [Scripts](scripts/README.md) | [`scripts/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts) | Dev/ops shell scripts |
+| [Supabase](supabase/README.md) | [`docs/dev/supabase/`](supabase/README.md) | Cloud schema scripts (test profiles) |
 | [Agent Docs](agents/README.md) | [`docs/agents/`](../agents/codebase-notes.md) | AI agent knowledge base |
 
 ---
@@ -44,7 +47,7 @@ repo root
 | Component library | Radix UI / shadcn-ui |
 | Charts | Recharts, D3 |
 | Testing | Vitest |
-| Deployment | Railway, Vercel, Docker |
+| Deployment | Railway, Vercel, Docker — see [Deployment](deployment/README.md) |
 
 ---
 
@@ -108,6 +111,8 @@ Roles are stored in `profiles.app_role` (or `user_roster.app_role`).
 
 ## Local Development
 
+**New developers:** follow [Onboarding — Day 0 setup](onboarding/day-0-setup.md) (preferred: `./scripts/dev.sh --install`; Windows: `.\scripts\dev.ps1 -Install`).
+
 ```bash
 # Install dependencies
 npm install --prefix backend
@@ -162,6 +167,13 @@ See [`ubiquitous_language.md`](../agents/ubiquitous_language.md) for the full gl
 7. **No logic in routes** — routes only wire middleware → controller. All business logic is in services.
 8. **`server-only` guard** in any frontend module that must not run on the client.
 9. **Published docs site** — the human-facing handbook is on GitHub Pages (MkDocs). Keep pages **concise at the top** (Purpose, Navigation, Files) and put deep detail / generated API indexes at the **bottom**. In-site navigation must stay under `docs/`; use GitHub blob links for source code.
+
+### Docs depth
+
+- **Handbook vs reference** — `docs/dev/` is the human handbook (standards, placement, ops). Symbol catalogs are generated TypeDoc under [`docs/reference/`](../reference/README.md); link there instead of inventing leaf mirrors.
+- **New README only for a Standards boundary** — add a `docs/dev/**/README.md` when a directory has rules that parent hubs cannot own, not merely because a source folder exists.
+- **Missing leaf READMEs are expected** — walk up to the nearest parent hub; that hub’s Purpose / Standards are authoritative.
+- **Architecture narrative** — humans: this page; agents: [`docs/agents/codebase-notes.md`](../agents/codebase-notes.md). Other handbook pages **link**, do not retell request flow / auth / roles.
 
 ---
 

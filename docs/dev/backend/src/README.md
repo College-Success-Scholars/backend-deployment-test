@@ -7,13 +7,13 @@
 
 [← Root](../../README.md) › [Backend](../README.md) › src
 
-Children: [controllers/](controllers/README.md) · [models/](models/README.md) · [services/](services/README.md) · [routes/](routes/README.md) · [middleware/](middleware/README.md) · [tests/](tests/README.md)
+Children: [controllers/](controllers/README.md) · [models/](models/README.md) · [services/](services/README.md) · [routes/](routes/README.md) · [middleware/](middleware/README.md) · [supabase/](supabase/README.md)
 
 ---
 
 ## Purpose
 
-The root of all backend TypeScript source code. Contains the application entry point (`server.ts`), the Express app factory (`app.ts`), and the four-layer architecture: routes → controllers → services → models.
+The root of all backend TypeScript source code. Contains the application entry point (`server.ts`), the Express app factory (`app.ts`), and the four-layer architecture: routes → controllers → services → models. Vitest integration tests live under `tests/`.
 
 ---
 
@@ -34,8 +34,9 @@ The root of all backend TypeScript source code. Contains the application entry p
 | `models/` | [models/README.md](models/README.md) | TypeScript types and constants for domain data shapes |
 | `services/` | [services/README.md](services/README.md) | Business logic and all Supabase database access |
 | `routes/` | [routes/README.md](routes/README.md) | Express Router definitions — wire middleware to controllers |
-| `middleware/` | [middleware/README.md](middleware/README.md) | Express middleware (logging, etc.) |
-| `tests/` | [tests/README.md](tests/README.md) | Vitest integration tests |
+| `middleware/` | [middleware/README.md](middleware/README.md) | Express middleware (logging, acting denylist) |
+| `supabase/` | [supabase/README.md](supabase/README.md) | Generated `Database` types + typed JWT-bound client |
+| `tests/` | _(hub)_ | Vitest + supertest integration tests (see below) |
 
 ---
 
@@ -53,6 +54,21 @@ Request → Route → Middleware (auth) → Controller → Service → Supabase
 | Controller | `controllers/*.controller.ts` | Parse/validate params; orchestrate service calls; format response |
 | Service | `services/*.service.ts` | All Supabase queries; business logic; data transformation |
 | Model | `models/*.model.ts` | TypeScript types only — no runtime logic |
+
+---
+
+## Tests
+
+Vitest integration tests under `tests/` import the Express `app` from `app.ts` and use `supertest` so they exercise the full pipeline without starting a live server.
+
+```bash
+npm run test          # vitest run (single pass)
+npm run test:watch    # vitest (watch mode)
+```
+
+Configured in [`backend/vitest.config.ts`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/vitest.config.ts).
+
+**Test standards:** one `<domain>.test.ts` per domain; mock Supabase in CI when possible; cover 401 / 403 / 200 auth levels; reset mocks in `beforeEach`/`afterEach`; never start a live server.
 
 ---
 

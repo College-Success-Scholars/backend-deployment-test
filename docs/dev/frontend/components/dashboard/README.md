@@ -7,8 +7,6 @@
 
 [← Root](../../../README.md) › [Frontend](../../README.md) › [components](../README.md) › dashboard
 
-Children: [roles/](roles/README.md) · [widgets/](widgets/README.md)
-
 ---
 
 ## Purpose
@@ -21,7 +19,7 @@ Dashboard-specific components split into role home views and reusable feature wi
 
 | Directory | Purpose |
 |-----------|---------|
-| `roles/` | Home dashboard per `app_role` — rendered by `app/dashboard/page.tsx` |
+| `roles/` | Home dashboard per `app_role` — selected by `app/dashboard/page.tsx` via `resolveUserRole()` |
 | `widgets/` | Feature widgets used inside dashboard routes (activity log, directory, …) |
 
 Layout chrome (`dashboard-header`, `dashboard-breadcrumb`, sidebar nav) lives in `components/layout/`, not here.
@@ -32,7 +30,8 @@ Charts live in `components/charts/`. Non-component dictionaries live in `lib/das
 
 ## Standards
 
-- **Server/client split** — use `foo.tsx` + `foo-client.tsx`: server fetches, client interacts.
-- **Role selection in `app/dashboard/page.tsx`** — do not switch roles inside dashboard components.
+- **Server/client split** — use `foo.tsx` + `foo-client.tsx`: server fetches, client interacts (same for widgets that fetch or filter).
+- **Role selection in `app/dashboard/page.tsx`** — do not switch roles inside dashboard components; roles import widgets from `widgets/` and charts from `components/charts/`.
 - **New role dashboard** — add to `roles/` and wire in `app/dashboard/page.tsx`.
 - **New feature widget** — add to `widgets/` unless it is route-private (then use `_components/`).
+- **WA HF status** — single canonical card in `mentee-monitoring/wahf-card.tsx` (do not duplicate under widgets).

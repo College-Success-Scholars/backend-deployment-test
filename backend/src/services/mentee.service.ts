@@ -17,7 +17,7 @@
  * - Mentee activity data (that's daily-scholar-activity.service.ts)
  * - HTTP request/response logic
  */
-import { getSupabaseClient } from "./supabase.service.js";
+import { getSupabaseClient } from "../supabase/client.js";
 import type { MenteeRow } from "../models/mentee.model.js";
 
 export async function getMenteesByMentorKey(mentorKey: string): Promise<MenteeRow[]> {

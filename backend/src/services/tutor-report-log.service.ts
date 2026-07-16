@@ -17,7 +17,7 @@
  * - Session log queries (that's session-log.service.ts)
  * - HTTP request/response logic
  */
-import { getSupabaseClient } from "./supabase.service.js";
+import { getSupabaseClient } from "../supabase/client.js";
 import { campusWeekToDateRange, getWeekFetchEnd } from "./time.service.js";
 import type { TutorReportLogRow } from "../models/tutor-report-log.model.js";
 
