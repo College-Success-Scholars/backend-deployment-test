@@ -9,6 +9,7 @@
 | Guide | When |
 |-------|------|
 | [Day 0 setup](day-0-setup.md) | First clone — get the stack running |
+| [Branching & reviews](branching-and-reviews.md) | `develop` / `main`, teams, CODEOWNERS, rulesets |
 | [Golden path (first PR)](golden-path-first-pr.md) | First real change end-to-end |
 | [Roles & personas](roles-and-personas.md) | Understanding scholar / team leader / developer |
 | [Campus weeks](campus-weeks.md) | Dates, `weekNum`, Memo alignment |
@@ -36,7 +37,7 @@ Do **not** duplicate architecture encyclopedias here. Link out to existing docs 
 | 2 | Trace one request using [codebase notes](../../agents/codebase-notes.md) (no code changes yet) |
 | 3 | [Roles & personas](roles-and-personas.md) — switch test personas, compare UI |
 | 4 | [Campus weeks](campus-weeks.md) — verify a Memo week against `shared/time-config.ts` |
-| 5 | [Golden path](golden-path-first-pr.md) — tiny change + tests + PR using the [PR template](../pr/TEMPLATE.md) |
+| 5 | [Branching & reviews](branching-and-reviews.md) + [Golden path](golden-path-first-pr.md) — tiny change + tests + PR into `develop` using the [PR template](../pr/TEMPLATE.md) |
 
 ---
 
@@ -60,7 +61,9 @@ Product/behavior changes need a GitHub Issue first (use the **Bug**, **Feature**
 
 ## Pull requests
 
-Every PR description should follow **[`docs/dev/pr/TEMPLATE.md`](../pr/TEMPLATE.md)** (Summary, Changelog, Test plan with the package scripts you actually ran). There is no auto-injected `.github` PR template yet — copy from that file when opening the PR. Link with `Fixes #<n>`.
+- **Base branch:** `develop` for normal work. Juniors never target `main` — see [Branching & reviews](branching-and-reviews.md).
+- **Review:** CODEOWNERS requires a **Senior Developer** approval before the PR can merge into `develop`.
+- **Description:** follow **[`docs/dev/pr/TEMPLATE.md`](../pr/TEMPLATE.md)** (Summary, Changelog, Test plan with the package scripts you actually ran). There is no auto-injected `.github` PR template yet — copy from that file when opening the PR. Link with `Fixes #<n>`.
 
 ---
 

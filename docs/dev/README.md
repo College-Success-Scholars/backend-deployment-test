@@ -7,7 +7,7 @@
 
 | Area | Source | Docs |
 |------|--------|------|
-| [Onboarding](onboarding/README.md) | Guided path for new developers | Day 0 → first PR, roles, campus weeks, auth runbook |
+| [Onboarding](onboarding/README.md) | Guided path for new developers | Day 0 → branching → first PR, roles, campus weeks, auth runbook |
 | [Backend](backend/README.md) | [`backend/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend) | Express + TypeScript API |
 | [Shared](shared/README.md) | [`shared/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/shared) | Shared TypeScript utilities |
 | [Frontend](frontend/README.md) | [`frontend/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend) | Next.js 16 web app |

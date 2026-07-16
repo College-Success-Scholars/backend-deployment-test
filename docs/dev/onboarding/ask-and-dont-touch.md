@@ -53,4 +53,4 @@ Structural findings (schema drift, duplicated auth, dead domain modules): open a
 
 ## PR reminder
 
-Copy the canonical template — [`docs/dev/pr/TEMPLATE.md`](../pr/TEMPLATE.md) — and fill **Test plan** with the scripts you actually ran.
+Target **`develop`**, not `main`. Copy the canonical template — [`docs/dev/pr/TEMPLATE.md`](../pr/TEMPLATE.md) — and fill **Test plan** with the scripts you actually ran. Branch policy: [Branching & reviews](branching-and-reviews.md).

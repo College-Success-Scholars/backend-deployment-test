@@ -43,6 +43,7 @@ nav:
   - Onboarding:
       - Overview: dev/onboarding/README.md
       - Day 0 setup: dev/onboarding/day-0-setup.md
+      - Branching & reviews: dev/onboarding/branching-and-reviews.md
       - Golden path (first PR): dev/onboarding/golden-path-first-pr.md
       - Roles & personas: dev/onboarding/roles-and-personas.md
       - Campus weeks: dev/onboarding/campus-weeks.md

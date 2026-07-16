@@ -6,7 +6,7 @@
 
 [← Onboarding](README.md) › Golden path (first PR)
 
-**Also read:** [PR template](../pr/TEMPLATE.md) · [Day 0 setup](day-0-setup.md)
+**Also read:** [Branching & reviews](branching-and-reviews.md) · [PR template](../pr/TEMPLATE.md) · [Day 0 setup](day-0-setup.md)
 
 ---
 
@@ -21,6 +21,34 @@ Pick a **tiny, reviewable** change (prefer a supervised ticket). Examples of goo
 - Extend an existing read endpoint with a well-scoped query param (team-approved)
 
 Avoid first PRs that change auth middleware, RLS, migrations, or `shared/time-config.ts` — see [Ask / don’t touch](ask-and-dont-touch.md).
+
+---
+
+## Before your edits can hit `develop`
+
+Your commits never land on `develop` by pushing there directly (unless you are on the senior team). The path is:
+
+```text
+1. Branch off develop
+2. Push a feature branch
+3. Open a PR with base = develop  (never main)
+4. CI green + CODEOWNERS (senior) approval
+5. Merge → develop
+```
+
+Checklist before you start coding:
+
+| Step | What to do |
+|------|------------|
+| Base branch | `git fetch origin && git checkout develop && git pull` — create your branch from **current `develop`**, not `main` |
+| Branch name | Something like `feature/short-description` or `fix/short-description` |
+| PR target | Base branch **`develop`**. Do not open a PR into `main` |
+| Description | Copy [`docs/dev/pr/TEMPLATE.md`](../pr/TEMPLATE.md); link `Fixes #<n>` when there is an issue |
+| Review | GitHub requests `@College-Success-Scholars/senior-developers` via [CODEOWNERS](branching-and-reviews.md#codeowners). You need **one** Senior Developer approval |
+| Checks | Required CI status checks must pass |
+| Merge | After approval + green CI, merge the PR. That is when your edits hit `develop` |
+
+Policy detail (teams, `main`, hotfixes): [Branching & reviews](branching-and-reviews.md).
 
 ---
 
@@ -77,9 +105,9 @@ cd frontend && npm test && npm run build
 
 Skip packages you did not change; never skip the package you did. Docker only if containers / shared packaging are involved: `docker compose build` from repo root.
 
-### 4. Open the PR with the canonical template
+### 4. Open the PR into `develop` with the canonical template
 
-Copy **[`docs/dev/pr/TEMPLATE.md`](../pr/TEMPLATE.md)** into the PR body (GitHub does not auto-apply it yet).
+Confirm the PR **base** is `develop` (not `main`). Copy **[`docs/dev/pr/TEMPLATE.md`](../pr/TEMPLATE.md)** into the PR body (GitHub does not auto-apply it yet).
 
 Fill at least:
 
@@ -96,14 +124,23 @@ Example Test plan lines:
 - [ ] `cd frontend && npm run build`   # if frontend changed
 ```
 
-### 5. Request review
+### 5. Wait for senior review + CI (then merge)
 
-Ping a writer who knows the area — [Miguel](mailto:miguelventura1123@gmail.com), [Ben](mailto:bsaenz454@gmail.com), or [Moosay](mailto:97802676+m0osay@users.noreply.github.com) — and link the issue (`Fixes #…`) when there is one.
+CODEOWNERS auto-requests **Senior Developers**. You can also ping [Miguel](mailto:miguelventura1123@gmail.com), [Ben](mailto:bsaenz454@gmail.com), or [Moosay](mailto:97802676+m0osay@users.noreply.github.com) if review is stuck.
+
+Merge only when:
+
+1. At least one **Senior Developer / code owner** approval is on the PR  
+2. Required CI checks are green  
+3. Base is still `develop`
+
+That merge is the moment your edits hit `develop`. Linking `Fixes #…` closes the issue when the PR merges.
 
 ---
 
 ## Success criteria
 
-- [ ] Change merged or in review with template-complete description
+- [ ] PR targets `develop` (not `main`) with template-complete description
+- [ ] Senior Developer (CODEOWNERS) approval + green CI, then merge — or still in that review
 - [ ] Tests / builds for touched packages green
 - [ ] No drive-by refactors outside the ticket

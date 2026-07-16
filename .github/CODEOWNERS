@@ -1,0 +1,14 @@
+# Default owners for every path. PRs that change matching files request a review
+# from this team when "Require review from Code Owners" is enabled on the
+# develop / main rulesets.
+#
+# Team: Senior Developers — must have Write access on this repo.
+# Slug must match the org team exactly:
+#   https://github.com/orgs/College-Success-Scholars/teams/senior-developers
+#
+# Syntax: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+* @College-Success-Scholars/senior-developers
+
+# Protect this file (and other GitHub config) with the same owners.
+/.github/ @College-Success-Scholars/senior-developers
