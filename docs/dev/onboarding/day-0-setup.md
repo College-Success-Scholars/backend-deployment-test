@@ -36,16 +36,26 @@ cd <repo>
 
 `--install` runs `npm install` in `shared/`, `backend/`, and `frontend/`. Prefer this over ad-hoc installs.
 
+**Windows (PowerShell):** use `.\scripts\dev.ps1` instead of `./scripts/dev.sh` (same flags: `-Install`, `-NoWatch`, or `--install` / `--no-watch`).
+
 To start without reinstalling later:
 
 ```bash
 ./scripts/dev.sh
 ```
 
+```powershell
+.\scripts\dev.ps1
+```
+
 Or, without shared watch:
 
 ```bash
 ./scripts/dev.sh --no-watch
+```
+
+```powershell
+.\scripts\dev.ps1 -NoWatch
 ```
 
 Manual equivalent (if you need separate terminals):

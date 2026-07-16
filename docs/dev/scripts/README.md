@@ -20,6 +20,7 @@ Shell scripts for deployment validation and operational tasks. These run outside
 | File | Source Link | Description |
 |------|-------------|-------------|
 | `dev.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/dev.sh) | Start local full-stack development (shared watch + backend + frontend) |
+| `dev.ps1` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/dev.ps1) | Windows PowerShell mirror of `dev.sh` |
 | `smoke-test.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/smoke-test.sh) | Deployment health-check: tests health endpoint, auth gating, and CORS headers |
 | `alert.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/alert.sh) | Opens an architectural alert as a GitHub Issue (`architecture-alert`). Requires `gh` auth — no markdown fallback |
 | `resolve-alert.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/resolve-alert.sh) | Resolves an alert by issue number: logs session via `log-agent-session.sh`, then closes the issue (or comments if already closed) |
@@ -46,6 +47,11 @@ Shell scripts for deployment validation and operational tasks. These run outside
 ./scripts/dev.sh
 ./scripts/dev.sh --install     # npm install in shared, backend, frontend first
 ./scripts/dev.sh --no-watch    # build shared once; skip tsc --watch
+
+# Windows PowerShell (same behavior)
+.\scripts\dev.ps1
+.\scripts\dev.ps1 -Install
+.\scripts\dev.ps1 -NoWatch
 
 # Run against local backend (Docker Compose CORS — Origin :3000)
 BASE_URL=http://localhost:3001 bash scripts/smoke-test.sh

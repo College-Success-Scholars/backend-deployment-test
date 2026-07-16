@@ -111,7 +111,7 @@ Roles are stored in `profiles.app_role` (or `user_roster.app_role`).
 
 ## Local Development
 
-**New developers:** follow [Onboarding — Day 0 setup](onboarding/day-0-setup.md) (preferred: `./scripts/dev.sh --install`).
+**New developers:** follow [Onboarding — Day 0 setup](onboarding/day-0-setup.md) (preferred: `./scripts/dev.sh --install`; Windows: `.\scripts\dev.ps1 -Install`).
 
 ```bash
 # Install dependencies
