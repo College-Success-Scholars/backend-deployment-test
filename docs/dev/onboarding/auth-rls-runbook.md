@@ -28,7 +28,7 @@ Flow reminder:
 | Symptom | Likely cause | What to check |
 |---------|--------------|---------------|
 | `401` on every `/api/*` call | Missing / expired JWT, or middleware rejecting before controller | Cookie session on frontend; `Authorization` header; login again |
-| Redirected to `/auth/login` right after a successful Supabase sign-in | Backend down / unreachable — `getCurrentUser()` fails and dashboard layout treats it as no user | Start backend (`./scripts/dev.sh` or `npm run dev --prefix backend`); verify `BACKEND_URL` ([Day 0 failures](day-0-setup.md#common-day-0-failures)) |
+| Redirected to `/auth/login` right after a successful Supabase sign-in | Backend down / unreachable — `getCurrentUser()` fails and dashboard layout treats it as no user | Start backend (`./scripts/dev.sh`, `.\scripts\dev.ps1`, or `npm run dev --prefix backend`); verify `BACKEND_URL` ([Day 0 failures](day-0-setup.md#common-day-0-failures)) |
 | `200` with `{ data: [] }` or null-ish empty where Dashboard SQL shows rows | RLS scoped you out, wrong persona, or service filter | Are you acting as a test profile? Does the real user own those rows? JWT bound in service path? |
 | CORS / browser blocks API | `CORS_ORIGIN` ≠ page origin | `backend/.env` → `CORS_ORIGIN=http://localhost:3000` ([Day 0](day-0-setup.md)) |
 | Mutation fails while “acting as” someone | `rejectWritesWhenActing` denylist | Switch to **My profile** for writes; see [middleware README](../backend/src/middleware/README.md) |

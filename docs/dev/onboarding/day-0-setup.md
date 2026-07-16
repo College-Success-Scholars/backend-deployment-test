@@ -21,6 +21,8 @@ Copy-paste checklist from a fresh clone to a running stack. Done when frontend (
 - Node.js 22+
 - Access to the team’s Supabase project (URL + publishable/anon key)
 - A developer (or test-capable) login for the app — ask [Miguel](mailto:miguelventura1123@gmail.com) / [Ben](mailto:bsaenz454@gmail.com) if you do not have one yet
+- **macOS / Linux:** a normal shell (`bash` / `zsh`) so you can run `./scripts/dev.sh`
+- **Windows:** [PowerShell](https://learn.microsoft.com/powershell/) 5.1+ (Windows PowerShell or PowerShell 7). Use `.\scripts\dev.ps1` — do not expect `./scripts/dev.sh` to run in CMD. If scripts are blocked, unblock once for the session: `Set-ExecutionPolicy -Scope Process Bypass`
 
 ---
 
@@ -28,37 +30,43 @@ Copy-paste checklist from a fresh clone to a running stack. Done when frontend (
 
 ### 1. Clone and install
 
+Pick the script for your OS. `--install` / `-Install` runs `npm install` in `shared/`, `backend/`, and `frontend/`. Prefer this over ad-hoc installs.
+
+**macOS / Linux**
+
 ```bash
 git clone <repo-url>
 cd <repo>
 ./scripts/dev.sh --install
 ```
 
-`--install` runs `npm install` in `shared/`, `backend/`, and `frontend/`. Prefer this over ad-hoc installs.
-
-**Windows (PowerShell):** use `.\scripts\dev.ps1` instead of `./scripts/dev.sh` (same flags: `-Install`, `-NoWatch`, or `--install` / `--no-watch`).
-
-To start without reinstalling later:
+Later starts (no reinstall):
 
 ```bash
 ./scripts/dev.sh
-```
-
-```powershell
-.\scripts\dev.ps1
-```
-
-Or, without shared watch:
-
-```bash
+# or skip shared watch:
 ./scripts/dev.sh --no-watch
 ```
 
+**Windows (PowerShell)**
+
 ```powershell
+git clone <repo-url>
+cd <repo>
+.\scripts\dev.ps1 -Install
+```
+
+Later starts (no reinstall):
+
+```powershell
+.\scripts\dev.ps1
+# or skip shared watch:
 .\scripts\dev.ps1 -NoWatch
 ```
 
-Manual equivalent (if you need separate terminals):
+Same flags also accept bash-style forms: `--install`, `--no-watch`, `-Help`. Details: [Scripts](../scripts/README.md).
+
+Manual equivalent (any OS, if you need separate terminals):
 
 ```bash
 npm install --prefix shared && npm install --prefix backend && npm install --prefix frontend
@@ -117,7 +125,9 @@ Details: [Scripts](../scripts/README.md).
 | Frontend can’t reach API / CORS errors | `CORS_ORIGIN` ≠ browser origin | Set `CORS_ORIGIN=http://localhost:3000` in `backend/.env`, restart backend |
 | Module / shared import errors | `shared/` not built | `npm run build --prefix shared` then restart |
 | Port already in use | Leftover Node process | Free `:3000` / `:3001` or change ports deliberately |
-| Sent to `/auth/login` (or bounce off dashboard) even though you just signed in | **Backend not running** on `:3001` (or wrong `BACKEND_URL`) — dashboard calls `GET /api/auth/me`; on failure it treats you as logged out and redirects | Confirm backend is up (`curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3001/` → `200`); use `./scripts/dev.sh` so both processes stay alive; check `BACKEND_URL` / `NEXT_PUBLIC_BACKEND_URL` |
+| Sent to `/auth/login` (or bounce off dashboard) even though you just signed in | **Backend not running** on `:3001` (or wrong `BACKEND_URL`) — dashboard calls `GET /api/auth/me`; on failure it treats you as logged out and redirects | Confirm backend is up (`curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3001/` → `200`); use `./scripts/dev.sh` or `.\scripts\dev.ps1` so both processes stay alive; check `BACKEND_URL` / `NEXT_PUBLIC_BACKEND_URL` |
+| `.\scripts\dev.ps1` is blocked / “running scripts is disabled” | PowerShell execution policy | `Set-ExecutionPolicy -Scope Process Bypass`, then re-run the script from the repo root |
+| `./scripts/dev.sh` fails on Windows | Bash script not meant for CMD/PowerShell | Use `.\scripts\dev.ps1` instead ([Scripts](../scripts/README.md)) |
 | Auth redirect loop / empty session (backend is up) | Bad Supabase URL/key in `.env.local` | Double-check `NEXT_PUBLIC_SUPABASE_*` |
 | Empty lists but data exists in Supabase | RLS / JWT not attached — see [Auth & RLS runbook](auth-rls-runbook.md) | Confirm cookie session + `Authorization` on API calls |
 
@@ -125,6 +135,6 @@ Details: [Scripts](../scripts/README.md).
 
 ## Success criteria
 
-- [ ] `./scripts/dev.sh` (or equivalent) keeps both apps up
+- [ ] `./scripts/dev.sh` or `.\scripts\dev.ps1` keeps both apps up
 - [ ] You are signed in
 - [ ] You can explain in one sentence: backend Supabase queries are RLS-scoped via the JWT bound in `AsyncLocalStorage` ([codebase notes](../../agents/codebase-notes.md))
