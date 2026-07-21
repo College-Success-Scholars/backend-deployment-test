@@ -493,9 +493,8 @@ export async function getWplFormLogById(id: number): Promise<WplFormLogRow | nul
 // ---------------------------------------------------------------------------
 
 export function scholarUidFromProfile(profile: ProfilesRow | null): string | null {
-  if (typeof profile?.student_id === "number" && Number.isFinite(profile.student_id)) {
-    return String(profile.student_id);
-  }
+  const id = profile?.student_id;
+  if (typeof id === "string" && id.trim() !== "") return id.trim();
   return null;
 }
 

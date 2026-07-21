@@ -23,7 +23,14 @@
  * - Authentication (that's auth.controller.ts)
  */
 import { getSupabaseClient } from "../supabase/client.js";
+import type { Database } from "../supabase/database.types.js";
 import type { MemoUserRow, TeamLeaderRow } from "../models/user.model.js";
+
+/** Writable profiles insert — excludes generated `full_name` and server `created_at`. */
+type ScholarProfileInsert = Omit<
+  Database["public"]["Tables"]["profiles"]["Insert"],
+  "full_name" | "created_at"
+>;
 
 function uniqueNonEmptyStrings(values: string[]): string[] {
   return [...new Set(values)].filter(Boolean);
@@ -183,7 +190,9 @@ export type CreateScholarProfileInput = {
 };
 
 /** Writable `public.profiles` columns on self-service scholar create (excludes `created_at`, `full_name`). */
-export function buildScholarProfileInsertRow(input: CreateScholarProfileInput) {
+export function buildScholarProfileInsertRow(
+  input: CreateScholarProfileInput,
+): ScholarProfileInsert {
   return {
     id: input.userId,
     first_name: input.first_name,
@@ -200,7 +209,7 @@ export function buildScholarProfileInsertRow(input: CreateScholarProfileInput) {
     mentee_count: 0,
     majors: [] as string[],
     minors: [] as string[],
-    teams: [] as string[]
+    teams: [] as string[],
   };
 }
 

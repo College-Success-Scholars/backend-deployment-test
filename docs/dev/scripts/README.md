@@ -42,6 +42,20 @@ Shell scripts for deployment validation and operational tasks. These run outside
 
 ## Usage
 
+### `dev.sh` / `dev.ps1`
+
+Starts the local full-stack loop: builds `shared/`, optionally watches it, then runs backend (`:3001`) and frontend (`:3000`) in one process group (Ctrl+C stops all).
+
+**Before you run it**, create env files from the examples — the script exits with an error if they are missing:
+
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env.local
+# then edit both with real Supabase URL/key values
+```
+
+Day 0 walkthrough (order matters): [Onboarding — Day 0 setup](../onboarding/day-0-setup.md).
+
 ```bash
 # Start local full-stack dev (frontend :3000, backend :3001)
 ./scripts/dev.sh

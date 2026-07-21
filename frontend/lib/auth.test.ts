@@ -45,8 +45,8 @@ describe("hasAssignedMentees", () => {
     expect(hasAssignedMentees({ mentee_count: 2 })).toBe(true);
   });
 
-  it("is true when mentee_uids is non-empty", () => {
-    expect(hasAssignedMentees({ mentee_uids: ["uid-1"] })).toBe(true);
+  it("is true when nested user_roster.mentee_uids is non-empty", () => {
+    expect(hasAssignedMentees({ user_roster: { mentee_uids: ["uid-1"] } })).toBe(true);
   });
 
   it("reads mentee fields from nested user_roster", () => {
@@ -54,7 +54,7 @@ describe("hasAssignedMentees", () => {
   });
 
   it("is false when no mentees are assigned", () => {
-    expect(hasAssignedMentees({ mentee_count: 0, mentee_uids: [] })).toBe(false);
+    expect(hasAssignedMentees({ mentee_count: 0, user_roster: { mentee_uids: [] } })).toBe(false);
     expect(hasAssignedMentees(null)).toBe(false);
   });
 });

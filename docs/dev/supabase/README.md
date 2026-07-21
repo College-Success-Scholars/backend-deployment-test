@@ -20,7 +20,9 @@ Auth session management on the frontend still uses the Supabase JS client; that 
 
 ### Typed client (backend only)
 
-Generated schema types and `createClient<Database>` live under [`backend/src/supabase/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/supabase) — not in `shared/`, and not bundled for the frontend. Regen after migrations: `npm run db:types --prefix backend`.
+Generated schema types and `createClient<Database>` live under [`backend/src/supabase/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/supabase) — not in `shared/`, and not bundled for the frontend. Regen after migrations: `npm run db:types --prefix backend`, then fix backend models / frontend API types until `npm test` / `npm run typecheck` pass (see [`database-model-align.test.ts`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/tests/database-model-align.test.ts)).
+
+**Architecture:** Postgres → generated `Database` (backend) → backend models/services → HTTP JSON → `frontend/lib/types/*` (route/API DTOs). There is no shared schema DTO package.
 
 Frontend types should describe **route response shapes** (what each page/API returns), not a mirror of Postgres tables. Backend maps query results to those DTOs.
 
@@ -62,18 +64,17 @@ When debugging empty dashboards, check whether the linked project has recent row
 
 `get_mentee_activity`, `get_my_mentees`, `get_week_breaks`, `get_weekly_memo`, `get_effective_requirement`, `handle_new_user`, `is_developer`, `sync_daily_scholar_activity`, …
 
-### Drift checklist (dump vs hand-written types)
+### Schema ↔ app types (resolved)
 
-Findings to clear in later phases (types / generated `Database`); **not** fixed by changing prod to match models:
+Hand-written type drift against the baseline dump was cleared (architecture alert #25):
 
-| Area | Dump (Postgres) | Codebase |
-|------|-----------------|----------|
-| `profiles.student_id` | `text` | Backend `ProfilesRow.student_id: number \| null`; frontend `ProfileRow` uses `string \| null` |
-| `profiles.full_name` | `GENERATED ALWAYS … STORED` | Treated as a normal writable/readable field in places (inserts must omit it) |
-| `profiles.mentee_uids` | **Not a column** on `profiles` | Frontend `ProfileRow.mentee_uids` — lives on `user_roster` / `dev_test_profiles` instead |
-| `get_mentee_activity` | Returns `scholar_uid`, `activity_date`, `log_source`, `duration_minutes` | Frontend `MenteeActivityRpcRow` also requires `week_num` (not in RPC) |
-| `tutor_report_logs.date` | Column present | Frontend `TutoringRow` omits `date` |
-| Auth / redirects | Dashboard Auth config (not in SQL dump) | App assumes Site URL + redirect URLs match frontend origin — verify in Dashboard separately |
+- `profiles.student_id` is `string | null` end-to-end (Postgres `text`)
+- Scholar profile create omits generated `full_name`
+- `ProfileRow` / profiles DTOs do not invent `mentee_uids` (use `user_roster` / `/api/auth/mentees`)
+- Tutor report types include `date`
+- Compile-time checks live in backend `database-model-align` tests
+
+**Standing ops (not schema):** verify Supabase Dashboard Auth Site URL + redirect URLs match each environment’s frontend origin.
 
 Domain-semantics drift (campus week vs ISO week) is a separate alert — out of scope here.
 

@@ -64,7 +64,7 @@ Create a personal access token at [supabase.com/dashboard/account/tokens](https:
 
 ## Scholar onboarding (complete profile)
 
-After email confirmation, users without a `profiles` row are redirected from `/dashboard` to `/auth/complete-profile`. The form calls `POST /api/auth/profile`, which creates a full `profiles` row via `buildScholarProfileInsertRow()` (including `full_name` and explicit defaults for all other columns).
+After email confirmation, users without a `profiles` row are redirected from `/dashboard` to `/auth/complete-profile`. The form calls `POST /api/auth/profile`, which creates a `profiles` row via `buildScholarProfileInsertRow()` (writable columns only — `full_name` is DB-generated and omitted; other columns get explicit defaults).
 
 **Sign-up constraints:** only `@umd.edu` and `@terpmail.umd.edu` emails (validated client-side and on profile create).
 

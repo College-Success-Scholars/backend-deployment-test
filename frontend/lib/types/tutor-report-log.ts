@@ -3,6 +3,7 @@
 export interface TutorReportLogRow {
   id: number;
   created_at: string | null;
+  date: string | null;
   tutor_name: string;
   scholar_uid: string | null;
   end_time: string;

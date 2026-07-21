@@ -102,12 +102,9 @@ export function isValidUuid(value: string): boolean {
   return UUID_RE.test(value);
 }
 
-/** Maps roster_uid to profiles.student_id (numeric when possible). */
-function rosterUidToStudentId(rosterUid: string): number | string {
-  const trimmed = rosterUid.trim();
-  const asNum = Number.parseInt(trimmed, 10);
-  if (Number.isFinite(asNum) && String(asNum) === trimmed) return asNum;
-  return trimmed;
+/** Maps roster_uid to profiles.student_id (Postgres `text`). */
+function rosterUidToStudentId(rosterUid: string): string {
+  return rosterUid.trim();
 }
 
 /**
