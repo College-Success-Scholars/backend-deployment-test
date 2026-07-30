@@ -153,7 +153,7 @@ export async function fetchTeamLeaders(): Promise<TeamLeaderRow[]> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
     .from("user_roster")
-    .select("uid, first_name, last_name, cohort, program_role, fd_required, ss_required, mentee_count")
+    .select("uid, first_name, last_name, cohort, program_role, fd_required, ss_required, mentee_count, mentee_uids")
     .or("program_role.neq.scholar,program_role.is.null");
   if (error) throw error;
   const rows = (data ?? []).map((r) => ({
@@ -165,6 +165,9 @@ export async function fetchTeamLeaders(): Promise<TeamLeaderRow[]> {
     fd_required: r.fd_required != null ? Number(r.fd_required) : null,
     ss_required: r.ss_required != null ? Number(r.ss_required) : null,
     mentee_count: r.mentee_count != null ? Number(r.mentee_count) : null,
+    mentee_uids: Array.isArray(r.mentee_uids)
+      ? r.mentee_uids.map((id) => String(id)).filter(Boolean)
+      : null,
   }));
   return rows.filter((r) => (r.program_role ?? "").toLowerCase() !== "scholar");
 }
