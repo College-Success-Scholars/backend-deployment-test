@@ -28,6 +28,7 @@ Shell scripts for deployment validation and operational tasks. These run outside
 | `migrate-alerts-to-issues.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/migrate-alerts-to-issues.sh) | One-shot: migrate legacy `docs/agents/alerts/*.md` files to GitHub Issues, then delete those files |
 | `log-agent-session.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/log-agent-session.sh) | Records an agent/AI session to `docs/agents/logs/`: who ran it, raw user prompt, stated purpose, agent response summary, and changed files |
 | `configure-supabase-confirm-email-template.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/configure-supabase-confirm-email-template.sh) | Patches Supabase **Confirm signup** email template so links use `token_hash` + `type` for `/auth/confirm` |
+| `ingest-user-roster.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/ingest-user-roster.sh) | Ops: stream a roster CSV into `public.user_roster` (service role prompted interactively; no PII dumps to disk) |
 
 ---
 
@@ -113,4 +114,30 @@ gh issue list --label architecture-alert --state open
 
 # Patch Supabase confirm-signup email template (requires personal access token)
 SUPABASE_ACCESS_TOKEN=... SUPABASE_PROJECT_REF=... ./scripts/configure-supabase-confirm-email-template.sh
+
+# Roster CSV → user_roster (parse + reports only; no network, no service-role prompt)
+./scripts/ingest-user-roster.sh --dry-run /path/to/roster.csv
+
+# Roster CSV → user_roster (prompts for service role key; streams to Supabase)
+# URL from SUPABASE_URL / NEXT_PUBLIC_SUPABASE_URL or backend/.env (URL only)
+./scripts/ingest-user-roster.sh /path/to/roster.csv
 ```
+
+### `ingest-user-roster.sh`
+
+Ops script for bulk-loading a sheet export into `public.user_roster`. Companion parser: [`scripts/ingest-user-roster.py`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/ingest-user-roster.py).
+
+**Sensitivity**
+
+- Treat the CSV as PII. The script reads it from the path you pass and POSTs mapped rows to Supabase; it does **not** write transformed CSV/JSON/report files.
+- Secure or delete the source CSV yourself after the run.
+- Insert-only (re-runs can duplicate on email). Non-9-digit UIDs are stored as `NULL`.
+
+**Credentials**
+
+| Credential | Source |
+|------------|--------|
+| Supabase URL | `SUPABASE_URL` or `NEXT_PUBLIC_SUPABASE_URL` in the current shell, or URL-only from `backend/.env` |
+| Service role | Interactive hidden prompt (or `SUPABASE_SERVICE_ROLE_KEY` already exported in **this** shell). Never loaded from project `.env` / `.env.local`, and not documented in `.env.example` |
+
+`--dry-run` skips the prompt and does not POST. Stdout includes TSV reports for bad university emails (with contact fields) and null UIDs.
