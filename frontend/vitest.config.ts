@@ -7,7 +7,13 @@ export default defineConfig({
   test: {
     environment: "node",
     globals: true,
-    include: ["lib/**/*.test.ts", "app/**/*.test.ts", "app/**/*.test.tsx", "../shared/**/*.test.ts"],
+    include: [
+      "lib/**/*.test.ts",
+      "app/**/*.test.ts",
+      "app/**/*.test.tsx",
+      "components/**/*.test.ts",
+      "../shared/**/*.test.ts",
+    ],
   },
   resolve: {
     alias: {

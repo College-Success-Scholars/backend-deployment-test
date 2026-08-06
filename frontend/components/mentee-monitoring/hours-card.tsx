@@ -37,7 +37,8 @@ export function HoursCard({
   todayLabel,
 }: HoursCardProps) {
   const remaining = Math.max(0, total - completed)
-  const percentage = total > 0 ? Math.round((completed / total) * 100) : 0
+  const percentage =
+    total > 0 ? Math.min(100, Math.round((completed / total) * 100)) : 0
   const onTrack = percentage >= 75
   const cfg = COLOR_CONFIG[color]
   const fmt = (v: number) => (Number.isInteger(v) ? String(v) : v.toFixed(1))

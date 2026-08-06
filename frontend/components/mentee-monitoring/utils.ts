@@ -1,66 +1,23 @@
 import {
-  getISOWeek,
-  startOfISOWeek,
-  endOfISOWeek,
   format,
   parseISO,
-  eachDayOfInterval,
   getISODay,
   differenceInCalendarDays,
 } from "date-fns"
 import { getWhafDeadlineForWeek } from "@/lib/format/form-deadlines"
-import { getCampusWeekForIsoWeek } from "@/lib/format/time"
+import { dateToCampusWeek, parseEasternDate } from "@/lib/format/time"
 import type {
   ActivityRow,
   WahfRow,
   TutoringRow,
-  SemesterRow,
 } from "@/lib/types/supabase"
-import { findSubmissionForIsoWeek } from "@/components/personal/utils"
+import {
+  computeWeekOptions,
+  findSubmissionForCampusWeek,
+  type WeekOption,
+} from "@/components/personal/utils"
 
-// ---------------------------------------------------------------------------
-// Week options
-// ---------------------------------------------------------------------------
-
-export type WeekOption = {
-  weekNum: number
-  label: string
-  isCurrent: boolean
-}
-
-const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const
-
-export function computeWeekOptions(
-  semester: SemesterRow,
-  currentIsoWeek: number,
-): WeekOption[] {
-  const start = parseISO(semester.start_date)
-  const end = parseISO(semester.end_date)
-  const today = new Date()
-  const latestDate = end < today ? end : today
-
-  if (latestDate < start) return []
-
-  const seen = new Set<number>()
-  const options: WeekOption[] = []
-  const days = eachDayOfInterval({ start, end: latestDate })
-
-  for (const day of days) {
-    const wk = getISOWeek(day)
-    if (seen.has(wk)) continue
-    seen.add(wk)
-
-    const wkStart = startOfISOWeek(day)
-    const wkEnd = endOfISOWeek(day)
-    const displayStart = wkStart < start ? start : wkStart
-    const displayEnd = wkEnd > latestDate ? latestDate : wkEnd
-    const label = `${format(displayStart, "MMM d")} \u2013 ${format(displayEnd, "MMM d")}`
-
-    options.push({ weekNum: wk, label, isCurrent: wk === currentIsoWeek })
-  }
-
-  return options.reverse()
-}
+export { computeWeekOptions, type WeekOption }
 
 // ---------------------------------------------------------------------------
 // Activity filtering
@@ -71,14 +28,32 @@ export type DailyHoursEntry = {
   hours: number
 }
 
+const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const
+
+/** Campus week from activity_date — never trust stored week_num. */
+function campusWeekForActivityDate(activityDate: string): number | null {
+  const day = activityDate.slice(0, 10)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(day)) {
+    try {
+      return dateToCampusWeek(parseEasternDate(day))
+    } catch {
+      return null
+    }
+  }
+  const d = new Date(activityDate)
+  if (Number.isNaN(d.getTime())) return null
+  return dateToCampusWeek(d)
+}
+
 export function filterActivityForMenteeWeek(
   activity: ActivityRow[],
   uid: string,
   weekNum: number,
 ) {
-  const rows = activity.filter(
-    (r) => r.scholar_uid === uid && r.week_num === weekNum,
-  )
+  const rows = activity.filter((r) => {
+    if (r.scholar_uid !== uid) return false
+    return campusWeekForActivityDate(r.activity_date) === weekNum
+  })
   const studySession = rows.filter((r) => r.log_source === "study_session_logs")
   const frontDesk = rows.filter((r) => r.log_source === "front_desk_logs")
   return { studySession, frontDesk }
@@ -119,27 +94,24 @@ export function computeWahfStatus(
   wahf: WahfRow[],
   uid: string,
   weekNum: number,
-  currentIsoWeek: number,
+  currentCampusWeek: number | null,
 ): WahfStatus {
   const menteeWahf = wahf.filter((w) => w.scholar_uid === uid)
-  const submission = findSubmissionForIsoWeek(menteeWahf, weekNum)
+  const submission = findSubmissionForCampusWeek(menteeWahf, weekNum)
   const submitted = submission != null
 
   const now = new Date()
-  const campusWeek = getCampusWeekForIsoWeek(weekNum, currentIsoWeek)
-  const deadline =
-    campusWeek != null ? getWhafDeadlineForWeek(campusWeek) : null
-
+  const deadline = getWhafDeadlineForWeek(weekNum)
   const dueDate = deadline ? format(deadline, "MMM d, yyyy") : ""
 
   let daysOverdue = 0
   if (submission) {
     daysOverdue = 0
-  } else if (weekNum < currentIsoWeek) {
+  } else if (currentCampusWeek != null && weekNum < currentCampusWeek) {
     if (deadline) {
       daysOverdue = Math.max(0, differenceInCalendarDays(now, deadline))
     }
-  } else if (weekNum === currentIsoWeek) {
+  } else if (currentCampusWeek != null && weekNum === currentCampusWeek) {
     if (deadline && now.getTime() > deadline.getTime()) {
       daysOverdue = Math.max(0, differenceInCalendarDays(now, deadline))
     }
@@ -164,6 +136,58 @@ export type TutoringSessionDerived = {
   durationMinutes: number
 }
 
+/** Prefer session `date` (YYYY-MM-DD); fall back to valid ISO `start_time`. Skip bad rows. */
+function campusWeekForTutoringRow(t: TutoringRow): number | null {
+  const day = t.date?.slice(0, 10)
+  if (day && /^\d{4}-\d{2}-\d{2}$/.test(day)) {
+    try {
+      return dateToCampusWeek(parseEasternDate(day))
+    } catch {
+      // fall through to start_time
+    }
+  }
+  if (!t.start_time) return null
+  const start = new Date(t.start_time)
+  if (Number.isNaN(start.getTime())) return null
+  return dateToCampusWeek(start)
+}
+
+/**
+ * Parse form clock strings like "15:00" or "3:00 PM" to minutes since midnight.
+ * `start_time` / `end_time` on tutor_report_logs are text, not timestamps.
+ */
+export function clockStringToMinutes(value: string): number | null {
+  const s = value.trim()
+  const m24 = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/.exec(s)
+  if (m24) {
+    const h = Number(m24[1])
+    const min = Number(m24[2])
+    if (h > 23 || min > 59) return null
+    return h * 60 + min
+  }
+  const m12 = /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i.exec(s)
+  if (m12) {
+    let h = Number(m12[1])
+    const min = Number(m12[2])
+    const ap = m12[3].toUpperCase()
+    if (h < 1 || h > 12 || min > 59) return null
+    if (ap === "AM") h = h === 12 ? 0 : h
+    else h = h === 12 ? 12 : h + 12
+    return h * 60 + min
+  }
+  return null
+}
+
+/** Duration in minutes from tutor form clock fields (e.g. "14:00" → "15:00" = 60). */
+export function durationMinutesFromClockTimes(start: string, end: string): number {
+  const a = clockStringToMinutes(start)
+  const b = clockStringToMinutes(end)
+  if (a == null || b == null) return 0
+  let diff = b - a
+  if (diff < 0) diff += 24 * 60
+  return diff
+}
+
 export function computeTutoringSessions(
   tutoring: TutoringRow[],
   uid: string,
@@ -171,14 +195,14 @@ export function computeTutoringSessions(
 ): TutoringSessionDerived[] {
   const rows = tutoring.filter((t) => {
     if (t.scholar_uid !== uid) return false
-    const startDate = new Date(t.start_time)
-    return getISOWeek(startDate) === weekNum
+    return campusWeekForTutoringRow(t) === weekNum
   })
 
   return rows.flatMap((row) => {
-    const startMs = new Date(row.start_time).getTime()
-    const endMs = new Date(row.end_time).getTime()
-    const durationMinutes = Math.max(0, Math.round((endMs - startMs) / 60_000))
+    const durationMinutes = durationMinutesFromClockTimes(
+      row.start_time ?? "",
+      row.end_time ?? "",
+    )
 
     return (row.courses ?? []).map((course) => ({
       id: row.id,

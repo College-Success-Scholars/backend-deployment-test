@@ -30,9 +30,8 @@ export function MenteeMonitoringClient({
   mentees,
   activity,
   wahf,
-  tutoring, 
-  semester,
-  currentIsoWeek,
+  tutoring,
+  currentCampusWeek,
 }: MenteeMonitoringClientProps) {
   const validMentees = useMemo(
     () => mentees.filter((m) => m.scholar_uid != null),
@@ -42,11 +41,13 @@ export function MenteeMonitoringClient({
   const [selectedUid, setSelectedUid] = useState<string>(
     () => validMentees[0]?.scholar_uid ?? "",
   )
-  const [selectedWeek, setSelectedWeek] = useState<number>(currentIsoWeek)
+  const [selectedWeek, setSelectedWeek] = useState<number>(
+    () => currentCampusWeek ?? 0,
+  )
 
   const weekOptions = useMemo(
-    () => computeWeekOptions(semester, currentIsoWeek),
-    [semester, currentIsoWeek],
+    () => computeWeekOptions(currentCampusWeek),
+    [currentCampusWeek],
   )
 
   const weekIndex = weekOptions.findIndex((w) => w.weekNum === selectedWeek)
@@ -75,8 +76,8 @@ export function MenteeMonitoringClient({
   const fdRequired = (selectedMentee?.fd_required ?? 0) / 60
 
   const wahfStatus = useMemo(
-    () => computeWahfStatus(wahf, selectedUid, selectedWeek, currentIsoWeek),
-    [wahf, selectedUid, selectedWeek, currentIsoWeek],
+    () => computeWahfStatus(wahf, selectedUid, selectedWeek, currentCampusWeek),
+    [wahf, selectedUid, selectedWeek, currentCampusWeek],
   )
 
   const tutoringSessions = useMemo(

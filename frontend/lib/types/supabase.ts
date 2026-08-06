@@ -90,8 +90,8 @@ export interface MenteeMonitoringClientProps {
   activity: ActivityRow[]
   wahf: WahfRow[]
   tutoring: TutoringRow[]
-  semester: SemesterRow
-  currentIsoWeek: number
+  /** Campus week from `dateToCampusWeek`; null before Fall start. */
+  currentCampusWeek: number | null
 }
 
 export interface PersonalClientProps {
@@ -99,6 +99,6 @@ export interface PersonalClientProps {
   wahf: WahfRow[]
   mcf: McfRow[]
   wpl: WplRow[]
-  semester: SemesterRow
-  currentIsoWeek: number
+  /** Campus week from `dateToCampusWeek`; null before Fall start. */
+  currentCampusWeek: number | null
 }

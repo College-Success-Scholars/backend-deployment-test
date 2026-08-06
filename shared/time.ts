@@ -174,24 +174,3 @@ export function formatMinutesToHoursAndMinutes(totalMinutes: number): string {
   const minutes = mins % 60;
   return `${hours}h\n${minutes}m`;
 }
-
-/** Monday 00:00:00 local time for the ISO week containing `date`. */
-function startOfISOWeek(date: Date): Date {
-  const d = new Date(date.getTime());
-  const day = d.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  d.setDate(d.getDate() + diff);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-export function getCampusWeekForIsoWeek(
-  isoWeek: number,
-  currentIsoWeek: number
-): number | null {
-  const now = new Date();
-  const ref = startOfISOWeek(now);
-  const diff = isoWeek - currentIsoWeek;
-  const targetDate = new Date(ref.getTime() + diff * 7 * ONE_DAY_MS);
-  return dateToCampusWeek(targetDate);
-}

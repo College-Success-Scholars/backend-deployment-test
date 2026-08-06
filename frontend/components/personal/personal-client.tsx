@@ -16,8 +16,8 @@ import {
 } from "@/components/ui/dialog"
 import type { PersonalClientProps, WahfRow, McfRow, WplRow } from "@/lib/types/supabase"
 import {
-  findSubmissionForIsoWeek,
-  formatIsoWeekRangeWithYear,
+  findSubmissionForCampusWeek,
+  formatCampusWeekRangeWithYear,
   computeWeekOptions,
   getFormStatusForWeek,
   getGreeting,
@@ -55,19 +55,19 @@ const FORM_DEADLINES: Record<FormType, string> = {
 type DialogState = {
   /** Bumps only when opening the modal so tab selection is not reset on week nav. */
   sessionKey: number
-  isoWeek: number
+  campusWeek: number
   initialFormType: FormType
 } | null
 
-export function PersonalClient({ profile, wahf, mcf, wpl, semester, currentIsoWeek }: PersonalClientProps) {
+export function PersonalClient({ profile, wahf, mcf, wpl, currentCampusWeek }: PersonalClientProps) {
   const dialogSessionRef = useRef(0)
   const [dialogState, setDialogState] = useState<DialogState>(null)
 
-  const openFormDialog = (isoWeek: number, initialFormType: FormType) => {
+  const openFormDialog = (campusWeek: number, initialFormType: FormType) => {
     dialogSessionRef.current += 1
     setDialogState({
       sessionKey: dialogSessionRef.current,
-      isoWeek,
+      campusWeek,
       initialFormType,
     })
   }
@@ -77,17 +77,16 @@ export function PersonalClient({ profile, wahf, mcf, wpl, semester, currentIsoWe
   const today = useMemo(() => format(new Date(), "EEEE, MMMM d"), [])
 
   const weekOptions = useMemo(
-    () => computeWeekOptions(semester, currentIsoWeek),
-    [semester, currentIsoWeek],
+    () => computeWeekOptions(currentCampusWeek),
+    [currentCampusWeek],
   )
 
-  const currentWeekStatuses = useMemo(
-    () =>
-      FORM_TYPES.map((ft) =>
-        getFormStatusForWeek(ft, wahf, mcf, wpl, currentIsoWeek, currentIsoWeek),
-      ),
-    [wahf, mcf, wpl, currentIsoWeek],
-  )
+  const currentWeekStatuses = useMemo(() => {
+    if (currentCampusWeek == null) return []
+    return FORM_TYPES.map((ft) =>
+      getFormStatusForWeek(ft, wahf, mcf, wpl, currentCampusWeek, currentCampusWeek),
+    )
+  }, [wahf, mcf, wpl, currentCampusWeek])
 
   const pastWeeks = useMemo(
     () => weekOptions.filter((w) => !w.isCurrent),
@@ -107,27 +106,30 @@ export function PersonalClient({ profile, wahf, mcf, wpl, semester, currentIsoWe
     <div className="space-y-8 max-w-2xl mx-auto">
       <div>
         <p className="text-sm text-muted-foreground">
-          {today} &middot; Week {currentIsoWeek}
+          {today}
+          {currentCampusWeek != null ? <> &middot; Week {currentCampusWeek}</> : null}
         </p>
         <h1 className="text-2xl font-bold tracking-tight">
           {greeting}, {firstName}
         </h1>
       </div>
 
-      <section>
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-          This Week&apos;s Forms
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {currentWeekStatuses.map((fs) => (
-            <ThisWeekFormCard
-              key={fs.formType}
-              formStatus={fs}
-              onView={() => openFormDialog(currentIsoWeek, fs.formType)}
-            />
-          ))}
-        </div>
-      </section>
+      {currentCampusWeek != null && (
+        <section>
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+            This Week&apos;s Forms
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {currentWeekStatuses.map((fs) => (
+              <ThisWeekFormCard
+                key={fs.formType}
+                formStatus={fs}
+                onView={() => openFormDialog(currentCampusWeek, fs.formType)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {pastWeeks.length > 0 && (
         <section>
@@ -143,7 +145,7 @@ export function PersonalClient({ profile, wahf, mcf, wpl, semester, currentIsoWe
                 wahf={wahf}
                 mcf={mcf}
                 wpl={wpl}
-                currentIsoWeek={currentIsoWeek}
+                currentCampusWeek={currentCampusWeek}
                 onView={(formType) => openFormDialog(week.weekNum, formType)}
               />
             ))}
@@ -171,11 +173,10 @@ export function PersonalClient({ profile, wahf, mcf, wpl, semester, currentIsoWe
         wahf={wahf}
         mcf={mcf}
         wpl={wpl}
-        semester={semester}
-        currentIsoWeek={currentIsoWeek}
+        currentCampusWeek={currentCampusWeek}
         onClose={() => setDialogState(null)}
-        onNavigateWeek={(isoWeek) =>
-          setDialogState((prev) => (prev ? { ...prev, isoWeek } : null))
+        onNavigateWeek={(campusWeek) =>
+          setDialogState((prev) => (prev ? { ...prev, campusWeek } : null))
         }
       />
     </div>
@@ -271,7 +272,7 @@ function HistoryWeekBlock({
   wahf,
   mcf,
   wpl,
-  currentIsoWeek,
+  currentCampusWeek,
   onView,
 }: {
   weekNum: number
@@ -279,15 +280,15 @@ function HistoryWeekBlock({
   wahf: WahfRow[]
   mcf: McfRow[]
   wpl: WplRow[]
-  currentIsoWeek: number
+  currentCampusWeek: number | null
   onView: (formType: FormType) => void
 }) {
   const statuses = useMemo(
     () =>
       FORM_TYPES.map((ft) =>
-        getFormStatusForWeek(ft, wahf, mcf, wpl, weekNum, currentIsoWeek),
+        getFormStatusForWeek(ft, wahf, mcf, wpl, weekNum, currentCampusWeek),
       ),
-    [wahf, mcf, wpl, weekNum, currentIsoWeek],
+    [wahf, mcf, wpl, weekNum, currentCampusWeek],
   )
 
   return (
@@ -406,8 +407,7 @@ function FormDetailDialog({
   wahf,
   mcf,
   wpl,
-  semester,
-  currentIsoWeek,
+  currentCampusWeek,
   onClose,
   onNavigateWeek,
 }: {
@@ -416,16 +416,15 @@ function FormDetailDialog({
   wahf: WahfRow[]
   mcf: McfRow[]
   wpl: WplRow[]
-  semester: PersonalClientProps["semester"]
-  currentIsoWeek: number
+  currentCampusWeek: number | null
   onClose: () => void
-  onNavigateWeek: (isoWeek: number) => void
+  onNavigateWeek: (campusWeek: number) => void
 }) {
-  const dialogIsoWeek = state?.isoWeek
+  const dialogCampusWeek = state?.campusWeek
   const weekIndex = useMemo(() => {
-    if (dialogIsoWeek == null) return -1
-    return weekOptions.findIndex((w) => w.weekNum === dialogIsoWeek)
-  }, [dialogIsoWeek, weekOptions])
+    if (dialogCampusWeek == null) return -1
+    return weekOptions.findIndex((w) => w.weekNum === dialogCampusWeek)
+  }, [dialogCampusWeek, weekOptions])
 
   const canPrev = state !== null && weekIndex >= 0 && weekIndex < weekOptions.length - 1
   const canNext = state !== null && weekIndex > 0
@@ -443,7 +442,7 @@ function FormDetailDialog({
   }
 
   const dateSubtitle = state
-    ? formatIsoWeekRangeWithYear(semester, state.isoWeek, currentIsoWeek)
+    ? formatCampusWeekRangeWithYear(state.campusWeek)
     : ""
 
   return (
@@ -456,7 +455,7 @@ function FormDetailDialog({
       {state && (
         <FormDetailDialogContent
           key={state.sessionKey}
-          isoWeek={state.isoWeek}
+          campusWeek={state.campusWeek}
           initialFormType={state.initialFormType}
           dateSubtitle={dateSubtitle}
           canPrev={canPrev}
@@ -466,7 +465,7 @@ function FormDetailDialog({
           wahf={wahf}
           mcf={mcf}
           wpl={wpl}
-          currentIsoWeek={currentIsoWeek}
+          currentCampusWeek={currentCampusWeek}
         />
       )}
     </Dialog>
@@ -474,7 +473,7 @@ function FormDetailDialog({
 }
 
 function FormDetailDialogContent({
-  isoWeek,
+  campusWeek,
   initialFormType,
   dateSubtitle,
   canPrev,
@@ -484,9 +483,9 @@ function FormDetailDialogContent({
   wahf,
   mcf,
   wpl,
-  currentIsoWeek,
+  currentCampusWeek,
 }: {
-  isoWeek: number
+  campusWeek: number
   initialFormType: FormType
   dateSubtitle: string
   canPrev: boolean
@@ -496,23 +495,23 @@ function FormDetailDialogContent({
   wahf: WahfRow[]
   mcf: McfRow[]
   wpl: WplRow[]
-  currentIsoWeek: number
+  currentCampusWeek: number | null
 }) {
   const [activeTab, setActiveTab] = useState<FormType>(initialFormType)
 
   const footerStatus = useMemo(() => {
-    const fs = getFormStatusForWeek(activeTab, wahf, mcf, wpl, isoWeek, currentIsoWeek)
+    const fs = getFormStatusForWeek(activeTab, wahf, mcf, wpl, campusWeek, currentCampusWeek)
     if (fs.status !== "done" || !fs.submittedAt) return "Not submitted"
     const day = formatSubmittedDay(fs.submittedAt)
     return fs.isLate ? `Submitted ${day} · late` : `Submitted ${day} · on time`
-  }, [activeTab, wahf, mcf, wpl, isoWeek, currentIsoWeek])
+  }, [activeTab, wahf, mcf, wpl, campusWeek, currentCampusWeek])
 
   return (
     <DialogContent className="flex h-[min(85vh,42rem)] w-full max-w-xl flex-col gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-xl [&>button]:cursor-pointer">
       <div className="shrink-0 space-y-4 border-b px-6 pb-4 pt-6">
         <DialogHeader className="space-y-1 p-0 text-left">
           <DialogTitle className="text-xl font-semibold tracking-tight">
-            Week {isoWeek} submission
+            Week {campusWeek} submission
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
             {dateSubtitle}
@@ -556,7 +555,7 @@ function FormDetailDialogContent({
       >
         <FormTabBody
           formType={activeTab}
-          isoWeek={isoWeek}
+          campusWeek={campusWeek}
           wahf={wahf}
           mcf={mcf}
           wpl={wpl}
@@ -596,26 +595,26 @@ function FormDetailDialogContent({
 
 function FormTabBody({
   formType,
-  isoWeek,
+  campusWeek,
   wahf,
   mcf,
   wpl,
 }: {
   formType: FormType
-  isoWeek: number
+  campusWeek: number
   wahf: WahfRow[]
   mcf: McfRow[]
   wpl: WplRow[]
 }) {
   if (formType === "WAHF") {
-    const row = findSubmissionForIsoWeek(wahf, isoWeek)
+    const row = findSubmissionForCampusWeek(wahf, campusWeek)
     return <WahfTabBody row={row} />
   }
   if (formType === "WPL") {
-    const row = findSubmissionForIsoWeek(wpl, isoWeek)
+    const row = findSubmissionForCampusWeek(wpl, campusWeek)
     return <WplTabBody row={row} />
   }
-  const row = findSubmissionForIsoWeek(mcf, isoWeek)
+  const row = findSubmissionForCampusWeek(mcf, campusWeek)
   return <McfTabBody row={row} />
 }
 

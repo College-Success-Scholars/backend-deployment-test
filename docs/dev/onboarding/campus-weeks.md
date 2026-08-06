@@ -19,8 +19,8 @@ Stop ISO-week bugs before they ship. Most backend and Memo queries use **campus 
 ## Rules of thumb
 
 1. **Default to campus weeks** from `shared/` (`FALL_SEMESTER_FIRST_DAY`, winter-break handling, `campusWeekToDateRange`, etc.).
-2. **Do not** use `date-fns` `getISOWeek` (or similar) for Memo, attendance, form deadlines, or anything keyed by `week_num` in tables.
-3. **`GET /api/auth/semester` / `getActiveSemester`** — use sparingly: when the server-owned campus frame does not apply (historical data, collection year not started, or you truly need a Supabase `semesters` row). Handbook note: [Campus Week System](../README.md#campus-week-system).
+2. **Do not** use `date-fns` `getISOWeek` (or similar) for Memo, Personal, Mentee, attendance, form deadlines, or anything keyed by `week_num` in tables.
+3. **`GET /api/auth/semester` / `getActiveSemester`** — use sparingly: when the server-owned campus frame does not apply (historical data, collection year not started, or you truly need a Supabase `semesters` row). Handbook note: [Campus Week System](../README.md#campus-week-system). Personal and Mentee dashboards use the shared campus calendar — not semester ISO weeks.
 
 ---
 

@@ -1,17 +1,14 @@
-import { getISOWeek } from "date-fns";
 import { redirect } from "next/navigation";
 import { PersonalClient } from "@/components/personal/personal-client";
 import { canAccessWeeklyMemo } from "@/lib/auth";
-import { getActiveSemester, getCurrentProfile } from "@/lib/server/queries";
+import { getCurrentProfile } from "@/lib/server/queries";
 import { backendPost } from "@/lib/server/api-client";
+import { dateToCampusWeek } from "@/lib/format/time";
 import { WahfFormLogRow, McfFormLogRow, WplFormLogRow } from "@/lib/types/form-log";
 import { ProfileRow } from "@/lib/types/supabase";
 
 export default async function PersonalPage() {
-  const [semester, profile] = await Promise.all([
-    getActiveSemester(),
-    getCurrentProfile(),
-  ]);
+  const profile = await getCurrentProfile();
 
   // Personal monitoring is team_leader+ (same effective-role gate as Memo).
   if (!canAccessWeeklyMemo(profile)) {
@@ -27,6 +24,8 @@ export default async function PersonalPage() {
     uids.length ? backendPost<WplFormLogRow[]>("/api/form-logs/wpl/by-uids", { uids }) : Promise.resolve([]),
   ]);
 
+  const currentCampusWeek = dateToCampusWeek(new Date());
+
   return (
     <div className="space-y-6">
       <PersonalClient
@@ -34,8 +33,7 @@ export default async function PersonalPage() {
         wahf={wahf as WahfFormLogRow[]}
         mcf={mcf as McfFormLogRow[]}
         wpl={wpl as WplFormLogRow[]}
-        semester={semester}
-        currentIsoWeek={getISOWeek(new Date(Date.now()))}
+        currentCampusWeek={currentCampusWeek}
       />
     </div>
   );
