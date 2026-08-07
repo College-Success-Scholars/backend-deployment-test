@@ -1,10 +1,10 @@
-import type { MemoPageData, ScholarFollowUpRow } from "../types"
+import type { MemoLivePageData, ScholarFollowUpRow } from "../types"
 
 const LOW_COMPLETION_THRESHOLD = 75
 
 const toScholarYear = (cohort: number | null) => (cohort === 2025 ? "Freshman" : "Sophomore")
 
-export const classifyScholarFollowUpRisk = (data: MemoPageData): ScholarFollowUpRow[] => {
+export const classifyScholarFollowUpRisk = (data: MemoLivePageData): ScholarFollowUpRow[] => {
   const rows = data.scholars
     .map((row) => {
       const flags: string[] = []

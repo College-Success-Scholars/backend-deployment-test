@@ -22,6 +22,7 @@ import type { AuthenticatedRequest } from "./auth.controller.js";
 import { syncMemo, getWeeklyMemo, triggerRefreshStats } from "../services/memo.service.js";
 import { getTrafficEntryCountForWeek } from "../services/traffic.service.js";
 import { getMemoPageData } from "../services/memo-page.service.js";
+import { resolveMemoDefaultWeek } from "../services/memo-default-week.js";
 
 function parseWeekNumberFromBody(body: { weekNumber?: number; weekNum?: number }): number | null {
   const weekNumber = body.weekNumber ?? body.weekNum;
@@ -102,8 +103,12 @@ export async function pageData(req: AuthenticatedRequest, res: Response) {
     }
   } else {
     const { dateToCampusWeek } = await import("../services/time.service.js");
-    const current = dateToCampusWeek(new Date());
-    weekNumber = current ?? 1;
+    const resolved = resolveMemoDefaultWeek(dateToCampusWeek(new Date()));
+    if (resolved.status === "year_not_started") {
+      res.json({ data: { yearNotStarted: true as const, currentCampusWeek: null } });
+      return;
+    }
+    weekNumber = resolved.weekNumber;
   }
   try {
     const data = await getMemoPageData(weekNumber);

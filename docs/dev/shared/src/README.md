@@ -33,7 +33,8 @@ Pure TypeScript source for the shared library. All exports are re-exported throu
 ```typescript
 // Campus calendar
 campusWeekToDateRange(weekNum: number): CampusWeekDateRange
-dateToCampusWeek(date: Date): number
+dateToCampusWeek(date: Date): number | null
+isCollectionYearStarted(now?: Date): boolean  // true iff dateToCampusWeek(now) != null
 
 // Eastern time utilities
 parseEasternDate(input: string): Date          // "YYYY-MM-DD" → UTC Date

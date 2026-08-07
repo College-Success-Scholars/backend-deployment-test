@@ -11,7 +11,9 @@ export async function DailyActivityMinutesNote() {
   const uid = process.env.MENTEE_ACTIVITY_PREVIEW_UID?.trim();
   if (!uid) return null;
 
-  const weekNum = dateToCampusWeek(new Date()) ?? 1;
+  const weekNum = dateToCampusWeek(new Date());
+  if (weekNum == null) return null;
+
   let minutes: number;
   try {
     minutes = await getTotalMinutesForMenteeWeek({

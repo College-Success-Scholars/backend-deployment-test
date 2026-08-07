@@ -3,6 +3,7 @@
 import { Suspense } from "react"
 
 import { Skeleton } from "@/components/ui/skeleton"
+import { YEAR_NOT_STARTED_COPY } from "@/components/dashboard/widgets/year-not-started-state"
 import { useWeeklyMemoNav } from "./weekly-memo-nav-context"
 import { WeeklyMemoWeekNav } from "./weekly-memo-week-nav"
 
@@ -18,7 +19,9 @@ function WeeklyMemoHeaderShellContent({ weekParam }: WeeklyMemoHeaderShellProps)
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Weekly memo</h1>
-        {hasDates ? (
+        {nav.yearNotStarted ? (
+          <p className="text-muted-foreground text-sm">{YEAR_NOT_STARTED_COPY}</p>
+        ) : hasDates ? (
           <p className="text-muted-foreground text-sm">
             {nav.weekStartLabel} - {nav.weekEndLabel}
           </p>
@@ -26,14 +29,16 @@ function WeeklyMemoHeaderShellContent({ weekParam }: WeeklyMemoHeaderShellProps)
           <Skeleton className="mt-1 h-5 w-48" />
         )}
       </div>
-      <WeeklyMemoWeekNav
-        weekParam={weekParam}
-        selectedWeek={nav.weekNumber}
-        availableWeeks={nav.availableWeeks}
-        prevWeek={nav.prevWeek}
-        nextWeek={nav.nextWeek}
-        currentCampusWeek={nav.currentCampusWeek}
-      />
+      {!nav.yearNotStarted && (
+        <WeeklyMemoWeekNav
+          weekParam={weekParam}
+          selectedWeek={nav.weekNumber}
+          availableWeeks={nav.availableWeeks}
+          prevWeek={nav.prevWeek}
+          nextWeek={nav.nextWeek}
+          currentCampusWeek={nav.currentCampusWeek}
+        />
+      )}
     </div>
   )
 }

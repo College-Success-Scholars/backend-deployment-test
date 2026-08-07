@@ -27,6 +27,7 @@ import {
   type FormStatusResult,
   type WeekOption,
 } from "./utils"
+import { YearNotStartedState } from "@/components/dashboard/widgets/year-not-started-state"
 import {
   gradeScoreClass,
   missedFieldDisplay,
@@ -114,7 +115,10 @@ export function PersonalClient({ profile, wahf, mcf, wpl, currentCampusWeek }: P
         </h1>
       </div>
 
-      {currentCampusWeek != null && (
+      {currentCampusWeek == null ? (
+        <YearNotStartedState variant="full" />
+      ) : (
+        <>
         <section>
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
             This Week&apos;s Forms
@@ -129,7 +133,6 @@ export function PersonalClient({ profile, wahf, mcf, wpl, currentCampusWeek }: P
             ))}
           </div>
         </section>
-      )}
 
       {pastWeeks.length > 0 && (
         <section>
@@ -179,6 +182,8 @@ export function PersonalClient({ profile, wahf, mcf, wpl, currentCampusWeek }: P
           setDialogState((prev) => (prev ? { ...prev, campusWeek } : null))
         }
       />
+        </>
+      )}
     </div>
   )
 }

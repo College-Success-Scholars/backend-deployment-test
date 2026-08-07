@@ -10,6 +10,7 @@
  * ## Responsibilities
  * - campusWeekToDateRange(weekNum): week number → { startDate, endDate }
  * - dateToCampusWeek(date): date → week number
+ * - isCollectionYearStarted(now?): true iff dateToCampusWeek(now) != null
  * - getWeekFetchEnd(weekNum): get the fetch-end boundary date for a week
  * - formatEntryDate(iso, showTime?): format a timestamp for display
  * - formatDuration(ms): format milliseconds as "Xh Ym Zs"
@@ -104,6 +105,11 @@ export function campusWeekToDateRange(weekNumber: number): CampusWeekDateRange |
 
 export function dateToCampusWeek(date: Date): number | null {
   return campusCalendar.weekOf(date);
+}
+
+/** True once the Fall collection year has a campus week for `now` (not before Fall start). */
+export function isCollectionYearStarted(now: Date = new Date()): boolean {
+  return dateToCampusWeek(now) != null;
 }
 
 export function getWeekFetchEnd(range: { endDate: Date }): Date {

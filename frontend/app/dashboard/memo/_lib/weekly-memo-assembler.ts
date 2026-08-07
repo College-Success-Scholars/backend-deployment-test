@@ -2,7 +2,7 @@ import type { ScholarWithCompletedSession } from "@/lib/types/session-log"
 import type { MemoTutorReportRow } from "@/lib/types/tutor-report-log"
 import type {
   FormStatus,
-  MemoPageData,
+  MemoLivePageData,
   TeamLeaderPerformanceRow,
   TutoringLogRow,
   WeeklyMemoViewData,
@@ -41,7 +41,7 @@ const aggregateSessionMinutes = (sessions: ScholarWithCompletedSession[]) => {
   return byScholar
 }
 
-const buildTeamLeaderRows = (data: MemoPageData): TeamLeaderPerformanceRow[] =>
+const buildTeamLeaderRows = (data: MemoLivePageData): TeamLeaderPerformanceRow[] =>
   data.teamLeaderFormStats.map((row) => ({
     leaderName: row.name,
     mcf: getFormStatus(row.mcfCompleted, row.mcfRequired, row.mcfLate),
@@ -78,7 +78,7 @@ const buildTutoringLog = (tutorReports: MemoTutorReportRow[]) => {
   }
 }
 
-export const assembleWeeklyMemo = (data: MemoPageData): WeeklyMemoViewData => {
+export const assembleWeeklyMemo = (data: MemoLivePageData): WeeklyMemoViewData => {
   const weekDates = formatWeekDateRange(data.weekLabel)
   const visitsLastWeek = data.trafficWeeklyData.find((entry) => entry.weekNumber === data.selectedWeekNumber - 1)?.entryCount ?? 0
   const visitsTrend = data.trafficEntryCountForSelectedWeek - visitsLastWeek

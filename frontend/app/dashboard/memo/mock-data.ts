@@ -1,6 +1,6 @@
 import type {
   FormStatus,
-  MemoPageData,
+  MemoLivePageData,
   ScholarFollowUpRow,
   TeamLeaderPerformanceRow,
   WeeklyMemoViewData,
@@ -46,21 +46,21 @@ const sortScholars = (rows: ScholarFollowUpRow[]) => {
   })
 }
 
-const baseMemoData: MemoPageData = {
-  scholars: [] as MemoPageData["scholars"],
-  teamLeaders: [] as MemoPageData["teamLeaders"],
-  pieData: { traffic: 0, studySession: 0, formSubmissions: 0 } as unknown as MemoPageData["pieData"],
+const baseMemoData: MemoLivePageData = {
+  scholars: [] as MemoLivePageData["scholars"],
+  teamLeaders: [] as MemoLivePageData["teamLeaders"],
+  pieData: { traffic: 0, studySession: 0, formSubmissions: 0 } as unknown as MemoLivePageData["pieData"],
   formCompletionOverall:
-    { wahf: 0, wpl: 0, mcf: 0, overall: 0 } as unknown as MemoPageData["formCompletionOverall"],
-  completedStudy: [] as MemoPageData["completedStudy"],
-  completedFd: [] as MemoPageData["completedFd"],
+    { wahf: 0, wpl: 0, mcf: 0, overall: 0 } as unknown as MemoLivePageData["formCompletionOverall"],
+  completedStudy: [] as MemoLivePageData["completedStudy"],
+  completedFd: [] as MemoLivePageData["completedFd"],
   trafficWeeklyData: [],
   trafficEntryCountForSelectedWeek: 0,
-  trafficSessions: [] as MemoPageData["trafficSessions"],
-  tutorReports: [] as MemoPageData["tutorReports"],
-  gradeBreakdown: { low: 0, mid: 0, high: 0 } as unknown as MemoPageData["gradeBreakdown"],
+  trafficSessions: [] as MemoLivePageData["trafficSessions"],
+  tutorReports: [] as MemoLivePageData["tutorReports"],
+  gradeBreakdown: { low: 0, mid: 0, high: 0 } as unknown as MemoLivePageData["gradeBreakdown"],
   wahfDonut: { total: 0, completeCount: 0, lateCount: 0, percentComplete: 0 },
-  teamLeaderFormStats: [] as MemoPageData["teamLeaderFormStats"],
+  teamLeaderFormStats: [] as MemoLivePageData["teamLeaderFormStats"],
   weekLabel: "",
   selectedWeekNumber: 12,
   currentCampusWeek: 12,

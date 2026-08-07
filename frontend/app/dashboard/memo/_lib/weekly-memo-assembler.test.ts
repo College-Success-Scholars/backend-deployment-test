@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest"
-import type { MemoPageData } from "../types"
+import type { MemoLivePageData } from "../types"
 import { assembleWeeklyMemo } from "./weekly-memo-assembler"
 
-const buildMemoData = (): MemoPageData =>
+const buildMemoData = (): MemoLivePageData =>
   ({
     scholars: [
       {
@@ -93,7 +93,7 @@ const buildMemoData = (): MemoPageData =>
     weekLabel: "Apr 1 - Apr 7",
     currentCampusWeek: 6,
     selectedWeekNumber: 5,
-  }) as unknown as MemoPageData
+  }) as unknown as MemoLivePageData
 
 describe("weekly-memo-assembler", () => {
   it("assembles top-level weekly memo sections from memo page data", () => {
