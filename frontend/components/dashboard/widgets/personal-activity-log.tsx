@@ -1,21 +1,18 @@
 import { Clock3 } from "lucide-react"
-import { getRecentFormSubmissions } from "@/lib/server/data"
-type ProfilesRow = Record<string, unknown> & { student_id?: string | null }
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import type { RecentFormSubmission } from "@/lib/types/form-log"
 import { PersonalActivityLogClient } from "./personal-activity-log-client"
 
-export async function PersonalActivityLog({
-  profile,
+export function PersonalActivityLog({
+  entries,
 }: {
-  profile: ProfilesRow | null
+  entries: RecentFormSubmission[]
 }) {
-  const recentSubmissions = await getRecentFormSubmissions({ profile })
-
   return (
     <Card className="gap-4 py-5">
       <CardHeader className="px-5 pb-0 pt-0">
@@ -28,7 +25,7 @@ export async function PersonalActivityLog({
         </CardDescription>
       </CardHeader>
       <div className="space-y-4 px-5 pb-1 pt-0">
-        <PersonalActivityLogClient entries={recentSubmissions} />
+        <PersonalActivityLogClient entries={entries} />
       </div>
     </Card>
   )

@@ -30,7 +30,7 @@ Charts live in `components/charts/`. Non-component dictionaries live in `lib/das
 
 ## Standards
 
-- **Server/client split** — use `foo.tsx` + `foo-client.tsx`: server fetches, client interacts (same for widgets that fetch or filter).
+- **Server/client split** — use `foo.tsx` + `foo-client.tsx`: presentational server shell + interactive client. Domain fetching stays in pages (or thin role parents that only receive props from the page); pass results as props.
 - **Role selection in `app/dashboard/page.tsx`** — do not switch roles inside dashboard components; roles import widgets from `widgets/` and charts from `components/charts/`.
 - **New role dashboard** — add to `roles/` and wire in `app/dashboard/page.tsx`.
 - **New feature widget** — add to `widgets/` unless it is route-private (then use `_components/`).

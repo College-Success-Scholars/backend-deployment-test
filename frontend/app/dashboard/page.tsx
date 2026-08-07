@@ -17,6 +17,7 @@
 import { TeamLeaderDashboard } from "@/components/dashboard/roles/team-leader-dashboard";
 import { ScholarDashboard } from "@/components/dashboard/roles/scholar-dashboard";
 import { DefaultDashboard } from "@/components/dashboard/roles/default-dashboard";
+import { getRecentFormSubmissions } from "@/lib/server/data";
 import { getCurrentUser } from "@/lib/server/queries";
 import { resolveUserRole } from "@/lib/auth";
 
@@ -25,7 +26,10 @@ export default async function Page() {
   const role = resolveUserRole(me?.profile as { app_role?: string | null; program_role?: string | null } | null);
 
   if (role === "scholar") {
-    return <ScholarDashboard />;
+    const entries = await getRecentFormSubmissions({
+      profile: me?.profile as { student_id?: string | null } | null,
+    });
+    return <ScholarDashboard me={me} entries={entries} />;
   }
 
   if (role === "team-leader" || role === "developer") {

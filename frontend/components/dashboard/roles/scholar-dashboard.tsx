@@ -4,16 +4,22 @@ import {
   ClipboardList,
   GraduationCap
 } from "lucide-react"
-import { backendGet } from "@/lib/server/api-client";
 import { StudySessionChart } from "@/components/charts/study-session-chart"
 import { FrontDeskChart } from "@/components/charts/front-desk-chart"
 import { ActivityLog } from "@/components/dashboard/widgets/activity-log"
+import type { CurrentUserResponse } from "@/lib/server/queries"
+import type { RecentFormSubmission } from "@/lib/types/form-log"
 
-export async function ScholarDashboard() {
-  const me = await backendGet<{ user: { id: string; email: string | null }; profile: { first_name?: string; last_name?: string } | null }>("/api/auth/me");
-
-  const firstName = me?.profile?.first_name ?? me?.user?.email?.split('@')[0] ?? '';
-  const lastName = me?.profile?.last_name ?? '';
+export function ScholarDashboard({
+  me,
+  entries,
+}: {
+  me: CurrentUserResponse | null
+  entries: RecentFormSubmission[]
+}) {
+  const profile = me?.profile as { first_name?: string; last_name?: string } | null | undefined
+  const firstName = profile?.first_name ?? me?.user?.email?.split('@')[0] ?? '';
+  const lastName = profile?.last_name ?? '';
 
   // Mock data - replace with actual queries later
   const studySessionHours = {
@@ -113,7 +119,7 @@ export async function ScholarDashboard() {
 
       {/* Activity Log */}
       <div className="mt-4">
-        <ActivityLog />
+        <ActivityLog entries={entries} />
       </div>
     </div>
   )
