@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Clock, Timer, CheckCircle2, UserIcon } from "lucide-react"
 
+import { useMinuteNow } from "@/hooks/use-minute-now"
 import { formatDuration, formatEstimatedExit } from "./traffic-format"
 
 export type DurationChoice = 30 | 60 | 90 | "custom"
@@ -44,6 +45,8 @@ export function TrafficCheckInForm({
   onAdjustCustomByMinutes,
   onSubmit,
 }: TrafficCheckInFormProps) {
+  const now = useMinuteNow()
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/10 p-4 lg:p-8 dark:bg-background">
       <Card className="w-full max-w-4xl border-0 shadow-2xl ring-1 ring-border/50">
@@ -258,7 +261,7 @@ export function TrafficCheckInForm({
                         className="text-6xl font-extrabold tracking-tighter text-foreground tabular-nums lg:text-7xl"
                         suppressHydrationWarning
                       >
-                        {formatEstimatedExit(durationMin)}
+                        {formatEstimatedExit(durationMin, now)}
                       </p>
                       <p className="mt-6 rounded-full border border-border/50 bg-background/60 px-4 py-2 text-xs font-bold uppercase tracking-wider text-muted-foreground shadow-sm">
                         {formatDuration(durationMin)} stay
