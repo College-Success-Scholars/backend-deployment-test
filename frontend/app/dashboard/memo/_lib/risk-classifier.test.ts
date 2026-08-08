@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import type { MemoPageData } from "../types"
+import type { MemoLivePageData } from "../types"
 import { classifyScholarFollowUpRisk } from "./risk-classifier"
 
 describe("risk-classifier", () => {
@@ -24,7 +24,7 @@ describe("risk-classifier", () => {
     weekLabel: "Week 1",
     currentCampusWeek: 1,
     selectedWeekNumber: 1,
-  } as MemoPageData
+  } as MemoLivePageData
 
   it("flags scholars below completion thresholds and low grades", () => {
     const rows = classifyScholarFollowUpRisk(baseData)

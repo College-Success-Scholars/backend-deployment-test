@@ -1,10 +1,10 @@
-import { getISOWeek } from "date-fns";
 import { redirect } from "next/navigation";
 import { MenteeMonitoringClient } from "@/components/mentee-monitoring/mentee-monitoring-client";
 import { canAccessMenteeMonitoring } from "@/lib/auth";
-import { getActiveSemester, getCurrentProfile, getMyMentees } from "@/lib/server/queries";
+import { getCurrentProfile, getMyMentees } from "@/lib/server/queries";
 import { backendPost } from "@/lib/server/api-client";
-import type { ActivityRow, WahfRow, TutoringRow, MenteeRow, SemesterRow } from "@/lib/types/supabase";
+import { dateToCampusWeek } from "@/lib/format/time";
+import type { ActivityRow, WahfRow, TutoringRow, MenteeRow } from "@/lib/types/supabase";
 
 export default async function MenteePage() {
   const profile = await getCurrentProfile();
@@ -12,10 +12,7 @@ export default async function MenteePage() {
     redirect("/dashboard");
   }
 
-  const [semester, mentees] = await Promise.all([
-    getActiveSemester(),
-    getMyMentees(),
-  ]);
+  const mentees = await getMyMentees();
 
   const menteeUids = (mentees as Array<{ scholar_uid?: string }>)
     .map((m) => m.scholar_uid)
@@ -33,7 +30,7 @@ export default async function MenteePage() {
       : Promise.resolve([] as TutoringRow[]),
   ]);
 
-  const currentIsoWeek = getISOWeek(new Date(Date.now()));
+  const currentCampusWeek = dateToCampusWeek(new Date());
 
   return (
     <div className="space-y-6">
@@ -42,8 +39,7 @@ export default async function MenteePage() {
         activity={activity as ActivityRow[]}
         wahf={wahf as WahfRow[]}
         tutoring={tutoring as TutoringRow[]}
-        semester={semester as SemesterRow}
-        currentIsoWeek={currentIsoWeek}
+        currentCampusWeek={currentCampusWeek}
       />
     </div>
   );

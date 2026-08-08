@@ -55,6 +55,7 @@ Product vocabulary: [ubiquitous language](../../agents/ubiquitous_language.md).
 - Clients send only `dev_test_profiles.id` (cookie → `X-Dev-Active-Profile`); the server resolves `roster_uid`.
 - While acting, many **mutations are denylisted** (`rejectWritesWhenActing`). Read-via-POST endpoints and `/api/dev/*` stay allowed. Symptom of a blocked write: error from that middleware rather than a successful `{ data }`.
 - Setup SQL order and seed placeholders: [docs/dev/supabase/README.md](../supabase/README.md).
+- **RLS blindspot:** personas overlay `req.profile` only — the JWT stays the developer (`auth.uid()` / real `app_role`). Policies keyed on the JWT still see you as a developer. Acting as TL/scholar will **not** catch empty-data bugs that only real `team_leader` (or scholar) sessions hit. Smoke those with a real non-developer login; see [Auth & RLS runbook](auth-rls-runbook.md).
 
 ---
 

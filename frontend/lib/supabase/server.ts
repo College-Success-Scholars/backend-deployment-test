@@ -36,7 +36,7 @@ import { getCurrentUser as getAuthMe } from "@/lib/server/queries";
 import { getSupabasePublicKey } from "./public-key";
 import { mergeProfileWithRoster } from "../../../shared/dist/auth.js";
 
-/** Row shape from `public.profiles` (and joined `user_roster`) as returned by getCurrentUserWithProfile(). */
+/** Merged profile API shape (profiles + optional user_roster). `student_id` is Postgres text. */
 export type ProfilesRow = {
   id: string;
   first_name: string | null;
@@ -46,7 +46,7 @@ export type ProfilesRow = {
   app_role?: string | null;
   teams: string[] | null;
   emails: string[] | null;
-  student_id: number | null;
+  student_id: string | null;
   [key: string]: unknown;
 };
 

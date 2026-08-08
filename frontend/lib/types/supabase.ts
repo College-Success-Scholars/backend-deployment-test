@@ -1,4 +1,6 @@
-/** Row shape from backend GET /api/auth/mentees (mentor_mentee + user_roster join). */
+/** API response shapes for backend routes (not Postgres table mirrors). */
+
+/** Response row from GET /api/auth/mentees (mentor_mentee + user_roster join). */
 export type MenteeRow = {
   scholar_uid: string | null
   first_name: string | null
@@ -7,23 +9,14 @@ export type MenteeRow = {
   ss_required: number | null
 }
 
-/** Row shape from Supabase RPC `get_mentee_activity`. */
-export type MenteeActivityRpcRow = {
-  scholar_uid: string | null
-  activity_date: string | null
-  log_source: string | null
-  duration_minutes: number | null
-  week_num: number
-}
-
-/** Row shape from Supabase RPC `get_week_breaks`. */
+/** Response shape when calling break-week helpers (backend maps RPC / semester APIs). */
 export type WeekBreakRpcRow = {
   break_days: number | null
   is_break_week: boolean | null
   breaks: unknown[] | null
 }
 
-/** Row shape from Supabase table `public.daily_scholar_activity`. */
+/** Response row from daily-activity APIs (`/api/form-logs/daily-activity/…`). */
 export type ActivityRow = {
     scholar_uid: string
     activity_date: string
@@ -38,18 +31,19 @@ export type WahfRow = WahfFormLogRow
 export type McfRow = McfFormLogRow
 export type WplRow = WplFormLogRow
 
-/** Row shape from Supabase table `public.tutor_report_logs`. */
+/** Response row from tutor-report APIs (mirrors backend TutorReportLogRow). */
 export type TutoringRow = {
   id: number
   created_at: string
+  date: string | null
   tutor_name: string
   scholar_uid: string
   start_time: string
   end_time: string
   courses: string[]
-}   
+}
 
-/** Row shape from Supabase table `public.semesters`. */
+/** Active semester payload used by dashboard pages. */
 export type SemesterRow = {
     id: number
     iso_week_offset: number
@@ -57,7 +51,7 @@ export type SemesterRow = {
     end_date: string
 }
 
-/** Row shape from Supabase table `public.traffic`. */
+/** Traffic kiosk / analytics row from traffic APIs. */
 export type TrafficRow = {
   id: number
   created_at: string
@@ -66,7 +60,10 @@ export type TrafficRow = {
   duration_min: number | null
 }
 
-/** Row shape from Supabase table `public.profiles`. */
+/**
+ * Profile fields returned by auth/profile APIs for dashboard pages.
+ * Mentee assignments live on `user_roster` / GET /api/auth/mentees — not on profiles.
+ */
 export type ProfileRow = {
   id: string
   created_at: string
@@ -85,7 +82,6 @@ export type ProfileRow = {
   emails: string[] | null
   majors: string[] | null
   minors: string[] | null
-  mentee_uids: string[] | null
   teams: string[] | null
 }
 
@@ -94,8 +90,8 @@ export interface MenteeMonitoringClientProps {
   activity: ActivityRow[]
   wahf: WahfRow[]
   tutoring: TutoringRow[]
-  semester: SemesterRow
-  currentIsoWeek: number
+  /** Campus week from `dateToCampusWeek`; null before Fall start. */
+  currentCampusWeek: number | null
 }
 
 export interface PersonalClientProps {
@@ -103,6 +99,6 @@ export interface PersonalClientProps {
   wahf: WahfRow[]
   mcf: McfRow[]
   wpl: WplRow[]
-  semester: SemesterRow
-  currentIsoWeek: number
+  /** Campus week from `dateToCampusWeek`; null before Fall start. */
+  currentCampusWeek: number | null
 }

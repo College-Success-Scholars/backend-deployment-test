@@ -16,6 +16,7 @@
  * - Supabase client imports
  */
 
+/** Profile / merged API shape. `student_id` matches Postgres `text` (see database.types). */
 export type ProfilesRow = {
   id: string;
   first_name: string | null;
@@ -25,7 +26,7 @@ export type ProfilesRow = {
   app_role?: string | null;
   teams: string[] | null;
   emails: string[] | null;
-  student_id: number | null;
+  student_id: string | null;
   [key: string]: unknown;
 };
 

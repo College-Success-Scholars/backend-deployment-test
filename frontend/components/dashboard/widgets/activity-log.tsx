@@ -1,13 +1,9 @@
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Clock } from "lucide-react"
-import { getCurrentProfile } from "@/lib/server/queries"
-import { getRecentFormSubmissions } from "@/lib/server/data"
+import type { RecentFormSubmission } from "@/lib/types/form-log"
 import { ActivityLogClient } from "./activity-log-client"
 
-export async function ActivityLog() {
-  const profile = await getCurrentProfile()
-  const entries = await getRecentFormSubmissions({ profile })
-
+export function ActivityLog({ entries }: { entries: RecentFormSubmission[] }) {
   return (
     <Card>
       <CardHeader>

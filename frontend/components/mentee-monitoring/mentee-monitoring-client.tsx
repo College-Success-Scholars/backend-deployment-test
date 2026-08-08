@@ -22,18 +22,19 @@ import {
   getTodayDayLabel,
 } from "./utils"
 import { HoursCard } from "./hours-card"
-import { SeminarsCard } from "./seminars-card"
 import { TutoringCard } from "./tutoring-card"
 import { WahfCard } from "./wahf-card"
+import { YearNotStartedState } from "@/components/dashboard/widgets/year-not-started-state"
 
 export function MenteeMonitoringClient({
   mentees,
   activity,
   wahf,
-  tutoring, 
-  semester,
-  currentIsoWeek,
+  tutoring,
+  currentCampusWeek,
 }: MenteeMonitoringClientProps) {
+  const yearStarted = currentCampusWeek != null
+
   const validMentees = useMemo(
     () => mentees.filter((m) => m.scholar_uid != null),
     [mentees],
@@ -42,11 +43,13 @@ export function MenteeMonitoringClient({
   const [selectedUid, setSelectedUid] = useState<string>(
     () => validMentees[0]?.scholar_uid ?? "",
   )
-  const [selectedWeek, setSelectedWeek] = useState<number>(currentIsoWeek)
+  const [selectedWeek, setSelectedWeek] = useState<number>(
+    () => currentCampusWeek ?? 0,
+  )
 
   const weekOptions = useMemo(
-    () => computeWeekOptions(semester, currentIsoWeek),
-    [semester, currentIsoWeek],
+    () => computeWeekOptions(currentCampusWeek),
+    [currentCampusWeek],
   )
 
   const weekIndex = weekOptions.findIndex((w) => w.weekNum === selectedWeek)
@@ -59,10 +62,10 @@ export function MenteeMonitoringClient({
 
   const { studySession, frontDesk } = useMemo(
     () =>
-      selectedUid
+      yearStarted && selectedUid
         ? filterActivityForMenteeWeek(activity, selectedUid, selectedWeek)
         : { studySession: [], frontDesk: [] },
-    [activity, selectedUid, selectedWeek],
+    [activity, selectedUid, selectedWeek, yearStarted],
   )
 
   const ssDailyHours = useMemo(() => computeDailyHours(studySession), [studySession])
@@ -75,13 +78,19 @@ export function MenteeMonitoringClient({
   const fdRequired = (selectedMentee?.fd_required ?? 0) / 60
 
   const wahfStatus = useMemo(
-    () => computeWahfStatus(wahf, selectedUid, selectedWeek, currentIsoWeek),
-    [wahf, selectedUid, selectedWeek, currentIsoWeek],
+    () =>
+      yearStarted
+        ? computeWahfStatus(wahf, selectedUid, selectedWeek, currentCampusWeek)
+        : null,
+    [wahf, selectedUid, selectedWeek, currentCampusWeek, yearStarted],
   )
 
   const tutoringSessions = useMemo(
-    () => computeTutoringSessions(tutoring, selectedUid, selectedWeek),
-    [tutoring, selectedUid, selectedWeek],
+    () =>
+      yearStarted
+        ? computeTutoringSessions(tutoring, selectedUid, selectedWeek)
+        : [],
+    [tutoring, selectedUid, selectedWeek, yearStarted],
   )
 
   if (validMentees.length === 0) {
@@ -117,7 +126,8 @@ export function MenteeMonitoringClient({
 
   // ---- Alert banner -------------------------------------------------------
 
-  const showAlert = !wahfStatus.submitted && wahfStatus.daysOverdue > 0
+  const showAlert =
+    wahfStatus != null && !wahfStatus.submitted && wahfStatus.daysOverdue > 0
 
   return (
     <div className="space-y-4 max-w-2xl mx-auto">
@@ -126,8 +136,13 @@ export function MenteeMonitoringClient({
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{name}</h1>
           <p className="text-sm text-muted-foreground">
-            UID {selectedUid} &middot;{" "}
-            {currentWeekOption?.label ?? `Week ${selectedWeek}`}
+            UID {selectedUid}
+            {yearStarted ? (
+              <>
+                {" "}
+                &middot; {currentWeekOption?.label ?? `Week ${selectedWeek}`}
+              </>
+            ) : null}
           </p>
         </div>
 
@@ -148,86 +163,96 @@ export function MenteeMonitoringClient({
             </SelectContent>
           </Select>
 
-          <div className="flex w-full items-center gap-1">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 shrink-0 cursor-pointer"
-              disabled={!canGoBack}
-              onClick={goBack}
-              aria-label="Previous week"
-            >
-              <ChevronLeft className="size-4" />
-            </Button>
-
-            <div className="min-w-0 flex-1">
-              <Select
-                value={String(selectedWeek)}
-                onValueChange={(v) => setSelectedWeek(Number(v))}
+          {yearStarted && (
+            <div className="flex w-full items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9 shrink-0 cursor-pointer"
+                disabled={!canGoBack}
+                onClick={goBack}
+                aria-label="Previous week"
               >
-                <SelectTrigger className="w-full min-w-0 cursor-pointer">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {weekOptions.map((w) => (
-                    <SelectItem key={w.weekNum} value={String(w.weekNum)}>
-                      {w.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <ChevronLeft className="size-4" />
+              </Button>
+
+              <div className="min-w-0 flex-1">
+                <Select
+                  value={String(selectedWeek)}
+                  onValueChange={(v) => setSelectedWeek(Number(v))}
+                >
+                  <SelectTrigger className="w-full min-w-0 cursor-pointer">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {weekOptions.map((w) => (
+                      <SelectItem key={w.weekNum} value={String(w.weekNum)}>
+                        {w.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9 shrink-0 cursor-pointer"
+                disabled={!canGoForward}
+                onClick={goForward}
+                aria-label="Next week"
+              >
+                <ChevronRight className="size-4" />
+              </Button>
             </div>
-
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 shrink-0 cursor-pointer"
-              disabled={!canGoForward}
-              onClick={goForward}
-              aria-label="Next week"
-            >
-              <ChevronRight className="size-4" />
-            </Button>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* ---- Alert Banner ---- */}
-      {showAlert && (
-        <div className="flex items-center justify-between gap-4 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="size-4 shrink-0 text-destructive" />
-            <p className="text-sm font-medium text-destructive">
-              WAHF form overdue &mdash; action required
-            </p>
+      {!yearStarted ? (
+        <YearNotStartedState variant="full" />
+      ) : (
+        <>
+          {/* ---- Alert Banner ---- */}
+          {showAlert && (
+            <div className="flex items-center justify-between gap-4 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="size-4 shrink-0 text-destructive" />
+                <p className="text-sm font-medium text-destructive">
+                  WAHF form overdue &mdash; action required
+                </p>
+              </div>
+              <span className="shrink-0 rounded-md bg-destructive/20 px-2.5 py-0.5 text-xs font-semibold text-destructive">
+                {wahfStatus.daysOverdue} days overdue
+              </span>
+            </div>
+          )}
+
+          {/* ---- Card Grid ---- */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <HoursCard
+              title="Study session hours"
+              completed={ssCompleted}
+              total={ssRequired}
+              color="emerald"
+              dailyHours={ssDailyHours}
+              todayLabel={todayLabel}
+            />
+            <HoursCard
+              title="Front desk hours"
+              completed={fdCompleted}
+              total={fdRequired}
+              color="sky"
+              dailyHours={fdDailyHours}
+              todayLabel={todayLabel}
+            />
+            <TutoringCard sessions={tutoringSessions} menteeName={name} />
+            {wahfStatus != null && (
+              <WahfCard menteeName={name} status={wahfStatus} />
+            )}
           </div>
-          <span className="shrink-0 rounded-md bg-destructive/20 px-2.5 py-0.5 text-xs font-semibold text-destructive">
-            {wahfStatus.daysOverdue} days overdue
-          </span>
-        </div>
+        </>
       )}
-
-      {/* ---- Card Grid ---- */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <HoursCard
-          title="Study session hours"
-          completed={ssCompleted}
-          total={ssRequired}
-          color="emerald"
-          dailyHours={ssDailyHours}
-          todayLabel={todayLabel}
-        />
-        <HoursCard
-          title="Front desk hours"
-          completed={fdCompleted}
-          total={fdRequired}
-          color="sky"
-          dailyHours={fdDailyHours}
-          todayLabel={todayLabel}
-        />
-        <TutoringCard sessions={tutoringSessions} menteeName={name} />
-        <WahfCard menteeName={name} status={wahfStatus} />
-      </div>
     </div>
   )
 }

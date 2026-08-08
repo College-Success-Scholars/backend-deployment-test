@@ -10,6 +10,10 @@ export type WeeklyMemoNavState = {
   prevWeek: number | null
   nextWeek: number | null
   currentCampusWeek: number | null
+  /** True after async content reports pre-Fall empty state (distinct from initial load). */
+  yearNotStarted: boolean
+  /** True once WeeklyMemoNavSync has run at least once. */
+  hydrated: boolean
 }
 
 const defaultState: WeeklyMemoNavState = {
@@ -20,6 +24,8 @@ const defaultState: WeeklyMemoNavState = {
   prevWeek: null,
   nextWeek: null,
   currentCampusWeek: null,
+  yearNotStarted: false,
+  hydrated: false,
 }
 
 const WeeklyMemoNavContext = createContext<WeeklyMemoNavState>(defaultState)
@@ -40,13 +46,14 @@ export function useWeeklyMemoNav() {
 }
 
 export type WeeklyMemoNavSyncProps = {
-  weekStartLabel: string
-  weekEndLabel: string
-  weekNumber: number
+  weekStartLabel: string | null
+  weekEndLabel: string | null
+  weekNumber: number | null
   availableWeeks: number[]
   prevWeek: number | null
   nextWeek: number | null
   currentCampusWeek: number | null
+  yearNotStarted?: boolean
 }
 
 export function WeeklyMemoNavSync({
@@ -57,6 +64,7 @@ export function WeeklyMemoNavSync({
   prevWeek,
   nextWeek,
   currentCampusWeek,
+  yearNotStarted = false,
 }: WeeklyMemoNavSyncProps) {
   const setState = useContext(WeeklyMemoNavSetterContext)
 
@@ -69,8 +77,20 @@ export function WeeklyMemoNavSync({
       prevWeek,
       nextWeek,
       currentCampusWeek,
+      yearNotStarted,
+      hydrated: true,
     })
-  }, [weekStartLabel, weekEndLabel, weekNumber, availableWeeks, prevWeek, nextWeek, currentCampusWeek, setState])
+  }, [
+    weekStartLabel,
+    weekEndLabel,
+    weekNumber,
+    availableWeeks,
+    prevWeek,
+    nextWeek,
+    currentCampusWeek,
+    yearNotStarted,
+    setState,
+  ])
 
   return null
 }

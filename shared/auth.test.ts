@@ -101,7 +101,7 @@ describe("mapTestProfileToEffectiveRow", () => {
       mentee_count: 0,
     };
     const effective = mapTestProfileToEffectiveRow(real, test);
-    expect(effective.student_id).toBe(12345);
+    expect(effective.student_id).toBe("12345");
     expect(effective.program_role).toBe("Scholar");
     expect(effective.app_role).toBeNull();
     expect(effective.id).toBe("dev-uuid");

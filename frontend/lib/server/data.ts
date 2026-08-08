@@ -313,7 +313,7 @@ export function scholarIdFromProfile(profile: { student_id?: unknown } | null): 
 export const scholarUidFromProfile = scholarIdFromProfile;
 
 export async function getRecentFormSubmissions(params: {
-  profile: { student_id?: number | null } | null;
+  profile: { student_id?: string | null } | null;
 }): Promise<RecentFormSubmission[]> {
   const scholarId = scholarIdFromProfile(params.profile);
   if (!scholarId) return [];

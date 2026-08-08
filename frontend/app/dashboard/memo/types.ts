@@ -45,7 +45,14 @@ export type MemoPieData = {
   }
 }
 
-export type MemoPageData = {
+/** Default memo view when `dateToCampusWeek(now)` is null (before Fall start). */
+export type MemoYearNotStartedData = {
+  yearNotStarted: true
+  currentCampusWeek: null
+}
+
+export type MemoLivePageData = {
+  yearNotStarted?: false
   scholars: MemoScholarRow[]
   teamLeaders: MemoTLRow[]
   pieData: MemoPieData
@@ -67,6 +74,14 @@ export type MemoPageData = {
   weekLabel: string
   currentCampusWeek: number | null
   selectedWeekNumber: number
+}
+
+export type MemoPageData = MemoYearNotStartedData | MemoLivePageData
+
+export function isMemoYearNotStarted(
+  data: MemoPageData,
+): data is MemoYearNotStartedData {
+  return "yearNotStarted" in data && data.yearNotStarted === true
 }
 
 export type FormStatus = "submitted" | "on-time" | "missing" | "late" | "check-mentees"
@@ -175,7 +190,7 @@ export type TutoringLogSectionData = {
   tabs: TutoringLogTab[]
 }
 
-export type WeeklyMemoViewData = MemoPageData & {
+export type WeeklyMemoViewData = MemoLivePageData & {
   weekStartLabel: string
   weekEndLabel: string
   weekNumber: number

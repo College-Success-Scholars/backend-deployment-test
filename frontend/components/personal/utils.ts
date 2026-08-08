@@ -1,14 +1,9 @@
 import {
-  getISOWeek,
-  startOfISOWeek,
-  endOfISOWeek,
   format,
-  parseISO,
-  eachDayOfInterval,
   differenceInMilliseconds,
   differenceInCalendarDays,
 } from "date-fns"
-import type { SemesterRow, WahfRow, McfRow, WplRow } from "@/lib/types/supabase"
+import type { WahfRow, McfRow, WplRow } from "@/lib/types/supabase"
 import {
   getWhafDeadlineForWeek,
   getMcfWplDeadlineForWeek,
@@ -16,10 +11,10 @@ import {
   isMcfLateForWeek,
   isWplLateForWeek,
 } from "@/lib/format/form-deadlines"
-import { getCampusWeekForIsoWeek } from "@/lib/format/time"
+import { campusWeekToDateRange, dateToCampusWeek } from "@/lib/format/time"
 
 // ---------------------------------------------------------------------------
-// Week options (adapted from mentee-monitoring/utils.ts for ISO weeks)
+// Week options (campus calendar — shared by Personal + Mentee)
 // ---------------------------------------------------------------------------
 
 export type WeekOption = {
@@ -28,33 +23,37 @@ export type WeekOption = {
   isCurrent: boolean
 }
 
+function formatCampusWeekLabel(
+  weekNum: number,
+  now: Date,
+): string | null {
+  const range = campusWeekToDateRange(weekNum)
+  if (!range) return null
+
+  const displayEnd = range.endDate > now ? now : range.endDate
+  const end = displayEnd < range.startDate ? range.endDate : displayEnd
+  return `${format(range.startDate, "MMM d")}\u2013${format(end, "MMM d")}`
+}
+
+/**
+ * Campus weeks from 1 through the current campus week (newest first).
+ * Empty when the collection year has not started (`currentCampusWeek` is null).
+ */
 export function computeWeekOptions(
-  semester: SemesterRow,
-  currentIsoWeek: number,
+  currentCampusWeek: number | null,
+  now: Date = new Date(),
 ): WeekOption[] {
-  const start = parseISO(semester.start_date)
-  const end = parseISO(semester.end_date)
-  const today = new Date()
-  const latestDate = end < today ? end : today
+  if (currentCampusWeek == null || currentCampusWeek < 1) return []
 
-  if (latestDate < start) return []
-
-  const seen = new Set<number>()
   const options: WeekOption[] = []
-  const days = eachDayOfInterval({ start, end: latestDate })
-
-  for (const day of days) {
-    const wk = getISOWeek(day)
-    if (seen.has(wk)) continue
-    seen.add(wk)
-
-    const wkStart = startOfISOWeek(day)
-    const wkEnd = endOfISOWeek(day)
-    const displayStart = wkStart < start ? start : wkStart
-    const displayEnd = wkEnd > latestDate ? latestDate : wkEnd
-    const label = `${format(displayStart, "MMM d")}\u2013${format(displayEnd, "d")}`
-
-    options.push({ weekNum: wk, label, isCurrent: wk === currentIsoWeek })
+  for (let wk = 1; wk <= currentCampusWeek; wk++) {
+    const label = formatCampusWeekLabel(wk, now)
+    if (!label) continue
+    options.push({
+      weekNum: wk,
+      label,
+      isCurrent: wk === currentCampusWeek,
+    })
   }
 
   return options.reverse()
@@ -78,18 +77,17 @@ export type FormStatusResult = {
   submission: WahfRow | McfRow | WplRow | null
 }
 
-export function findSubmissionForIsoWeek<T extends { created_at: string }>(
-  rows: T[],
-  isoWeekNum: number,
-): T | null {
-  return rows.find((r) => getISOWeek(new Date(r.created_at)) === isoWeekNum) ?? null
-}
-
-function findSubmissionForWeek<T extends { created_at: string }>(
+export function findSubmissionForCampusWeek<T extends { created_at: string }>(
   rows: T[],
   weekNum: number,
 ): T | null {
-  return findSubmissionForIsoWeek(rows, weekNum)
+  return (
+    rows.find((r) => {
+      const created = new Date(r.created_at)
+      if (Number.isNaN(created.getTime())) return false
+      return dateToCampusWeek(created) === weekNum
+    }) ?? null
+  )
 }
 
 export function getFormStatusForWeek(
@@ -97,29 +95,27 @@ export function getFormStatusForWeek(
   wahf: WahfRow[],
   mcf: McfRow[],
   wpl: WplRow[],
-  isoWeekNum: number,
-  currentIsoWeek: number,
+  weekNum: number,
+  currentCampusWeek: number | null,
 ): FormStatusResult {
   const now = new Date()
-  const campusWeek = getCampusWeekForIsoWeek(isoWeekNum, currentIsoWeek)
 
   let submission: WahfRow | McfRow | WplRow | null = null
   let isLate = false
 
   if (formType === "WAHF") {
-    submission = findSubmissionForWeek(wahf, isoWeekNum)
-    if (submission) isLate = campusWeek != null && isWhafLateForWeek(submission.created_at, campusWeek)
+    submission = findSubmissionForCampusWeek(wahf, weekNum)
+    if (submission) isLate = isWhafLateForWeek(submission.created_at, weekNum)
   } else if (formType === "MCF") {
-    submission = findSubmissionForWeek(mcf, isoWeekNum)
-    if (submission) isLate = campusWeek != null && isMcfLateForWeek(submission.created_at, campusWeek)
+    submission = findSubmissionForCampusWeek(mcf, weekNum)
+    if (submission) isLate = isMcfLateForWeek(submission.created_at, weekNum)
   } else {
-    submission = findSubmissionForWeek(wpl, isoWeekNum)
-    if (submission) isLate = campusWeek != null && isWplLateForWeek(submission.created_at, campusWeek)
+    submission = findSubmissionForCampusWeek(wpl, weekNum)
+    if (submission) isLate = isWplLateForWeek(submission.created_at, weekNum)
   }
 
-  const deadline = campusWeek != null
-    ? (formType === "WAHF" ? getWhafDeadlineForWeek(campusWeek) : getMcfWplDeadlineForWeek(campusWeek))
-    : null
+  const deadline =
+    formType === "WAHF" ? getWhafDeadlineForWeek(weekNum) : getMcfWplDeadlineForWeek(weekNum)
 
   let status: FormStatus
   let daysOverdue = 0
@@ -127,10 +123,10 @@ export function getFormStatusForWeek(
 
   if (submission) {
     status = "done"
-  } else if (isoWeekNum < currentIsoWeek) {
+  } else if (currentCampusWeek != null && weekNum < currentCampusWeek) {
     status = "missed"
     if (deadline) daysOverdue = Math.max(0, differenceInCalendarDays(now, deadline))
-  } else if (isoWeekNum === currentIsoWeek) {
+  } else if (currentCampusWeek != null && weekNum === currentCampusWeek) {
     if (deadline && now.getTime() > deadline.getTime()) {
       status = "overdue"
       daysOverdue = Math.max(0, differenceInCalendarDays(now, deadline))
@@ -180,16 +176,10 @@ export function getGreeting(): string {
 // Date formatting helpers
 // ---------------------------------------------------------------------------
 
-export function formatWeekDateRange(isoWeekNum: number): string {
-  const year = new Date().getFullYear()
-  const jan4 = new Date(year, 0, 4)
-  const refWeek = getISOWeek(jan4)
-  const diff = isoWeekNum - refWeek
-  const targetDate = new Date(jan4.getTime() + diff * 7 * 24 * 60 * 60 * 1000)
-
-  const wkStart = startOfISOWeek(targetDate)
-  const wkEnd = endOfISOWeek(targetDate)
-  return `${format(wkStart, "MMM d")}\u2013${format(wkEnd, "d")}`
+export function formatCampusWeekDateRange(weekNum: number): string {
+  const range = campusWeekToDateRange(weekNum)
+  if (!range) return `Week ${weekNum}`
+  return `${format(range.startDate, "MMM d")}\u2013${format(range.endDate, "MMM d")}`
 }
 
 export function formatSubmittedDay(createdAt: string): string {
@@ -198,26 +188,13 @@ export function formatSubmittedDay(createdAt: string): string {
 }
 
 /**
- * Calendar span for an ISO week, clamped to the active semester, with year
- * (e.g. "Mar 24–30, 2026"). Anchored from the current calendar week.
+ * Calendar span for a campus week with year (e.g. "Mar 24–30, 2026").
  */
-export function formatIsoWeekRangeWithYear(
-  semester: SemesterRow,
-  isoWeekNum: number,
-  currentIsoWeek: number,
-): string {
-  const semesterStart = parseISO(semester.start_date)
-  const semesterEnd = parseISO(semester.end_date)
-  const now = new Date()
-  const ref = startOfISOWeek(now)
-  const diff = isoWeekNum - currentIsoWeek
-  const targetDate = new Date(ref.getTime() + diff * 7 * 24 * 60 * 60 * 1000)
-  const wkStart = startOfISOWeek(targetDate)
-  const wkEnd = endOfISOWeek(targetDate)
+export function formatCampusWeekRangeWithYear(weekNum: number): string {
+  const range = campusWeekToDateRange(weekNum)
+  if (!range) return `Week ${weekNum}`
 
-  const displayStart = wkStart < semesterStart ? semesterStart : wkStart
-  const displayEnd = wkEnd > semesterEnd ? semesterEnd : wkEnd
-
+  const { startDate: displayStart, endDate: displayEnd } = range
   const yStart = displayStart.getFullYear()
   const yEnd = displayEnd.getFullYear()
   const mStart = displayStart.getMonth()

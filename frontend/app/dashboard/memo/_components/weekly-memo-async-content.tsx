@@ -6,9 +6,11 @@ import { TeamLeaderPerformanceTable } from "./team-leader-performance-table"
 import { TutoringLogSection } from "./tutoring-log-section"
 import { WeeklyKpiCards } from "./weekly-kpi-cards"
 import { WeeklyMemoNavSync } from "./weekly-memo-nav-context"
+import { YearNotStartedState } from "@/components/dashboard/widgets/year-not-started-state"
 import { backendMemoSource } from "../_lib/memo-source"
 import { assembleWeeklyMemo } from "../_lib/weekly-memo-assembler"
 import { computeWeekNavigation } from "../_lib/week-navigation"
+import { isMemoYearNotStarted } from "../types"
 
 type WeeklyMemoAsyncContentProps = {
   weekParam?: string
@@ -16,6 +18,25 @@ type WeeklyMemoAsyncContentProps = {
 
 export async function WeeklyMemoAsyncContent({ weekParam }: WeeklyMemoAsyncContentProps) {
   const memoData = await backendMemoSource.getWeeklyMemoPageData(weekParam)
+
+  if (isMemoYearNotStarted(memoData)) {
+    return (
+      <>
+        <WeeklyMemoNavSync
+          weekStartLabel={null}
+          weekEndLabel={null}
+          weekNumber={null}
+          availableWeeks={[]}
+          prevWeek={null}
+          nextWeek={null}
+          currentCampusWeek={null}
+          yearNotStarted
+        />
+        <YearNotStartedState variant="full" />
+      </>
+    )
+  }
+
   const data = assembleWeeklyMemo(memoData)
   const navigation = computeWeekNavigation({
     trafficWeeklyData: memoData.trafficWeeklyData,
@@ -33,6 +54,7 @@ export async function WeeklyMemoAsyncContent({ weekParam }: WeeklyMemoAsyncConte
         prevWeek={navigation.prevWeek}
         nextWeek={navigation.nextWeek}
         currentCampusWeek={memoData.currentCampusWeek}
+        yearNotStarted={false}
       />
       <WeeklyKpiCards cards={data.kpis} />
       <TeamLeaderPerformanceTable rows={data.teamLeaderRows} />

@@ -66,6 +66,10 @@ vi.mock("./form-submissions-section", () => ({
   FormSubmissionsSection: mockFormSubmissionsSection,
 }))
 
+vi.mock("@/components/dashboard/widgets/year-not-started-state", () => ({
+  YearNotStartedState: () => React.createElement("div", { "data-testid": "year-not-started" }),
+}))
+
 import { WeeklyMemoAsyncContent } from "./weekly-memo-async-content"
 
 const renderAsyncContent = async (props: { weekParam?: string } = {}) => {
@@ -201,6 +205,27 @@ describe("WeeklyMemoAsyncContent", () => {
         prevWeek: 4,
         nextWeek: 6,
         currentCampusWeek: 7,
+        yearNotStarted: false,
+      }),
+      undefined
+    )
+  })
+
+  it("renders year-not-started empty state when API reports pre-Fall", async () => {
+    mockGetWeeklyMemoPageData.mockResolvedValue({
+      yearNotStarted: true,
+      currentCampusWeek: null,
+    })
+
+    const markup = renderToStaticMarkup(await WeeklyMemoAsyncContent({}))
+
+    expect(markup).toContain("year-not-started")
+    expect(mockWeeklyKpiCards).not.toHaveBeenCalled()
+    expect(mockWeeklyMemoNavSync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        yearNotStarted: true,
+        currentCampusWeek: null,
+        availableWeeks: [],
       }),
       undefined
     )

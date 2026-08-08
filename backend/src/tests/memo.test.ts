@@ -1,6 +1,7 @@
 import request from "supertest";
 import { describe, it, expect } from "vitest";
 import { app } from "../app.js";
+import { resolveMemoDefaultWeek } from "../services/memo-default-week.js";
 
 describe("Memo routes — auth gating", () => {
   it("GET /api/memo/weekly returns 401 without token", async () => {
@@ -21,5 +22,15 @@ describe("Memo routes — auth gating", () => {
   it("GET /api/memo/traffic-count returns 401 without token", async () => {
     const res = await request(app).get("/api/memo/traffic-count");
     expect(res.status).toBe(401);
+  });
+});
+
+describe("resolveMemoDefaultWeek", () => {
+  it("returns year_not_started when current campus week is null", () => {
+    expect(resolveMemoDefaultWeek(null)).toEqual({ status: "year_not_started" });
+  });
+
+  it("returns the current week without falling back to 1", () => {
+    expect(resolveMemoDefaultWeek(6)).toEqual({ status: "ok", weekNumber: 6 });
   });
 });

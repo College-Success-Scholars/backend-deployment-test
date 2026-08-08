@@ -12,14 +12,13 @@
  * ## What does NOT belong here
  * - Functions, queries, or runtime logic
  *
- * TODO: A future column (e.g. `session_date`) will allow tutors to specify
- * when tutoring actually occurred, separate from `created_at` (form submission
- * time). Once added, day_of_week derivation in memo-page.service.ts should
- * use session_date instead of created_at.
+ * Prefer `date` (session calendar day) when present; week filtering in the UI
+ * may still use `start_time` until call sites are updated.
  */
 export interface TutorReportLogRow {
   id: number;
   created_at: string | null;
+  date: string | null;
   tutor_name: string;
   scholar_uid: string | null;
   end_time: string;

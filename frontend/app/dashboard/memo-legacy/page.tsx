@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import { canAccessWeeklyMemo } from "@/lib/auth"
 import { backendGet } from "@/lib/server/api-client"
 import { getCurrentProfile } from "@/lib/server/queries"
+import { YearNotStartedState } from "@/components/dashboard/widgets/year-not-started-state"
 import { FormSubmissionsSection } from "../memo/_components/form-submissions-section"
 import { FullAttendanceDetailSection } from "../memo/_components/full-attendance-detail-section"
 import { RecognitionBoardSection } from "../memo/_components/recognition-board-section"
@@ -12,7 +13,7 @@ import { WeeklyKpiCards } from "../memo/_components/weekly-kpi-cards"
 import { WeeklyMemoHeader } from "../memo/_components/weekly-memo-header"
 import { assembleWeeklyMemo } from "../memo/_lib/weekly-memo-assembler"
 import { computeWeekNavigation } from "../memo/_lib/week-navigation"
-import type { MemoPageData } from "../memo/types"
+import { isMemoYearNotStarted, type MemoPageData } from "../memo/types"
 
 export const dynamic = "force-dynamic"
 
@@ -31,6 +32,18 @@ export default async function DashboardMemoPage({ searchParams }: PageProps) {
 
   const query = weekParam ? `?weekNumber=${weekParam}` : ""
   const memoData = await backendGet<MemoPageData>(`/api/memo/page-data${query}`)
+
+  if (isMemoYearNotStarted(memoData)) {
+    return (
+      <main className="space-y-4 pb-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Weekly memo</h1>
+        </div>
+        <YearNotStartedState variant="full" />
+      </main>
+    )
+  }
+
   const data = assembleWeeklyMemo(memoData)
 
   const navigation = computeWeekNavigation({

@@ -10,6 +10,7 @@
  * ## Responsibilities
  * - campusWeekToDateRange(weekNum): week number → { startDate, endDate }
  * - dateToCampusWeek(date): date → week number
+ * - isCollectionYearStarted(now?): true iff dateToCampusWeek(now) != null
  * - getWeekFetchEnd(weekNum): get the fetch-end boundary date for a week
  * - formatEntryDate(iso, showTime?): format a timestamp for display
  * - formatDuration(ms): format milliseconds as "Xh Ym Zs"
@@ -106,6 +107,11 @@ export function dateToCampusWeek(date: Date): number | null {
   return campusCalendar.weekOf(date);
 }
 
+/** True once the Fall collection year has a campus week for `now` (not before Fall start). */
+export function isCollectionYearStarted(now: Date = new Date()): boolean {
+  return dateToCampusWeek(now) != null;
+}
+
 export function getWeekFetchEnd(range: { endDate: Date }): Date {
   return new Date(range.endDate.getTime() + ONE_DAY_MS - 1);
 }
@@ -173,25 +179,4 @@ export function formatMinutesToHoursAndMinutes(totalMinutes: number): string {
   const hours = Math.floor(mins / 60);
   const minutes = mins % 60;
   return `${hours}h\n${minutes}m`;
-}
-
-/** Monday 00:00:00 local time for the ISO week containing `date`. */
-function startOfISOWeek(date: Date): Date {
-  const d = new Date(date.getTime());
-  const day = d.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  d.setDate(d.getDate() + diff);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-export function getCampusWeekForIsoWeek(
-  isoWeek: number,
-  currentIsoWeek: number
-): number | null {
-  const now = new Date();
-  const ref = startOfISOWeek(now);
-  const diff = isoWeek - currentIsoWeek;
-  const targetDate = new Date(ref.getTime() + diff * 7 * ONE_DAY_MS);
-  return dateToCampusWeek(targetDate);
 }

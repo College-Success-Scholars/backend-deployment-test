@@ -7,9 +7,14 @@ export function formatDuration(minutes: number): string {
   return `${hrs} hr ${mins} min`
 }
 
-export function formatEstimatedExit(minutes: number): string {
+export function formatEstimatedExit(
+  minutes: number,
+  /** Wall clock to project from; pass a ticking value so kiosk UI stays current. */
+  now: Date | number = Date.now()
+): string {
   if (!minutes || minutes <= 0) return "--:-- --"
-  const estimated = new Date(Date.now() + minutes * 60 * 1000)
+  const baseMs = typeof now === "number" ? now : now.getTime()
+  const estimated = new Date(baseMs + minutes * 60 * 1000)
   return estimated.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",

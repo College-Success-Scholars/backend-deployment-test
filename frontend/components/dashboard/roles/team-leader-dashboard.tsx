@@ -13,9 +13,37 @@
  * - Scholar-only content (that's scholar-dashboard.tsx)
  * - Admin content (that's admin-dashboard.tsx)
  */
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { UserCheck } from "lucide-react"
+
+const overviewLinks = [
+  {
+    title: "Personal",
+    href: "/dashboard/personal",
+    description:
+      "Track your WPL, MCF, and WAHF submission status, plus view your activity log.",
+  },
+  {
+    title: "Mentees",
+    href: "/dashboard/mentee",
+    description:
+      "Monitor your mentees' study sessions, front desk hours, tutoring, and WAHF status.",
+  },
+  {
+    title: "Room Monitoring",
+    href: "/dashboard/room",
+    description:
+      "View real-time room occupancy and scholar presence for study sessions and front desk duty.",
+  },
+  {
+    title: "Weekly Memo",
+    href: "/dashboard/memo",
+    description:
+      "Review the weekly memo: scholar follow-up, team leader form compliance, and attendance.",
+  },
+] as const
 
 export function TeamLeaderDashboard() {
   return (
@@ -41,25 +69,17 @@ export function TeamLeaderDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="p-4 border rounded-lg">
-              <h3 className="font-medium mb-2">Personal</h3>
-              <p className="text-sm text-muted-foreground">
-                Track your WPL, MCF, and WAHF submission status, plus view your activity log.
-              </p>
-            </div>
-            <div className="p-4 border rounded-lg">
-              <h3 className="font-medium mb-2">Mentees</h3>
-              <p className="text-sm text-muted-foreground">
-                Monitor your mentees&apos; study sessions, front desk hours, tutoring, and WAHF status.
-              </p>
-            </div>
-            <div className="p-4 border rounded-lg">
-              <h3 className="font-medium mb-2">Room Monitoring</h3>
-              <p className="text-sm text-muted-foreground">
-                View real-time room occupancy and scholar presence for study sessions and front desk duty.
-              </p>
-            </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {overviewLinks.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="block rounded-lg border p-4 transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <h3 className="mb-2 font-medium">{item.title}</h3>
+                <p className="text-sm text-muted-foreground">{item.description}</p>
+              </Link>
+            ))}
           </div>
         </CardContent>
       </Card>

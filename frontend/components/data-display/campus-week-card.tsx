@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { YearNotStartedState } from "@/components/dashboard/widgets/year-not-started-state";
 
 const DESCRIPTION =
   "Campus week from lib/time. Links through current plus one.";
@@ -42,8 +43,11 @@ export function CampusWeekCard({
   selectedWeek,
 }: CampusWeekCardProps) {
   const currentCampusWeek = dateToCampusWeek(new Date());
-  const maxWeek = (currentCampusWeek ?? 1) + 1;
-  const weekNumbers = Array.from({ length: maxWeek }, (_, i) => i + 1);
+  const yearStarted = currentCampusWeek != null;
+  const maxWeek = yearStarted ? currentCampusWeek + 1 : 0;
+  const weekNumbers = yearStarted
+    ? Array.from({ length: maxWeek }, (_, i) => i + 1)
+    : [];
 
   return (
     <Card className="relative">
@@ -56,28 +60,32 @@ export function CampusWeekCard({
         <CardDescription>{DESCRIPTION}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div>
-          <p className="text-muted-foreground text-sm mb-2">Quick week links:</p>
-          <div className="flex flex-wrap gap-1">
-            {weekNumbers.map((w) => {
-              const href = buildWeekHref(basePath, w, additionalSearchParams);
-              const isSelected = selectedWeek != null && selectedWeek === w;
-              return (
-                <Link
-                  key={w}
-                  href={href}
-                  className={`inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-sm font-medium transition-colors ${
-                    isSelected
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
-                  }`}
-                >
-                  {w}
-                </Link>
-              );
-            })}
+        {!yearStarted ? (
+          <YearNotStartedState variant="compact" />
+        ) : (
+          <div>
+            <p className="text-muted-foreground text-sm mb-2">Quick week links:</p>
+            <div className="flex flex-wrap gap-1">
+              {weekNumbers.map((w) => {
+                const href = buildWeekHref(basePath, w, additionalSearchParams);
+                const isSelected = selectedWeek != null && selectedWeek === w;
+                return (
+                  <Link
+                    key={w}
+                    href={href}
+                    className={`inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-sm font-medium transition-colors ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                    }`}
+                  >
+                    {w}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

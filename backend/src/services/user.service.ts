@@ -23,7 +23,14 @@
  * - Authentication (that's auth.controller.ts)
  */
 import { getSupabaseClient } from "../supabase/client.js";
+import type { Database } from "../supabase/database.types.js";
 import type { MemoUserRow, TeamLeaderRow } from "../models/user.model.js";
+
+/** Writable profiles insert — excludes generated `full_name` and server `created_at`. */
+type ScholarProfileInsert = Omit<
+  Database["public"]["Tables"]["profiles"]["Insert"],
+  "full_name" | "created_at"
+>;
 
 function uniqueNonEmptyStrings(values: string[]): string[] {
   return [...new Set(values)].filter(Boolean);
@@ -146,7 +153,7 @@ export async function fetchTeamLeaders(): Promise<TeamLeaderRow[]> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
     .from("user_roster")
-    .select("uid, first_name, last_name, cohort, program_role, fd_required, ss_required, mentee_count")
+    .select("uid, first_name, last_name, cohort, program_role, fd_required, ss_required, mentee_count, mentee_uids")
     .or("program_role.neq.scholar,program_role.is.null");
   if (error) throw error;
   const rows = (data ?? []).map((r) => ({
@@ -158,6 +165,9 @@ export async function fetchTeamLeaders(): Promise<TeamLeaderRow[]> {
     fd_required: r.fd_required != null ? Number(r.fd_required) : null,
     ss_required: r.ss_required != null ? Number(r.ss_required) : null,
     mentee_count: r.mentee_count != null ? Number(r.mentee_count) : null,
+    mentee_uids: Array.isArray(r.mentee_uids)
+      ? r.mentee_uids.map((id) => String(id)).filter(Boolean)
+      : null,
   }));
   return rows.filter((r) => (r.program_role ?? "").toLowerCase() !== "scholar");
 }
@@ -183,7 +193,9 @@ export type CreateScholarProfileInput = {
 };
 
 /** Writable `public.profiles` columns on self-service scholar create (excludes `created_at`, `full_name`). */
-export function buildScholarProfileInsertRow(input: CreateScholarProfileInput) {
+export function buildScholarProfileInsertRow(
+  input: CreateScholarProfileInput,
+): ScholarProfileInsert {
   return {
     id: input.userId,
     first_name: input.first_name,
@@ -200,7 +212,7 @@ export function buildScholarProfileInsertRow(input: CreateScholarProfileInput) {
     mentee_count: 0,
     majors: [] as string[],
     minors: [] as string[],
-    teams: [] as string[]
+    teams: [] as string[],
   };
 }
 

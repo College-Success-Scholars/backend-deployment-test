@@ -24,22 +24,22 @@ Self-service scholars sign up with a UMD email, confirm via email link, complete
 | phone_number | no | |
 | cohort | yes | e.g. 2025 |
 
-Server sets: `program_role: "scholar"`, `app_role: null`, `emails: [auth email]`, `full_name` (from first + last name), and explicit defaults for all other profile columns (see below).
+Server sets: `program_role: "scholar"`, `app_role: null`, `emails: [auth email]`, and explicit defaults for writable profile columns (see below). `full_name` is **DB-generated** from first/last name — do not send it on insert.
 
 ### Profile columns set at create
 
 | Column | Source | Value |
 |--------|--------|-------|
 | `id` | auth user | `auth.users.id` |
-| `first_name`, `last_name`, `student_id`, `phone_number`, `cohort` | complete-profile form | user input |
-| `full_name` | server | `` `${first_name} ${last_name}` `` |
+| `first_name`, `last_name`, `student_id`, `phone_number`, `cohort` | complete-profile form | user input (`student_id` is Postgres `text`) |
 | `emails` | server | `[auth email]` |
-| `program_role` | server | `"scholar"` |
+| `program_role` | server | `"Scholar"` |
 | `app_role` | server | `null` |
 | `status` | server default | `null` |
 | `fd_required`, `ss_required` | server default | `null` |
 | `mentee_count` | server default | `0` |
-| `majors`, `minors`, `mentee_uids`, `teams` | server default | `[]` |
+| `majors`, `minors`, `teams` | server default | `[]` |
+| `full_name` | database | generated from first/last — omitted on insert |
 | `created_at` | database | `now()` (not sent on insert) |
 
 Implementation: `buildScholarProfileInsertRow()` in `backend/src/services/user.service.ts`.
@@ -56,10 +56,11 @@ These are **not** on the complete-profile form. They are initialized to safe sch
 | `majors` | `[]` | Add to complete-profile form, settings edit UI, or bulk roster import when academic data is collected. |
 | `minors` | `[]` | Same as `majors`. |
 | `teams` | `[]` | Assign via roster/admin when placing scholars on teams; team leaders often have non-empty `teams`. |
-| `mentee_uids` | `[]` | **Team leaders only** — populated when a TL is assigned mentees; scholars stay `[]`. |
-| `mentee_count` | `0` | **Team leaders only** — derived from mentee assignments; do not set on scholar self-signup. |
+| `mentee_count` | `0` | **Team leaders only** — derived from mentee assignments on `user_roster` / `mentor_mentee`; do not invent a `profiles.mentee_uids` column. |
 | `app_role` | `null` | Promote to `team_leader` or `developer` in `user_roster` / `profiles` (admin). Controls memo access and elevated routes. |
-| `program_role` | `"scholar"` | Change only if the user is not a scholar (e.g. roster pre-provision as `team_leader`); use invite/roster flows instead of self-signup. |
+| `program_role` | `"Scholar"` | Change only if the user is not a scholar (e.g. roster pre-provision as `team_leader`); use invite/roster flows instead of self-signup. |
+
+**Mentee assignments** live on `user_roster.mentee_uids` / `mentor_mentee`, not on `profiles`. Use `GET /api/auth/mentees` for lists.
 
 **Pre-provisioned users:** If a row already exists in `user_roster` for the scholar UID, `mergeProfileWithRoster` can backfill `fd_required`, `ss_required`, names, and `app_role` on read — but self-service create does not join roster automatically. Consider a post-create sync job or manual dev profile linking if roster data must match on day one.
 
