@@ -31,6 +31,7 @@ type ProfileRoleFields = {
 
 type MenteeProfileFields = {
   mentee_count?: number | null;
+  mentee_uids?: string[] | null;
   user_roster?: {
     mentee_count?: number | null;
     mentee_uids?: string[] | null;
@@ -44,7 +45,7 @@ export function hasAssignedMentees(profile: MenteeProfileFields | null | undefin
   const count = profile.mentee_count ?? profile.user_roster?.mentee_count ?? 0;
   if (count > 0) return true;
 
-  const uids = profile.user_roster?.mentee_uids ?? [];
+  const uids = profile.mentee_uids ?? profile.user_roster?.mentee_uids ?? [];
   return uids.length > 0;
 }
 

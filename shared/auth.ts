@@ -110,6 +110,9 @@ function rosterUidToStudentId(rosterUid: string): string {
 /**
  * Overlays a dev test profile onto the developer's real profile for effective identity.
  * Preserves the developer's auth id; student_id becomes roster_uid for data queries.
+ *
+ * Clears nested `user_roster` so persona gates (e.g. mentee nav) cannot read the
+ * developer's real mentee_count / mentee_uids via roster fallbacks.
  */
 export function mapTestProfileToEffectiveRow<T extends Record<string, unknown>>(
   realProfile: T,
@@ -129,6 +132,8 @@ export function mapTestProfileToEffectiveRow<T extends Record<string, unknown>>(
     mentee_uids: testProfile.mentee_uids ?? [],
     mentee_count: testProfile.mentee_count ?? 0,
     student_id: studentId,
+    // Drop the developer's joined roster — mentee/role fallbacks must use persona fields only.
+    user_roster: null,
     _devTestProfileLabel: testProfile.label,
   } as T;
 }

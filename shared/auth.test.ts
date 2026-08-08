@@ -106,6 +106,34 @@ describe("mapTestProfileToEffectiveRow", () => {
     expect(effective.app_role).toBeNull();
     expect(effective.id).toBe("dev-uuid");
   });
+
+  it("clears nested user_roster so developer mentees do not leak into the persona", () => {
+    const real = {
+      id: "dev-uuid",
+      student_id: "999",
+      app_role: "developer",
+      mentee_count: 3,
+      mentee_uids: ["dev-mentee-1"],
+      user_roster: {
+        mentee_count: 3,
+        mentee_uids: ["dev-mentee-1", "dev-mentee-2"],
+      },
+    };
+    const test = {
+      id: "test-profile-uuid",
+      label: "Team leader — no mentees",
+      roster_uid: "tl-no-mentees",
+      program_role: "team_leader",
+      app_role: "team_leader",
+      mentee_uids: [],
+      mentee_count: 0,
+    };
+    const effective = mapTestProfileToEffectiveRow(real, test);
+    expect(effective.user_roster).toBeNull();
+    expect(effective.mentee_count).toBe(0);
+    expect(effective.mentee_uids).toEqual([]);
+    expect(effective.app_role).toBe("team_leader");
+  });
 });
 
 describe("getEffectiveScholarId", () => {

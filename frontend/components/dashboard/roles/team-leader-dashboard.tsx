@@ -18,18 +18,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { UserCheck } from "lucide-react"
 
-const overviewLinks = [
+const baseOverviewLinks = [
   {
     title: "Personal",
     href: "/dashboard/personal",
     description:
       "Track your WPL, MCF, and WAHF submission status, plus view your activity log.",
-  },
-  {
-    title: "Mentees",
-    href: "/dashboard/mentee",
-    description:
-      "Monitor your mentees' study sessions, front desk hours, tutoring, and WAHF status.",
   },
   {
     title: "Room Monitoring",
@@ -45,7 +39,23 @@ const overviewLinks = [
   },
 ] as const
 
-export function TeamLeaderDashboard() {
+const menteesOverviewLink = {
+  title: "Mentees",
+  href: "/dashboard/mentee",
+  description:
+    "Monitor your mentees' study sessions, front desk hours, tutoring, and WAHF status.",
+} as const
+
+type TeamLeaderDashboardProps = {
+  /** When false, hide the Mentees quick link (same gate as sidebar / mentee page). */
+  showMentees?: boolean;
+};
+
+export function TeamLeaderDashboard({ showMentees = false }: TeamLeaderDashboardProps) {
+  const overviewLinks = showMentees
+    ? [baseOverviewLinks[0], menteesOverviewLink, ...baseOverviewLinks.slice(1)]
+    : [...baseOverviewLinks];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
