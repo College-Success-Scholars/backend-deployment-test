@@ -25,18 +25,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ExcuseDialog } from "@/components/attendance/excuse-dialog";
 
 type StudyRecordRow = StudySessionRecordRow & {
   scholar_name?: string | null;
@@ -290,106 +283,36 @@ function ExcuseModal({
   row: RecordRowWithProgress | null;
   onSuccess: () => void;
 }) {
-  const [excuse, setExcuse] = useState("");
-  const [excuseMin, setExcuseMin] = useState<string>("");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Reset form when modal opens with a row
-  useEffect(() => {
-    if (open && row) {
-      setExcuse(row.excuse ?? "");
-      setExcuseMin(row.excuse_min != null ? String(row.excuse_min) : "");
-      setError(null);
-    }
-  }, [open, row]);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!row || row.uid == null || row.week_num == null) return;
-    setSubmitting(true);
-    setError(null);
-    const weekNum = row.week_num;
-    const uid = row.uid;
-    const excuseMinNum = excuseMin.trim() === "" ? null : parseInt(excuseMin, 10);
-    const payload = {
-      uid,
-      weekNum,
-      excuse: excuse.trim() || null,
-      excuse_min: excuseMinNum != null && !Number.isNaN(excuseMinNum) ? excuseMinNum : null,
-    };
-    const route = row._tableType === "fd" ? "front-desk" : "study";
-    try {
-      const result = await backendPatch(`/api/session-records/${route}/excuse`, payload);
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
-      onSuccess();
-      onOpenChange(false);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Request failed");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  if (!row) return null;
+  if (!row || row.uid == null || row.week_num == null) return null;
 
   const tableLabel = row._tableType === "fd" ? "Front desk" : "Study session";
   const scholarLabel = row.scholar_name ?? `UID ${row.uid}`;
+  const weekNum = row.week_num;
+  const uid = row.uid;
+  const route = row._tableType === "fd" ? "front-desk" : "study";
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {row.excuse ? "Edit excuse" : "Add excuse"}
-          </DialogTitle>
-          <DialogDescription>
-            {tableLabel} · Week {row.week_num} · {scholarLabel}
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="excuse-modal-excuse">Excuse (reason)</Label>
-            <Input
-              id="excuse-modal-excuse"
-              value={excuse}
-              onChange={(e) => setExcuse(e.target.value)}
-              placeholder="e.g. Sick day, family event"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="excuse-modal-min">Minutes excused (optional)</Label>
-            <Input
-              id="excuse-modal-min"
-              type="number"
-              min={0}
-              value={excuseMin}
-              onChange={(e) => setExcuseMin(e.target.value)}
-              placeholder="e.g. 60"
-            />
-          </div>
-          {error && (
-            <p className="text-destructive text-sm">{error}</p>
-          )}
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={submitting}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Saving…" : "Save excuse"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <ExcuseDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      kindLabel={tableLabel}
+      scholarLabel={scholarLabel}
+      weekNum={weekNum}
+      initialDescription={row.excuse}
+      initialExcuseMin={row.excuse_min}
+      onSubmit={async (values) => {
+        const result = await backendPatch(`/api/session-records/${route}/excuse`, {
+          uid,
+          weekNum,
+          excuse: values.description,
+          excuse_min: values.excuse_min,
+        });
+        if (!result.ok) {
+          throw new Error(result.error);
+        }
+        onSuccess();
+      }}
+    />
   );
 }
 

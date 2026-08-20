@@ -230,6 +230,21 @@ const getRoleBasedNav = (role: UserRole, showMemo: boolean, showMentees: boolean
               },
             ]
           : []),
+        {
+          title: "Teams",
+          url: "/dashboard/teams/front-desk",
+          icon: Users,
+          items: [
+            {
+              title: "Front Desk",
+              url: "/dashboard/teams/front-desk",
+            },
+            {
+              title: "Study Sessions",
+              url: "/dashboard/teams/study",
+            },
+          ],
+        },
       ]
     
     case 'exec':

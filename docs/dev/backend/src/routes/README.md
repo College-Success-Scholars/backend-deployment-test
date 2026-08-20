@@ -28,6 +28,7 @@ Express Router definitions. Each route file declares HTTP method + path combinat
 | `traffic.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/traffic.routes.ts) | `/api/traffic` | `requireTeamLeaderOrAbove` |
 | `activity.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/activity.routes.ts) | `/api/daily-activity` | `requireAuth` |
 | `tutor-report-log.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/tutor-report-log.routes.ts) | `/api/tutor-reports` | `requireTeamLeaderOrAbove` |
+| `attendance.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/attendance.routes.ts) | `/api/attendance` | `requireTeamLeaderOrAbove` |
 | `dev.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/dev.routes.ts) | `/api/dev` | `requireDeveloper` |
 
 All routers are mounted in [`backend/src/app.ts`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/app.ts).

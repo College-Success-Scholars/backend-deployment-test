@@ -474,8 +474,9 @@ All routes under `/api/session-records` require **requireAuth**.
 
 ### `PATCH /api/session-records/front-desk/excuse`
 
-**Auth:** requireAuth
-**Description:** Updates the excuse text and/or excused minutes on a front desk record.
+**Auth:** requireAuth  
+**Status:** Legacy for product UI — prefer `PATCH /api/attendance/excuse` (writes `scholar_week_excuses`). Dev `/dev/session-records` may still use this until Stage 4.  
+**Description:** Updates the excuse text and/or excused minutes on a front desk record.  
 **Request Body:**
 ```json
 {
@@ -576,7 +577,8 @@ Returns `404` if no record exists for the UID/week combination.
 
 ### `PATCH /api/session-records/study/excuse`
 
-**Auth:** requireAuth
+**Auth:** requireAuth  
+**Status:** Legacy for product UI — prefer `PATCH /api/attendance/excuse`.  
 **Description:** Updates the excuse text and/or excused minutes on a study session record.
 **Request Body:**
 ```json
@@ -592,6 +594,76 @@ Returns `404` if no record exists for the UID/week combination.
 { "data": { /* updated record */ } }
 ```
 Returns `404` if no record exists for the UID/week combination.
+
+---
+
+## Attendance (campus week)
+
+All routes under `/api/attendance` require **requireTeamLeaderOrAbove**.  
+Minutes are computed on read from cleaned session tickets (campus week). Excuses live in `scholar_week_excuses`, keyed by `(scholar_uid, week_start, kind)` where `week_start` is the Eastern date of `campusWeekToDateRange(weekNum).startDate`. Callers still send `weekNum`; the server derives `week_start`. These endpoints do **not** write `*_records`.
+
+### `GET /api/attendance/week/:weekNum`
+
+**Auth:** requireTeamLeaderOrAbove  
+**Description:** Week board for eligible scholars (program role scholar with required hours for the kind). Includes Mon–Fri minutes, logged total, excuse, description, and completion %.  
+**Request Params:** `weekNum` (integer, >= 1)  
+**Query:** `kind` = `front_desk` | `study_session` (required)  
+**Response:**
+```json
+{
+  "data": {
+    "week_num": 1,
+    "week_start": "2026-08-31",
+    "kind": "front_desk",
+    "rows": [
+      {
+        "scholar_uid": "12345",
+        "scholar_name": "Ada Lovelace",
+        "week_num": 1,
+        "kind": "front_desk",
+        "mon_min": 30,
+        "tues_min": 0,
+        "wed_min": 45,
+        "thurs_min": 0,
+        "fri_min": 0,
+        "logged_min": 75,
+        "excuse_min": 15,
+        "description": "Doctor appointment",
+        "required_min": 120,
+        "effective_min": 90,
+        "completion_pct": 75
+      }
+    ],
+    "summary": {
+      "scholar_count": 1,
+      "at_or_above_90": 0,
+      "below_75": 0
+    }
+  }
+}
+```
+
+---
+
+### `PATCH /api/attendance/excuse`
+
+**Auth:** requireTeamLeaderOrAbove  
+**Description:** Upserts excuse minutes + description for a scholar/week/kind into `scholar_week_excuses`. `week_start` is derived from `weekNum` via the campus calendar (not client-supplied). Description is required when `excuse_min > 0`.  
+**Request Body:**
+```json
+{
+  "uid": "12345",
+  "weekNum": 1,
+  "kind": "front_desk",
+  "excuse_min": 60,
+  "description": "Sick day"
+}
+```
+(`scholar_uid` and `week_num` / `excuse` aliases are also accepted.)  
+**Response:**
+```json
+{ "data": { /* scholar_week_excuses row */ } }
+```
 
 ---
 
