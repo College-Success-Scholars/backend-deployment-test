@@ -359,6 +359,36 @@ export type Database = {
           },
         ]
       }
+      scholar_week_excuses: {
+        Row: {
+          description: string | null
+          excuse_min: number | null
+          kind: string
+          scholar_uid: string
+          updated_at: string
+          updated_by: string | null
+          week_num: number
+        }
+        Insert: {
+          description?: string | null
+          excuse_min?: number | null
+          kind: string
+          scholar_uid: string
+          updated_at?: string
+          updated_by?: string | null
+          week_num: number
+        }
+        Update: {
+          description?: string | null
+          excuse_min?: number | null
+          kind?: string
+          scholar_uid?: string
+          updated_at?: string
+          updated_by?: string | null
+          week_num?: number
+        }
+        Relationships: []
+      }
       scholar_weekly_stats: {
         Row: {
           fd_completion: number

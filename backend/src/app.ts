@@ -36,6 +36,7 @@ import trafficRoutes from "./routes/traffic.routes.js";
 import formLogRoutes from "./routes/form-log.routes.js";
 import activityRoutes from "./routes/activity.routes.js";
 import tutorReportRoutes from "./routes/tutor-report-log.routes.js";
+import attendanceRoutes from "./routes/attendance.routes.js";
 import { requestLogger } from "./middleware/request-logger.js";
 
 // CORS: accepts comma-separated origins via CORS_ORIGIN env var
@@ -66,6 +67,7 @@ app.use("/api/traffic", trafficRoutes);
 app.use("/api/form-logs", formLogRoutes);
 app.use("/api/daily-activity", activityRoutes);
 app.use("/api/tutor-reports", tutorReportRoutes);
+app.use("/api/attendance", attendanceRoutes);
 
 // Global error handler
 app.use(

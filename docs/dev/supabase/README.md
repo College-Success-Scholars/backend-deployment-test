@@ -38,7 +38,7 @@ Captured with `supabase db dump --linked --schema public` → [`supabase/migrati
 
 ### Inventory — tables in dump
 
-`am_pm_form_logs`, `daily_scholar_activity`, `dev_test_profiles`, `front_desk_logs`, `front_desk_records`, `mcf_form_logs`, `mentor_mentee`, `profiles`, `scholar_weekly_stats`, `semester_breaks`, `semesters`, `study_session_logs`, `study_session_records`, `traffic`, `traffic_weekly_summary`, `tutor_report_logs`, `user_roster`, `whaf_form_logs`, `wpl_form_logs`
+`am_pm_form_logs`, `daily_scholar_activity`, `dev_test_profiles`, `front_desk_logs`, `front_desk_records`, `mcf_form_logs`, `mentor_mentee`, `profiles`, `scholar_week_excuses`, `scholar_weekly_stats`, `semester_breaks`, `semesters`, `study_session_logs`, `study_session_records`, `traffic`, `traffic_weekly_summary`, `tutor_report_logs`, `user_roster`, `whaf_form_logs`, `wpl_form_logs`
 
 ### Form / log intake (Google Forms)
 
@@ -56,7 +56,7 @@ Likely intake targets from the baseline migration (`*_form_logs`, log tables wit
 | `front_desk_logs` | Front-desk check-in/out style logs (`submitted_by_email`) |
 | `study_session_logs` | Study-session check-in/out style logs (`submitted_by_email`) |
 
-**Not** Google Form intake (app- or DB-derived): `front_desk_records` / `study_session_records` (synced totals), `daily_scholar_activity` / `scholar_weekly_stats` (aggregates), `traffic` / `traffic_weekly_summary` (kiosk + analytics), `profiles` / `user_roster` / `mentor_mentee` / `dev_test_profiles` / semester tables.
+**Not** Google Form intake (app- or DB-derived): `front_desk_records` / `study_session_records` (synced totals), `scholar_week_excuses` (TL-entered excuses), `daily_scholar_activity` / `scholar_weekly_stats` (aggregates), `traffic` / `traffic_weekly_summary` (kiosk + analytics), `profiles` / `user_roster` / `mentor_mentee` / `dev_test_profiles` / semester tables.
 
 When debugging empty dashboards, check whether the linked project has recent rows in the form/log tables above before assuming a missing “populate data” feature.
 
