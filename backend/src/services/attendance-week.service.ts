@@ -12,14 +12,18 @@
  *
  * ## What belongs here
  * - Ticket → campus-week minute aggregation (via session-record pure helpers)
- * - scholar_week_excuses queries
+ * - scholar_week_excuses queries keyed by week_start
  *
  * ## What does NOT belong here
  * - HTTP request/response logic
  * - Session record sync / *_records upserts
  */
 import { getSupabaseClient } from "../supabase/client.js";
-import { campusWeekToDateRange, getWeekFetchEnd } from "./time.service.js";
+import {
+  campusWeekToDateRange,
+  getEasternDateParts,
+  getWeekFetchEnd,
+} from "./time.service.js";
 import {
   getFrontDeskCompletedSessions,
   getStudySessionCompletedSessions,
@@ -67,29 +71,53 @@ export function parseAttendanceKind(
   return isAttendanceKind(value) ? value : null;
 }
 
-async function fetchExcusesForWeek(
-  weekNum: number,
+/** Eastern YYYY-MM-DD of campusWeekToDateRange(weekNum).startDate. */
+export function campusWeekStartDate(weekNum: number): string | null {
+  const range = campusWeekToDateRange(weekNum);
+  if (!range) return null;
+  const { year, month, day } = getEasternDateParts(range.startDate);
+  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function mapExcuseRow(row: {
+  scholar_uid: string;
+  week_start: string;
+  week_num: number;
+  kind: string;
+  excuse_min: number | null;
+  description: string | null;
+  updated_by: string | null;
+  updated_at: string;
+}): ScholarWeekExcuseRow | null {
+  if (!isAttendanceKind(row.kind)) return null;
+  return {
+    scholar_uid: String(row.scholar_uid),
+    week_start: String(row.week_start),
+    week_num: Number(row.week_num),
+    kind: row.kind,
+    excuse_min: row.excuse_min != null ? Number(row.excuse_min) : null,
+    description: row.description ?? null,
+    updated_by: row.updated_by ?? null,
+    updated_at: row.updated_at,
+  };
+}
+
+async function fetchExcusesForWeekStart(
+  weekStart: string,
   kind: AttendanceKind
 ): Promise<Map<string, ScholarWeekExcuseRow>> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
     .from("scholar_week_excuses")
     .select("*")
-    .eq("week_num", weekNum)
+    .eq("week_start", weekStart)
     .eq("kind", kind);
   if (error) throw error;
   const map = new Map<string, ScholarWeekExcuseRow>();
   for (const row of data ?? []) {
-    if (!isAttendanceKind(row.kind)) continue;
-    map.set(String(row.scholar_uid), {
-      scholar_uid: String(row.scholar_uid),
-      week_num: Number(row.week_num),
-      kind: row.kind,
-      excuse_min: row.excuse_min != null ? Number(row.excuse_min) : null,
-      description: row.description ?? null,
-      updated_by: row.updated_by ?? null,
-      updated_at: row.updated_at,
-    });
+    const mapped = mapExcuseRow(row);
+    if (!mapped) continue;
+    map.set(mapped.scholar_uid, mapped);
   }
   return map;
 }
@@ -129,6 +157,8 @@ export async function getWeekBoard(
 ): Promise<AttendanceWeekBoard> {
   const range = campusWeekToDateRange(weekNum);
   if (!range) throw new Error(`Invalid week number: ${weekNum}`);
+  const weekStart = campusWeekStartDate(weekNum);
+  if (!weekStart) throw new Error(`Invalid week number: ${weekNum}`);
   const fetchEnd = getWeekFetchEnd(range);
 
   const getSessions =
@@ -142,7 +172,7 @@ export async function getWeekBoard(
       startDate: range.startDate,
       endDate: fetchEnd,
     }),
-    fetchExcusesForWeek(weekNum, kind),
+    fetchExcusesForWeekStart(weekStart, kind),
   ]);
 
   const eligible = filterEligibleForKind(users, kind);
@@ -195,6 +225,7 @@ export async function getWeekBoard(
 
   return {
     week_num: weekNum,
+    week_start: weekStart,
     kind,
     rows,
     summary: {
@@ -220,6 +251,8 @@ export async function upsertExcuse(
   if (!scholar_uid) throw new Error("Missing scholar_uid");
   if (!week_num || week_num < 1) throw new Error("Invalid week_num");
   if (!isAttendanceKind(kind)) throw new Error("Invalid kind");
+  const weekStart = campusWeekStartDate(week_num);
+  if (!weekStart) throw new Error("Invalid week_num");
   if (excuse_min != null && (Number.isNaN(excuse_min) || excuse_min < 0)) {
     throw new Error("excuse_min must be null or a non-negative number");
   }
@@ -234,6 +267,7 @@ export async function upsertExcuse(
   const supabase = getSupabaseClient();
   const row = {
     scholar_uid: String(scholar_uid),
+    week_start: weekStart,
     week_num,
     kind,
     excuse_min: excuse_min ?? null,
@@ -244,18 +278,12 @@ export async function upsertExcuse(
 
   const { data, error } = await supabase
     .from("scholar_week_excuses")
-    .upsert(row, { onConflict: "scholar_uid,week_num,kind" })
+    .upsert(row, { onConflict: "scholar_uid,week_start,kind" })
     .select()
     .single();
   if (error) throw error;
 
-  return {
-    scholar_uid: String(data.scholar_uid),
-    week_num: Number(data.week_num),
-    kind: data.kind as AttendanceKind,
-    excuse_min: data.excuse_min != null ? Number(data.excuse_min) : null,
-    description: data.description ?? null,
-    updated_by: data.updated_by ?? null,
-    updated_at: data.updated_at,
-  };
+  const mapped = mapExcuseRow(data);
+  if (!mapped) throw new Error("Invalid kind");
+  return mapped;
 }

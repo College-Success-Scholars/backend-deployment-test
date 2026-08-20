@@ -368,6 +368,7 @@ export type Database = {
           updated_at: string
           updated_by: string | null
           week_num: number
+          week_start: string
         }
         Insert: {
           description?: string | null
@@ -377,6 +378,7 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           week_num: number
+          week_start: string
         }
         Update: {
           description?: string | null
@@ -386,6 +388,7 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           week_num?: number
+          week_start?: string
         }
         Relationships: []
       }

@@ -32,6 +32,9 @@ describe("Database ↔ model alignment", () => {
     expectTypeOf<ScholarWeekExcuseRow["scholar_uid"]>().toEqualTypeOf<
       ScholarWeekExcuseDbRow["scholar_uid"]
     >();
+    expectTypeOf<ScholarWeekExcuseRow["week_start"]>().toEqualTypeOf<
+      ScholarWeekExcuseDbRow["week_start"]
+    >();
     expectTypeOf<ScholarWeekExcuseRow["week_num"]>().toEqualTypeOf<
       ScholarWeekExcuseDbRow["week_num"]
     >();

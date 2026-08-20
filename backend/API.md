@@ -600,7 +600,7 @@ Returns `404` if no record exists for the UID/week combination.
 ## Attendance (campus week)
 
 All routes under `/api/attendance` require **requireTeamLeaderOrAbove**.  
-Minutes are computed on read from cleaned session tickets (campus week). Excuses live in `scholar_week_excuses` — these endpoints do **not** write `*_records`.
+Minutes are computed on read from cleaned session tickets (campus week). Excuses live in `scholar_week_excuses`, keyed by `(scholar_uid, week_start, kind)` where `week_start` is the Eastern date of `campusWeekToDateRange(weekNum).startDate`. Callers still send `weekNum`; the server derives `week_start`. These endpoints do **not** write `*_records`.
 
 ### `GET /api/attendance/week/:weekNum`
 
@@ -613,6 +613,7 @@ Minutes are computed on read from cleaned session tickets (campus week). Excuses
 {
   "data": {
     "week_num": 1,
+    "week_start": "2026-08-31",
     "kind": "front_desk",
     "rows": [
       {
@@ -647,7 +648,7 @@ Minutes are computed on read from cleaned session tickets (campus week). Excuses
 ### `PATCH /api/attendance/excuse`
 
 **Auth:** requireTeamLeaderOrAbove  
-**Description:** Upserts excuse minutes + description for a scholar/week/kind into `scholar_week_excuses`. Description is required when `excuse_min > 0`.  
+**Description:** Upserts excuse minutes + description for a scholar/week/kind into `scholar_week_excuses`. `week_start` is derived from `weekNum` via the campus calendar (not client-supplied). Description is required when `excuse_min > 0`.  
 **Request Body:**
 ```json
 {

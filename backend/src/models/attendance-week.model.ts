@@ -18,6 +18,7 @@ export type AttendanceKind = "front_desk" | "study_session";
 
 export interface ScholarWeekExcuseRow {
   scholar_uid: string;
+  week_start: string;
   week_num: number;
   kind: AttendanceKind;
   excuse_min: number | null;
@@ -56,6 +57,7 @@ export interface AttendanceWeekBoardSummary {
 
 export interface AttendanceWeekBoard {
   week_num: number;
+  week_start: string;
   kind: AttendanceKind;
   rows: AttendanceWeekBoardRow[];
   summary: AttendanceWeekBoardSummary;

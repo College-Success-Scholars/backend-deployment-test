@@ -17,7 +17,7 @@ TypeScript type definitions and constants that describe the shape of domain / AP
 
 ## Modules
 
-One `*.model.ts` per domain (user, session-log, session-record, form-log, traffic, time, daily-scholar-activity, mentee, tutor-report-log). Source: [`backend/src/models/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/models). Symbol docs: [API Reference](../../../../reference/README.md).
+One `*.model.ts` per domain (user, session-log, session-record, attendance-week, form-log, traffic, time, daily-scholar-activity, mentee, tutor-report-log). Source: [`backend/src/models/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/models). Symbol docs: [API Reference](../../../../reference/README.md).
 
 ---
 

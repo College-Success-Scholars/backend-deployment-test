@@ -2,11 +2,16 @@ import { describe, it, expect } from "vitest";
 import request from "supertest";
 import { app } from "../app.js";
 import {
+  campusWeekStartDate,
   completionPct,
   effectiveMinutes,
   loggedMinutes,
   parseAttendanceKind,
 } from "../services/attendance-week.service.js";
+import {
+  campusWeekToDateRange,
+  getEasternDateParts,
+} from "../services/time.service.js";
 import { EMPTY_WEEKLY_MINUTES } from "../models/session-record.model.js";
 
 describe("Attendance week helpers", () => {
@@ -40,6 +45,16 @@ describe("Attendance week helpers", () => {
     expect(completionPct(0, 60)).toBe(0);
     expect(completionPct(60, null)).toBeNull();
     expect(completionPct(60, 0)).toBeNull();
+  });
+
+  it("campusWeekStartDate is the Eastern date of the campus week range start", () => {
+    expect(campusWeekStartDate(0)).toBeNull();
+    const weekOne = campusWeekToDateRange(1);
+    expect(weekOne).not.toBeNull();
+    const { year, month, day } = getEasternDateParts(weekOne!.startDate);
+    const expected = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    expect(campusWeekStartDate(1)).toBe(expected);
+    expect(campusWeekStartDate(2)).not.toBe(campusWeekStartDate(1));
   });
 });
 

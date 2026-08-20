@@ -3,7 +3,8 @@
  * @module backend/routes
  *
  * Express Router for /api/attendance/* endpoints.
- * Campus-week minutes from tickets + excuses from scholar_week_excuses.
+ * Campus-week minutes from tickets + excuses from scholar_week_excuses
+ * (keyed by scholar_uid, week_start, kind).
  * Requires team leader or above.
  */
 import { Router } from "express";

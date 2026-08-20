@@ -28,6 +28,7 @@ export interface AttendanceWeekBoardSummary {
 
 export interface AttendanceWeekBoard {
   week_num: number;
+  week_start: string;
   kind: AttendanceKind;
   rows: AttendanceWeekBoardRow[];
   summary: AttendanceWeekBoardSummary;
@@ -35,6 +36,7 @@ export interface AttendanceWeekBoard {
 
 export interface ScholarWeekExcuse {
   scholar_uid: string;
+  week_start: string;
   week_num: number;
   kind: AttendanceKind;
   excuse_min: number | null;

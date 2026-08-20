@@ -56,7 +56,7 @@ Likely intake targets from the baseline migration (`*_form_logs`, log tables wit
 | `front_desk_logs` | Front-desk check-in/out style logs (`submitted_by_email`) |
 | `study_session_logs` | Study-session check-in/out style logs (`submitted_by_email`) |
 
-**Not** Google Form intake (app- or DB-derived): `front_desk_records` / `study_session_records` (synced totals), `scholar_week_excuses` (TL-entered excuses), `daily_scholar_activity` / `scholar_weekly_stats` (aggregates), `traffic` / `traffic_weekly_summary` (kiosk + analytics), `profiles` / `user_roster` / `mentor_mentee` / `dev_test_profiles` / semester tables.
+**Not** Google Form intake (app- or DB-derived): `front_desk_records` / `study_session_records` (synced totals), `scholar_week_excuses` (TL-entered excuses, keyed by campus-week `week_start`), `daily_scholar_activity` / `scholar_weekly_stats` (aggregates), `traffic` / `traffic_weekly_summary` (kiosk + analytics), `profiles` / `user_roster` / `mentor_mentee` / `dev_test_profiles` / semester tables.
 
 When debugging empty dashboards, check whether the linked project has recent rows in the form/log tables above before assuming a missing “populate data” feature.
 
