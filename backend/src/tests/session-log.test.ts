@@ -8,8 +8,8 @@ describe("Session log routes — auth gating", () => {
     expect(res.status).toBe(401);
   });
 
-  it("GET /api/session-records returns 401 without token", async () => {
+  it("GET /api/session-records is gone (attendance is /api/attendance)", async () => {
     const res = await request(app).get("/api/session-records");
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(404);
   });
 });

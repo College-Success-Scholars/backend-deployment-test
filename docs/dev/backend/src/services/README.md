@@ -69,7 +69,6 @@ Generated from TypeScript signatures. Module indexes below; full catalog: [API R
 | `memo.service` | [API](../../../../reference/api/backend/src/services/memo.service/README.md) |
 | `mentee.service` | [API](../../../../reference/api/backend/src/services/mentee.service/README.md) |
 | `session-log.service` | [API](../../../../reference/api/backend/src/services/session-log.service/README.md) |
-| `session-record.service` | [API](../../../../reference/api/backend/src/services/session-record.service/README.md) |
 | `time.service` | [API](../../../../reference/api/backend/src/services/time.service/README.md) |
 | `traffic.service` | [API](../../../../reference/api/backend/src/services/traffic.service/README.md) |
 | `tutor-report-log.service` | [API](../../../../reference/api/backend/src/services/tutor-report-log.service/README.md) |

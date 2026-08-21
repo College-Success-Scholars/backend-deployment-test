@@ -14,7 +14,7 @@ Dashboard SQL Editor is **emergency / one-off ops only** — every lasting schem
 |----|--------|
 | Call Supabase from `backend/src/services/*` (`.from(…)`, `.rpc(…)`) | Deploy or invoke **Supabase Edge Functions** |
 | Keep business logic in the Express app | Put domain logic in Deno edge functions under `supabase/functions/` |
-| Read form/session log tables; sync derived records via services/RPCs | Rebuild Google Form → Postgres intake inside Next.js / Express |
+| Read form/session log tables; compute weekly minutes on read | Rebuild Google Form → Postgres intake inside Next.js / Express; sync `*_records` |
 
 Auth session management on the frontend still uses the Supabase JS client; that is not domain data access. PostgreSQL functions/triggers in migrations are fine — they are database objects, not Edge Functions.
 
@@ -38,7 +38,7 @@ Captured with `supabase db dump --linked --schema public` → [`supabase/migrati
 
 ### Inventory — tables in dump
 
-`am_pm_form_logs`, `daily_scholar_activity`, `dev_test_profiles`, `front_desk_logs`, `front_desk_records`, `mcf_form_logs`, `mentor_mentee`, `profiles`, `scholar_week_excuses`, `scholar_weekly_stats`, `semester_breaks`, `semesters`, `study_session_logs`, `study_session_records`, `traffic`, `traffic_weekly_summary`, `tutor_report_logs`, `user_roster`, `whaf_form_logs`, `wpl_form_logs`
+`am_pm_form_logs`, `daily_scholar_activity`, `dev_test_profiles`, `front_desk_logs`, `front_desk_records_legacy`, `mcf_form_logs`, `mentor_mentee`, `profiles`, `scholar_week_excuses`, `scholar_weekly_stats`, `semester_breaks`, `semesters`, `study_session_logs`, `study_session_records_legacy`, `traffic`, `traffic_weekly_summary`, `tutor_report_logs`, `user_roster`, `whaf_form_logs`, `wpl_form_logs`
 
 ### Form / log intake (Google Forms)
 
@@ -56,7 +56,7 @@ Likely intake targets from the baseline migration (`*_form_logs`, log tables wit
 | `front_desk_logs` | Front-desk check-in/out style logs (`submitted_by_email`) |
 | `study_session_logs` | Study-session check-in/out style logs (`submitted_by_email`) |
 
-**Not** Google Form intake (app- or DB-derived): `front_desk_records` / `study_session_records` (synced totals), `scholar_week_excuses` (TL-entered excuses, keyed by campus-week `week_start`), `daily_scholar_activity` / `scholar_weekly_stats` (aggregates), `traffic` / `traffic_weekly_summary` (kiosk + analytics), `profiles` / `user_roster` / `mentor_mentee` / `dev_test_profiles` / semester tables.
+**Not** Google Form intake (app- or DB-derived): `front_desk_records_legacy` / `study_session_records_legacy` (frozen snapshots — do not use), `scholar_week_excuses` (TL-entered excuses, keyed by campus-week `week_start`), `daily_scholar_activity` / `scholar_weekly_stats` (aggregates), `traffic` / `traffic_weekly_summary` (kiosk + analytics), `profiles` / `user_roster` / `mentor_mentee` / `dev_test_profiles` / semester tables.
 
 When debugging empty dashboards, check whether the linked project has recent rows in the form/log tables above before assuming a missing “populate data” feature.
 

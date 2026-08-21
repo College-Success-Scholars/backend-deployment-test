@@ -3,7 +3,7 @@
  * @module frontend/components/attendance
  *
  * Shared Add/Edit excuse dialog (description + minutes).
- * Callers own the save path (attendance API or legacy session-records).
+ * Callers own the save path (attendance API).
  */
 "use client";
 

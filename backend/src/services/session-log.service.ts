@@ -18,7 +18,7 @@
  * - Check-in/out pairing and cleaning logic
  *
  * ## What does NOT belong here
- * - Weekly record aggregation (that's session-record.service.ts)
+ * - Weekly minute aggregation (that's weekly-minutes.service / attendance-week.service)
  * - HTTP request/response logic
  */
 import { getSupabaseClient } from "../supabase/client.js";

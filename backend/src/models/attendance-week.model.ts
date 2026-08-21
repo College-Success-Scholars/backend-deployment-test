@@ -12,7 +12,9 @@
  * ## What does NOT belong here
  * - Queries or HTTP handlers
  */
-import type { WeeklyMinutesByDay } from "./session-record.model.js";
+import type { WeeklyMinutesByDay } from "./weekly-minutes.model.js";
+import type { MemoUserRow } from "./user.model.js";
+import type { ScholarWithCompletedSession } from "./session-log.model.js";
 
 export type AttendanceKind = "front_desk" | "study_session";
 
@@ -61,4 +63,23 @@ export interface AttendanceWeekBoard {
   kind: AttendanceKind;
   rows: AttendanceWeekBoardRow[];
   summary: AttendanceWeekBoardSummary;
+}
+
+/** Per-scholar logged minutes + excuse for one duty kind. */
+export interface CampusWeekAttendanceTotals {
+  minutes: WeeklyMinutesByDay;
+  loggedMin: number;
+  excuseMin: number;
+  description: string | null;
+}
+
+/** Shared compute-on-read payload for teams boards and Weekly Memo. */
+export interface CampusWeekAttendance {
+  week_num: number;
+  week_start: string;
+  users: MemoUserRow[];
+  fdByUid: Map<string, CampusWeekAttendanceTotals>;
+  ssByUid: Map<string, CampusWeekAttendanceTotals>;
+  fdSessions: ScholarWithCompletedSession[];
+  ssSessions: ScholarWithCompletedSession[];
 }

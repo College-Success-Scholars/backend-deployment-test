@@ -10,7 +10,6 @@ const AUTH_PROTECTED_ROUTES = [
   "/api/auth/profile",
   "/api/users",
   "/api/session-logs",
-  "/api/session-records",
   "/api/traffic",
   "/api/form-logs",
   "/api/daily-activity",

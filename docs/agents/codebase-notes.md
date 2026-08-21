@@ -24,7 +24,7 @@ Operational form and session-log rows (WAHF/WPL/MCF, tutoring, front desk, study
 Entry point: `backend/src/server.ts`.
 
 - Registers CORS (comma-separated `CORS_ORIGIN`, default `http://localhost:3002` — must match the frontend origin), JSON parsing, request logger, route groups, and a global error handler.
-- Routes are mounted under `/api/*` with domain-specific modules (`auth`, `users`, `session-logs`, `session-records`, `attendance`, `traffic`, `form-logs`, `daily-activity`, `memo`, `tutor-reports`, `dev`).
+- Routes are mounted under `/api/*` with domain-specific modules (`auth`, `users`, `session-logs`, `attendance`, `traffic`, `form-logs`, `daily-activity`, `memo`, `tutor-reports`, `dev`).
 
 Request flow pattern:
 
@@ -43,8 +43,8 @@ Auth and Supabase context:
 Important backend domains:
 
 - `session-log.*`: fetches and cleans raw check-in/out logs.
-- `session-record.*`: computes weekly minute totals, syncs records into `front_desk_records` / `study_session_records`, supports legacy excuse updates on those tables.
-- `attendance-week.*`: campus-week boards from tickets + excuses in `scholar_week_excuses` keyed by campus-week `week_start` (product path for FD/SS teams pages; does not write `*_records`).
+- `attendance-week.*`: campus-week boards and Memo minutes from cleaned tickets on read + excuses in `scholar_week_excuses` keyed by campus-week `week_start`. Frozen `*_records_legacy` tables are not used at runtime.
+- `weekly-minutes.*`: pure Mon–Fri rollup from paired tickets (`computeWeeklyMinutesByUid`).
 - `form-log.*`: MCF/WHAF/WPL and related aggregation endpoints.
 - `memo.*`: memo aggregation endpoints and sync/refresh operations.
 - `traffic.*`: weekly traffic counts and session entries.
@@ -62,17 +62,17 @@ Data access pattern:
 
 - `frontend/lib/server/data.ts` acts as a typed backend API client wrapper for many `/api/*` calls.
 - Frontend server/client features consume these wrappers instead of duplicating fetch logic.
-- Developer tools pages (`/dev/session-records`, `/dev/session-logs`, etc.) are present for operational/debug workflows.
+- Developer tools pages (`/dev/session-logs`, `/dev/session-records` retired notice, etc.) are present for operational/debug workflows.
 
 ## Typical end-to-end flow (example)
 
 For an authenticated session record request:
 
 1. User logs in through Supabase in frontend.
-2. Frontend sends JWT to backend endpoint (for example `/api/session-records/...`).
+2. Frontend sends JWT to backend endpoint (for example `/api/attendance/week/:weekNum`).
 3. Backend `requireAuth` verifies token and loads profile.
 4. Controller parses week/uid input.
-5. Service queries Supabase tables and optionally computes/updates derived records.
+5. Service queries Supabase tables and/or computes on-read aggregates.
 6. Backend returns normalized JSON response.
 
 ## Operational notes

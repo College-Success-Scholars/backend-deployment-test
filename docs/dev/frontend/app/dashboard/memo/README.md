@@ -11,7 +11,7 @@
 
 ## Purpose
 
-The weekly memo page — the most complex view in the application. It aggregates all scholar activity for a given campus week into a single report: KPI cards, attendance detail, form submission rates, scholar follow-up tables, recognition board, and team leader performance metrics.
+The weekly memo page — the most complex view in the application. It aggregates all scholar activity for a given campus week into a single report: KPI cards, attendance detail, form submission rates, scholar follow-up tables, recognition board, and team leader performance metrics. FD/SS completion uses compute-on-read minutes from tickets plus `scholar_week_excuses` (see [ADR 001](../../../../adr/001-attendance-compute-on-read.md)).
 
 ---
 

@@ -240,7 +240,7 @@ describe("WeeklyMemoAsyncContent", () => {
       expect.objectContaining({
         cards: expect.arrayContaining([
           expect.objectContaining({ title: "Visits this week", primaryValue: "100" }),
-          expect.objectContaining({ title: "Front desk completion", primaryValue: "67%" }),
+          expect.objectContaining({ title: "Front desk completion", primaryValue: "73%" }),
         ]),
       }),
       undefined

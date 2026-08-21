@@ -7,9 +7,7 @@
  * purposes. Accessible only to users with app_role = "developer".
  *
  * ## Responsibilities
- * - Provide diagnostic endpoints: test, me, raw session records, form log lookups
- * - Allow developers to trigger sync operations manually
- * - Return unfiltered data that standard endpoints might restrict
+ * - Provide diagnostic endpoints: test, me, form log lookups, test profiles
  *
  * ## What belongs here
  * - Handler functions for /api/dev/* routes
@@ -24,17 +22,6 @@ import type { AuthenticatedRequest } from "./auth.controller.js";
 import { isDeveloperProfile } from "../../../shared/dist/auth.js";
 import { listTestProfiles, getTestProfileById } from "../services/dev-profile.service.js";
 import { getMcfFormLogById, getWplFormLogById } from "../services/form-log.service.js";
-import {
-  getFrontDeskRecord,
-  getFrontDeskRecordsForWeek,
-  getStudySessionRecord,
-  getStudySessionRecordsForWeek,
-  syncFrontDeskRecordsForWeek,
-  syncFrontDeskRecordsForWeekAllUids,
-  syncStudySessionRecordsForWeek,
-  syncStudySessionRecordsForWeekAllUids,
-  updateRecordExcuse,
-} from "../services/session-record.service.js";
 
 // GET /api/dev/test
 export function test(req: AuthenticatedRequest, res: Response) {
@@ -111,160 +98,6 @@ export async function setActiveProfile(req: AuthenticatedRequest, res: Response)
     isActingAsTestProfile: testProfileId !== null,
     isDeveloper: isDeveloperProfile(req.realProfile),
   });
-}
-
-// ---------------------------------------------------------------------------
-// Front desk records
-// ---------------------------------------------------------------------------
-
-// GET /api/dev/session-records/front-desk?week=X&uid=Y
-export async function getFrontDesk(req: AuthenticatedRequest, res: Response) {
-  const week = req.query.week as string | undefined;
-  const uid = req.query.uid as string | undefined;
-  if (!week) { res.status(400).json({ error: "Missing week query parameter" }); return; }
-  const weekNum = parseInt(week, 10);
-  if (Number.isNaN(weekNum) || weekNum < 1) { res.status(400).json({ error: "Invalid week" }); return; }
-  try {
-    if (!uid || uid.trim() === "") {
-      const data = await getFrontDeskRecordsForWeek(weekNum);
-      res.json({ data }); return;
-    }
-    const uidNum = parseInt(uid, 10);
-    if (Number.isNaN(uidNum)) { res.status(400).json({ error: "Invalid uid" }); return; }
-    const data = await getFrontDeskRecord(uidNum, weekNum);
-    res.json({ data });
-  } catch (e) {
-    res.status(500).json({ error: e instanceof Error ? e.message : "Failed to fetch record" });
-  }
-}
-
-// POST /api/dev/session-records/front-desk/sync
-export async function syncFrontDesk(req: AuthenticatedRequest, res: Response) {
-  const { weekNum, uid } = req.body as { weekNum?: number; uid?: number };
-  if (typeof weekNum !== "number" || weekNum < 1) {
-    res.status(400).json({ error: "weekNum must be a number >= 1" }); return;
-  }
-  if (uid !== undefined && (typeof uid !== "number" || Number.isNaN(uid))) {
-    res.status(400).json({ error: "uid must be a number if provided" }); return;
-  }
-  try {
-    const result = await syncFrontDeskRecordsForWeek(weekNum, uid);
-    res.json({ data: result });
-  } catch (e) {
-    res.status(500).json({ error: e instanceof Error ? e.message : "Sync failed" });
-  }
-}
-
-// POST /api/dev/session-records/front-desk/sync-all
-export async function syncFrontDeskAll(req: AuthenticatedRequest, res: Response) {
-  const { weekNum } = req.body as { weekNum?: number };
-  if (typeof weekNum !== "number" || weekNum < 1) {
-    res.status(400).json({ error: "weekNum must be a number >= 1" }); return;
-  }
-  try {
-    const result = await syncFrontDeskRecordsForWeekAllUids(weekNum);
-    res.json({ data: result });
-  } catch (e) {
-    res.status(500).json({ error: e instanceof Error ? e.message : "Sync failed" });
-  }
-}
-
-// PATCH /api/dev/session-records/front-desk/excuse
-export async function excuseFrontDesk(req: AuthenticatedRequest, res: Response) {
-  const { uid, weekNum, excuse, excuse_min } = req.body as {
-    uid?: number; weekNum?: number; excuse?: string | null; excuse_min?: number | null;
-  };
-  if (uid == null || typeof uid !== "number" || weekNum == null || typeof weekNum !== "number") {
-    res.status(400).json({ error: "Body must include uid and weekNum (numbers)" }); return;
-  }
-  if (weekNum < 1) { res.status(400).json({ error: "Invalid weekNum" }); return; }
-  try {
-    const data = await updateRecordExcuse(uid, weekNum, "front_desk", {
-      excuse: excuse ?? null, excuse_min: excuse_min ?? null,
-    });
-    if (!data) { res.status(404).json({ error: "Record not found for this uid and week" }); return; }
-    res.json({ data });
-  } catch (e) {
-    console.error("[PATCH front-desk/excuse]", e);
-    res.status(500).json({ error: e instanceof Error ? e.message : "Failed to update excuse" });
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Study session records
-// ---------------------------------------------------------------------------
-
-// GET /api/dev/session-records/study?week=X&uid=Y
-export async function getStudy(req: AuthenticatedRequest, res: Response) {
-  const week = req.query.week as string | undefined;
-  const uid = req.query.uid as string | undefined;
-  if (!week) { res.status(400).json({ error: "Missing week query parameter" }); return; }
-  const weekNum = parseInt(week, 10);
-  if (Number.isNaN(weekNum) || weekNum < 1) { res.status(400).json({ error: "Invalid week" }); return; }
-  try {
-    if (!uid || uid.trim() === "") {
-      const data = await getStudySessionRecordsForWeek(weekNum);
-      res.json({ data }); return;
-    }
-    const uidNum = parseInt(uid, 10);
-    if (Number.isNaN(uidNum)) { res.status(400).json({ error: "Invalid uid" }); return; }
-    const data = await getStudySessionRecord(uidNum, weekNum);
-    res.json({ data });
-  } catch (e) {
-    res.status(500).json({ error: e instanceof Error ? e.message : "Failed to fetch record" });
-  }
-}
-
-// POST /api/dev/session-records/study/sync
-export async function syncStudy(req: AuthenticatedRequest, res: Response) {
-  const { weekNum, uid } = req.body as { weekNum?: number; uid?: number };
-  if (typeof weekNum !== "number" || weekNum < 1) {
-    res.status(400).json({ error: "weekNum must be a number >= 1" }); return;
-  }
-  if (uid !== undefined && (typeof uid !== "number" || Number.isNaN(uid))) {
-    res.status(400).json({ error: "uid must be a number if provided" }); return;
-  }
-  try {
-    const result = await syncStudySessionRecordsForWeek(weekNum, uid);
-    res.json({ data: result });
-  } catch (e) {
-    res.status(500).json({ error: e instanceof Error ? e.message : "Sync failed" });
-  }
-}
-
-// POST /api/dev/session-records/study/sync-all
-export async function syncStudyAll(req: AuthenticatedRequest, res: Response) {
-  const { weekNum } = req.body as { weekNum?: number };
-  if (typeof weekNum !== "number" || weekNum < 1) {
-    res.status(400).json({ error: "weekNum must be a number >= 1" }); return;
-  }
-  try {
-    const result = await syncStudySessionRecordsForWeekAllUids(weekNum);
-    res.json({ data: result });
-  } catch (e) {
-    res.status(500).json({ error: e instanceof Error ? e.message : "Sync failed" });
-  }
-}
-
-// PATCH /api/dev/session-records/study/excuse
-export async function excuseStudy(req: AuthenticatedRequest, res: Response) {
-  const { uid, weekNum, excuse, excuse_min } = req.body as {
-    uid?: number; weekNum?: number; excuse?: string | null; excuse_min?: number | null;
-  };
-  if (uid == null || typeof uid !== "number" || weekNum == null || typeof weekNum !== "number") {
-    res.status(400).json({ error: "Body must include uid and weekNum (numbers)" }); return;
-  }
-  if (weekNum < 1) { res.status(400).json({ error: "Invalid weekNum" }); return; }
-  try {
-    const data = await updateRecordExcuse(uid, weekNum, "study_session", {
-      excuse: excuse ?? null, excuse_min: excuse_min ?? null,
-    });
-    if (!data) { res.status(404).json({ error: "Record not found for this uid and week" }); return; }
-    res.json({ data });
-  } catch (e) {
-    console.error("[PATCH study/excuse]", e);
-    res.status(500).json({ error: e instanceof Error ? e.message : "Failed to update excuse" });
-  }
 }
 
 // ---------------------------------------------------------------------------

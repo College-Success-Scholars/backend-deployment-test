@@ -3,7 +3,7 @@
  * @module backend/services
  *
  * Campus-week attendance board: minutes from cleaned tickets (on read) +
- * excuses from scholar_week_excuses. Does not read or write *_records.
+ * excuses from scholar_week_excuses. Does not read or write frozen *_records_legacy.
  *
  * ## Responsibilities
  * - Build week boards for front_desk / study_session
@@ -11,12 +11,13 @@
  * - Completion helpers (effective = logged + excuse_min)
  *
  * ## What belongs here
- * - Ticket → campus-week minute aggregation (via session-record pure helpers)
+ * - Ticket → campus-week minute aggregation (via weekly-minutes helpers)
  * - scholar_week_excuses queries keyed by week_start
+ * - Shared getCampusWeekAttendance for Memo and teams boards
  *
  * ## What does NOT belong here
  * - HTTP request/response logic
- * - Session record sync / *_records upserts
+ * - Frozen *_records_legacy tables
  */
 import { getSupabaseClient } from "../supabase/client.js";
 import {
@@ -28,18 +29,16 @@ import {
   getFrontDeskCompletedSessions,
   getStudySessionCompletedSessions,
 } from "./session-log.service.js";
-import {
-  computeWeeklyMinutesByUid,
-} from "./session-record.service.js";
-import {
-  fetchAllUsersForMemo,
-} from "./user.service.js";
-import { EMPTY_WEEKLY_MINUTES } from "../models/session-record.model.js";
-import type { WeeklyMinutesByDay } from "../models/session-record.model.js";
+import { computeWeeklyMinutesByUid } from "./weekly-minutes.service.js";
+import { fetchAllUsersForMemo } from "./user.service.js";
+import { EMPTY_WEEKLY_MINUTES } from "../models/weekly-minutes.model.js";
+import type { WeeklyMinutesByDay } from "../models/weekly-minutes.model.js";
 import type {
   AttendanceKind,
   AttendanceWeekBoard,
   AttendanceWeekBoardRow,
+  CampusWeekAttendance,
+  CampusWeekAttendanceTotals,
   ScholarWeekExcuseRow,
   UpsertExcusePayload,
 } from "../models/attendance-week.model.js";
@@ -102,24 +101,101 @@ function mapExcuseRow(row: {
   };
 }
 
-async function fetchExcusesForWeekStart(
-  weekStart: string,
-  kind: AttendanceKind
-): Promise<Map<string, ScholarWeekExcuseRow>> {
+async function fetchExcusesForWeekStart(weekStart: string): Promise<{
+  front_desk: Map<string, ScholarWeekExcuseRow>;
+  study_session: Map<string, ScholarWeekExcuseRow>;
+}> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
     .from("scholar_week_excuses")
     .select("*")
-    .eq("week_start", weekStart)
-    .eq("kind", kind);
+    .eq("week_start", weekStart);
   if (error) throw error;
-  const map = new Map<string, ScholarWeekExcuseRow>();
+  const front_desk = new Map<string, ScholarWeekExcuseRow>();
+  const study_session = new Map<string, ScholarWeekExcuseRow>();
   for (const row of data ?? []) {
     const mapped = mapExcuseRow(row);
     if (!mapped) continue;
-    map.set(mapped.scholar_uid, mapped);
+    if (mapped.kind === "front_desk") front_desk.set(mapped.scholar_uid, mapped);
+    else study_session.set(mapped.scholar_uid, mapped);
+  }
+  return { front_desk, study_session };
+}
+
+const ZERO_TOTALS: CampusWeekAttendanceTotals = {
+  minutes: EMPTY_WEEKLY_MINUTES,
+  loggedMin: 0,
+  excuseMin: 0,
+  description: null,
+};
+
+function totalsForUid(
+  uid: string,
+  minutesByUid: Map<string, WeeklyMinutesByDay>,
+  excuses: Map<string, ScholarWeekExcuseRow>
+): CampusWeekAttendanceTotals {
+  const minutes = minutesByUid.get(uid) ?? EMPTY_WEEKLY_MINUTES;
+  const excuse = excuses.get(uid);
+  const excuseMin = excuse?.excuse_min != null ? Number(excuse.excuse_min) : 0;
+  return {
+    minutes,
+    loggedMin: loggedMinutes(minutes),
+    excuseMin,
+    description: excuse?.description ?? null,
+  };
+}
+
+function buildTotalsMap(
+  minutesByUid: Map<string, WeeklyMinutesByDay>,
+  excuses: Map<string, ScholarWeekExcuseRow>
+): Map<string, CampusWeekAttendanceTotals> {
+  const uids = new Set([...minutesByUid.keys(), ...excuses.keys()]);
+  const map = new Map<string, CampusWeekAttendanceTotals>();
+  for (const uid of uids) {
+    map.set(uid, totalsForUid(uid, minutesByUid, excuses));
   }
   return map;
+}
+
+/**
+ * Minutes from cleaned tickets + excuses for both duty kinds, one campus week.
+ * Callers look up missing UIDs as zeros (empty tickets / no excuse).
+ */
+export async function getCampusWeekAttendance(
+  weekNum: number
+): Promise<CampusWeekAttendance> {
+  const range = campusWeekToDateRange(weekNum);
+  if (!range) throw new Error(`Invalid week number: ${weekNum}`);
+  const weekStart = campusWeekStartDate(weekNum);
+  if (!weekStart) throw new Error(`Invalid week number: ${weekNum}`);
+  const fetchEnd = getWeekFetchEnd(range);
+  const weekRange = { startDate: range.startDate, endDate: range.endDate };
+
+  const [users, fdSessions, ssSessions, excuses] = await Promise.all([
+    fetchAllUsersForMemo(),
+    getFrontDeskCompletedSessions({
+      startDate: range.startDate,
+      endDate: fetchEnd,
+    }),
+    getStudySessionCompletedSessions({
+      startDate: range.startDate,
+      endDate: fetchEnd,
+    }),
+    fetchExcusesForWeekStart(weekStart),
+  ]);
+
+  const fdMinutes = computeWeeklyMinutesByUid(fdSessions, weekRange);
+  const ssMinutes = computeWeeklyMinutesByUid(ssSessions, weekRange);
+
+  return {
+    week_num: weekNum,
+    week_start: weekStart,
+    users,
+    fdByUid: buildTotalsMap(fdMinutes, excuses.front_desk),
+    ssByUid: buildTotalsMap(ssMinutes, excuses.study_session),
+    fdSessions,
+    ssSessions,
+  };
 }
 
 /**
@@ -155,52 +231,27 @@ export async function getWeekBoard(
   weekNum: number,
   kind: AttendanceKind
 ): Promise<AttendanceWeekBoard> {
-  const range = campusWeekToDateRange(weekNum);
-  if (!range) throw new Error(`Invalid week number: ${weekNum}`);
-  const weekStart = campusWeekStartDate(weekNum);
-  if (!weekStart) throw new Error(`Invalid week number: ${weekNum}`);
-  const fetchEnd = getWeekFetchEnd(range);
-
-  const getSessions =
-    kind === "front_desk"
-      ? getFrontDeskCompletedSessions
-      : getStudySessionCompletedSessions;
-
-  const [users, sessions, excuses] = await Promise.all([
-    fetchAllUsersForMemo(),
-    getSessions({
-      startDate: range.startDate,
-      endDate: fetchEnd,
-    }),
-    fetchExcusesForWeekStart(weekStart, kind),
-  ]);
-
-  const eligible = filterEligibleForKind(users, kind);
-  const minutesByUid = computeWeeklyMinutesByUid(sessions, {
-    startDate: range.startDate,
-    endDate: range.endDate,
-  });
+  const attendance = await getCampusWeekAttendance(weekNum);
+  const eligible = filterEligibleForKind(attendance.users, kind);
+  const byUid = kind === "front_desk" ? attendance.fdByUid : attendance.ssByUid;
 
   const rows: AttendanceWeekBoardRow[] = eligible.map((s) => {
-    const mins = minutesByUid.get(s.uid) ?? EMPTY_WEEKLY_MINUTES;
-    const logged = loggedMinutes(mins);
-    const excuse = excuses.get(s.uid);
-    const excuseMin = excuse?.excuse_min != null ? Number(excuse.excuse_min) : 0;
-    const effective = effectiveMinutes(logged, excuseMin);
+    const totals = byUid.get(s.uid) ?? ZERO_TOTALS;
+    const effective = effectiveMinutes(totals.loggedMin, totals.excuseMin);
     const pct = completionPct(effective, s.required);
     return {
       scholar_uid: s.uid,
       scholar_name: s.name,
       week_num: weekNum,
       kind,
-      mon_min: mins.mon_min,
-      tues_min: mins.tues_min,
-      wed_min: mins.wed_min,
-      thurs_min: mins.thurs_min,
-      fri_min: mins.fri_min,
-      logged_min: logged,
-      excuse_min: excuseMin,
-      description: excuse?.description ?? null,
+      mon_min: totals.minutes.mon_min,
+      tues_min: totals.minutes.tues_min,
+      wed_min: totals.minutes.wed_min,
+      thurs_min: totals.minutes.thurs_min,
+      fri_min: totals.minutes.fri_min,
+      logged_min: totals.loggedMin,
+      excuse_min: totals.excuseMin,
+      description: totals.description,
       required_min: s.required,
       effective_min: effective,
       completion_pct: pct,
@@ -225,7 +276,7 @@ export async function getWeekBoard(
 
   return {
     week_num: weekNum,
-    week_start: weekStart,
+    week_start: attendance.week_start,
     kind,
     rows,
     summary: {

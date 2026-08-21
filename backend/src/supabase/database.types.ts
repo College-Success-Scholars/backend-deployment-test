@@ -156,7 +156,7 @@ export type Database = {
         }
         Relationships: []
       }
-      front_desk_records: {
+      front_desk_records_legacy: {
         Row: {
           excuse: string | null
           excuse_min: number | null
@@ -552,7 +552,7 @@ export type Database = {
         }
         Relationships: []
       }
-      study_session_records: {
+      study_session_records_legacy: {
         Row: {
           excuse: string | null
           excuse_min: number | null

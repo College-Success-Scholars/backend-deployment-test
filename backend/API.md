@@ -387,220 +387,19 @@ All routes under `/api/session-logs` require **requireAuth**. All endpoints use 
 
 ---
 
-## Session Records
+## Session Records (retired)
 
-All routes under `/api/session-records` require **requireAuth**.
-
-### `GET /api/session-records/front-desk/by-uid/:uid`
-
-**Auth:** requireAuth
-**Description:** Returns all front desk records for a given scholar UID.
-**Request Params:** `uid` (string)
-**Response:**
-```json
-{ "data": [ /* front desk record rows */ ] }
-```
-
----
-
-### `GET /api/session-records/front-desk/week/:weekNum/all`
-
-**Auth:** requireAuth
-**Description:** Returns front desk records for all scholars for a specific week.
-**Request Params:** `weekNum` (integer, >= 1)
-**Response:**
-```json
-{ "data": [ /* front desk record rows */ ] }
-```
-
----
-
-### `GET /api/session-records/front-desk/week/:weekNum`
-
-**Auth:** requireAuth
-**Description:** Returns front desk records for the authenticated user's scholars for a specific week.
-**Request Params:** `weekNum` (integer, >= 1)
-**Response:**
-```json
-{ "data": [ /* front desk record rows */ ] }
-```
-
----
-
-### `GET /api/session-records/front-desk/:uid/week/:weekNum`
-
-**Auth:** requireAuth
-**Description:** Returns a single front desk record for a specific scholar UID and week number.
-**Request Params:** `uid` (integer), `weekNum` (integer, >= 1)
-**Response:**
-```json
-{ "data": { /* single front desk record */ } }
-```
-
----
-
-### `POST /api/session-records/front-desk/sync`
-
-**Auth:** requireAuth
-**Description:** Syncs (recalculates) front desk records for a given week, optionally for a single UID.
-**Request Body:**
-```json
-{
-  "weekNum": 1,       // required, integer >= 1
-  "uid": 12345        // optional, integer
-}
-```
-**Response:**
-```json
-{ "data": { /* sync result */ } }
-```
-
----
-
-### `POST /api/session-records/front-desk/sync-all`
-
-**Auth:** requireAuth
-**Description:** Syncs front desk records for all UIDs for a given week.
-**Request Body:**
-```json
-{ "weekNum": 1 }  // required, integer >= 1
-```
-**Response:**
-```json
-{ "data": { /* sync result */ } }
-```
-
----
-
-### `PATCH /api/session-records/front-desk/excuse`
-
-**Auth:** requireAuth  
-**Status:** Legacy for product UI — prefer `PATCH /api/attendance/excuse` (writes `scholar_week_excuses`). Dev `/dev/session-records` may still use this until Stage 4.  
-**Description:** Updates the excuse text and/or excused minutes on a front desk record.  
-**Request Body:**
-```json
-{
-  "uid": 12345,                  // required, integer
-  "weekNum": 1,                  // required, integer >= 1
-  "excuse": "string or null",    // optional
-  "excuse_min": 60               // optional, integer or null
-}
-```
-**Response:**
-```json
-{ "data": { /* updated record */ } }
-```
-Returns `404` if no record exists for the UID/week combination.
-
----
-
-### `GET /api/session-records/study/by-uid/:uid`
-
-**Auth:** requireAuth
-**Description:** Returns all study session records for a given scholar UID.
-**Request Params:** `uid` (string)
-**Response:**
-```json
-{ "data": [ /* study session record rows */ ] }
-```
-
----
-
-### `GET /api/session-records/study/week/:weekNum/all`
-
-**Auth:** requireAuth
-**Description:** Returns study session records for all scholars for a specific week.
-**Request Params:** `weekNum` (integer, >= 1)
-**Response:**
-```json
-{ "data": [ /* study session record rows */ ] }
-```
-
----
-
-### `GET /api/session-records/study/week/:weekNum`
-
-**Auth:** requireAuth
-**Description:** Returns study session records for a specific week.
-**Request Params:** `weekNum` (integer, >= 1)
-**Response:**
-```json
-{ "data": [ /* study session record rows */ ] }
-```
-
----
-
-### `GET /api/session-records/study/:uid/week/:weekNum`
-
-**Auth:** requireAuth
-**Description:** Returns a single study session record for a specific scholar UID and week.
-**Request Params:** `uid` (integer), `weekNum` (integer, >= 1)
-**Response:**
-```json
-{ "data": { /* single study session record */ } }
-```
-
----
-
-### `POST /api/session-records/study/sync`
-
-**Auth:** requireAuth
-**Description:** Syncs (recalculates) study session records for a given week, optionally for a single UID.
-**Request Body:**
-```json
-{
-  "weekNum": 1,       // required, integer >= 1
-  "uid": 12345        // optional, integer
-}
-```
-**Response:**
-```json
-{ "data": { /* sync result */ } }
-```
-
----
-
-### `POST /api/session-records/study/sync-all`
-
-**Auth:** requireAuth
-**Description:** Syncs study session records for all UIDs for a given week.
-**Request Body:**
-```json
-{ "weekNum": 1 }  // required, integer >= 1
-```
-**Response:**
-```json
-{ "data": { /* sync result */ } }
-```
-
----
-
-### `PATCH /api/session-records/study/excuse`
-
-**Auth:** requireAuth  
-**Status:** Legacy for product UI — prefer `PATCH /api/attendance/excuse`.  
-**Description:** Updates the excuse text and/or excused minutes on a study session record.
-**Request Body:**
-```json
-{
-  "uid": 12345,                  // required, integer
-  "weekNum": 1,                  // required, integer >= 1
-  "excuse": "string or null",    // optional
-  "excuse_min": 60               // optional, integer or null
-}
-```
-**Response:**
-```json
-{ "data": { /* updated record */ } }
-```
-Returns `404` if no record exists for the UID/week combination.
+`/api/session-records` has been removed. Weekly minutes are computed on read from
+cleaned tickets; excuses live in `scholar_week_excuses`. Use `/api/attendance`.
+The `front_desk_records` / `study_session_records` tables are frozen as
+`*_legacy` SQL snapshots (no app writes).
 
 ---
 
 ## Attendance (campus week)
 
 All routes under `/api/attendance` require **requireTeamLeaderOrAbove**.  
-Minutes are computed on read from cleaned session tickets (campus week). Excuses live in `scholar_week_excuses`, keyed by `(scholar_uid, week_start, kind)` where `week_start` is the Eastern date of `campusWeekToDateRange(weekNum).startDate`. Callers still send `weekNum`; the server derives `week_start`. These endpoints do **not** write `*_records`.
+Minutes are computed on read from cleaned session tickets (campus week). Excuses live in `scholar_week_excuses`, keyed by `(scholar_uid, week_start, kind)` where `week_start` is the Eastern date of `campusWeekToDateRange(weekNum).startDate`. Callers still send `weekNum`; the server derives `week_start`. These endpoints do **not** write frozen `*_records_legacy` tables.
 
 ### `GET /api/attendance/week/:weekNum`
 
@@ -1078,136 +877,6 @@ All routes under `/api/dev` require **requireDeveloper**.
 
 ---
 
-### `GET /api/dev/session-records/front-desk`
-
-**Auth:** requireDeveloper
-**Description:** Returns front desk records for a given week. Optionally filter by UID.
-**Query Params:**
-- `week` (integer >= 1, required) -- Week number
-- `uid` (integer, optional) -- Scholar UID; if omitted returns all records for the week
-
-**Response:**
-```json
-{ "data": { /* single record or array of records */ } }
-```
-
----
-
-### `POST /api/dev/session-records/front-desk/sync`
-
-**Auth:** requireDeveloper
-**Description:** Syncs front desk records for a given week, optionally for a single UID.
-**Request Body:**
-```json
-{ "weekNum": 1, "uid": 12345 }  // uid optional
-```
-**Response:**
-```json
-{ "data": { /* sync result */ } }
-```
-
----
-
-### `POST /api/dev/session-records/front-desk/sync-all`
-
-**Auth:** requireDeveloper
-**Description:** Syncs front desk records for all UIDs for a given week.
-**Request Body:**
-```json
-{ "weekNum": 1 }
-```
-**Response:**
-```json
-{ "data": { /* sync result */ } }
-```
-
----
-
-### `PATCH /api/dev/session-records/front-desk/excuse`
-
-**Auth:** requireDeveloper
-**Description:** Updates excuse on a front desk record.
-**Request Body:**
-```json
-{
-  "uid": 12345,
-  "weekNum": 1,
-  "excuse": "string or null",
-  "excuse_min": 60
-}
-```
-**Response:**
-```json
-{ "data": { /* updated record */ } }
-```
-
----
-
-### `GET /api/dev/session-records/study`
-
-**Auth:** requireDeveloper
-**Description:** Returns study session records for a given week. Optionally filter by UID.
-**Query Params:**
-- `week` (integer >= 1, required) -- Week number
-- `uid` (integer, optional) -- Scholar UID; if omitted returns all records for the week
-
-**Response:**
-```json
-{ "data": { /* single record or array of records */ } }
-```
-
----
-
-### `POST /api/dev/session-records/study/sync`
-
-**Auth:** requireDeveloper
-**Description:** Syncs study session records for a given week, optionally for a single UID.
-**Request Body:**
-```json
-{ "weekNum": 1, "uid": 12345 }  // uid optional
-```
-**Response:**
-```json
-{ "data": { /* sync result */ } }
-```
-
----
-
-### `POST /api/dev/session-records/study/sync-all`
-
-**Auth:** requireDeveloper
-**Description:** Syncs study session records for all UIDs for a given week.
-**Request Body:**
-```json
-{ "weekNum": 1 }
-```
-**Response:**
-```json
-{ "data": { /* sync result */ } }
-```
-
----
-
-### `PATCH /api/dev/session-records/study/excuse`
-
-**Auth:** requireDeveloper
-**Description:** Updates excuse on a study session record.
-**Request Body:**
-```json
-{
-  "uid": 12345,
-  "weekNum": 1,
-  "excuse": "string or null",
-  "excuse_min": 60
-}
-```
-**Response:**
-```json
-{ "data": { /* updated record */ } }
-```
-
----
-
 ### `GET /api/dev/form-logs/:formType/:formId`
 
 **Auth:** requireDeveloper
@@ -1260,7 +929,7 @@ Routes under `/api/memo` require **requireTeamLeaderOrAbove** unless noted other
 ### `GET /api/memo/page-data`
 
 **Auth:** requireTeamLeaderOrAbove
-**Description:** Returns all processed data needed to render the memo page for a given week (aggregated in one call).
+**Description:** Returns all processed data needed to render the memo page for a given week (aggregated in one call). FD/SS minutes are computed on read from cleaned tickets; excuses come from `scholar_week_excuses` (not `*_records`).
 **Query Params:**
 - `weekNumber` (integer >= 1; legacy `weekNum` accepted; defaults to current campus week if omitted)
 
@@ -1274,7 +943,7 @@ Routes under `/api/memo` require **requireTeamLeaderOrAbove** unless noted other
 ### `POST /api/memo/sync`
 
 **Auth:** requireTeamLeaderOrAbove
-**Description:** Triggers a memo sync for a given week. Mode controls depth of recalculation.
+**Description:** No-op. Session-record sync is retired; Memo attendance is computed on read. Still requires `weekNumber`/`weekNum` and `mode` (`light`|`heavy`) for compatibility.
 **Request Body:**
 ```json
 {

@@ -32,6 +32,18 @@ const columns: DataTableColumn<AttendanceDetailRow>[] = [
     sortable: true,
   },
   {
+    id: "excuse",
+    header: "Excuse minutes",
+    field: "excuseMinutes",
+    sortable: true,
+    renderCell: (row) =>
+      row.excuseMinutes > 0 ? (
+        <span className="tabular-nums">{row.excuseMinutes}</span>
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      ),
+  },
+  {
     id: "required",
     header: "Required minutes",
     field: "requiredMinutes",

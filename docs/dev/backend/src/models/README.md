@@ -17,7 +17,7 @@ TypeScript type definitions and constants that describe the shape of domain / AP
 
 ## Modules
 
-One `*.model.ts` per domain (user, session-log, session-record, attendance-week, form-log, traffic, time, daily-scholar-activity, mentee, tutor-report-log). Source: [`backend/src/models/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/models). Symbol docs: [API Reference](../../../../reference/README.md).
+One `*.model.ts` per domain (user, session-log, attendance-week, weekly-minutes, form-log, traffic, time, daily-scholar-activity, mentee, tutor-report-log). Source: [`backend/src/models/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/models). Symbol docs: [API Reference](../../../../reference/README.md).
 
 ---
 
@@ -43,7 +43,6 @@ Generated from TypeScript signatures. Module indexes below; full catalog: [API R
 | `form-log.model` | [API](../../../../reference/api/backend/src/models/form-log.model/README.md) |
 | `mentee.model` | [API](../../../../reference/api/backend/src/models/mentee.model/README.md) |
 | `session-log.model` | [API](../../../../reference/api/backend/src/models/session-log.model/README.md) |
-| `session-record.model` | [API](../../../../reference/api/backend/src/models/session-record.model/README.md) |
 | `time.model` | [API](../../../../reference/api/backend/src/models/time.model/README.md) |
 | `traffic.model` | [API](../../../../reference/api/backend/src/models/traffic.model/README.md) |
 | `tutor-report-log.model` | [API](../../../../reference/api/backend/src/models/tutor-report-log.model/README.md) |

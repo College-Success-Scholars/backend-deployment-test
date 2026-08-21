@@ -12,7 +12,7 @@ import {
   campusWeekToDateRange,
   getEasternDateParts,
 } from "../services/time.service.js";
-import { EMPTY_WEEKLY_MINUTES } from "../models/session-record.model.js";
+import { EMPTY_WEEKLY_MINUTES } from "../models/weekly-minutes.model.js";
 
 describe("Attendance week helpers", () => {
   it("parseAttendanceKind accepts only FD/SS kinds", () => {

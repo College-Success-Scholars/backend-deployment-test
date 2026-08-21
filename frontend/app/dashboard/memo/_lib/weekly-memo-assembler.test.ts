@@ -13,8 +13,8 @@ const buildMemoData = (): MemoLivePageData =>
         ssPct: 91,
         fdRequired: 120,
         ssRequired: 120,
-        fdTotal: 0,
-        ssTotal: 0,
+        fdTotal: 114,
+        ssTotal: 109,
         fdExcuseMin: 0,
         ssExcuseMin: 0,
       },
@@ -26,9 +26,9 @@ const buildMemoData = (): MemoLivePageData =>
         ssPct: 70,
         fdRequired: 120,
         ssRequired: 120,
-        fdTotal: 0,
-        ssTotal: 0,
-        fdExcuseMin: 0,
+        fdTotal: 30,
+        ssTotal: 84,
+        fdExcuseMin: 30,
         ssExcuseMin: 0,
       },
     ],
@@ -104,7 +104,7 @@ describe("weekly-memo-assembler", () => {
     expect(result.kpis).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ title: "Visits this week", primaryValue: "100" }),
-        expect.objectContaining({ title: "Front desk completion", primaryValue: "67%" }),
+        expect.objectContaining({ title: "Front desk completion", primaryValue: "73%" }),
       ])
     )
     expect(result.teamLeaderRows[0]).toMatchObject({
@@ -135,6 +135,29 @@ describe("weekly-memo-assembler", () => {
     expect(result.kpis).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ title: "Tutoring sessions held", secondaryText: "1 empty session" }),
+      ])
+    )
+  })
+
+  it("builds attendance tabs from scholar logged + excuse minutes, including zeros", () => {
+    const result = assembleWeeklyMemo(buildMemoData())
+    const fdTab = result.fullAttendanceDetail.tabs.find((tab) => tab.id === "front-desk")
+    expect(fdTab?.rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          scholarName: "Alice Scholar",
+          completedMinutes: 114,
+          excuseMinutes: 0,
+          requiredMinutes: 120,
+          completionPct: 95,
+        }),
+        expect.objectContaining({
+          scholarName: "Bob Scholar",
+          completedMinutes: 60,
+          excuseMinutes: 30,
+          requiredMinutes: 120,
+          completionPct: 50,
+        }),
       ])
     )
   })

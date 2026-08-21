@@ -17,7 +17,7 @@ Express request handlers. A controller receives a validated `AuthenticatedReques
 
 ## Modules
 
-One `*.controller.ts` per domain (auth, user, session-log, session-record, form-log, memo, traffic, activity, tutor-report-log, dev). Source: [`backend/src/controllers/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/controllers). Symbol docs: [API Reference](../../../../reference/README.md).
+One `*.controller.ts` per domain (auth, user, session-log, form-log, memo, traffic, activity, tutor-report-log, attendance-week, dev). Source: [`backend/src/controllers/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/controllers). Symbol docs: [API Reference](../../../../reference/README.md).
 
 ---
 
@@ -30,7 +30,7 @@ One `*.controller.ts` per domain (auth, user, session-log, session-record, form-
 - **Use `AuthenticatedRequest`** from `auth.controller.ts` instead of plain `Request` so TypeScript knows about `authUser`, `profile`, and `accessToken`.
 - **Auth middleware goes in the route file**, not the controller. Controllers assume auth has already been verified.
 - **No `next()` calls** — controllers are terminal handlers; they always send a response.
-- **Naming** — export functions as camelCase verbs: `getScholarNames`, `syncFrontDesk`, `updateExcuse`.
+- **Naming** — export functions as camelCase verbs: `getScholarNames`, `upsertExcuse`.
 
 <!-- AUTO-API-REFERENCE:START -->
 
@@ -46,7 +46,6 @@ Generated from TypeScript signatures. Module indexes below; full catalog: [API R
 | `form-log.controller` | [API](../../../../reference/api/backend/src/controllers/form-log.controller/README.md) |
 | `memo.controller` | [API](../../../../reference/api/backend/src/controllers/memo.controller/README.md) |
 | `session-log.controller` | [API](../../../../reference/api/backend/src/controllers/session-log.controller/README.md) |
-| `session-record.controller` | [API](../../../../reference/api/backend/src/controllers/session-record.controller/README.md) |
 | `traffic.controller` | [API](../../../../reference/api/backend/src/controllers/traffic.controller/README.md) |
 | `tutor-report-log.controller` | [API](../../../../reference/api/backend/src/controllers/tutor-report-log.controller/README.md) |
 | `user.controller` | [API](../../../../reference/api/backend/src/controllers/user.controller/README.md) |

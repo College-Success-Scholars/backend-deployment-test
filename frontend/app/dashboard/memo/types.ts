@@ -129,6 +129,7 @@ export type AttendanceDetailRow = {
   scholarName: string
   scholarYear: string
   completedMinutes: number
+  excuseMinutes: number
   requiredMinutes: number
   completionPct: number
 }

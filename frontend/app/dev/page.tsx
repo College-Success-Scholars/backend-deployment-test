@@ -48,7 +48,7 @@ export default function DevPage() {
           href="/dev/session-records"
           className="text-primary hover:underline text-sm font-medium"
         >
-          Session Records Test →
+          Session Records (retired) →
         </Link>
         <Link
           href="/dev/traffic"

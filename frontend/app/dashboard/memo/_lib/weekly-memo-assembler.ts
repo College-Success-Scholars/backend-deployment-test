@@ -1,4 +1,3 @@
-import type { ScholarWithCompletedSession } from "@/lib/types/session-log"
 import type { MemoTutorReportRow } from "@/lib/types/tutor-report-log"
 import type {
   FormStatus,
@@ -20,25 +19,6 @@ const formatWeekDateRange = (weekLabel: string) => {
     weekStartLabel: start || weekLabel,
     weekEndLabel: end || weekLabel,
   }
-}
-
-const aggregateSessionMinutes = (sessions: ScholarWithCompletedSession[]) => {
-  const byScholar = new Map<string, { scholarId: string; scholarName: string; totalMinutes: number }>()
-  for (const session of sessions) {
-    const scholarName = session.scholarName || "Unknown scholar"
-    const existing = byScholar.get(session.scholarId)
-    const minutes = Math.max(0, Math.round(session.durationMs / 60000))
-    if (existing) {
-      existing.totalMinutes += minutes
-    } else {
-      byScholar.set(session.scholarId, {
-        scholarId: session.scholarId,
-        scholarName,
-        totalMinutes: minutes,
-      })
-    }
-  }
-  return byScholar
 }
 
 const buildTeamLeaderRows = (data: MemoLivePageData): TeamLeaderPerformanceRow[] =>
@@ -88,25 +68,35 @@ export const assembleWeeklyMemo = (data: MemoLivePageData): WeeklyMemoViewData =
   const tutoringLog = buildTutoringLog(data.tutorReports)
   const emptySessionCount = tutoringLog.tabs.find((tab) => tab.id === "empty-sessions")?.rows.length ?? 0
 
-  const fdByScholar = aggregateSessionMinutes(data.completedFd)
-  const studyByScholar = aggregateSessionMinutes(data.completedStudy)
-
   const makeAttendanceRows = (
-    minuteMap: Map<string, { scholarId: string; scholarName: string; totalMinutes: number }>,
+    totalKey: "fdTotal" | "ssTotal",
+    excuseKey: "fdExcuseMin" | "ssExcuseMin",
     requiredKey: "fdRequired" | "ssRequired"
   ) =>
-    Array.from(minuteMap.values()).map((entry) => {
-      const scholar = data.scholars.find((s) => s.scholarId === entry.scholarId)
-      const requiredMinutes = scholar?.[requiredKey] ?? 0
-      const completionPct = requiredMinutes > 0 ? Math.round((entry.totalMinutes / requiredMinutes) * 100) : 0
-      return {
-        scholarName: entry.scholarName,
-        scholarYear: scholar?.cohort === 2025 ? "Freshman" : "Sophomore",
-        completedMinutes: entry.totalMinutes,
-        requiredMinutes,
-        completionPct: Math.max(0, Math.min(100, completionPct)),
-      }
-    })
+    data.scholars
+      .filter((scholar) => (scholar[requiredKey] ?? 0) > 0)
+      .map((scholar) => {
+        const logged = scholar[totalKey]
+        const excuseMinutes = scholar[excuseKey]
+        const requiredMinutes = scholar[requiredKey] ?? 0
+        const completedMinutes = logged + excuseMinutes
+        const completionPct =
+          requiredMinutes > 0 ? Math.round((completedMinutes / requiredMinutes) * 100) : 0
+        return {
+          scholarName: scholar.scholarName,
+          scholarYear: scholar.cohort === 2025 ? "Freshman" : "Sophomore",
+          completedMinutes,
+          excuseMinutes,
+          requiredMinutes,
+          completionPct: Math.max(0, Math.min(100, completionPct)),
+        }
+      })
+
+  const averageScholarPct = (key: "fdPct" | "ssPct") => {
+    const vals = data.scholars.map((row) => row[key]).filter((pct): pct is number => pct != null)
+    if (vals.length === 0) return 0
+    return Math.round(vals.reduce((acc, pct) => acc + pct, 0) / vals.length)
+  }
 
   return {
     ...data,
@@ -123,29 +113,15 @@ export const assembleWeeklyMemo = (data: MemoLivePageData): WeeklyMemoViewData =
       },
       {
         title: "Front desk completion",
-        primaryValue: `${Math.round(
-          (
-            (data.formCompletionOverall.wahfRequired > 0
-              ? (data.formCompletionOverall.wahfCompleted / data.formCompletionOverall.wahfRequired) * 100
-              : 0) +
-            (data.formCompletionOverall.wplRequired > 0
-              ? (data.formCompletionOverall.wplCompleted / data.formCompletionOverall.wplRequired) * 100
-              : 0) +
-            (data.formCompletionOverall.mcfRequired > 0
-              ? (data.formCompletionOverall.mcfCompleted / data.formCompletionOverall.mcfRequired) * 100
-              : 0)
-          ) / 3
-        )}%`,
-        secondaryText: `${data.completedFd.length} completed records`,
+        primaryValue: `${averageScholarPct("fdPct")}%`,
+        secondaryText: `${data.scholars.filter((row) => (row.fdRequired ?? 0) > 0).length} scholars`,
         trendText: "",
         subStats: [],
       },
       {
         title: "Study session completion",
-        primaryValue: `${Math.round(
-          data.scholars.reduce((acc, row) => acc + (row.ssPct ?? 0), 0) / Math.max(1, data.scholars.length)
-        )}%`,
-        secondaryText: `${data.completedStudy.length} completed records`,
+        primaryValue: `${averageScholarPct("ssPct")}%`,
+        secondaryText: `${data.scholars.filter((row) => (row.ssRequired ?? 0) > 0).length} scholars`,
         trendText: "",
         subStats: [],
       },
@@ -177,8 +153,8 @@ export const assembleWeeklyMemo = (data: MemoLivePageData): WeeklyMemoViewData =
     fullAttendanceDetail: {
       rightLabel: "Front desk · Study sessions",
       tabs: [
-        { id: "front-desk", label: "Front desk", rows: makeAttendanceRows(fdByScholar, "fdRequired") },
-        { id: "study-sessions", label: "Study sessions", rows: makeAttendanceRows(studyByScholar, "ssRequired") },
+        { id: "front-desk", label: "Front desk", rows: makeAttendanceRows("fdTotal", "fdExcuseMin", "fdRequired") },
+        { id: "study-sessions", label: "Study sessions", rows: makeAttendanceRows("ssTotal", "ssExcuseMin", "ssRequired") },
       ],
     },
     formSubmissions: {
