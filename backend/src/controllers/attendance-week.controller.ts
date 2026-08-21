@@ -49,9 +49,13 @@ export async function weekBoard(req: AuthenticatedRequest, res: Response) {
     const data = await getWeekBoard(weekNum, kind);
     res.json({ data });
   } catch (e) {
-    res.status(500).json({
-      error: e instanceof Error ? e.message : "Failed to fetch attendance week board",
-    });
+    const message =
+      e instanceof Error
+        ? e.message
+        : e && typeof e === "object" && "message" in e && typeof (e as { message: unknown }).message === "string"
+          ? (e as { message: string }).message
+          : "Failed to fetch attendance week board";
+    res.status(500).json({ error: message });
   }
 }
 
