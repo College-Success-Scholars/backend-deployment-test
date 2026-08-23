@@ -111,7 +111,7 @@ export function TeamLeaderPerformanceTable({ rows }: TeamLeaderPerformanceTableP
   return (
     <MemoAccordionSection
       title="Team leader performance"
-      description="WPL, MCF, and WAHF compliance for team leaders. Missing MCF is a TL issue, not scholar follow-up."
+      description="WPL, MCF, and WAHF compliance for team leaders."
       badgeText={`${followUpCount} need follow-up`}
       badgeVariant="warning"
       rightLabel="MCF · WPL · WAHF"
