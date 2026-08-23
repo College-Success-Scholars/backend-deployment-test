@@ -72,9 +72,35 @@ export function FullAttendanceDetailSection({ data }: FullAttendanceDetailSectio
 
   if (!selectedTab) return null
 
+  const { wahfCensus } = data
+
   return (
-    <MemoAccordionSection title="Full attendance detail" rightLabel={data.rightLabel}>
+    <MemoAccordionSection
+      title="Full attendance detail"
+      description="Hours for every scholar with required minutes, plus overall WAHF submission. Missing or late WAHF shows on scholar follow-up."
+      rightLabel={data.rightLabel}
+    >
       <div className="space-y-3 px-3 py-3">
+        <div className="rounded-md bg-muted/40 p-3">
+          <div className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">WAHF</div>
+          <p className="text-muted-foreground mt-1 text-xs">
+            Overall submission among scholars with required hours. WPL and MCF are on team leader performance.
+          </p>
+          <div className="mt-2 grid grid-cols-3 gap-2 text-sm">
+            <div>
+              <div className="text-muted-foreground text-xs">On time</div>
+              <div className="font-medium text-success tabular-nums">{wahfCensus.onTime}</div>
+            </div>
+            <div>
+              <div className="text-muted-foreground text-xs">Late</div>
+              <div className="font-medium text-warning-muted-foreground tabular-nums">{wahfCensus.late}</div>
+            </div>
+            <div>
+              <div className="text-muted-foreground text-xs">Missing</div>
+              <div className="font-medium text-destructive tabular-nums">{wahfCensus.missing}</div>
+            </div>
+          </div>
+        </div>
         <div className="flex items-center gap-1.5 rounded-md bg-muted/40 p-1">
           {data.tabs.map((tab) => (
             <button

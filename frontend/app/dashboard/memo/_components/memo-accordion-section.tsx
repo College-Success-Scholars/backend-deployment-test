@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 
 type MemoAccordionSectionProps = {
   title: string
+  description?: string
   badgeText?: ReactNode
   badgeClassName?: string
   /** Prefer semantic Badge variants for soft chips (success|warning|info). */
@@ -19,6 +20,7 @@ type MemoAccordionSectionProps = {
 
 export function MemoAccordionSection({
   title,
+  description,
   badgeText,
   badgeClassName,
   badgeVariant,
@@ -31,19 +33,24 @@ export function MemoAccordionSection({
       <Collapsible defaultOpen={defaultOpen}>
         <CollapsibleTrigger className="group w-full cursor-pointer px-4 py-3 text-left">
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-base font-semibold">{title}</CardTitle>
-              {badgeText ? (
-                typeof badgeText === "string" ? (
-                  <Badge variant={badgeVariant} className={badgeClassName}>
-                    {badgeText}
-                  </Badge>
-                ) : (
-                  badgeText
-                )
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base font-semibold">{title}</CardTitle>
+                {badgeText ? (
+                  typeof badgeText === "string" ? (
+                    <Badge variant={badgeVariant} className={badgeClassName}>
+                      {badgeText}
+                    </Badge>
+                  ) : (
+                    badgeText
+                  )
+                ) : null}
+              </div>
+              {description ? (
+                <p className="text-muted-foreground mt-1 text-xs leading-snug">{description}</p>
               ) : null}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
               {rightLabel ? <span className="text-muted-foreground text-xs">{rightLabel}</span> : null}
               <ChevronDown className="text-muted-foreground size-4 transition-transform group-data-[state=open]:rotate-180" />
             </div>

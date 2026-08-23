@@ -36,7 +36,41 @@ import {
   buildTeamLeaderFormStatsForWeek,
 } from "./form-log.service.js";
 import { getTutorReportLogsForWeek } from "./tutor-report-log.service.js";
+import type { FormLogRowWithLate, WahfFormLogRow } from "../models/form-log.model.js";
 import type { MemoUserRow } from "../models/user.model.js";
+
+export type ScholarWahfStatus = "on-time" | "late" | "missing";
+
+/** Latest weekly WAHF form-log row for a scholar, or null if none. */
+export function latestScholarWahf(
+  scholarId: string,
+  wahfRows: FormLogRowWithLate<WahfFormLogRow>[]
+): FormLogRowWithLate<WahfFormLogRow> | null {
+  const mine = wahfRows.filter((row) => row.scholar_uid === scholarId);
+  if (mine.length === 0) return null;
+  return mine.reduce((best, row) =>
+    (row.created_at ?? "") > (best.created_at ?? "") ? row : best
+  );
+}
+
+/** Latest WAHF for a scholar this week: missing, on-time, or late. */
+export function scholarWahfStatus(
+  scholarId: string,
+  wahfRows: FormLogRowWithLate<WahfFormLogRow>[]
+): ScholarWahfStatus {
+  const latest = latestScholarWahf(scholarId, wahfRows);
+  if (!latest) return "missing";
+  return latest.isLate ? "late" : "on-time";
+}
+
+/** `created_at` of the latest weekly WAHF log for that scholar, or null if none. */
+export function scholarWahfSubmittedAt(
+  scholarId: string,
+  wahfRows: FormLogRowWithLate<WahfFormLogRow>[]
+): string | null {
+  const createdAt = latestScholarWahf(scholarId, wahfRows)?.created_at;
+  return createdAt ? createdAt : null;
+}
 
 function isScholar(role: string | null): boolean {
   return (role ?? "").toLowerCase() === "scholar";
@@ -69,6 +103,8 @@ export type MemoScholarAttendanceRow = {
   ssExcuseMin: number;
   fdPct: number | null;
   ssPct: number | null;
+  wahfStatus: ScholarWahfStatus;
+  wahfSubmittedAt: string | null;
 };
 
 /**
@@ -78,7 +114,8 @@ export type MemoScholarAttendanceRow = {
 export function buildMemoScholarAttendanceRows(
   users: MemoUserRow[],
   fdByUid: Map<string, CampusWeekAttendanceTotals>,
-  ssByUid: Map<string, CampusWeekAttendanceTotals>
+  ssByUid: Map<string, CampusWeekAttendanceTotals>,
+  wahfRows: FormLogRowWithLate<WahfFormLogRow>[] = []
 ): {
   scholars: MemoScholarAttendanceRow[];
   cohort2024: { total: number; fdCompleteCount: number; ssCompleteCount: number };
@@ -112,6 +149,8 @@ export function buildMemoScholarAttendanceRows(
       ssExcuseMin: study.excuseMin,
       fdPct: fd_pct,
       ssPct: ss_pct,
+      wahfStatus: scholarWahfStatus(u.uid, wahfRows),
+      wahfSubmittedAt: scholarWahfSubmittedAt(u.uid, wahfRows),
     });
 
     const fdComplete = fd_pct != null && fd_pct >= 100;
@@ -146,7 +185,8 @@ export function buildMemoScholarAttendanceRows(
  * 5. Build team leader form stats (MCF/WHAF/WPL completion per TL).
  * 6. Aggregate form completion totals across all team leaders.
  * 7. Build scholar rows: merge FD/SS compute-on-read minutes + excuses with
- *    roster requirements, compute completion percentages, and track cohort-level
+ *    roster requirements, compute completion percentages, attach WAHF status
+ *    and latest form-log submitted-at from form logs, and track cohort-level
  *    stats for pie charts (2024 vs 2025).
  * 8. Build team leader MCF rows: per-TL MCF count, late flag, latest date.
  * 9. Resolve tutor report scholar names and derive day-of-week.
@@ -257,7 +297,8 @@ export async function getMemoPageData(weekNum: number) {
   const { scholars, cohort2024, cohort2025 } = buildMemoScholarAttendanceRows(
     allUsers,
     attendance.fdByUid,
-    attendance.ssByUid
+    attendance.ssByUid,
+    whafRowsWithLate
   );
 
   const pieData = {

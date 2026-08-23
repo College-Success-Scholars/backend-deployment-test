@@ -1,6 +1,7 @@
 import type {
   FormStatus,
   MemoLivePageData,
+  ScholarFollowUpIssue,
   ScholarFollowUpRow,
   TeamLeaderPerformanceRow,
   WeeklyMemoViewData,
@@ -36,12 +37,49 @@ const sortTeamLeaders = (rows: TeamLeaderPerformanceRow[]) => {
 
 const scholarCombinedCompletion = (row: ScholarFollowUpRow) => (row.frontDeskPct + row.studySessionPct) / 2
 
+const LOW_COMPLETION_THRESHOLD = 75
+
+const mockFollowUpIssues = (row: Omit<ScholarFollowUpRow, "issues">): ScholarFollowUpIssue[] => {
+  const issues: ScholarFollowUpIssue[] = []
+  if (row.frontDeskPct < LOW_COMPLETION_THRESHOLD) {
+    issues.push({
+      kind: "front-desk",
+      glance: "Front desk",
+      pct: row.frontDeskPct,
+      requiredMinutes: row.fdRequired,
+    })
+  }
+  if (row.studySessionPct < LOW_COMPLETION_THRESHOLD) {
+    issues.push({
+      kind: "study-session",
+      glance: "Study session",
+      pct: row.studySessionPct,
+      requiredMinutes: row.ssRequired,
+    })
+  }
+  if (row.flags.some((flag) => /grade/i.test(flag))) {
+    issues.push({ kind: "grade", glance: "CMSC131 · Midterm", pct: 58 })
+  }
+  if (row.flags.includes("Missing WAHF")) {
+    issues.push({ kind: "wahf", glance: "WAHF", status: "missing", submittedAtLabel: null })
+  }
+  if (row.flags.includes("Late WAHF")) {
+    issues.push({ kind: "wahf", glance: "WAHF", status: "late", submittedAtLabel: "Apr 4, 8:00 AM" })
+  }
+  return issues
+}
+
+const withFollowUpIssues = (row: Omit<ScholarFollowUpRow, "issues">): ScholarFollowUpRow => ({
+  ...row,
+  issues: mockFollowUpIssues(row),
+})
+
 const sortScholars = (rows: ScholarFollowUpRow[]) => {
   return [...rows].sort((a, b) => {
     const aCompletion = scholarCombinedCompletion(a)
     const bCompletion = scholarCombinedCompletion(b)
     if (aCompletion !== bCompletion) return aCompletion - bCompletion
-    if (b.flags.length !== a.flags.length) return b.flags.length - a.flags.length
+    if (b.issues.length !== a.issues.length) return b.issues.length - a.issues.length
     return a.scholarName.localeCompare(b.scholarName)
   })
 }
@@ -118,70 +156,86 @@ const weeklyMemoByWeek: Record<number, WeeklyMemoViewData> = {
       { leaderName: "Jordan Kim", mcf: "submitted", wpl: "on-time", wahf: "on-time", menteesOk: "yes" },
     ]),
     scholarRows: sortScholars([
-      {
+      withFollowUpIssues({
         scholarName: "Leo Pham",
         scholarYear: "Freshman",
         teamLeader: "Rafael Moreno",
         flags: ["Missed tutoring", "Missing WAHF", "Low grade"],
         frontDeskPct: 20,
         studySessionPct: 17,
-      },
-      {
+        fdRequired: 120,
+        ssRequired: 180,
+      }),
+      withFollowUpIssues({
         scholarName: "Derek Osei",
         scholarYear: "Sophomore",
         teamLeader: "Aisha Brooks",
         flags: ["Missed study session", "Late WPL", "Low grade"],
         frontDeskPct: 30,
         studySessionPct: 0,
-      },
-      {
+        fdRequired: 120,
+        ssRequired: 180,
+      }),
+      withFollowUpIssues({
         scholarName: "Marcus Webb",
         scholarYear: "Sophomore",
         teamLeader: "Jordan Kim",
         flags: ["Missed study session", "Missing MCF", "Low grade"],
         frontDeskPct: 40,
         studySessionPct: 0,
-      },
-      {
+        fdRequired: 120,
+        ssRequired: 180,
+      }),
+      withFollowUpIssues({
         scholarName: "Kenji Adeyemi",
         scholarYear: "Sophomore",
         teamLeader: "Simone Carter",
         flags: ["Missed study session", "Low grade"],
         frontDeskPct: 60,
         studySessionPct: 0,
-      },
-      {
+        fdRequired: 120,
+        ssRequired: 180,
+      }),
+      withFollowUpIssues({
         scholarName: "Fatima Diallo",
         scholarYear: "Freshman",
         teamLeader: "Tyler Nguyen",
         flags: ["Missed tutoring", "Low grade"],
         frontDeskPct: 50,
         studySessionPct: 47,
-      },
-      {
+        fdRequired: 120,
+        ssRequired: 180,
+      }),
+      withFollowUpIssues({
         scholarName: "Tyler Nguyen",
         scholarYear: "Sophomore",
         teamLeader: "Simone Carter",
         flags: ["Missed tutoring"],
         frontDeskPct: 75,
         studySessionPct: 69,
-      },
-      {
+        fdRequired: 120,
+        ssRequired: 180,
+      }),
+      withFollowUpIssues({
         scholarName: "Amara Johnson",
         scholarYear: "Freshman",
         teamLeader: "Jordan Kim",
         flags: ["Missing WAHF", "Late MCF"],
         frontDeskPct: 71,
         studySessionPct: 65,
-      },
-      {
+        fdRequired: 120,
+        ssRequired: 180,
+      }),
+      withFollowUpIssues({
         scholarName: "Priya Nair",
         scholarYear: "Freshman",
         teamLeader: "Aisha Brooks",
         flags: ["Missing WAHF", "Late WPL"],
         frontDeskPct: 90,
         studySessionPct: 82,
-      },
+        fdRequired: 120,
+        ssRequired: 180,
+      }),
     ]),
     tutoringLog: {
       badgeText: "28 sessions",
@@ -226,7 +280,8 @@ const weeklyMemoByWeek: Record<number, WeeklyMemoViewData> = {
       items: ["Aisha Brooks - Perfect submissions", "Priya Nair - 90% front desk completion"],
     },
     fullAttendanceDetail: {
-      rightLabel: "Front desk · Study sessions",
+      rightLabel: "Front desk · Study sessions · WAHF",
+      wahfCensus: { onTime: 31, late: 4, missing: 2 },
       tabs: [
         {
           id: "front-desk",
@@ -264,21 +319,6 @@ const weeklyMemoByWeek: Record<number, WeeklyMemoViewData> = {
             { scholarName: "Leo Pham", scholarYear: "Freshman", completedMinutes: 36, excuseMinutes: 0, requiredMinutes: 180, completionPct: 20 },
           ],
         },
-      ],
-    },
-    formSubmissions: {
-      badgeText: "4 late or missing",
-      rightLabel: "WAHF · WPL · MCF",
-      summaries: [
-        { form: "WAHF", onTime: 31, late: 4, missing: 2 },
-        { form: "WPL", onTime: 34, late: 1, missing: 0 },
-        { form: "MCF", onTime: 33, late: 2, missing: 2 },
-      ],
-      rows: [
-        { scholarName: "Amara Johnson", scholarYear: "Freshman", wahf: "missing", wpl: "on-time", mcf: "late" },
-        { scholarName: "Derek Osei", scholarYear: "Sophomore", wahf: "late", wpl: "on-time", mcf: "missing" },
-        { scholarName: "Priya Nair", scholarYear: "Freshman", wahf: "missing", wpl: "late", mcf: "on-time" },
-        { scholarName: "Marcus Webb", scholarYear: "Sophomore", wahf: "on-time", wpl: "on-time", mcf: "missing" },
       ],
     },
   },
@@ -333,22 +373,26 @@ const weeklyMemoByWeek: Record<number, WeeklyMemoViewData> = {
       { leaderName: "Tyler Nguyen", mcf: "submitted", wpl: "on-time", wahf: "on-time", menteesOk: "yes" },
     ]),
     scholarRows: sortScholars([
-      {
+      withFollowUpIssues({
         scholarName: "Marcus Webb",
         scholarYear: "Sophomore",
         teamLeader: "Jordan Kim",
         flags: ["Missing MCF", "Low grade"],
         frontDeskPct: 34,
         studySessionPct: 10,
-      },
-      {
+        fdRequired: 120,
+        ssRequired: 180,
+      }),
+      withFollowUpIssues({
         scholarName: "Leo Pham",
         scholarYear: "Freshman",
         teamLeader: "Rafael Moreno",
         flags: ["Missing WAHF", "Low grade"],
         frontDeskPct: 45,
         studySessionPct: 14,
-      },
+        fdRequired: 120,
+        ssRequired: 180,
+      }),
     ]),
     tutoringLog: {
       badgeText: "25 sessions",
@@ -384,7 +428,8 @@ const weeklyMemoByWeek: Record<number, WeeklyMemoViewData> = {
       items: ["Jordan Kim - 100% form compliance", "Amara Johnson - High study consistency"],
     },
     fullAttendanceDetail: {
-      rightLabel: "Front desk · Study sessions",
+      rightLabel: "Front desk · Study sessions · WAHF",
+      wahfCensus: { onTime: 28, late: 2, missing: 2 },
       tabs: [
         {
           id: "front-desk",
@@ -410,21 +455,6 @@ const weeklyMemoByWeek: Record<number, WeeklyMemoViewData> = {
             { scholarName: "Marcus Webb", scholarYear: "Sophomore", completedMinutes: 20, excuseMinutes: 0, requiredMinutes: 180, completionPct: 11 },
           ],
         },
-      ],
-    },
-    formSubmissions: {
-      badgeText: "5 late or missing",
-      rightLabel: "WAHF · WPL · MCF",
-      summaries: [
-        { form: "WAHF", onTime: 28, late: 2, missing: 2 },
-        { form: "WPL", onTime: 27, late: 3, missing: 1 },
-        { form: "MCF", onTime: 30, late: 1, missing: 2 },
-      ],
-      rows: [
-        { scholarName: "Leo Pham", scholarYear: "Freshman", wahf: "missing", wpl: "late", mcf: "on-time" },
-        { scholarName: "Marcus Webb", scholarYear: "Sophomore", wahf: "on-time", wpl: "missing", mcf: "missing" },
-        { scholarName: "Rafael Moreno", scholarYear: "Sophomore", wahf: "late", wpl: "on-time", mcf: "late" },
-        { scholarName: "Simone Carter", scholarYear: "Sophomore", wahf: "on-time", wpl: "missing", mcf: "on-time" },
       ],
     },
   },

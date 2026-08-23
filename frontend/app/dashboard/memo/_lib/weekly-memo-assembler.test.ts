@@ -17,6 +17,8 @@ const buildMemoData = (): MemoLivePageData =>
         ssTotal: 109,
         fdExcuseMin: 0,
         ssExcuseMin: 0,
+        wahfStatus: "on-time" as const,
+        wahfSubmittedAt: "2026-04-02T16:00:00.000Z",
       },
       {
         scholarId: "2023-010",
@@ -30,6 +32,8 @@ const buildMemoData = (): MemoLivePageData =>
         ssTotal: 84,
         fdExcuseMin: 30,
         ssExcuseMin: 0,
+        wahfStatus: "missing" as const,
+        wahfSubmittedAt: null,
       },
     ],
     teamLeaders: [],
@@ -115,9 +119,16 @@ describe("weekly-memo-assembler", () => {
     })
     expect(result.scholarRows[0]).toMatchObject({
       scholarName: "Bob Scholar",
-      flags: ["Low front desk completion", "Low study session completion", "Low grade"],
+      flags: ["Low front desk completion", "Low study session completion", "Low grade", "Missing WAHF"],
+      issues: [
+        { kind: "front-desk", glance: "Front desk", pct: 50, requiredMinutes: 120 },
+        { kind: "study-session", glance: "Study session", pct: 70, requiredMinutes: 120 },
+        { kind: "grade", glance: "X · Y", pct: 60 },
+        { kind: "wahf", glance: "WAHF", status: "missing", submittedAtLabel: null },
+      ],
+      fdRequired: 120,
+      ssRequired: 120,
     })
-    expect(result.formSubmissions.summaries).toEqual(expect.arrayContaining([expect.objectContaining({ form: "MCF", missing: 1 })]))
     expect(result.tutoringLog).toMatchObject({
       badgeText: "1 session",
       rightLabel: "Sessions · Empty sessions",
@@ -160,5 +171,6 @@ describe("weekly-memo-assembler", () => {
         }),
       ])
     )
+    expect(result.fullAttendanceDetail.wahfCensus).toEqual({ onTime: 1, late: 0, missing: 1 })
   })
 })

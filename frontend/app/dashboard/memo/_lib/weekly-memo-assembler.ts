@@ -151,42 +151,16 @@ export const assembleWeeklyMemo = (data: MemoLivePageData): WeeklyMemoViewData =
       ],
     },
     fullAttendanceDetail: {
-      rightLabel: "Front desk · Study sessions",
+      rightLabel: "Front desk · Study sessions · WAHF",
+      wahfCensus: {
+        onTime: data.scholars.filter((row) => row.wahfStatus === "on-time").length,
+        late: data.scholars.filter((row) => row.wahfStatus === "late").length,
+        missing: data.scholars.filter((row) => row.wahfStatus === "missing").length,
+      },
       tabs: [
         { id: "front-desk", label: "Front desk", rows: makeAttendanceRows("fdTotal", "fdExcuseMin", "fdRequired") },
         { id: "study-sessions", label: "Study sessions", rows: makeAttendanceRows("ssTotal", "ssExcuseMin", "ssRequired") },
       ],
-    },
-    formSubmissions: {
-      badgeText: `${teamLeaderRows.filter((row) => row.wahf !== "on-time" || row.wpl !== "on-time" || row.mcf !== "on-time").length} late or missing`,
-      rightLabel: "WAHF · WPL · MCF",
-      summaries: [
-        {
-          form: "WAHF",
-          onTime: teamLeaderRows.filter((row) => row.wahf === "on-time").length,
-          late: teamLeaderRows.filter((row) => row.wahf === "late").length,
-          missing: teamLeaderRows.filter((row) => row.wahf === "missing").length,
-        },
-        {
-          form: "WPL",
-          onTime: teamLeaderRows.filter((row) => row.wpl === "on-time").length,
-          late: teamLeaderRows.filter((row) => row.wpl === "late").length,
-          missing: teamLeaderRows.filter((row) => row.wpl === "missing").length,
-        },
-        {
-          form: "MCF",
-          onTime: teamLeaderRows.filter((row) => row.mcf === "on-time").length,
-          late: teamLeaderRows.filter((row) => row.mcf === "late").length,
-          missing: teamLeaderRows.filter((row) => row.mcf === "missing").length,
-        },
-      ],
-      rows: scholarRows.slice(0, 10).map((row) => ({
-        scholarName: row.scholarName,
-        scholarYear: row.scholarYear,
-        wahf: row.flags.some((flag) => flag.includes("Low")) ? "late" : "on-time",
-        wpl: row.frontDeskPct < 75 ? "missing" : "on-time",
-        mcf: row.studySessionPct < 75 ? "late" : "on-time",
-      })),
     },
   }
 }

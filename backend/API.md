@@ -929,7 +929,7 @@ Routes under `/api/memo` require **requireTeamLeaderOrAbove** unless noted other
 ### `GET /api/memo/page-data`
 
 **Auth:** requireTeamLeaderOrAbove
-**Description:** Returns all processed data needed to render the memo page for a given week (aggregated in one call). FD/SS minutes are computed on read from cleaned tickets; excuses come from `scholar_week_excuses` (not `*_records`).
+**Description:** Returns all processed data needed to render the memo page for a given week (aggregated in one call). FD/SS minutes are computed on read from cleaned tickets; excuses come from `scholar_week_excuses` (not `*_records`). Each scholar row includes `wahfStatus` (`on-time` | `late` | `missing`) and `wahfSubmittedAt` (latest weekly WAHF form-log `created_at`, or `null` if none) from that week's WAHF form logs. Scholars owe WAHF only; WPL/MCF stay on team-leader form stats.
 **Query Params:**
 - `weekNumber` (integer >= 1; legacy `weekNum` accepted; defaults to current campus week if omitted)
 

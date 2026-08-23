@@ -86,4 +86,71 @@ describe("buildMemoScholarAttendanceRows", () => {
     expect(scholars[0]?.fdPct).toBe(100);
     expect(cohort2025.fdCompleteCount).toBe(1);
   });
+
+  it("sets WAHF status from latest form-log row for that scholar", () => {
+    const wahfRows = [
+      {
+        id: "1",
+        created_at: "2026-04-02T12:00:00.000Z",
+        scholar_uid: "1001",
+        scholar_name: "Ada Lovelace",
+        team_leader_contact: null,
+        tl_meeting_in_person: null,
+        course_changes: null,
+        assignment_grades: null,
+        missed_classes: null,
+        missed_assignments: null,
+        submitted_by_email: null,
+        course_change_details: null,
+        isLate: true,
+      },
+      {
+        id: "2",
+        created_at: "2026-04-03T12:00:00.000Z",
+        scholar_uid: "1001",
+        scholar_name: "Ada Lovelace",
+        team_leader_contact: null,
+        tl_meeting_in_person: null,
+        course_changes: null,
+        assignment_grades: null,
+        missed_classes: null,
+        missed_assignments: null,
+        submitted_by_email: null,
+        course_change_details: null,
+        isLate: false,
+      },
+    ];
+    const { scholars } = buildMemoScholarAttendanceRows([scholar], new Map(), new Map(), wahfRows);
+    expect(scholars[0]?.wahfStatus).toBe("on-time");
+    expect(scholars[0]?.wahfSubmittedAt).toBe("2026-04-03T12:00:00.000Z");
+  });
+
+  it("marks WAHF missing when the scholar has no form log", () => {
+    const { scholars } = buildMemoScholarAttendanceRows([scholar], new Map(), new Map(), []);
+    expect(scholars[0]?.wahfStatus).toBe("missing");
+    expect(scholars[0]?.wahfSubmittedAt).toBeNull();
+  });
+
+  it("marks WAHF late when the latest submission is late", () => {
+    const wahfRows = [
+      {
+        id: "1",
+        created_at: "2026-04-04T12:00:00.000Z",
+        scholar_uid: "1001",
+        scholar_name: "Ada Lovelace",
+        team_leader_contact: null,
+        tl_meeting_in_person: null,
+        course_changes: null,
+        assignment_grades: null,
+        missed_classes: null,
+        missed_assignments: null,
+        submitted_by_email: null,
+        course_change_details: null,
+        isLate: true,
+      },
+    ];
+    const { scholars } = buildMemoScholarAttendanceRows([scholar], new Map(), new Map(), wahfRows);
+    expect(scholars[0]?.wahfStatus).toBe("late");
+    expect(scholars[0]?.wahfSubmittedAt).toBe("2026-04-04T12:00:00.000Z");
+  });
 });

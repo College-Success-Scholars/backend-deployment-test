@@ -1,17 +1,49 @@
+import { Clock } from "lucide-react"
+
+import { CompletionMeter } from "@/components/data-display/completion-meter"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { CompletionMeter } from "@/components/data-display/completion-meter"
 import { MemoAccordionSection } from "./memo-accordion-section"
-import type { ScholarFollowUpRow } from "../types"
+import type { ScholarFollowUpIssue, ScholarFollowUpRow } from "../types"
 
 type ScholarFollowUpTableProps = {
   rows: ScholarFollowUpRow[]
+}
+
+function FollowUpIssueDetail({ issue }: { issue: ScholarFollowUpIssue }) {
+  if (issue.kind === "wahf") {
+    return (
+      <div className="flex flex-wrap items-center gap-1.5 text-xs">
+        <Clock className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+        {issue.submittedAtLabel ? (
+          <span className="tabular-nums">{issue.submittedAtLabel}</span>
+        ) : (
+          <span className="text-muted-foreground">No submission</span>
+        )}
+        {issue.status === "late" ? <Badge variant="warning">Late</Badge> : null}
+      </div>
+    )
+  }
+
+  if (issue.kind === "grade") {
+    return <CompletionMeter pct={issue.pct} />
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <CompletionMeter pct={issue.pct} />
+      {issue.requiredMinutes != null && issue.requiredMinutes > 0 ? (
+        <span className="text-muted-foreground text-xs tabular-nums">of {issue.requiredMinutes} min</span>
+      ) : null}
+    </div>
+  )
 }
 
 export function ScholarFollowUpTable({ rows }: ScholarFollowUpTableProps) {
   return (
     <MemoAccordionSection
       title="Scholar follow-up"
+      description="Who needs a conversation this week — low hours, low grades, or missing/late WAHF."
       badgeText={`${rows.length} need attention`}
       badgeVariant="warning"
       rightLabel="Sorted by severity"
@@ -22,9 +54,8 @@ export function ScholarFollowUpTable({ rows }: ScholarFollowUpTableProps) {
           <TableRow className="bg-muted/30 hover:bg-muted/30">
             <TableHead className="px-4">Scholar</TableHead>
             <TableHead>TL</TableHead>
-            <TableHead>Flags</TableHead>
-            <TableHead>Front desk</TableHead>
-            <TableHead className="pr-4">Study session</TableHead>
+            <TableHead>What's missing</TableHead>
+            <TableHead className="pr-4">How it's missing</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -34,19 +65,24 @@ export function ScholarFollowUpTable({ rows }: ScholarFollowUpTableProps) {
                 <div className="font-medium">{row.scholarName}</div>
                 <div className="text-muted-foreground text-xs">{row.scholarYear}</div>
               </TableCell>
-              <TableCell className="text-sm">{row.teamLeader}</TableCell>
-              <TableCell className="space-x-2 space-y-1 whitespace-normal">
-                {row.flags.map((flag) => (
-                  <Badge key={flag} variant="warning">
-                    {flag}
-                  </Badge>
-                ))}
+              <TableCell className="align-top text-sm">{row.teamLeader}</TableCell>
+              <TableCell className="align-top">
+                <div className="flex flex-col items-start gap-2">
+                  {row.issues.map((issue, index) => (
+                    <div key={`${issue.kind}-${issue.glance}-${index}`} className="flex min-h-8 items-center">
+                      <Badge variant="warning">{issue.glance}</Badge>
+                    </div>
+                  ))}
+                </div>
               </TableCell>
-              <TableCell>
-                <CompletionMeter pct={row.frontDeskPct} />
-              </TableCell>
-              <TableCell className="pr-4">
-                <CompletionMeter pct={row.studySessionPct} />
+              <TableCell className="pr-4 align-top">
+                <div className="flex flex-col flex-wrap content-start gap-2">
+                  {row.issues.map((issue, index) => (
+                    <div key={`${issue.kind}-${issue.glance}-${index}`} className="flex min-h-8 items-center">
+                      <FollowUpIssueDetail issue={issue} />
+                    </div>
+                  ))}
+                </div>
               </TableCell>
             </TableRow>
           ))}

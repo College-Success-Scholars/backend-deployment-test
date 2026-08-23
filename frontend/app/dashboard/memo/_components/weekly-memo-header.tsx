@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 
+import { WEEKLY_MEMO_HEADER_BLURB } from "../_lib/memo-section-guide"
 import { WeeklyMemoWeekNav } from "./weekly-memo-week-nav"
 
 type WeeklyMemoHeaderProps = {
@@ -30,6 +31,7 @@ export function WeeklyMemoHeader({
         <p className="text-muted-foreground text-sm">
           {weekStartLabel} - {weekEndLabel}
         </p>
+        <p className="text-muted-foreground mt-2 max-w-3xl text-sm leading-relaxed">{WEEKLY_MEMO_HEADER_BLURB}</p>
       </div>
       <Suspense fallback={<div className="h-9 w-[calc(5rem+190px)]" />}>
         <WeeklyMemoWeekNav

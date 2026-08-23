@@ -27,10 +27,10 @@
 | **Weekly Memo** | The weekly dashboard view summarizing scholar outcomes, team-leader form compliance, and attendance completion for a selected campus week. | Weekly report, snapshot |
 | **Campus Week** | The canonical numbered week used to select and compare weekly operational data. | Sprint week, report period |
 | **KPI card** | A metric tile showing a weekly performance indicator and optional trend/substats. | Stat box, widget |
-| **Scholar follow-up** | A prioritized scholar row with risk flags and completion percentages that indicates intervention need. | Student risk list, action list |
+| **Scholar follow-up** | A prioritized scholar action-list row with **What's missing** (short labels: Front desk, Study session, WAHF, assignment title) and **How it's missing** (hours/grade meters, WAHF submitted-at or no-submission time). Healthy hours are omitted. | Student risk list, action list |
 | **Recognition board** | A curated list of scholars and team leaders highlighted for strong weekly performance. | Shout-outs, highlights |
-| **Attendance detail** | Tabular minutes-based completion details by scholar for front desk and study session requirements. | Attendance table, minutes log |
-| **Form submissions** | Weekly status summary for required forms across on-time, late, and missing states. Submissions are collected via Google Forms into Supabase form-log tables; the app aggregates status, it does not own intake. | Form compliance, forms status |
+| **Attendance detail** | Tabular minutes-based completion details by scholar for front desk and study session requirements, plus overall WAHF on-time / late / missing counts for that roster. | Attendance table, minutes log |
+| **Team leader performance** | Weekly WPL, MCF, and WAHF compliance for Team Leaders. | TL form table |
 | **Scholar follow-up risk** | The finalized weekly decision that a scholar requires active support follow-up. | Risk list |
 
 ## Compliance and data terms
@@ -45,7 +45,7 @@
 | **WPL** | Weekly Project List documenting team-leader hours worked and the work completed during the week. | Project log, work log |
 | **MCF** | Mentee Check-in Form submitted by a Team Leader to document a mentee's academic, professional, and personal status and perceived support need. | Check-in note, mentee report |
 | **MCF support rating** | A Team Leader's 1-5 rating indicating perceived support need for a mentee, where 3 or higher requires active follow-up. | Risk score |
-| **Flag** | A concise risk signal attached to a scholar follow-up row (for example low completion or low grade). | Warning, note |
+| **Flag** | A concise risk category on a scholar follow-up row (low completion, low grade, missing/late WAHF). **What's missing** is the short label; **How it's missing** is the meter or time indicator — not healthy completion meters. | Warning, note |
 | **Low-grade alert** | A scholar risk signal indicating academic performance in the low-grade band for the week. | Grade warning, poor grade |
 | **Scholar ID** | The canonical scholar identity key (University ID) used across systems, sometimes represented as `uid`. | Name-only identity |
 
@@ -64,19 +64,20 @@
 ## Relationships
 
 - A **Weekly Memo** is scoped to exactly one **Campus Week**.
-- A **Weekly Memo** contains multiple **KPI cards**, one **Recognition board**, one **Attendance detail** section, and one **Form submissions** section.
+- A **Weekly Memo** contains multiple **KPI cards**, one **Recognition board**, one **Attendance detail** section (hours census + overall **WAHF** counts), and one **Team leader performance** section. Missing or late **WAHF** also appears as an **Issue** on **Scholar follow-up**.
 - A **Scholar** has exactly one **Primary Team Leader** per **Campus Week**, except Team Leaders do not have mentors.
 - A **Team Leader** is also a **Scholar** identity but is exempt from required front desk and study-session hours while active in the Team Leader role.
 - Every **Program member** must submit **WAHF** each **Campus Week**.
 - Every **Team Leader** must submit one weekly **WPL** and one **MCF** per assigned mentee each **Campus Week**.
 - **Front desk completion** and **Study session completion** apply to non-Team-Leader freshmen and sophomores.
-- **Form submissions** aggregate **Form status** counts for **WAHF**, **WPL**, and **MCF** using timezone-aware ET deadlines.
+- **WAHF** form-log status uses timezone-aware ET deadlines; **WPL** and **MCF** status is shown on **Team leader performance**, not as scholar requirements.
 - If multiple MCFs exist for one scholar in one week, the latest submitted MCF is canonical for current status.
 - Missing **MCF** is always a Team Leader compliance issue and is not by itself automatic **Scholar follow-up risk**.
+- Missing or late **WAHF** is a scholar **Issue** on **Scholar follow-up** (**What's missing** is WAHF; **How it's missing** is submitted-at from the form log, or no-submission time).
 - **Scholar follow-up risk** uses a hybrid model: system-derived baseline plus Team Leader judgment.
 - **MCF support rating** of 3, 4, or 5 requires active follow-up for that week.
 - Source conflicts resolve by precedence: latest valid record, then approved admin correction, then source-of-record, with full audit history retained.
-- A **Low-grade alert** is represented as a **Flag** on **Scholar follow-up**.
+- A **Low-grade alert** is represented as an **Issue** on **Scholar follow-up** (assignment title in **What's missing**, percent meter in **How it's missing**).
 
 ## Example dialogue
 
