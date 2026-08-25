@@ -17,11 +17,13 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@fontsource/archivo": "5.3.0",
     "@supabase/supabase-js": "^2.104.0",
     "cors": "^2.8.6",
     "date-fns": "^4.1.0",
     "dotenv": "^17.4.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "puppeteer": "25.8.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

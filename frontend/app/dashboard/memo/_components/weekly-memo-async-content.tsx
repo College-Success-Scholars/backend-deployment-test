@@ -54,7 +54,7 @@ export async function WeeklyMemoAsyncContent({ weekParam }: WeeklyMemoAsyncConte
         prevWeek={navigation.prevWeek}
         nextWeek={navigation.nextWeek}
         currentCampusWeek={memoData.currentCampusWeek}
-        yearNotStarted={false}
+            yearNotStarted={false}
       />
       <WeeklyKpiCards cards={data.kpis} />
       <TeamLeaderPerformanceTable rows={data.teamLeaderRows} />

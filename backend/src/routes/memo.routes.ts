@@ -24,6 +24,7 @@ router.post("/refresh-stats", requireTeamLeaderOrAbove, memoController.refreshSt
 
 // Full memo page data (all the processing in one call)
 router.get("/page-data", requireTeamLeaderOrAbove, memoController.pageData);
+router.get("/pdf", requireTeamLeaderOrAbove, memoController.pdf);
 
 // These require team leader or above
 router.post("/sync", requireTeamLeaderOrAbove, memoController.sync);
