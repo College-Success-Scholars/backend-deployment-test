@@ -1,7 +1,9 @@
+import type { GradeBreakdown, GradeEntry } from "@/lib/types/form-log"
 import type { MemoTutorReportRow } from "@/lib/types/tutor-report-log"
 import type {
   FormStatus,
   MemoLivePageData,
+  RecognitionBoardSectionData,
   TeamLeaderPerformanceRow,
   TutoringLogRow,
   WeeklyMemoViewData,
@@ -39,6 +41,33 @@ const mapTutoringLogRow = (report: MemoTutorReportRow): TutoringLogRow => ({
   startTime: report.startTime,
   endTime: report.endTime,
 })
+
+const RECOGNITION_BANDS = [
+  { id: "high" as const, label: "90 – 100%", key: "high" as const },
+  { id: "mid" as const, label: "70 – 89%", key: "mid" as const },
+  { id: "low" as const, label: "Below 70%", key: "low" as const },
+]
+
+const byGradePercentDesc = (left: GradeEntry, right: GradeEntry) => {
+  if (left.percent !== right.percent) return right.percent - left.percent
+  const byName = left.scholarName.localeCompare(right.scholarName)
+  if (byName !== 0) return byName
+  return left.course.localeCompare(right.course)
+}
+
+const buildRecognitionBoard = (breakdown: GradeBreakdown): RecognitionBoardSectionData => {
+  const bands = RECOGNITION_BANDS.map((band) => ({
+    id: band.id,
+    label: band.label,
+    entries: [...breakdown[band.key]].sort(byGradePercentDesc),
+  }))
+  const total = bands.reduce((sum, band) => sum + band.entries.length, 0)
+  return {
+    badgeText: `${total} grade${total === 1 ? "" : "s"}`,
+    rightLabel: "90–100% · 70–89% · Below 70%",
+    bands,
+  }
+}
 
 const buildTutoringLog = (tutorReports: MemoTutorReportRow[]) => {
   const sessions = tutorReports
@@ -136,20 +165,7 @@ export const assembleWeeklyMemo = (data: MemoLivePageData): WeeklyMemoViewData =
     teamLeaderRows,
     scholarRows,
     tutoringLog,
-    recognitionBoard: {
-      badgeText: `${Math.min(5, data.scholars.length)} recognized`,
-      rightLabel: "Scholars · Team leaders",
-      items: [
-        ...data.scholars
-          .filter((row) => (row.fdPct ?? 0) >= 90 && (row.ssPct ?? 0) >= 90)
-          .slice(0, 3)
-          .map((row) => `${row.scholarName} - Strong completion this week`),
-        ...teamLeaderRows
-          .filter((row) => row.mcf === "on-time" && row.wpl === "on-time" && row.wahf === "on-time")
-          .slice(0, 2)
-          .map((row) => `${row.leaderName} - On-time forms`),
-      ],
-    },
+    recognitionBoard: buildRecognitionBoard(data.gradeBreakdown),
     fullAttendanceDetail: {
       rightLabel: "Front desk · Study sessions · WAHF",
       wahfCensus: {

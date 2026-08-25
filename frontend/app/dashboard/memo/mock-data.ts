@@ -96,7 +96,7 @@ const baseMemoData: MemoLivePageData = {
   trafficEntryCountForSelectedWeek: 0,
   trafficSessions: [] as MemoLivePageData["trafficSessions"],
   tutorReports: [] as MemoLivePageData["tutorReports"],
-  gradeBreakdown: { low: 0, mid: 0, high: 0 } as unknown as MemoLivePageData["gradeBreakdown"],
+  gradeBreakdown: { high: [], mid: [], low: [] },
   wahfDonut: { total: 0, completeCount: 0, lateCount: 0, percentComplete: 0 },
   teamLeaderFormStats: [] as MemoLivePageData["teamLeaderFormStats"],
   weekLabel: "",
@@ -275,9 +275,34 @@ const weeklyMemoByWeek: Record<number, WeeklyMemoViewData> = {
       ],
     },
     recognitionBoard: {
-      badgeText: "7 recognized",
-      rightLabel: "Scholars · Team leaders",
-      items: ["Aisha Brooks - Perfect submissions", "Priya Nair - 90% front desk completion"],
+      badgeText: "8 grades",
+      rightLabel: "90–100% · 70–89% · Below 70%",
+      bands: [
+        {
+          id: "high",
+          label: "90 – 100%",
+          entries: [
+            { scholarName: "Aisha Brooks", course: "CMSC131", assessment: "Quiz 3", grade: "96%", percent: 96 },
+            { scholarName: "Jordan Kim", course: "MATH140", assessment: "HW 8", grade: "92%", percent: 92 },
+          ],
+        },
+        {
+          id: "mid",
+          label: "70 – 89%",
+          entries: [{ scholarName: "Priya Nair", course: "ENGL101", assessment: "Essay", grade: "84%", percent: 84 }],
+        },
+        {
+          id: "low",
+          label: "Below 70%",
+          entries: [
+            { scholarName: "Leo Pham", course: "CMSC131", assessment: "Midterm", grade: "58%", percent: 58 },
+            { scholarName: "Derek Osei", course: "PHYS161", assessment: "Lab 4", grade: "62%", percent: 62 },
+            { scholarName: "Marcus Webb", course: "CMSC131", assessment: "Midterm", grade: "58%", percent: 58 },
+            { scholarName: "Kenji Adeyemi", course: "STAT100", assessment: "Quiz", grade: "55%", percent: 55 },
+            { scholarName: "Fatima Diallo", course: "CHEM131", assessment: "Exam 1", grade: "64%", percent: 64 },
+          ],
+        },
+      ],
     },
     fullAttendanceDetail: {
       rightLabel: "Front desk · Study sessions · WAHF",
@@ -423,9 +448,28 @@ const weeklyMemoByWeek: Record<number, WeeklyMemoViewData> = {
       ],
     },
     recognitionBoard: {
-      badgeText: "5 recognized",
-      rightLabel: "Scholars · Team leaders",
-      items: ["Jordan Kim - 100% form compliance", "Amara Johnson - High study consistency"],
+      badgeText: "4 grades",
+      rightLabel: "90–100% · 70–89% · Below 70%",
+      bands: [
+        {
+          id: "high",
+          label: "90 – 100%",
+          entries: [{ scholarName: "Jordan Kim", course: "CMSC131", assessment: "Quiz", grade: "94%", percent: 94 }],
+        },
+        {
+          id: "mid",
+          label: "70 – 89%",
+          entries: [{ scholarName: "Aisha Brooks", course: "ENGL101", assessment: "Draft", grade: "78%", percent: 78 }],
+        },
+        {
+          id: "low",
+          label: "Below 70%",
+          entries: [
+            { scholarName: "Marcus Webb", course: "CMSC131", assessment: "Midterm", grade: "58%", percent: 58 },
+            { scholarName: "Leo Pham", course: "MATH140", assessment: "Exam", grade: "51%", percent: 51 },
+          ],
+        },
+      ],
     },
     fullAttendanceDetail: {
       rightLabel: "Front desk · Study sessions · WAHF",

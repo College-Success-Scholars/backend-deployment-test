@@ -27,10 +27,10 @@ The header blurb (`WEEKLY_MEMO_HEADER_BLURB` in `_lib/memo-section-guide.ts`) is
 | Team leader performance | **WPL · MCF · WAHF** compliance for TLs. Missing MCF is a TL issue, not scholar follow-up. | Team leaders |
 | Scholar follow-up | **Action list** — who needs a conversation this week | Scholars with **What's missing** (Front desk, Study session, WAHF, assignment title) and **How it's missing** (hours/grade meters, WAHF submitted-at or no-submission time) |
 | Tutoring log | Sessions held vs empty sessions | Tutor report rows |
-| Recognition board | Strong hours / on-time TL forms | Highlight subset |
+| Recognition board | **Census** — every assignment grade parsed from this week's **WAHF** (90–100% / 70–89% / below 70%) | Scholars with parsed grades; empty band = None |
 | Full attendance detail | **Census** — hours math for everyone with required minutes, plus **overall WAHF** on-time / late / missing counts | All scholars with required hours |
 
-There is no separate Form submissions accordion. WAHF totals live on attendance detail; people who have not submitted (or submitted late) live on scholar follow-up; WPL/MCF live on team leader performance.
+There is no separate Form submissions accordion. WAHF totals live on attendance detail; people who have not submitted (or submitted late) live on scholar follow-up; assignment grades live on Recognition board (lows also on follow-up); WPL/MCF live on team leader performance.
 
 ---
 
@@ -63,7 +63,7 @@ There is no separate Form submissions accordion. WAHF totals live on attendance 
 | `scholar-follow-up-table.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/scholar-follow-up-table.tsx) | Scholars needing a conversation |
 | `full-attendance-detail-section.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/full-attendance-detail-section.tsx) | Hours census + overall WAHF counts |
 | `tutoring-log-section.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/tutoring-log-section.tsx) | Tutor sessions / empty sessions |
-| `recognition-board-section.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/recognition-board-section.tsx) | Recognition highlights |
+| `recognition-board-section.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/recognition-board-section.tsx) | WAHF grade census (three bands) |
 | `memo-accordion-section.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/memo-accordion-section.tsx) | Accordion wrapper (optional section description) |
 
 ### `_lib/`
@@ -84,5 +84,5 @@ There is no separate Form submissions accordion. WAHF totals live on attendance 
 - **Assembler owns data shape** — `weekly-memo-assembler.ts` is the single place that transforms raw API data into the memo display model. Do not transform data in individual components.
 - **Test the assembler** — the assembler contains the most business logic; tests must be kept current.
 - **Risk classification is in `risk-classifier.ts`** — do not hardcode thresholds in components.
-- **Scholar forms vs TL forms** — do not show WPL/MCF as required on scholar rows. WAHF exceptions are follow-up Issues (submitted-at when a log exists); WAHF census is on attendance detail.
+- **Scholar forms vs TL forms** — do not show WPL/MCF as required on scholar rows. WAHF exceptions are follow-up Issues (submitted-at when a log exists); WAHF census is on attendance detail. Assignment grades from WAHF are the Recognition board census; only low grades are follow-up Issues.
 - **What's missing vs how it's missing** — glance column is short labels only (no numbers). How-it's-missing uses CompletionMeter for hours/grades and a time indicator for WAHF. Do not put healthy FD/SS meters on follow-up. Hours only appear when below the classifier threshold; late/missing WAHF use form-log `created_at`, never attendance.

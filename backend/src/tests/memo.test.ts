@@ -3,10 +3,11 @@ import { describe, it, expect } from "vitest";
 import { app } from "../app.js";
 import { resolveMemoDefaultWeek } from "../services/memo-default-week.js";
 
-import { buildMemoScholarAttendanceRows } from "../services/memo-page.service.js";
+import { buildGradeBreakdown, buildMemoScholarAttendanceRows } from "../services/memo-page.service.js";
 import { EMPTY_WEEKLY_MINUTES } from "../models/weekly-minutes.model.js";
 import type { CampusWeekAttendanceTotals } from "../models/attendance-week.model.js";
 import type { MemoUserRow } from "../models/user.model.js";
+import type { FormLogRowWithLate, WahfFormLogRow } from "../models/form-log.model.js";
 
 describe("Memo routes — auth gating", () => {
   it("GET /api/memo/weekly returns 401 without token", async () => {
@@ -152,5 +153,116 @@ describe("buildMemoScholarAttendanceRows", () => {
     const { scholars } = buildMemoScholarAttendanceRows([scholar], new Map(), new Map(), wahfRows);
     expect(scholars[0]?.wahfStatus).toBe("late");
     expect(scholars[0]?.wahfSubmittedAt).toBe("2026-04-04T12:00:00.000Z");
+  });
+});
+
+const wahfRow = (
+  overrides: Partial<FormLogRowWithLate<WahfFormLogRow>>
+): FormLogRowWithLate<WahfFormLogRow> => ({
+  id: "1",
+  created_at: "2026-04-02T12:00:00.000Z",
+  scholar_uid: "1001",
+  scholar_name: "Ada Lovelace",
+  team_leader_contact: null,
+  tl_meeting_in_person: null,
+  course_changes: null,
+  assignment_grades: null,
+  missed_classes: null,
+  missed_assignments: null,
+  submitted_by_email: null,
+  course_change_details: null,
+  isLate: false,
+  ...overrides,
+});
+
+describe("buildGradeBreakdown", () => {
+  it("buckets parsed assignment grades into high, mid, and low bands", () => {
+    const breakdown = buildGradeBreakdown([
+      wahfRow({
+        assignment_grades: {
+          CMSC131: { Midterm: "95%", Quiz: "80%" },
+          MATH140: { Exam: "60" },
+        },
+      }),
+    ]);
+
+    expect(breakdown.high).toEqual([
+      expect.objectContaining({
+        scholarName: "Ada Lovelace",
+        course: "CMSC131",
+        assessment: "Midterm",
+        grade: "95%",
+        percent: 95,
+      }),
+    ]);
+    expect(breakdown.mid).toEqual([
+      expect.objectContaining({ course: "CMSC131", assessment: "Quiz", grade: "80%", percent: 80 }),
+    ]);
+    expect(breakdown.low).toEqual([
+      expect.objectContaining({ course: "MATH140", assessment: "Exam", grade: "60", percent: 60 }),
+    ]);
+  });
+
+  it("uses only the latest WAHF per scholar so resubmits do not duplicate", () => {
+    const breakdown = buildGradeBreakdown([
+      wahfRow({
+        id: "1",
+        created_at: "2026-04-02T12:00:00.000Z",
+        assignment_grades: { CMSC131: { Midterm: "50%" } },
+      }),
+      wahfRow({
+        id: "2",
+        created_at: "2026-04-03T12:00:00.000Z",
+        assignment_grades: { CMSC131: { Midterm: "92%" } },
+      }),
+    ]);
+
+    expect(breakdown.high).toHaveLength(1);
+    expect(breakdown.high[0]).toMatchObject({ grade: "92%", percent: 92 });
+    expect(breakdown.mid).toHaveLength(0);
+    expect(breakdown.low).toHaveLength(0);
+  });
+
+  it("sorts each band descending by percent", () => {
+    const breakdown = buildGradeBreakdown([
+      wahfRow({
+        scholar_uid: "1001",
+        scholar_name: "Zed Scholar",
+        assignment_grades: { CMSC131: { Quiz: "91%", Exam: "100%" } },
+      }),
+      wahfRow({
+        id: "2",
+        scholar_uid: "1002",
+        scholar_name: "Ann Scholar",
+        assignment_grades: { MATH140: { HW: "88%", Lab: "71%" }, PHYS161: { Quiz: "40" } },
+      }),
+    ]);
+
+    expect(breakdown.high.map((entry) => entry.percent)).toEqual([100, 91]);
+    expect(breakdown.mid.map((entry) => entry.percent)).toEqual([88, 71]);
+    expect(breakdown.low.map((entry) => entry.percent)).toEqual([40]);
+  });
+
+  it("parses grades independently per scholar", () => {
+    const breakdown = buildGradeBreakdown([
+      wahfRow({
+        scholar_uid: "1001",
+        scholar_name: "Ada Lovelace",
+        assignment_grades: { CMSC131: { Quiz: "91%" } },
+      }),
+      wahfRow({
+        id: "2",
+        scholar_uid: "1002",
+        scholar_name: "Alan Turing",
+        assignment_grades: { PHYS161: { Lab: "65%" } },
+      }),
+    ]);
+
+    expect(breakdown.high).toEqual([
+      expect.objectContaining({ scholarName: "Ada Lovelace", course: "CMSC131", percent: 91 }),
+    ]);
+    expect(breakdown.low).toEqual([
+      expect.objectContaining({ scholarName: "Alan Turing", course: "PHYS161", percent: 65 }),
+    ]);
   });
 });

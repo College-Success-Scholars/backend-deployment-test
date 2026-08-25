@@ -19,7 +19,11 @@ describe("risk-classifier", () => {
     trafficEntryCountForSelectedWeek: 0,
     trafficSessions: [],
     tutorReports: [],
-    gradeBreakdown: { low: [{ scholarName: "C Scholar", course: "X", assessment: "Y", grade: "60", percent: 60 }], high: [], mid: [] },
+    gradeBreakdown: {
+      low: [{ scholarName: "C Scholar", course: "X", assessment: "Y", grade: "60", percent: 60 }],
+      high: [{ scholarName: "A Scholar", course: "CMSC131", assessment: "Quiz", grade: "95%", percent: 95 }],
+      mid: [{ scholarName: "A Scholar", course: "MATH140", assessment: "HW 4", grade: "82%", percent: 82 }],
+    },
     wahfDonut: { total: 0, completeCount: 0, lateCount: 0, percentComplete: 0 },
     teamLeaderFormStats: [],
     weekLabel: "Week 1",
@@ -40,6 +44,8 @@ describe("risk-classifier", () => {
     expect(rows[1]?.issues).toEqual([
       { kind: "front-desk", glance: "Front desk", pct: 60, requiredMinutes: 120 },
     ])
+    expect(rows.find((row) => row.scholarName === "A Scholar")).toBeUndefined()
+    expect(rows.flatMap((row) => row.issues.filter((issue) => issue.kind === "grade"))).toHaveLength(1)
   })
 
   it("flags missing WAHF even when hours are complete", () => {

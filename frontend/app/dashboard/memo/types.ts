@@ -2,7 +2,7 @@ import type { ScholarWithCompletedSession } from "@/lib/types/session-log"
 import type { TrafficSession } from "@/lib/types/traffic"
 import type { FormCompletionOverall } from "@/components/data-display/form-completion-overview-card"
 import type { MemoTutorReportRow } from "@/lib/types/tutor-report-log"
-import type { GradeBreakdown, TeamLeaderFormStatsRow } from "@/lib/types/form-log"
+import type { GradeBreakdown, GradeEntry, TeamLeaderFormStatsRow } from "@/lib/types/form-log"
 
 export type ScholarWahfStatus = "on-time" | "late" | "missing"
 
@@ -149,18 +149,18 @@ export type ScholarFollowUpRow = {
   ssRequired: number | null
 }
 
-export type WeeklyAccordionSection = {
-  id: string
-  title: string
-  badgeText: string
-  rightLabel: string
-  items: string[]
+export type RecognitionBoardBandId = "high" | "mid" | "low"
+
+export type RecognitionBoardBand = {
+  id: RecognitionBoardBandId
+  label: string
+  entries: GradeEntry[]
 }
 
 export type RecognitionBoardSectionData = {
   badgeText: string
   rightLabel: string
-  items: string[]
+  bands: RecognitionBoardBand[]
 }
 
 export type AttendanceDetailRow = {

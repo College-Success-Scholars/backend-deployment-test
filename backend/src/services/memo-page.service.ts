@@ -72,6 +72,66 @@ export function scholarWahfSubmittedAt(
   return createdAt ? createdAt : null;
 }
 
+export type MemoGradeEntry = {
+  scholarName: string;
+  course: string;
+  assessment: string;
+  grade: string;
+  percent: number;
+};
+
+export type MemoGradeBreakdown = {
+  high: MemoGradeEntry[];
+  mid: MemoGradeEntry[];
+  low: MemoGradeEntry[];
+};
+
+function parseGradeEntriesFromWahf(row: FormLogRowWithLate<WahfFormLogRow>): MemoGradeEntry[] {
+  const grades = row.assignment_grades;
+  if (!grades || typeof grades !== "object") return [];
+  const scholarName = row.scholar_name ?? row.scholar_uid ?? "Unknown";
+  const entries: MemoGradeEntry[] = [];
+  for (const [course, assessments] of Object.entries(grades)) {
+    if (!assessments || typeof assessments !== "object") continue;
+    for (const [assessment, gradeStr] of Object.entries(assessments)) {
+      const match = String(gradeStr).match(/(\d+(?:\.\d+)?)/);
+      if (!match) continue;
+      const percent = parseFloat(match[1]!);
+      entries.push({ scholarName, course, assessment, grade: String(gradeStr), percent });
+    }
+  }
+  return entries;
+}
+
+/** Parse assignment grades from the latest WAHF per scholar so resubmits do not duplicate. */
+export function buildGradeBreakdown(
+  wahfRows: FormLogRowWithLate<WahfFormLogRow>[]
+): MemoGradeBreakdown {
+  const breakdown: MemoGradeBreakdown = { high: [], mid: [], low: [] };
+  const scholarIds = new Set(
+    wahfRows.map((row) => row.scholar_uid).filter((uid): uid is string => Boolean(uid))
+  );
+  for (const scholarId of scholarIds) {
+    const latest = latestScholarWahf(scholarId, wahfRows);
+    if (!latest) continue;
+    for (const entry of parseGradeEntriesFromWahf(latest)) {
+      if (entry.percent >= 90) breakdown.high.push(entry);
+      else if (entry.percent >= 70) breakdown.mid.push(entry);
+      else breakdown.low.push(entry);
+    }
+  }
+  const byPercentDesc = (left: MemoGradeEntry, right: MemoGradeEntry) => {
+    if (left.percent !== right.percent) return right.percent - left.percent;
+    const byName = left.scholarName.localeCompare(right.scholarName);
+    if (byName !== 0) return byName;
+    return left.course.localeCompare(right.course);
+  };
+  breakdown.high.sort(byPercentDesc);
+  breakdown.mid.sort(byPercentDesc);
+  breakdown.low.sort(byPercentDesc);
+  return breakdown;
+}
+
 function isScholar(role: string | null): boolean {
   return (role ?? "").toLowerCase() === "scholar";
 }
@@ -179,8 +239,8 @@ export function buildMemoScholarAttendanceRows(
  *      trafficWeeklyData, trafficEntryCount, trafficSessions,
  *      teamLeaders, mcf/whaf/wpl form logs (with late flags),
  *      tutorReportLogs.
- * 3. Parse assignment grades from WHAF submissions into a grade breakdown
- *    (high ≥90%, mid 70-89%, low <70%) with scholar names attached.
+ * 3. Parse assignment grades from the latest WHAF per scholar into a grade
+ *    breakdown (high ≥90%, mid 70-89%, low <70%) so resubmits do not duplicate.
  * 4. Compute WHAF submission donut stats (total users, submitted, late).
  * 5. Build team leader form stats (MCF/WHAF/WPL completion per TL).
  * 6. Aggregate form completion totals across all team leaders.
@@ -226,30 +286,7 @@ export async function getMemoPageData(weekNum: number) {
   const completedStudy = attendance.ssSessions;
   const completedFd = attendance.fdSessions;
 
-  // Grade breakdown — parse assignment_grades from all WAHF submissions this week
-  type GradeEntry = { scholarName: string; course: string; assessment: string; grade: string; percent: number };
-  const gradeHigh: GradeEntry[] = [];
-  const gradeMid: GradeEntry[] = [];
-  const gradeLow: GradeEntry[] = [];
-
-  for (const row of whafRowsWithLate) {
-    const grades = row.assignment_grades as Record<string, Record<string, string>> | null;
-    if (!grades || typeof grades !== "object") continue;
-    const scholarName = row.scholar_name ?? row.scholar_uid ?? "Unknown";
-    for (const [course, assessments] of Object.entries(grades)) {
-      if (!assessments || typeof assessments !== "object") continue;
-      for (const [assessment, gradeStr] of Object.entries(assessments)) {
-        const match = String(gradeStr).match(/(\d+(?:\.\d+)?)/);
-        if (!match) continue;
-        const percent = parseFloat(match[1]!);
-        const entry: GradeEntry = { scholarName, course, assessment, grade: String(gradeStr), percent };
-        if (percent >= 90) gradeHigh.push(entry);
-        else if (percent >= 70) gradeMid.push(entry);
-        else gradeLow.push(entry);
-      }
-    }
-  }
-  const gradeBreakdown = { high: gradeHigh, mid: gradeMid, low: gradeLow };
+  const gradeBreakdown = buildGradeBreakdown(whafRowsWithLate);
 
   // WHAF submission donut stats — all users, not just scholars with required hours
   const whafSubmitterUids = new Set(

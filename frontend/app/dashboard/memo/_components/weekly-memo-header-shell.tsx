@@ -4,7 +4,6 @@ import { Suspense } from "react"
 
 import { Skeleton } from "@/components/ui/skeleton"
 import { YEAR_NOT_STARTED_COPY } from "@/components/dashboard/widgets/year-not-started-state"
-import { WEEKLY_MEMO_HEADER_BLURB } from "../_lib/memo-section-guide"
 import { useWeeklyMemoNav } from "./weekly-memo-nav-context"
 import { WeeklyMemoWeekNav } from "./weekly-memo-week-nav"
 
@@ -23,12 +22,9 @@ function WeeklyMemoHeaderShellContent({ weekParam }: WeeklyMemoHeaderShellProps)
         {nav.yearNotStarted ? (
           <p className="text-muted-foreground text-sm">{YEAR_NOT_STARTED_COPY}</p>
         ) : hasDates ? (
-          <>
             <p className="text-muted-foreground text-sm">
               {nav.weekStartLabel} - {nav.weekEndLabel}
-            </p>
-            <p className="text-muted-foreground mt-2 max-w-3xl text-sm leading-relaxed">{WEEKLY_MEMO_HEADER_BLURB}</p>
-          </>
+            </p> 
         ) : (
           <Skeleton className="mt-1 h-5 w-48" />
         )}

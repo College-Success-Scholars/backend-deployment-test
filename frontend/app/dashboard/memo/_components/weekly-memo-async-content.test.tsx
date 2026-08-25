@@ -135,7 +135,11 @@ const buildMemoData = (overrides: Record<string, unknown> = {}) => ({
   trafficEntryCountForSelectedWeek: 100,
   trafficSessions: [{ id: "session-1" }],
   tutorReports: [{ id: 1, scholarId: "1", scholarName: "A", tutorName: "T", courses: [], startTime: "", endTime: "", dayOfWeek: "Mon" }],
-  gradeBreakdown: { low: [{ scholarName: "Bob Scholar", course: "X", assessment: "Y", grade: "60", percent: 60 }], high: [], mid: [] },
+  gradeBreakdown: {
+    high: [{ scholarName: "Alice Scholar", course: "CMSC131", assessment: "Quiz", grade: "95%", percent: 95 }],
+    mid: [{ scholarName: "Alice Scholar", course: "MATH140", assessment: "HW 4", grade: "82%", percent: 82 }],
+    low: [{ scholarName: "Bob Scholar", course: "X", assessment: "Y", grade: "60", percent: 60 }],
+  },
   wahfDonut: { total: 0, completeCount: 0, lateCount: 0, percentComplete: 0 },
   teamLeaderFormStats: [
     {
@@ -287,7 +291,23 @@ describe("WeeklyMemoAsyncContent", () => {
     expect(mockRecognitionBoardSection).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          items: expect.arrayContaining(["Alice Scholar - Strong completion this week"]),
+          badgeText: "3 grades",
+          rightLabel: "90–100% · 70–89% · Below 70%",
+          bands: [
+            expect.objectContaining({
+              id: "high",
+              label: "90 – 100%",
+              entries: [expect.objectContaining({ scholarName: "Alice Scholar", course: "CMSC131", assessment: "Quiz" })],
+            }),
+            expect.objectContaining({
+              id: "mid",
+              entries: [expect.objectContaining({ scholarName: "Alice Scholar", course: "MATH140" })],
+            }),
+            expect.objectContaining({
+              id: "low",
+              entries: [expect.objectContaining({ scholarName: "Bob Scholar", course: "X", assessment: "Y" })],
+            }),
+          ],
         }),
       }),
       undefined
