@@ -17,7 +17,7 @@ This repository is a two-app setup:
 
 Core data/auth platform is Supabase. The frontend obtains user session/JWT and calls backend endpoints with `Authorization: Bearer <token>`. The backend validates that JWT and then performs user-scoped Supabase queries.
 
-Operational form and session-log rows (WAHF/WPL/MCF, tutoring, front desk, study sessions, etc.) are **populated by an existing Google Forms → Supabase intake**, not by in-app forms. The Express API mostly **reads** those tables and derives aggregates; see [`docs/dev/supabase/README.md`](../dev/supabase/README.md#form--log-intake-google-forms).
+Operational form and session-log rows (WAHF/WPL/MCF, tutoring, front desk, study sessions, etc.) are **populated by an existing Google Forms → Supabase intake**, not by in-app forms. The Express API mostly **reads** those tables and derives aggregates; see [`docs/dev/supabase/README.md`](../dev/supabase/README.md#form--log-intake-google-forms). Each academic year, re-authenticate that pipeline (OAuth / Apps Script consent) as part of the calendar rollover — [Yearly rollover](../dev/supabase/README.md#yearly-rollover).
 
 ## Backend how it works
 

@@ -31,6 +31,7 @@ Stop ISO-week bugs before they ship. Most backend and Memo queries use **campus 
 2. In code, find where that week is computed or passed (`weekNum` into API).
 3. In a Node REPL or quick test, call `campusWeekToDateRange(weekNum)` from `shared` and confirm the date range matches UI expectations.
 4. Read `FALL_SEMESTER_FIRST_DAY` in `shared/time-config.ts` — know that this constant is updated per academic year (ask before changing it).
+5. Know that the same yearly rollover also **re-authenticates the Google Forms → Supabase pipelines** (OAuth / Apps Script consent). Calendar dates in git do not keep intake writing. Checklist: [Yearly rollover](../supabase/README.md#yearly-rollover).
 
 ---
 

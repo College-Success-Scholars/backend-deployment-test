@@ -7,7 +7,7 @@
 
 [← Root](../README.md) › Deployment
 
-Related: [Scripts](../scripts/README.md) · [Supabase](../supabase/README.md) · [Backend](../backend/README.md) · [Frontend](../frontend/README.md)
+Related: [IT review](../it-review.md) · [Scripts](../scripts/README.md) · [Supabase](../supabase/README.md) · [Backend](../backend/README.md) · [Frontend](../frontend/README.md)
 
 ---
 
