@@ -24,7 +24,11 @@ plugins:
 markdown_extensions:
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
   - tables
@@ -80,6 +84,7 @@ nav:
       - Overview: dev/shared/README.md
       - Source: dev/shared/src/README.md
   - Deployment: dev/deployment/README.md
+  - IT review: dev/it-review.md
   - Scripts: dev/scripts/README.md
   - Supabase: dev/supabase/README.md
   - Agents:
