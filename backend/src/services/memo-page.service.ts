@@ -7,7 +7,7 @@
  * response object. Calls multiple domain services and merges their results.
  *
  * ## Responsibilities
- * - Fetch and combine session records, form logs, traffic, and user data
+ * - Fetch and combine campus-week attendance (tickets + excuses), form logs, traffic, and user data
  * - Compute derived metrics (completion rates, traffic trends, etc.)
  * - Return a fully assembled getMemoPageData(weekNum) payload
  *
@@ -19,10 +19,13 @@
  * - Memo sync operations (that's memo.service.ts)
  * - HTTP request/response logic
  */
-import { campusWeekToDateRange, dateToCampusWeek, getWeekFetchEnd } from "./time.service.js";
-import { fetchAllUsersForMemo, fetchTeamLeaders } from "./user.service.js";
-import { getStudySessionRecordsForWeekAll, getFrontDeskRecordsForWeekAll } from "./session-record.service.js";
-import { getStudySessionCompletedSessions, getFrontDeskCompletedSessions } from "./session-log.service.js";
+import { campusWeekToDateRange, dateToCampusWeek, freshmanCohortYear, getWeekFetchEnd, sophomoreCohortYear } from "./time.service.js";
+import { fetchTeamLeaders, isEligibleScholar } from "./user.service.js";
+import {
+  getCampusWeekAttendance,
+} from "./attendance-week.service.js";
+import type { CampusWeekAttendanceTotals } from "../models/attendance-week.model.js";
+import { EMPTY_WEEKLY_MINUTES } from "../models/weekly-minutes.model.js";
 import { getTrafficEntryCountsForWeeks, getTrafficEntryCountForWeek, getTrafficSessionsForWeek } from "./traffic.service.js";
 import {
   getMcfFormLogsForWeekWithLate,
@@ -33,18 +36,191 @@ import {
   buildTeamLeaderFormStatsForWeek,
 } from "./form-log.service.js";
 import { getTutorReportLogsForWeek } from "./tutor-report-log.service.js";
+import type { FormLogRowWithLate, WahfFormLogRow } from "../models/form-log.model.js";
 import type { MemoUserRow } from "../models/user.model.js";
 
-function isScholar(role: string | null): boolean {
-  return (role ?? "").toLowerCase() === "scholar";
+export type ScholarWahfStatus = "on-time" | "late" | "missing";
+
+/** Latest weekly WAHF form-log row for a scholar, or null if none. */
+export function latestScholarWahf(
+  scholarId: string,
+  wahfRows: FormLogRowWithLate<WahfFormLogRow>[]
+): FormLogRowWithLate<WahfFormLogRow> | null {
+  const mine = wahfRows.filter((row) => row.scholar_uid === scholarId);
+  if (mine.length === 0) return null;
+  return mine.reduce((best, row) =>
+    (row.created_at ?? "") > (best.created_at ?? "") ? row : best
+  );
+}
+
+/** Latest WAHF for a scholar this week: missing, on-time, or late. */
+export function scholarWahfStatus(
+  scholarId: string,
+  wahfRows: FormLogRowWithLate<WahfFormLogRow>[]
+): ScholarWahfStatus {
+  const latest = latestScholarWahf(scholarId, wahfRows);
+  if (!latest) return "missing";
+  return latest.isLate ? "late" : "on-time";
+}
+
+/** `created_at` of the latest weekly WAHF log for that scholar, or null if none. */
+export function scholarWahfSubmittedAt(
+  scholarId: string,
+  wahfRows: FormLogRowWithLate<WahfFormLogRow>[]
+): string | null {
+  const createdAt = latestScholarWahf(scholarId, wahfRows)?.created_at;
+  return createdAt ? createdAt : null;
+}
+
+export type MemoGradeEntry = {
+  scholarName: string;
+  course: string;
+  assessment: string;
+  grade: string;
+  percent: number;
+};
+
+export type MemoGradeBreakdown = {
+  high: MemoGradeEntry[];
+  mid: MemoGradeEntry[];
+  low: MemoGradeEntry[];
+};
+
+function parseGradeEntriesFromWahf(row: FormLogRowWithLate<WahfFormLogRow>): MemoGradeEntry[] {
+  const grades = row.assignment_grades;
+  if (!grades || typeof grades !== "object") return [];
+  const scholarName = row.scholar_name ?? row.scholar_uid ?? "Unknown";
+  const entries: MemoGradeEntry[] = [];
+  for (const [course, assessments] of Object.entries(grades)) {
+    if (!assessments || typeof assessments !== "object") continue;
+    for (const [assessment, gradeStr] of Object.entries(assessments)) {
+      const match = String(gradeStr).match(/(\d+(?:\.\d+)?)/);
+      if (!match) continue;
+      const percent = parseFloat(match[1]!);
+      entries.push({ scholarName, course, assessment, grade: String(gradeStr), percent });
+    }
+  }
+  return entries;
+}
+
+/** Parse assignment grades from the latest WAHF per scholar so resubmits do not duplicate. */
+export function buildGradeBreakdown(
+  wahfRows: FormLogRowWithLate<WahfFormLogRow>[]
+): MemoGradeBreakdown {
+  const breakdown: MemoGradeBreakdown = { high: [], mid: [], low: [] };
+  const scholarIds = new Set(
+    wahfRows.map((row) => row.scholar_uid).filter((uid): uid is string => Boolean(uid))
+  );
+  for (const scholarId of scholarIds) {
+    const latest = latestScholarWahf(scholarId, wahfRows);
+    if (!latest) continue;
+    for (const entry of parseGradeEntriesFromWahf(latest)) {
+      if (entry.percent >= 90) breakdown.high.push(entry);
+      else if (entry.percent >= 70) breakdown.mid.push(entry);
+      else breakdown.low.push(entry);
+    }
+  }
+  const byPercentDesc = (left: MemoGradeEntry, right: MemoGradeEntry) => {
+    if (left.percent !== right.percent) return right.percent - left.percent;
+    const byName = left.scholarName.localeCompare(right.scholarName);
+    if (byName !== 0) return byName;
+    return left.course.localeCompare(right.course);
+  };
+  breakdown.high.sort(byPercentDesc);
+  breakdown.mid.sort(byPercentDesc);
+  breakdown.low.sort(byPercentDesc);
+  return breakdown;
 }
 
 function isTeamLeader(programRole: string | null): boolean {
   return (programRole ?? "").toLowerCase() !== "scholar";
 }
 
-function hasRequiredHours(u: MemoUserRow): boolean {
-  return (u.fd_required ?? 0) > 0 || (u.ss_required ?? 0) > 0;
+const ZERO_ATTENDANCE: CampusWeekAttendanceTotals = {
+  minutes: EMPTY_WEEKLY_MINUTES,
+  loggedMin: 0,
+  excuseMin: 0,
+  description: null,
+};
+
+export type MemoScholarAttendanceRow = {
+  scholarId: string;
+  scholarName: string;
+  cohort: number | null;
+  fdTotal: number;
+  ssTotal: number;
+  fdRequired: number | null;
+  ssRequired: number | null;
+  fdExcuseMin: number;
+  ssExcuseMin: number;
+  fdPct: number | null;
+  ssPct: number | null;
+  wahfStatus: ScholarWahfStatus;
+  wahfSubmittedAt: string | null;
+};
+
+/**
+ * Merge roster requirements with compute-on-read minutes + scholar_week_excuses.
+ * Empty tickets → 0 logged; excuse-only scholars still get completion from excuse_min.
+ */
+export function buildMemoScholarAttendanceRows(
+  users: MemoUserRow[],
+  fdByUid: Map<string, CampusWeekAttendanceTotals>,
+  ssByUid: Map<string, CampusWeekAttendanceTotals>,
+  wahfRows: FormLogRowWithLate<WahfFormLogRow>[] = []
+): {
+  scholars: MemoScholarAttendanceRow[];
+  cohort2024: { total: number; fdCompleteCount: number; ssCompleteCount: number };
+  cohort2025: { total: number; fdCompleteCount: number; ssCompleteCount: number };
+} {
+  const scholars: MemoScholarAttendanceRow[] = [];
+  const cohort2024 = { total: 0, fdCompleteCount: 0, ssCompleteCount: 0 };
+  const cohort2025 = { total: 0, fdCompleteCount: 0, ssCompleteCount: 0 };
+  const sophomoreYear = sophomoreCohortYear();
+  const freshmanYear = freshmanCohortYear();
+
+  for (const u of users) {
+    if (!isEligibleScholar(u)) continue;
+    const fd = fdByUid.get(u.uid) ?? ZERO_ATTENDANCE;
+    const study = ssByUid.get(u.uid) ?? ZERO_ATTENDANCE;
+    const fdReq = u.fd_required ?? null;
+    const ssReq = u.ss_required ?? null;
+    const fdEffective = fd.loggedMin + fd.excuseMin;
+    const ssEffective = study.loggedMin + study.excuseMin;
+    const fd_pct = fdReq != null && fdReq > 0 ? (fdEffective / fdReq) * 100 : null;
+    const ss_pct = ssReq != null && ssReq > 0 ? (ssEffective / ssReq) * 100 : null;
+    const name = [u.first_name, u.last_name].filter(Boolean).join(" ").trim() || u.uid;
+
+    scholars.push({
+      scholarId: u.uid,
+      scholarName: name,
+      cohort: u.cohort ?? null,
+      fdTotal: fd.loggedMin,
+      ssTotal: study.loggedMin,
+      fdRequired: fdReq,
+      ssRequired: ssReq,
+      fdExcuseMin: fd.excuseMin,
+      ssExcuseMin: study.excuseMin,
+      fdPct: fd_pct,
+      ssPct: ss_pct,
+      wahfStatus: scholarWahfStatus(u.uid, wahfRows),
+      wahfSubmittedAt: scholarWahfSubmittedAt(u.uid, wahfRows),
+    });
+
+    const fdComplete = fd_pct != null && fd_pct >= 100;
+    const ssComplete = ss_pct != null && ss_pct >= 100;
+    if (u.cohort === sophomoreYear) {
+      cohort2024.total++;
+      if (fdComplete) cohort2024.fdCompleteCount++;
+      if (ssComplete) cohort2024.ssCompleteCount++;
+    } else if (u.cohort === freshmanYear) {
+      cohort2025.total++;
+      if (fdComplete) cohort2025.fdCompleteCount++;
+      if (ssComplete) cohort2025.ssCompleteCount++;
+    }
+  }
+
+  return { scholars, cohort2024, cohort2025 };
 }
 
 /**
@@ -52,19 +228,20 @@ function hasRequiredHours(u: MemoUserRow): boolean {
  *
  * Flow:
  * 1. Resolve the campus week date range and prepare query boundaries.
- * 2. Fetch all data sources in parallel (13 queries):
- *    - allUsers, studyRecords, fdRecords, completedStudy, completedFd,
+ * 2. Fetch all data sources in parallel:
+ *    - campus-week attendance (tickets + scholar_week_excuses), completed sessions,
  *      trafficWeeklyData, trafficEntryCount, trafficSessions,
  *      teamLeaders, mcf/whaf/wpl form logs (with late flags),
  *      tutorReportLogs.
- * 3. Parse assignment grades from WHAF submissions into a grade breakdown
- *    (high ≥90%, mid 70-89%, low <70%) with scholar names attached.
+ * 3. Parse assignment grades from the latest WHAF per scholar into a grade
+ *    breakdown (high ≥90%, mid 70-89%, low <70%) so resubmits do not duplicate.
  * 4. Compute WHAF submission donut stats (total users, submitted, late).
  * 5. Build team leader form stats (MCF/WHAF/WPL completion per TL).
  * 6. Aggregate form completion totals across all team leaders.
- * 7. Build scholar rows: merge FD/SS records with user requirements,
- *    compute completion percentages, and track cohort-level stats for
- *    pie charts (2024 vs 2025).
+ * 7. Build scholar rows: merge FD/SS compute-on-read minutes + excuses with
+ *    roster requirements, compute completion percentages, attach WAHF status
+ *    and latest form-log submitted-at from form logs, and track cohort-level
+ *    stats for pie charts (2024 vs 2025).
  * 8. Build team leader MCF rows: per-TL MCF count, late flag, latest date.
  * 9. Resolve tutor report scholar names and derive day-of-week.
  * 10. Return everything as a single object for the frontend to render.
@@ -72,19 +249,13 @@ function hasRequiredHours(u: MemoUserRow): boolean {
 export async function getMemoPageData(weekNum: number) {
   const currentCampusWeek = dateToCampusWeek(new Date());
   const range = campusWeekToDateRange(weekNum);
-  const startDate = range?.startDate;
   const endDate = range ? getWeekFetchEnd(range) : undefined;
-  const dateRangeOpts = { startDate, endDate };
 
   const weekPickerMax = Math.max(25, currentCampusWeek ?? 1, weekNum);
   const weekNumbers = Array.from({ length: weekPickerMax }, (_, i) => i + 1);
 
   const [
-    allUsers,
-    studyRecords,
-    fdRecords,
-    completedStudy,
-    completedFd,
+    attendance,
     trafficWeeklyData,
     trafficEntryCountForSelectedWeek,
     trafficSessions,
@@ -94,11 +265,7 @@ export async function getMemoPageData(weekNum: number) {
     wplRowsWithLate,
     tutorReportLogs,
   ] = await Promise.all([
-    fetchAllUsersForMemo(),
-    getStudySessionRecordsForWeekAll(weekNum),
-    getFrontDeskRecordsForWeekAll(weekNum),
-    getStudySessionCompletedSessions(dateRangeOpts),
-    getFrontDeskCompletedSessions(dateRangeOpts),
+    getCampusWeekAttendance(weekNum),
     getTrafficEntryCountsForWeeks(weekNumbers),
     getTrafficEntryCountForWeek(weekNum),
     getTrafficSessionsForWeek(weekNum),
@@ -109,30 +276,11 @@ export async function getMemoPageData(weekNum: number) {
     getTutorReportLogsForWeek(weekNum),
   ]);
 
-  // Grade breakdown — parse assignment_grades from all WAHF submissions this week
-  type GradeEntry = { scholarName: string; course: string; assessment: string; grade: string; percent: number };
-  const gradeHigh: GradeEntry[] = [];
-  const gradeMid: GradeEntry[] = [];
-  const gradeLow: GradeEntry[] = [];
+  const allUsers = attendance.users;
+  const completedStudy = attendance.ssSessions;
+  const completedFd = attendance.fdSessions;
 
-  for (const row of whafRowsWithLate) {
-    const grades = row.assignment_grades as Record<string, Record<string, string>> | null;
-    if (!grades || typeof grades !== "object") continue;
-    const scholarName = row.scholar_name ?? row.scholar_uid ?? "Unknown";
-    for (const [course, assessments] of Object.entries(grades)) {
-      if (!assessments || typeof assessments !== "object") continue;
-      for (const [assessment, gradeStr] of Object.entries(assessments)) {
-        const match = String(gradeStr).match(/(\d+(?:\.\d+)?)/);
-        if (!match) continue;
-        const percent = parseFloat(match[1]!);
-        const entry: GradeEntry = { scholarName, course, assessment, grade: String(gradeStr), percent };
-        if (percent >= 90) gradeHigh.push(entry);
-        else if (percent >= 70) gradeMid.push(entry);
-        else gradeLow.push(entry);
-      }
-    }
-  }
-  const gradeBreakdown = { high: gradeHigh, mid: gradeMid, low: gradeLow };
+  const gradeBreakdown = buildGradeBreakdown(whafRowsWithLate);
 
   // WHAF submission donut stats — all users, not just scholars with required hours
   const whafSubmitterUids = new Set(
@@ -177,63 +325,12 @@ export async function getMemoPageData(weekNum: number) {
     }
   );
 
-  // Build scholar rows with session percentages
-  const studyByUid = new Map(
-    studyRecords.filter((r) => r.uid != null).map((r) => [
-      String(r.uid),
-      {
-        total: (r.mon_min ?? 0) + (r.tues_min ?? 0) + (r.wed_min ?? 0) + (r.thurs_min ?? 0) + (r.fri_min ?? 0),
-        excuse_min: r.excuse_min ?? 0,
-        ss_required: r.ss_required ?? null,
-      },
-    ])
+  const { scholars, cohort2024, cohort2025 } = buildMemoScholarAttendanceRows(
+    allUsers,
+    attendance.fdByUid,
+    attendance.ssByUid,
+    whafRowsWithLate
   );
-  const fdByUid = new Map(
-    fdRecords.filter((r) => r.uid != null).map((r) => [
-      String(r.uid),
-      {
-        total: (r.mon_min ?? 0) + (r.tues_min ?? 0) + (r.wed_min ?? 0) + (r.thurs_min ?? 0) + (r.fri_min ?? 0),
-        excuse_min: r.excuse_min ?? 0,
-        fd_required: r.fd_required ?? null,
-      },
-    ])
-  );
-
-  const scholars: Array<{
-    scholarId: string; scholarName: string; cohort: number | null;
-    fdTotal: number; ssTotal: number;
-    fdRequired: number | null; ssRequired: number | null;
-    fdExcuseMin: number; ssExcuseMin: number;
-    fdPct: number | null; ssPct: number | null;
-  }> = [];
-  const cohort2024 = { total: 0, fdCompleteCount: 0, ssCompleteCount: 0 };
-  const cohort2025 = { total: 0, fdCompleteCount: 0, ssCompleteCount: 0 };
-
-  for (const u of allUsers) {
-    if (!isScholar(u.program_role) || !hasRequiredHours(u)) continue;
-    const study = studyByUid.get(u.uid) ?? { total: 0, excuse_min: 0, ss_required: u.ss_required ?? null };
-    const fd = fdByUid.get(u.uid) ?? { total: 0, excuse_min: 0, fd_required: u.fd_required ?? null };
-    const fdReq = fd.fd_required ?? u.fd_required ?? null;
-    const ssReq = study.ss_required ?? u.ss_required ?? null;
-    const fdEffective = fd.total + fd.excuse_min;
-    const ssEffective = study.total + study.excuse_min;
-    const fd_pct = fdReq != null && fdReq > 0 ? (fdEffective / fdReq) * 100 : null;
-    const ss_pct = ssReq != null && ssReq > 0 ? (ssEffective / ssReq) * 100 : null;
-    const name = [u.first_name, u.last_name].filter(Boolean).join(" ").trim() || u.uid;
-
-    scholars.push({
-      scholarId: u.uid, scholarName: name, cohort: u.cohort ?? null,
-      fdTotal: fd.total, ssTotal: study.total,
-      fdRequired: fdReq, ssRequired: ssReq,
-      fdExcuseMin: fd.excuse_min, ssExcuseMin: study.excuse_min,
-      fdPct: fd_pct, ssPct: ss_pct,
-    });
-
-    const fdComplete = fd_pct != null && fd_pct >= 100;
-    const ssComplete = ss_pct != null && ss_pct >= 100;
-    if (u.cohort === 2024) { cohort2024.total++; if (fdComplete) cohort2024.fdCompleteCount++; if (ssComplete) cohort2024.ssCompleteCount++; }
-    else if (u.cohort === 2025) { cohort2025.total++; if (fdComplete) cohort2025.fdCompleteCount++; if (ssComplete) cohort2025.ssCompleteCount++; }
-  }
 
   const pieData = {
     cohort2024: {

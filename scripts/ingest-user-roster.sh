@@ -18,8 +18,8 @@
 
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-HELPER="${ROOT}/scripts/ingest-user-roster.py"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+HELPER="${REPO_ROOT}/scripts/ingest-user-roster.py"
 DRY_RUN=0
 CSV_PATH=""
 
@@ -83,62 +83,13 @@ if ! command -v python3 >/dev/null 2>&1; then
   exit 1
 fi
 
-# URL-only from backend/.env — never load service role from project env files.
-load_url_from_backend_env() {
-  local env_file="${ROOT}/backend/.env"
-  [[ -f "$env_file" ]] || return 0
-  local line name val
-  while IFS= read -r line || [[ -n "$line" ]]; do
-    line="${line#"${line%%[![:space:]]*}"}"
-    [[ -z "$line" || "$line" == \#* ]] && continue
-    name="${line%%=*}"
-    name="${name%"${name##*[![:space:]]}"}"
-    [[ "$name" == "SUPABASE_URL" || "$name" == "NEXT_PUBLIC_SUPABASE_URL" ]] || continue
-    val="${line#*=}"
-    val="${val#"${val%%[![:space:]]*}"}"
-    val="${val%"${val##*[![:space:]]}"}"
-    if [[ "$val" == \"*\" && "$val" == *\" ]]; then
-      val="${val:1:${#val}-2}"
-    elif [[ "$val" == \'*\' && "$val" == *\' ]]; then
-      val="${val:1:${#val}-2}"
-    fi
-    if [[ -z "${SUPABASE_URL:-}" && -n "$val" ]]; then
-      export SUPABASE_URL="$val"
-    fi
-  done < "$env_file"
-}
+# shellcheck source=scripts/supabase-env.sh
+source "${REPO_ROOT}/scripts/supabase-env.sh"
 
-if [[ -z "${SUPABASE_URL:-}" && -n "${NEXT_PUBLIC_SUPABASE_URL:-}" ]]; then
-  export SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL"
-fi
-
-if [[ -z "${SUPABASE_URL:-}" ]]; then
-  load_url_from_backend_env
-fi
-
+# A dry run neither reads nor writes Supabase, so it needs no credentials.
 if [[ "$DRY_RUN" -eq 0 ]]; then
-  if [[ -z "${SUPABASE_URL:-}" ]]; then
-    echo "error: set SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL (or put SUPABASE_URL in backend/.env)" >&2
-    exit 1
-  fi
-
-  if [[ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]]; then
-    if [[ ! -t 0 ]]; then
-      echo "error: SUPABASE_SERVICE_ROLE_KEY is unset and stdin is not a TTY (cannot prompt)" >&2
-      echo "Export SUPABASE_SERVICE_ROLE_KEY in this shell for non-interactive runs." >&2
-      exit 1
-    fi
-    echo "Paste Supabase service role key (input hidden), then Enter:" >&2
-    # Do not load from repo .env — operator pastes from Dashboard for this run only.
-    read -r -s SUPABASE_SERVICE_ROLE_KEY
-    echo >&2
-    export SUPABASE_SERVICE_ROLE_KEY
-  fi
-
-  if [[ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]]; then
-    echo "error: service role key is empty" >&2
-    exit 1
-  fi
+  require_supabase_url
+  require_supabase_service_role
 fi
 
 PY_ARGS=("$HELPER" "$CSV_PATH")

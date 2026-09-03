@@ -10,7 +10,6 @@ const AUTH_PROTECTED_ROUTES = [
   "/api/auth/profile",
   "/api/users",
   "/api/session-logs",
-  "/api/session-records",
   "/api/traffic",
   "/api/form-logs",
   "/api/daily-activity",
@@ -50,6 +49,11 @@ describe("Auth gating — unauthenticated requests", () => {
 
   it("GET /api/dev/test-profiles returns 401 without token", async () => {
     const res = await request(app).get("/api/dev/test-profiles");
+    expect(res.status).toBe(401);
+  });
+
+  it("PATCH /api/dev/roster/:uid returns 401 without token", async () => {
+    const res = await request(app).patch("/api/dev/roster/123").send({ status: "enrolled" });
     expect(res.status).toBe(401);
   });
 

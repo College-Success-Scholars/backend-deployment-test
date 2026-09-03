@@ -35,6 +35,7 @@ Prefer GitHub review comments or issues for async design discussion so the trail
 | Auth middleware (`requireAuth`, role gates) or JWT / `AsyncLocalStorage` binding | Breaks the whole API surface |
 | `rejectWritesWhenActing` denylist semantics | Security boundary for persona switching |
 | `shared/time-config.ts` academic calendar constants | Year-wide data alignment (Memo, records, forms) |
+| Google Forms → Supabase intake (re-auth, Drive move, destinations) | Ops pipeline outside the app; expired consent empties dashboards — [Yearly rollover](../supabase/README.md#yearly-rollover) |
 | Deploy topology / secrets / CORS defaults for production | [Deployment](../deployment/README.md) |
 
 Safe default for a first week: UI copy, display wiring of existing API fields, tests, docs — via the [golden path](golden-path-first-pr.md).

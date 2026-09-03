@@ -33,9 +33,11 @@ import type {
   ScholarWithCompletedSession,
 } from "@/lib/types/session-log";
 import type {
-  FrontDeskRecordRow,
-  StudySessionRecordRow,
-} from "@/lib/types/session-record";
+  AttendanceKind,
+  AttendanceWeekBoard,
+  ScholarWeekExcuse,
+} from "@/lib/types/attendance-week";
+import type { RosterRow } from "@/lib/types/roster";
 import type {
   TrafficSession,
   WeekEntryCount,
@@ -75,6 +77,7 @@ export type MemoUserRow = {
   app_role: string | null;
   fd_required: number | null;
   ss_required: number | null;
+  status: string | null;
 };
 
 export type TeamLeaderRow = Omit<MemoUserRow, "app_role"> & {
@@ -110,6 +113,12 @@ export async function fetchAllUsersForMemo(): Promise<MemoUserRow[]> {
 
 export async function getUserByUid(uid: string): Promise<MemoUserRow | null> {
   return backendGet<MemoUserRow | null>(`/api/users/${encodeURIComponent(uid)}`);
+}
+
+export type { RosterRow } from "@/lib/types/roster";
+
+export async function getRosterByUid(uid: string): Promise<RosterRow | null> {
+  return backendGet<RosterRow | null>(`/api/dev/roster/${encodeURIComponent(uid)}`);
 }
 
 export async function fetchTeamLeaders(): Promise<TeamLeaderRow[]> {
@@ -185,74 +194,24 @@ export async function getStudySessionCompletedSessions(options?: {
 }
 
 // ---------------------------------------------------------------------------
-// Session records
+// Attendance (campus week — tickets + scholar_week_excuses)
 // ---------------------------------------------------------------------------
 
-export type RecordKind = "front_desk" | "study_session";
-
-export type StudySessionRecordWithName = StudySessionRecordRow & {
-  scholar_name?: string | null; fd_required?: number | null; ss_required?: number | null;
-};
-
-export type FrontDeskRecordWithName = FrontDeskRecordRow & {
-  scholar_name?: string | null; fd_required?: number | null; ss_required?: number | null;
-};
-
-export interface UpdateExcusePayload { excuse: string | null; excuse_min: number | null; }
-
-export async function getFrontDeskRecord(uid: number, weekNum: number): Promise<FrontDeskRecordRow | null> {
-  return backendGet(`/api/session-records/front-desk/${uid}/week/${weekNum}`);
+export async function getAttendanceWeekBoard(
+  weekNum: number,
+  kind: AttendanceKind
+): Promise<AttendanceWeekBoard> {
+  return backendGet(`/api/attendance/week/${weekNum}?kind=${kind}`);
 }
 
-export async function getStudySessionRecord(uid: number, weekNum: number): Promise<StudySessionRecordRow | null> {
-  return backendGet(`/api/session-records/study/${uid}/week/${weekNum}`);
-}
-
-export async function getFrontDeskRecordsByUid(uid: string): Promise<FrontDeskRecordRow[]> {
-  return backendGet(`/api/session-records/front-desk/by-uid/${encodeURIComponent(uid)}`);
-}
-
-export async function getStudySessionRecordsByUid(uid: string): Promise<StudySessionRecordRow[]> {
-  return backendGet(`/api/session-records/study/by-uid/${encodeURIComponent(uid)}`);
-}
-
-export async function getStudySessionRecordsForWeek(weekNum: number): Promise<StudySessionRecordWithName[]> {
-  return backendGet(`/api/session-records/study/week/${weekNum}`);
-}
-
-export async function getStudySessionRecordsForWeekAll(weekNum: number): Promise<StudySessionRecordWithName[]> {
-  return backendGet(`/api/session-records/study/week/${weekNum}/all`);
-}
-
-export async function getFrontDeskRecordsForWeek(weekNum: number): Promise<FrontDeskRecordWithName[]> {
-  return backendGet(`/api/session-records/front-desk/week/${weekNum}`);
-}
-
-export async function getFrontDeskRecordsForWeekAll(weekNum: number): Promise<FrontDeskRecordWithName[]> {
-  return backendGet(`/api/session-records/front-desk/week/${weekNum}/all`);
-}
-
-export async function syncFrontDeskRecordsForWeek(weekNum: number, uid?: number) {
-  return backendPost<{ upserted: number }>("/api/session-records/front-desk/sync", { weekNum, uid });
-}
-
-export async function syncFrontDeskRecordsForWeekAllUids(weekNum: number) {
-  return backendPost<{ upserted: number }>("/api/session-records/front-desk/sync-all", { weekNum });
-}
-
-export async function syncStudySessionRecordsForWeek(weekNum: number, uid?: number) {
-  return backendPost<{ upserted: number }>("/api/session-records/study/sync", { weekNum, uid });
-}
-
-export async function syncStudySessionRecordsForWeekAllUids(weekNum: number) {
-  return backendPost<{ upserted: number }>("/api/session-records/study/sync-all", { weekNum });
-}
-
-export async function updateRecordExcuse(
-  uid: number, weekNum: number, kind: RecordKind, payload: UpdateExcusePayload
-): Promise<FrontDeskRecordRow | StudySessionRecordRow | null> {
-  const route = kind === "front_desk" ? "front-desk" : "study";
-  return backendPatch(`/api/session-records/${route}/excuse`, { uid, weekNum, ...payload });
+export async function upsertAttendanceExcuse(payload: {
+  uid: string;
+  weekNum: number;
+  kind: AttendanceKind;
+  excuse_min: number | null;
+  description: string | null;
+}): Promise<ScholarWeekExcuse> {
+  return backendPatch("/api/attendance/excuse", payload);
 }
 
 // ---------------------------------------------------------------------------

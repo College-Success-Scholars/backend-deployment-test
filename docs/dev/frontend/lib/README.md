@@ -104,7 +104,6 @@ Generated from TypeScript signatures. Module indexes below; full catalog: [API R
 | `supabase/server` | [API](../../../reference/api/frontend/lib/supabase/server/README.md) |
 | `types/form-log` | [API](../../../reference/api/frontend/lib/types/form-log/README.md) |
 | `types/session-log` | [API](../../../reference/api/frontend/lib/types/session-log/README.md) |
-| `types/session-record` | [API](../../../reference/api/frontend/lib/types/session-record/README.md) |
 | `types/supabase` | [API](../../../reference/api/frontend/lib/types/supabase/README.md) |
 | `types/time` | [API](../../../reference/api/frontend/lib/types/time/README.md) |
 | `types/traffic` | [API](../../../reference/api/frontend/lib/types/traffic/README.md) |

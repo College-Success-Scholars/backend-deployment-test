@@ -31,7 +31,7 @@ body:
     id: surface
     attributes:
       label: Surface
-      description: UI path (e.g. /dashboard/memo) or API route (e.g. /api/session-records/...).
+      description: UI path (e.g. /dashboard/memo) or API route (e.g. /api/attendance/week/1).
       placeholder: /dashboard/... or /api/...
     validations:
       required: true

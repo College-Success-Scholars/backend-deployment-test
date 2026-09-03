@@ -6,9 +6,10 @@ import {
   formatDate,
 } from "@/lib/format/time";
 import { getWeekFetchEnd } from "@/lib/format/time";
-import { getFrontDeskRecord, getStudySessionRecord } from "@/lib/server/data";
+import { getAttendanceWeekBoard } from "@/lib/server/data";
 import { fetchFrontDeskLogs, fetchStudySessionLogs } from "@/lib/server/data";
 import { getUserByUid } from "@/lib/server/data";
+import { getRosterByUid } from "@/lib/server/data";
 import {
   getWhafFormLogsByUid,
   getMcfFormLogsByUid,
@@ -34,10 +35,11 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { FormsDetailTables } from "./forms-detail-tables";
+import { RosterEditForm } from "../roster-edit-form";
 
 export const metadata = {
   title: "Profile | Dev Tools",
-  description: "User profile: records, tickets, form submissions",
+  description: "User profile: attendance, tickets, form submissions",
 };
 
 export const dynamic = "force-dynamic";
@@ -80,6 +82,8 @@ export default async function DevProfilePage({ params, searchParams }: PageProps
     notFound();
   }
 
+  const roster = await getRosterByUid(uid);
+
   const currentCampusWeek = dateToCampusWeek(new Date());
   const weekNum = parseWeek(resolvedSearchParams.week, currentCampusWeek);
   const range = campusWeekToDateRange(weekNum);
@@ -87,26 +91,28 @@ export default async function DevProfilePage({ params, searchParams }: PageProps
   const endDate = range ? getWeekFetchEnd(range) : undefined;
   const dateRangeOpts = { startDate, endDate, scholarUids: [uid] as string[] };
 
-  const uidNum = Number(uid);
   const isScholar = (user.program_role ?? "").toLowerCase() === "scholar";
 
   const [
-    fdRecord,
-    ssRecord,
+    fdBoard,
+    ssBoard,
     fdLogs,
     ssLogs,
     whafRows,
     mcfRows,
     wplRows,
   ] = await Promise.all([
-    Number.isNaN(uidNum) ? Promise.resolve(null) : getFrontDeskRecord(uidNum, weekNum),
-    Number.isNaN(uidNum) ? Promise.resolve(null) : getStudySessionRecord(uidNum, weekNum),
+    getAttendanceWeekBoard(weekNum, "front_desk"),
+    getAttendanceWeekBoard(weekNum, "study_session"),
     startDate && endDate ? fetchFrontDeskLogs(dateRangeOpts) : Promise.resolve([]),
     startDate && endDate ? fetchStudySessionLogs(dateRangeOpts) : Promise.resolve([]),
     isScholar ? getWhafFormLogsByUid(uid) : Promise.resolve([] as WahfFormLogRow[]),
     !isScholar ? getMcfFormLogsByUid(uid) : Promise.resolve([] as McfFormLogRow[]),
     !isScholar ? getWplFormLogsByUid(uid) : Promise.resolve([] as WplFormLogRow[]),
   ]);
+
+  const fdRow = fdBoard.rows.find((row) => row.scholar_uid === uid) ?? null;
+  const ssRow = ssBoard.rows.find((row) => row.scholar_uid === uid) ?? null;
 
   const displayName = [user.first_name, user.last_name].filter(Boolean).join(" ").trim() || user.uid;
 
@@ -120,6 +126,11 @@ export default async function DevProfilePage({ params, searchParams }: PageProps
           <Badge variant={isScholar ? "default" : "secondary"}>
             {user.program_role ?? "—"}
           </Badge>
+          {user.status && (
+            <Badge variant={user.status.toLowerCase() === "enrolled" ? "default" : "secondary"}>
+              {user.status}
+            </Badge>
+          )}
           {user.cohort != null && (
             <span className="text-sm text-muted-foreground">Cohort {user.cohort}</span>
           )}
@@ -129,6 +140,20 @@ export default async function DevProfilePage({ params, searchParams }: PageProps
         </div>
       </div>
 
+      {roster && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Edit roster</CardTitle>
+            <CardDescription>
+              Developer-only write to user_roster (and profiles when a signed-in row exists).
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RosterEditForm roster={roster} />
+          </CardContent>
+        </Card>
+      )}
+
       <CampusWeekCard
         basePath={`/dev/profiles/${uid}`}
         selectedWeek={weekNum}
@@ -136,14 +161,13 @@ export default async function DevProfilePage({ params, searchParams }: PageProps
 
       {isScholar && (
         <>
-          {/* FD record */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Front desk record (week {weekNum})</CardTitle>
-              <CardDescription>Weekly minutes and excuse</CardDescription>
+              <CardTitle className="text-base">Front desk attendance (week {weekNum})</CardTitle>
+              <CardDescription>Minutes from tickets on read + scholar_week_excuses</CardDescription>
             </CardHeader>
             <CardContent>
-              {fdRecord ? (
+              {fdRow ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -158,30 +182,30 @@ export default async function DevProfilePage({ params, searchParams }: PageProps
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                      <TableCell>{fdRecord.mon_min ?? "—"}</TableCell>
-                      <TableCell>{fdRecord.tues_min ?? "—"}</TableCell>
-                      <TableCell>{fdRecord.wed_min ?? "—"}</TableCell>
-                      <TableCell>{fdRecord.thurs_min ?? "—"}</TableCell>
-                      <TableCell>{fdRecord.fri_min ?? "—"}</TableCell>
-                      <TableCell>{fdRecord.excuse_min ?? "—"}</TableCell>
-                      <TableCell className="max-w-[200px] truncate">{fdRecord.excuse ?? "—"}</TableCell>
+                      <TableCell>{fdRow.mon_min}</TableCell>
+                      <TableCell>{fdRow.tues_min}</TableCell>
+                      <TableCell>{fdRow.wed_min}</TableCell>
+                      <TableCell>{fdRow.thurs_min}</TableCell>
+                      <TableCell>{fdRow.fri_min}</TableCell>
+                      <TableCell>{fdRow.excuse_min}</TableCell>
+                      <TableCell className="max-w-[200px] truncate">{fdRow.description ?? "—"}</TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
               ) : (
-                <p className="text-muted-foreground text-sm">No front desk record for this week.</p>
+                <p className="text-muted-foreground text-sm">No front desk attendance row for this week (not eligible or no required hours).</p>
               )}
             </CardContent>
           </Card>
 
-          {/* SS record */}
+          {/* SS attendance */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Study session record (week {weekNum})</CardTitle>
-              <CardDescription>Weekly minutes and excuse</CardDescription>
+              <CardTitle className="text-base">Study session attendance (week {weekNum})</CardTitle>
+              <CardDescription>Minutes from tickets on read + scholar_week_excuses</CardDescription>
             </CardHeader>
             <CardContent>
-              {ssRecord ? (
+              {ssRow ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -196,18 +220,18 @@ export default async function DevProfilePage({ params, searchParams }: PageProps
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                      <TableCell>{ssRecord.mon_min ?? "—"}</TableCell>
-                      <TableCell>{ssRecord.tues_min ?? "—"}</TableCell>
-                      <TableCell>{ssRecord.wed_min ?? "—"}</TableCell>
-                      <TableCell>{ssRecord.thurs_min ?? "—"}</TableCell>
-                      <TableCell>{ssRecord.fri_min ?? "—"}</TableCell>
-                      <TableCell>{ssRecord.excuse_min ?? "—"}</TableCell>
-                      <TableCell className="max-w-[200px] truncate">{ssRecord.excuse ?? "—"}</TableCell>
+                      <TableCell>{ssRow.mon_min}</TableCell>
+                      <TableCell>{ssRow.tues_min}</TableCell>
+                      <TableCell>{ssRow.wed_min}</TableCell>
+                      <TableCell>{ssRow.thurs_min}</TableCell>
+                      <TableCell>{ssRow.fri_min}</TableCell>
+                      <TableCell>{ssRow.excuse_min}</TableCell>
+                      <TableCell className="max-w-[200px] truncate">{ssRow.description ?? "—"}</TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
               ) : (
-                <p className="text-muted-foreground text-sm">No study session record for this week.</p>
+                <p className="text-muted-foreground text-sm">No study session attendance row for this week (not eligible or no required hours).</p>
               )}
             </CardContent>
           </Card>

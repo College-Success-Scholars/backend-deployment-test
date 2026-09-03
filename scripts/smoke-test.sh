@@ -47,7 +47,7 @@ for ROUTE in \
   "/api/memo/page-data" \
   "/api/users" \
   "/api/session-logs" \
-  "/api/session-records" \
+  "/api/attendance/week/1?kind=front_desk" \
   "/api/traffic" \
   "/api/form-logs" \
   "/api/daily-activity" \

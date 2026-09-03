@@ -31,6 +31,8 @@ export default async function DevProfilesPage() {
         <h1 className="text-2xl font-bold mt-2">Profile Test</h1>
         <p className="text-muted-foreground mt-1">
           All users. Click a name to open their profile (records, tickets, forms).
+          Use <span className="text-foreground">Active members only</span> to hide
+          inactive and graduated roster rows.
         </p>
       </div>
 

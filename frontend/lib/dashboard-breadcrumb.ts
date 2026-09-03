@@ -14,21 +14,6 @@ const DASHBOARD_PAGE_TITLES: Record<string, string> = {
   "/dashboard/events": "Events",
   "/dashboard/settings": "Settings",
   "/dashboard/room": "Room",
-  "/dashboard/exec": "Executive Dashboard",
-  "/dashboard/exec/performance": "Performance",
-  "/dashboard/exec/reports": "Reports",
-  "/dashboard/exec/reports/monthly": "Monthly Reports",
-  "/dashboard/exec/reports/quarterly": "Quarterly Reports",
-  "/dashboard/exec/teams": "Team Overview",
-  "/dashboard/exec/team-leaders": "Team Leaders",
-  "/dashboard/exec/documents": "Strategic Documents",
-  "/dashboard/admin": "Admin Dashboard",
-  "/dashboard/admin/analytics": "Analytics",
-  "/dashboard/admin/users": "User Management",
-  "/dashboard/admin/roles": "Roles & Permissions",
-  "/dashboard/admin/settings": "System Settings",
-  "/dashboard/admin/security": "Security",
-  "/dashboard/admin/tools": "System Tools",
 };
 
 function formatPathSegment(segment: string): string {

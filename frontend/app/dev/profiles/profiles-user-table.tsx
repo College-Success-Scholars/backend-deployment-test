@@ -5,6 +5,7 @@ import {
   ScholarDataTable,
   type ScholarDataTableColumn,
 } from "@/components/data-display/scholar-data-table";
+import type { DataTableFilter } from "@/components/data-display/data-table";
 import { Badge } from "@/components/ui/badge";
 import type { MemoUserRow } from "@/lib/server/data";
 
@@ -12,6 +13,22 @@ function displayName(row: MemoUserRow): string {
   const name = [row.first_name, row.last_name].filter(Boolean).join(" ").trim();
   return name || (row.first_name ?? row.last_name ?? "—");
 }
+
+function isActiveMember(row: MemoUserRow): boolean {
+  return (row.status ?? "").toLowerCase() === "enrolled";
+}
+
+const statusFilterBar: DataTableFilter<MemoUserRow>[] = [
+  {
+    field: "status",
+    placeholder: "Show",
+    options: [{ label: "Active members only", value: "enrolled" }],
+    matchFn: (row, selected) => {
+      if (selected.includes("enrolled")) return isActiveMember(row);
+      return true;
+    },
+  },
+];
 
 export function ProfilesUserTable({ users }: { users: MemoUserRow[] }) {
   const columns: ScholarDataTableColumn<MemoUserRow>[] = [
@@ -61,6 +78,20 @@ export function ProfilesUserTable({ users }: { users: MemoUserRow[] }) {
         </Badge>
       ),
     },
+    {
+      id: "status",
+      header: "Status",
+      field: "status",
+      sortable: true,
+      renderCell: (row) => {
+        const status = (row.status ?? "").toLowerCase();
+        return (
+          <Badge variant={status === "enrolled" ? "default" : "secondary"}>
+            {row.status ?? "—"}
+          </Badge>
+        );
+      },
+    },
   ];
 
   return (
@@ -68,6 +99,7 @@ export function ProfilesUserTable({ users }: { users: MemoUserRow[] }) {
       data={users}
       rowKeyField="uid"
       columns={columns}
+      filterBar={statusFilterBar}
       defaultSortColumnId="name"
       defaultSortDirection="asc"
       emptyMessage="No users found."

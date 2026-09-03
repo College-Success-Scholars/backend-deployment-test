@@ -16,6 +16,7 @@
  * - formatDuration(ms): format milliseconds as "Xh Ym Zs"
  * - formatDate(iso): format an ISO date string
  * - formatMinutesToHoursAndMinutes(minutes): format minutes as "Xh Ym"
+ * - freshman/sophomore cohort years from FALL_SEMESTER_FIRST_DAY
  * - Re-export all from eastern-time.ts, time-config.ts, time-types.ts
  *
  * ## What belongs here
@@ -179,4 +180,32 @@ export function formatMinutesToHoursAndMinutes(totalMinutes: number): string {
   const hours = Math.floor(mins / 60);
   const minutes = mins % 60;
   return `${hours}h\n${minutes}m`;
+}
+
+/** Entering cohort year for this academic year's freshmen (year of FALL_SEMESTER_FIRST_DAY). */
+export function freshmanCohortYear(): number {
+  return Number.parseInt(FALL_SEMESTER_FIRST_DAY.slice(0, 4), 10);
+}
+
+/** Entering cohort year for this academic year's sophomores. */
+export function sophomoreCohortYear(): number {
+  return freshmanCohortYear() - 1;
+}
+
+/** Front-desk / study-session hours apply only to current freshmen and sophomores. */
+export function isHourEligibleCohort(cohort: number | null | undefined): boolean {
+  if (cohort == null || !Number.isFinite(Number(cohort))) return false;
+  const year = Number(cohort);
+  return year === freshmanCohortYear() || year === sophomoreCohortYear();
+}
+
+export type ScholarYearLabel = "Freshman" | "Sophomore";
+
+/** Class-year label for hour-eligible cohorts; null for juniors+ or missing cohort. */
+export function scholarYearLabel(cohort: number | null | undefined): ScholarYearLabel | null {
+  if (cohort == null || !Number.isFinite(Number(cohort))) return null;
+  const year = Number(cohort);
+  if (year === freshmanCohortYear()) return "Freshman";
+  if (year === sophomoreCohortYear()) return "Sophomore";
+  return null;
 }

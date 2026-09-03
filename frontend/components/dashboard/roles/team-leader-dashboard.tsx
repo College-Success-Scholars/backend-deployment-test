@@ -11,7 +11,6 @@
  *
  * ## What does NOT belong here
  * - Scholar-only content (that's scholar-dashboard.tsx)
- * - Admin content (that's admin-dashboard.tsx)
  */
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"

@@ -2,7 +2,9 @@ import type { ScholarWithCompletedSession } from "@/lib/types/session-log"
 import type { TrafficSession } from "@/lib/types/traffic"
 import type { FormCompletionOverall } from "@/components/data-display/form-completion-overview-card"
 import type { MemoTutorReportRow } from "@/lib/types/tutor-report-log"
-import type { GradeBreakdown, TeamLeaderFormStatsRow } from "@/lib/types/form-log"
+import type { GradeBreakdown, GradeEntry, TeamLeaderFormStatsRow } from "@/lib/types/form-log"
+
+export type ScholarWahfStatus = "on-time" | "late" | "missing"
 
 export type MemoScholarRow = {
   scholarId: string
@@ -16,6 +18,8 @@ export type MemoScholarRow = {
   ssExcuseMin: number
   fdPct: number | null
   ssPct: number | null
+  wahfStatus: ScholarWahfStatus
+  wahfSubmittedAt: string | null
 }
 
 export type MemoTLRow = {
@@ -102,33 +106,68 @@ export type TeamLeaderPerformanceRow = {
   menteesOk: "yes" | "check"
 }
 
+export type ScholarFollowUpIssueKind = "front-desk" | "study-session" | "grade" | "wahf"
+
+/** Hours issue: glance is the area name; detail is a completion meter. */
+export type ScholarFollowUpHoursIssue = {
+  kind: "front-desk" | "study-session"
+  glance: string
+  pct: number
+  requiredMinutes: number | null
+}
+
+/** Grade issue: glance is the assignment title; detail is the percent. */
+export type ScholarFollowUpGradeIssue = {
+  kind: "grade"
+  glance: string
+  pct: number
+}
+
+/** WAHF issue: glance is "WAHF"; detail is submitted-at or an empty time state. */
+export type ScholarFollowUpWahfIssue = {
+  kind: "wahf"
+  glance: string
+  status: "late" | "missing"
+  submittedAtLabel: string | null
+}
+
+/** One concerning follow-up stat (healthy hours are omitted). */
+export type ScholarFollowUpIssue =
+  | ScholarFollowUpHoursIssue
+  | ScholarFollowUpGradeIssue
+  | ScholarFollowUpWahfIssue
+
 export type ScholarFollowUpRow = {
   scholarName: string
   scholarYear: string
   teamLeader: string
   flags: string[]
+  issues: ScholarFollowUpIssue[]
   frontDeskPct: number
   studySessionPct: number
+  fdRequired: number | null
+  ssRequired: number | null
 }
 
-export type WeeklyAccordionSection = {
-  id: string
-  title: string
-  badgeText: string
-  rightLabel: string
-  items: string[]
+export type RecognitionBoardBandId = "high" | "mid" | "low"
+
+export type RecognitionBoardBand = {
+  id: RecognitionBoardBandId
+  label: string
+  entries: GradeEntry[]
 }
 
 export type RecognitionBoardSectionData = {
   badgeText: string
   rightLabel: string
-  items: string[]
+  bands: RecognitionBoardBand[]
 }
 
 export type AttendanceDetailRow = {
   scholarName: string
   scholarYear: string
   completedMinutes: number
+  excuseMinutes: number
   requiredMinutes: number
   completionPct: number
 }
@@ -141,31 +180,14 @@ export type FullAttendanceDetailTab = {
 
 export type FullAttendanceDetailSectionData = {
   rightLabel: string
+  wahfCensus: WahfCensusSummary
   tabs: FullAttendanceDetailTab[]
 }
 
-export type FormSubmissionStatus = "on-time" | "late" | "missing"
-
-export type FormSubmissionSummary = {
-  form: "WAHF" | "WPL" | "MCF"
+export type WahfCensusSummary = {
   onTime: number
   late: number
   missing: number
-}
-
-export type FormSubmissionRow = {
-  scholarName: string
-  scholarYear: string
-  wahf: FormSubmissionStatus
-  wpl: FormSubmissionStatus
-  mcf: FormSubmissionStatus
-}
-
-export type FormSubmissionsSectionData = {
-  badgeText: string
-  rightLabel: string
-  summaries: FormSubmissionSummary[]
-  rows: FormSubmissionRow[]
 }
 
 export type TutoringLogRow = {
@@ -200,5 +222,4 @@ export type WeeklyMemoViewData = MemoLivePageData & {
   tutoringLog: TutoringLogSectionData
   recognitionBoard: RecognitionBoardSectionData
   fullAttendanceDetail: FullAttendanceDetailSectionData
-  formSubmissions: FormSubmissionsSectionData
 }

@@ -3,9 +3,8 @@
  * @module frontend/app/dashboard
  *
  * Main dashboard page (/dashboard).
- * Renders the role-appropriate dashboard component based on the user's app_role.
- * Currently renders TeamLeaderDashboard — extend to check profile.app_role
- * and render the correct variant (scholar, admin, executive, default).
+ * Renders the role-appropriate dashboard via resolveUserRole(): scholar,
+ * team-leader/developer, or default.
  *
  * ## What belongs here
  * - Role detection and dashboard variant selection

@@ -22,7 +22,7 @@ import { hasRoleAtLeast, isDeveloperProfile } from "../../shared/dist/auth.js";
 
 export { isDeveloperProfile };
 
-export type UserRole = "admin" | "exec" | "scholar" | "team-leader" | "developer" | "default";
+export type UserRole = "scholar" | "team-leader" | "developer" | "default";
 
 type ProfileRoleFields = {
   app_role?: string | null;
@@ -91,10 +91,6 @@ export function formatUserRoleLabel(role: UserRole): string {
       return "Team Leader";
     case "developer":
       return "Developer";
-    case "exec":
-      return "Executive";
-    case "admin":
-      return "Admin";
     default:
       return "Dashboard";
   }

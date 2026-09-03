@@ -143,9 +143,10 @@ max_catalogs = 2
 # Analytics Buckets is available to Supabase Pro plan.
 # [storage.analytics.buckets.my-warehouse]
 
-# Store vector embeddings in S3 for large and durable datasets
+# Store vector embeddings in S3 for large and durable datasets.
+# Paid-tier Storage feature — keep off. CLI seed/push will 402 on free projects if enabled.
 [storage.vector]
-enabled = true
+enabled = false
 max_buckets = 10
 max_indexes = 5
 

@@ -176,6 +176,8 @@ export async function getTeamLeaderOrAboveUser(): Promise<User | null> {
 
 /**
  * Returns the current user if they have developer access, or null.
+ * Developer access is determined by profile.app_role === 'developer' (merged profiles + user_roster).
+ * app_role is not editable in the app; set it in SQL on public.profiles.
  * Uses the **real** Supabase profiles row (not the acting-as persona overlay).
  * That is intentional: `/dev` and developer capability must stay available while
  * acting as a scholar/TL test profile. For persona-aware role gates, use

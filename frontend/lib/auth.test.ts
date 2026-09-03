@@ -38,6 +38,12 @@ describe("resolveUserRole", () => {
   it("does not treat null app_role as team-leader", () => {
     expect(resolveUserRole({ program_role: "scholar", app_role: null })).not.toBe("team-leader");
   });
+
+  it("maps unknown app_role values including admin and exec to default", () => {
+    expect(resolveUserRole({ app_role: "admin" })).toBe("default");
+    expect(resolveUserRole({ app_role: "exec" })).toBe("default");
+    expect(resolveUserRole({ app_role: "staff" })).toBe("default");
+  });
 });
 
 describe("hasAssignedMentees", () => {

@@ -31,8 +31,6 @@ import {
   SquareTerminal,
   Users,
   FileText,
-  BarChart3,
-  Shield,
   GraduationCap,
   UserCheck,
   Briefcase,
@@ -230,103 +228,18 @@ const getRoleBasedNav = (role: UserRole, showMemo: boolean, showMentees: boolean
               },
             ]
           : []),
-      ]
-    
-    case 'exec':
-      return [
         {
-          title: "Executive Dashboard",
-          url: "/dashboard/exec",
-          icon: BarChart3,
-          isActive: true,
-          items: [
-            {
-              title: "Overview",
-              url: "/dashboard/exec",
-            },
-            {
-              title: "Performance",
-              url: "/dashboard/exec/performance",
-            },
-          ],
-        },
-        {
-          title: "Reports",
-          url: "/dashboard/exec/reports",
-          icon: FileText,
-          items: [
-            {
-              title: "Monthly Reports",
-              url: "/dashboard/exec/reports/monthly",
-            },
-            {
-              title: "Quarterly Reports",
-              url: "/dashboard/exec/reports/quarterly",
-            },
-          ],
-        },
-        {
-          title: "Team Overview",
-          url: "/dashboard/exec/teams",
+          title: "Teams",
+          url: "/dashboard/teams/front-desk",
           icon: Users,
           items: [
             {
-              title: "All Teams",
-              url: "/dashboard/exec/teams",
+              title: "Front Desk",
+              url: "/dashboard/teams/front-desk",
             },
             {
-              title: "Team Leaders",
-              url: "/dashboard/exec/team-leaders",
-            },
-          ],
-        },
-      ]
-    
-    case 'admin':
-      return [
-        {
-          title: "Dashboard",
-          url: "/dashboard/admin",
-          icon: BarChart3,
-          isActive: true,
-          items: [
-            {
-              title: "Overview",
-              url: "/dashboard/admin",
-            },
-            {
-              title: "Analytics",
-              url: "/dashboard/admin/analytics",
-            },
-          ],
-        },
-        {
-          title: "User Management",
-          url: "/dashboard/admin/users",
-          icon: Users,
-          items: [
-            {
-              title: "All Users",
-              url: "/dashboard/admin/users",
-            },
-            {
-              title: "Roles & Permissions",
-              url: "/dashboard/admin/roles",
-            },
-          ],
-        },
-        {
-          title: "System Settings",
-          url: "/dashboard/admin/settings",
-          icon: Settings2,
-          items: [
-            {
-              title: "General",
-              url: "/dashboard/admin/settings",
-            },
-            {
-              title: "Security",
-              url: "/dashboard/admin/security",
+              title: "Study Sessions",
+              url: "/dashboard/teams/study",
             },
           ],
         },
@@ -368,34 +281,6 @@ const getRoleBasedResources = (role: UserRole) => {
         }
       ]
     
-    case 'exec':
-      return [
-        {
-          name: "Strategic Documents",
-          url: "/dashboard/exec/documents",
-          icon: FileText,
-        },
-        {
-          name: "Board Reports",
-          url: "/dashboard/exec/reports",
-          icon: BarChart3,
-        },
-      ]
-    
-    case 'admin':
-      return [
-        {
-          name: "System Tools",
-          url: "/dashboard/admin/tools",
-          icon: Settings2,
-        },
-        {
-          name: "User Directory",
-          url: "/dashboard/admin/users",
-          icon: Users,
-        },
-      ]
-    
     default:
       return defaultData.projects
   }
@@ -406,8 +291,6 @@ const getRoleBasedSecondaryNav = (role: UserRole) => {
     case 'scholar':
     case 'team-leader':
     case 'developer':
-    case 'exec':
-    case 'admin':
       return [
         {
           title: "Support",

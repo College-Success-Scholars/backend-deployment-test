@@ -22,9 +22,9 @@ function WeeklyMemoHeaderShellContent({ weekParam }: WeeklyMemoHeaderShellProps)
         {nav.yearNotStarted ? (
           <p className="text-muted-foreground text-sm">{YEAR_NOT_STARTED_COPY}</p>
         ) : hasDates ? (
-          <p className="text-muted-foreground text-sm">
-            {nav.weekStartLabel} - {nav.weekEndLabel}
-          </p>
+            <p className="text-muted-foreground text-sm">
+              {nav.weekStartLabel} - {nav.weekEndLabel}
+            </p> 
         ) : (
           <Skeleton className="mt-1 h-5 w-48" />
         )}

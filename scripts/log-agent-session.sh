@@ -133,41 +133,25 @@ FILENAME="${LOGS_DIR}/${TIMESTAMP}-${SLUG}.md"
 mkdir -p "$LOGS_DIR"
 
 # ── Write session file ──────────────────────────────────────────────────────────
-cat > "$FILENAME" <<EOF
-# ${TITLE}
-
-**Date:** ${TIMESTAMP}
-**User:** ${USER_ID}
-
----
-
-## User Prompt
-
-_Verbatim user input. Multiple messages are separated by `---`._
-
-\`\`\`
-${PROMPT_CONTENT}
-\`\`\`
-
----
-
-## Purpose
-
-${PURPOSE}
-
----
-
-## Agent Response Summary
-
-_What the agent did (not a recap of user input)._
-
-${SUMMARY_CONTENT}
-
----
-
-## Code Changes
-
-EOF
+# printf, not a heredoc: prompts and summaries routinely contain backticks and $,
+# which an interpolating heredoc would run as commands instead of logging verbatim.
+{
+  printf '# %s\n\n' "$TITLE"
+  printf '**Date:** %s\n' "$TIMESTAMP"
+  printf '**User:** %s\n\n' "$USER_ID"
+  printf -- '---\n\n'
+  printf '## User Prompt\n\n'
+  printf '_Verbatim user input. Multiple messages are separated by `---`._\n\n'
+  printf '```\n%s\n```\n\n' "$PROMPT_CONTENT"
+  printf -- '---\n\n'
+  printf '## Purpose\n\n%s\n\n' "$PURPOSE"
+  printf -- '---\n\n'
+  printf '## Agent Response Summary\n\n'
+  printf '_What the agent did (not a recap of user input)._\n\n'
+  printf '%s\n\n' "$SUMMARY_CONTENT"
+  printf -- '---\n\n'
+  printf '## Code Changes\n\n'
+} > "$FILENAME"
 
 if [[ -n "$CHANGES_LIST" ]]; then
   while IFS= read -r f; do
