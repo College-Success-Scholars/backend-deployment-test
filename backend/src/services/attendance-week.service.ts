@@ -30,7 +30,7 @@ import {
   getStudySessionCompletedSessions,
 } from "./session-log.service.js";
 import { computeWeeklyMinutesByUid } from "./weekly-minutes.service.js";
-import { fetchAllUsersForMemo } from "./user.service.js";
+import { fetchAllUsersForMemo, isEligibleScholar } from "./user.service.js";
 import { EMPTY_WEEKLY_MINUTES } from "../models/weekly-minutes.model.js";
 import type { WeeklyMinutesByDay } from "../models/weekly-minutes.model.js";
 import type {
@@ -199,7 +199,8 @@ export async function getCampusWeekAttendance(
 }
 
 /**
- * Eligible scholars for a duty kind: program scholars with that required > 0.
+ * Eligible scholars for a duty kind: enrolled freshman/sophomore scholars
+ * with that required > 0.
  */
 function filterEligibleForKind(
   users: Awaited<ReturnType<typeof fetchAllUsersForMemo>>,
@@ -211,8 +212,7 @@ function filterEligibleForKind(
 }[] {
   const out: { uid: string; name: string | null; required: number | null }[] = [];
   for (const u of users) {
-    const role = (u.program_role ?? "").toLowerCase();
-    if (role !== "scholar") continue;
+    if (!isEligibleScholar(u)) continue;
     const required =
       kind === "front_desk" ? u.fd_required : u.ss_required;
     const reqNum = required != null ? Number(required) : 0;

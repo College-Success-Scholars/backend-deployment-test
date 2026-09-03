@@ -52,6 +52,11 @@ describe("Auth gating — unauthenticated requests", () => {
     expect(res.status).toBe(401);
   });
 
+  it("PATCH /api/dev/roster/:uid returns 401 without token", async () => {
+    const res = await request(app).patch("/api/dev/roster/123").send({ status: "enrolled" });
+    expect(res.status).toBe(401);
+  });
+
   it("GET /api/auth/me returns 401 with malformed Bearer token", async () => {
     const res = await request(app)
       .get("/api/auth/me")

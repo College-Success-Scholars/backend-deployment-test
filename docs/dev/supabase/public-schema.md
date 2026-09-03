@@ -167,8 +167,8 @@ Canonical signed-in user row (created after invite accept or complete-profile). 
 | `last_name` | `text` | Family name. |
 | `student_id` | `text` | Scholar UID; joins to `user_roster.uid`. |
 | `cohort` | `integer` | Entering cohort year. |
-| `status` | `text` | Program status (e.g. active / inactive). |
-| `app_role` | `text` default `'scholar'` | App access role (`scholar`, `team_leader`, `developer`, …). |
+| `status` | `text` | Program status (`enrolled` / `inactive` / `graduated`). |
+| `app_role` | `text` default `'scholar'` | App access role (`scholar`, `team_leader`, `developer`, …). Not writable via the app; change in SQL. |
 | `program_role` | `text` | Program-facing role (Scholar, Team Leader, …). |
 | `fd_required` | `integer` default `0` | Weekly front-desk minutes required. |
 | `ss_required` | `integer` default `0` | Weekly study-session minutes required. |
@@ -348,8 +348,8 @@ Pre-invite staging table and source of truth for roster management only. After i
 | `phone_number` | `text` | Contact phone. |
 | `email` | `text` | Invite / contact email. |
 | `cohort` | `bigint` | Entering cohort year. |
-| `status` | `text` | Roster status (active, etc.). |
-| `app_role` | `text` | App access role to copy onto the profile. |
+| `status` | `text` | Roster status (`enrolled` / `inactive` / `graduated`). |
+| `app_role` | `text` | App access role to copy onto the profile at invite. Not writable via the app. |
 | `program_role` | `text` | Program-facing role. |
 | `fd_required` | `bigint` | Weekly front-desk minutes required. |
 | `ss_required` | `bigint` | Weekly study-session minutes required. |

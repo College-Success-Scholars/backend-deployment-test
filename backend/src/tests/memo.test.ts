@@ -8,6 +8,7 @@ import { EMPTY_WEEKLY_MINUTES } from "../models/weekly-minutes.model.js";
 import type { CampusWeekAttendanceTotals } from "../models/attendance-week.model.js";
 import type { MemoUserRow } from "../models/user.model.js";
 import type { FormLogRowWithLate, WahfFormLogRow } from "../models/form-log.model.js";
+import { freshmanCohortYear } from "../services/time.service.js";
 
 describe("Memo routes — auth gating", () => {
   it("GET /api/memo/weekly returns 401 without token", async () => {
@@ -46,11 +47,12 @@ describe("buildMemoScholarAttendanceRows", () => {
     uid: "1001",
     first_name: "Ada",
     last_name: "Lovelace",
-    cohort: 2025,
+    cohort: freshmanCohortYear(),
     program_role: "scholar",
     app_role: "authenticated",
     fd_required: 120,
     ss_required: 180,
+    status: "enrolled",
   };
 
   const zero: CampusWeekAttendanceTotals = {
@@ -153,6 +155,33 @@ describe("buildMemoScholarAttendanceRows", () => {
     const { scholars } = buildMemoScholarAttendanceRows([scholar], new Map(), new Map(), wahfRows);
     expect(scholars[0]?.wahfStatus).toBe("late");
     expect(scholars[0]?.wahfSubmittedAt).toBe("2026-04-04T12:00:00.000Z");
+  });
+
+  it("excludes inactive scholars", () => {
+    const { scholars } = buildMemoScholarAttendanceRows(
+      [{ ...scholar, status: "inactive" }],
+      new Map(),
+      new Map(),
+    );
+    expect(scholars).toHaveLength(0);
+  });
+
+  it("excludes juniors even when hours are set", () => {
+    const { scholars } = buildMemoScholarAttendanceRows(
+      [{ ...scholar, cohort: freshmanCohortYear() - 2 }],
+      new Map(),
+      new Map(),
+    );
+    expect(scholars).toHaveLength(0);
+  });
+
+  it("excludes enrolled frosh/soph without required hours", () => {
+    const { scholars } = buildMemoScholarAttendanceRows(
+      [{ ...scholar, fd_required: 0, ss_required: 0 }],
+      new Map(),
+      new Map(),
+    );
+    expect(scholars).toHaveLength(0);
   });
 });
 

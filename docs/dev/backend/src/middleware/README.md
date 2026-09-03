@@ -34,11 +34,11 @@ When `req.isActingAsTestProfile` is true, this middleware runs inside `requireAu
 |---------------------|--------|
 | `/api/auth/profile` | POST |
 | `/api/memo/sync`, `/api/memo/refresh-stats` | POST |
-| Any non-`/api/dev` route | PATCH, PUT, DELETE |
+| Any route | PATCH, PUT, DELETE |
 
-**Allowed when acting:** GET; POST read endpoints (form logs, session logs, users, traffic); all `/api/dev/*` routes.
+**Allowed when acting:** GET; POST read endpoints (form logs, session logs, users, traffic); `/api/dev/*` GET and non-mutation POST (persona switch).
 
-When adding a **new mutation** endpoint, add its full path to `ACTING_BLOCKED_POST_PATHS` in `reject-writes-when-acting.ts` (or rely on PATCH/PUT/DELETE blocking). Read-only POSTs need no change.
+When adding a **new mutation** endpoint, add its full path to `ACTING_BLOCKED_POST_PATHS` in `reject-writes-when-acting.ts` (or rely on PATCH/PUT/DELETE blocking, including `/api/dev`). Read-only POSTs need no change.
 
 ## Standards
 

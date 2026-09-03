@@ -24,8 +24,9 @@ For production features, build in `app/dashboard/` and shared components in `com
 | `layout.tsx` | `/dev/*` | Dev section layout — enforces `requireDeveloper` guard |
 | `page.tsx` | `/dev` | Dev tools home / index |
 | `form-logs/page.tsx` | `/dev/form-logs` | Browse raw MCF/WHAF/WPL form submissions |
-| `profiles/page.tsx` | `/dev/profiles` | User profile lookup by UID |
-| `profiles/[uid]/page.tsx` | `/dev/profiles/:uid` | Per-user detail: campus-week attendance, logs, and form submissions |
+| `profiles/page.tsx` | `/dev/profiles` | Roster list with enrollment status and an active-members filter |
+| `profiles/[uid]/page.tsx` | `/dev/profiles/:uid` | Edit roster (including enrollment) plus attendance, logs, and form submissions |
+| `profiles/roster-edit-form.tsx` | — | Client form that PATCHes `/api/dev/roster/:uid` (`app_role` is read-only) |
 | `session-logs/page.tsx` | `/dev/session-logs` | Raw session check-in/out logs with heat map |
 | `session-records/page.tsx` | `/dev/session-records` | Retired notice — use `/dashboard/teams/*` and `/api/attendance` |
 | `traffic/page.tsx` | `/dev/traffic` | Traffic count analytics |

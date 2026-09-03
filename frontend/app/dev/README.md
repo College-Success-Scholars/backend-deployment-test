@@ -4,12 +4,12 @@ This folder is **developer-only**. Access is restricted via `getDeveloperUser()`
 
 ## Granting developer access
 
-Set `app_role` to `'developer'` in your `public.user_roster` table for the user:
+`app_role` is not editable in the app. Set it in SQL on `public.profiles` (`is_developer()` reads that column):
 
 ```sql
-update public.user_roster
+update public.profiles
 set app_role = 'developer'
-where email = 'your-email@example.com';
+where student_id = 'your-uid';
 ```
 
 ## Test profile switcher
@@ -39,6 +39,8 @@ Use `getCurrentUser()` / `getCurrentProfile()` for the effective profile, or `ef
 - `/api/dev/*` — Dev API routes (also protected by developer check)
 - `GET /api/dev/test-profiles` — list personas
 - `POST /api/dev/active-profile` — validate a persona id (cookie set via server action)
+- `GET /api/dev/roster/:uid` — full roster row for `/dev/profiles`
+- `PATCH /api/dev/roster/:uid` — update roster except `uid` and `app_role` (blocked while acting as a test profile)
 
 ## Adding new tests
 

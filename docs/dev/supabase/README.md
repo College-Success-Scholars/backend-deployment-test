@@ -36,6 +36,8 @@ Captured with `supabase db dump --linked --schema public` → [`supabase/migrati
 
 **Do not** `supabase db push` the baseline onto production (objects already exist). New schema/RLS/RPC changes: `supabase migration new <name>` → PR → `db push` staging → prod.
 
+Developer roster edits from `/dev/profiles` need `developer_update_user_roster` (and `developer_*_mentor_mentee` for mentee UID sync) from [`20260903053000_developer_write_user_roster.sql`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/supabase/migrations/20260903053000_developer_write_user_roster.sql). Apply that migration on the linked project; do not re-run the historical `002_rls_developer_read.sql` runbook for writes.
+
 ### Inventory — tables in dump
 
 `am_pm_form_logs`, `daily_scholar_activity`, `dev_test_profiles`, `front_desk_logs`, `front_desk_records_legacy`, `mcf_form_logs`, `mentor_mentee`, `profiles`, `scholar_week_excuses`, `scholar_weekly_stats`, `semester_breaks`, `semesters`, `study_session_logs`, `study_session_records_legacy`, `traffic`, `traffic_weekly_summary`, `tutor_report_logs`, `user_roster`, `whaf_form_logs`, `wpl_form_logs`

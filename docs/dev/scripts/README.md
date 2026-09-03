@@ -29,6 +29,8 @@ Shell scripts for deployment validation and operational tasks. These run outside
 | `log-agent-session.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/log-agent-session.sh) | Records an agent/AI session to `docs/agents/logs/`: who ran it, raw user prompt, stated purpose, agent response summary, and changed files |
 | `configure-supabase-confirm-email-template.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/configure-supabase-confirm-email-template.sh) | Patches Supabase **Confirm signup** email template so links use `token_hash` + `type` for `/auth/confirm` |
 | `ingest-user-roster.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/ingest-user-roster.sh) | Ops: stream a roster CSV into `public.user_roster` (service role prompted interactively; no PII dumps to disk) |
+| `backfill-user-roster-defaults.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/backfill-user-roster-defaults.sh) | Ops: fill blank `cohort` / `fd_required` / `ss_required` on `public.user_roster` with program defaults |
+| `supabase-env.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/supabase-env.sh) | Sourced helper: resolves `SUPABASE_URL` and prompts for the service role key. Not executable on its own |
 
 ---
 
@@ -121,6 +123,12 @@ SUPABASE_ACCESS_TOKEN=... SUPABASE_PROJECT_REF=... ./scripts/configure-supabase-
 # Roster CSV → user_roster (prompts for service role key; streams to Supabase)
 # URL from SUPABASE_URL / NEXT_PUBLIC_SUPABASE_URL or backend/.env (URL only)
 ./scripts/ingest-user-roster.sh /path/to/roster.csv
+
+# Backfill blank roster requirements (plan only — reads the roster, writes nothing)
+./scripts/backfill-user-roster-defaults.sh --dry-run
+
+# Backfill for real: cohort 2026, FD 180 min/week, SS 300 min/week, Scholar rows only
+./scripts/backfill-user-roster-defaults.sh
 ```
 
 ### `ingest-user-roster.sh`
@@ -141,3 +149,40 @@ Ops script for bulk-loading a sheet export into `public.user_roster`. Companion 
 | Service role | Interactive hidden prompt (or `SUPABASE_SERVICE_ROLE_KEY` already exported in **this** shell). Never loaded from project `.env` / `.env.local`, and not documented in `.env.example` |
 
 `--dry-run` skips the prompt and does not POST. Stdout includes TSV reports for bad university emails (with contact fields) and null UIDs.
+
+Credential resolution is shared with `backfill-user-roster-defaults.sh` via [`scripts/supabase-env.sh`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/supabase-env.sh) (`require_supabase_url`, `require_supabase_service_role`). Source that helper in any new Supabase ops script instead of re-implementing the `.env` walk or the hidden prompt.
+
+### `backfill-user-roster-defaults.sh`
+
+Ops script that fills the program defaults onto roster rows the CSV ingest leaves blank. Companion helper: [`scripts/backfill-user-roster-defaults.py`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/backfill-user-roster-defaults.py).
+
+**Defaults**
+
+| Column | Value | Blank means |
+|--------|-------|-------------|
+| `cohort` | `2026` | `NULL` or `0` (year 0 is never a real cohort) |
+| `fd_required` | `180` | `NULL` (add `--include-zero` to also treat `0` as blank) |
+| `ss_required` | `300` | `NULL` (add `--include-zero` to also treat `0` as blank) |
+
+Only rows with `program_role` = `Scholar` are touched (case-insensitive); pass `--program-role any` to include team leaders and staff. Rows with a blank `program_role` never match a role filter, so the run reports how many exist.
+
+**Behavior**
+
+- **Fills blanks only.** A column that already holds a value is left alone unless you pass `--overwrite`. Rows already matching the defaults are skipped entirely, so re-running converges to a no-op.
+- **Plan first.** Stdout lists every row and the exact `column: blank -> value` transitions, then per-column counts, before anything is written.
+- Rows sharing an identical patch are collapsed into one `PATCH … ?id=in.(…)` request, so a full roster costs a handful of calls rather than one per scholar.
+- `--dry-run` prints the plan and writes nothing, but **still needs credentials** because it reads the roster first.
+
+**Credentials** — same sources as `ingest-user-roster.sh` above (URL from the shell or `backend/.env`; service role via hidden prompt only).
+
+```bash
+# Preview, then apply
+./scripts/backfill-user-roster-defaults.sh --dry-run
+./scripts/backfill-user-roster-defaults.sh
+
+# Next year's cohort, everyone on the roster
+./scripts/backfill-user-roster-defaults.sh --cohort 2027 --program-role any
+
+# Reset requirements that were seeded as 0
+./scripts/backfill-user-roster-defaults.sh --include-zero
+```

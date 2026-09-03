@@ -26,12 +26,13 @@ function requestPath(req: AuthenticatedRequest): string {
  */
 export function isActingWriteRequest(req: AuthenticatedRequest): boolean {
   const path = requestPath(req);
-  if (path.startsWith("/api/dev")) {
-    return false;
-  }
 
   if (req.method === "PATCH" || req.method === "PUT" || req.method === "DELETE") {
     return true;
+  }
+
+  if (path.startsWith("/api/dev")) {
+    return false;
   }
 
   if (req.method === "POST") {

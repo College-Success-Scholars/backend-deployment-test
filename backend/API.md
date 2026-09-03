@@ -137,7 +137,7 @@ All routes under `/api/users` require **requireAuth**.
 ### `POST /api/users/eligible-scholars`
 
 **Auth:** requireAuth
-**Description:** Filters the given UIDs to only those who are eligible scholars.
+**Description:** Filters the given UIDs to enrolled freshman/sophomore scholars with required hours.
 **Request Body:**
 ```json
 { "uids": ["uid1", "uid2"] }
@@ -404,7 +404,7 @@ Minutes are computed on read from cleaned session tickets (campus week). Excuses
 ### `GET /api/attendance/week/:weekNum`
 
 **Auth:** requireTeamLeaderOrAbove  
-**Description:** Week board for eligible scholars (program role scholar with required hours for the kind). Includes Mon–Fri minutes, logged total, excuse, description, and completion %.  
+**Description:** Week board for eligible scholars (enrolled freshman/sophomore with required hours for the kind). Includes Mon–Fri minutes, logged total, excuse, description, and completion %.  
 **Request Params:** `weekNum` (integer, >= 1)  
 **Query:** `kind` = `front_desk` | `study_session` (required)  
 **Response:**
@@ -885,6 +885,31 @@ All routes under `/api/dev` require **requireDeveloper**.
 **Response:**
 ```json
 { "data": { /* single form log row */ } }
+```
+
+---
+
+### `GET /api/dev/roster/:uid`
+
+**Auth:** requireDeveloper
+**Description:** Returns the full `user_roster` row for a scholar UID (including invite timestamps). Used by `/dev/profiles/:uid`.
+**Request Params:** `uid` (string)
+**Response:**
+```json
+{ "data": { "uid": "12345", "status": "enrolled", "first_name": "Ada" } }
+```
+
+---
+
+### `PATCH /api/dev/roster/:uid`
+
+**Auth:** requireDeveloper
+**Description:** Updates editable `user_roster` fields and dual-writes the matching `profiles` row (`student_id = uid`) when one exists. `mentee_uids` also replaces `mentor_mentee` rows for that profile. `uid` and `app_role` are not writable. `status` is `enrolled`, `inactive`, or `graduated`. Blocked while acting as a test profile.
+**Request Params:** `uid` (string)
+**Request Body:** any subset of `first_name`, `last_name`, `phone_number`, `email`, `cohort`, `status`, `program_role`, `fd_required`, `ss_required`, `majors`, `minors`, `teams`, `mentee_uids`
+**Response:**
+```json
+{ "data": { /* updated roster row */ } }
 ```
 
 ---

@@ -31,4 +31,7 @@ router.post("/active-profile", devController.setActiveProfile);
 // Form logs
 router.get("/form-logs/:formType/:formId", devController.getFormLog);
 
+router.get("/roster/:uid", devController.getRoster);
+router.patch("/roster/:uid", devController.patchRoster);
+
 export default router;

@@ -1,14 +1,18 @@
 import { describe, expect, it } from "vitest"
+import { freshmanCohortYear, sophomoreCohortYear } from "@/lib/format/time"
 import type { MemoLivePageData } from "../types"
 import { classifyScholarFollowUpRisk } from "./risk-classifier"
+
+const freshman = freshmanCohortYear()
+const sophomore = sophomoreCohortYear()
 
 describe("risk-classifier", () => {
   const baseData = {
     scholars: [
-      { scholarId: "2024-001", scholarName: "A Scholar", cohort: 2025, fdPct: 90, ssPct: 90, fdRequired: 120, ssRequired: 120, fdTotal: 0, ssTotal: 0, fdExcuseMin: 0, ssExcuseMin: 0, wahfStatus: "on-time", wahfSubmittedAt: "2026-04-02T16:00:00.000Z" },
-      { scholarId: "2023-010", scholarName: "B Scholar", cohort: 2024, fdPct: 60, ssPct: 90, fdRequired: 120, ssRequired: 120, fdTotal: 0, ssTotal: 0, fdExcuseMin: 0, ssExcuseMin: 0, wahfStatus: "on-time", wahfSubmittedAt: "2026-04-02T16:00:00.000Z" },
-      { scholarId: "2023-011", scholarName: "C Scholar", cohort: 2024, fdPct: 70, ssPct: 50, fdRequired: 120, ssRequired: 120, fdTotal: 0, ssTotal: 0, fdExcuseMin: 0, ssExcuseMin: 0, wahfStatus: "on-time", wahfSubmittedAt: "2026-04-02T16:00:00.000Z" },
-      { scholarId: "2023-012", scholarName: "D Scholar", cohort: 2024, fdPct: 90, ssPct: 90, fdRequired: 120, ssRequired: 120, fdTotal: 0, ssTotal: 0, fdExcuseMin: 0, ssExcuseMin: 0, wahfStatus: "missing", wahfSubmittedAt: null },
+      { scholarId: "2024-001", scholarName: "A Scholar", cohort: freshman, fdPct: 90, ssPct: 90, fdRequired: 120, ssRequired: 120, fdTotal: 0, ssTotal: 0, fdExcuseMin: 0, ssExcuseMin: 0, wahfStatus: "on-time", wahfSubmittedAt: "2026-04-02T16:00:00.000Z" },
+      { scholarId: "2023-010", scholarName: "B Scholar", cohort: sophomore, fdPct: 60, ssPct: 90, fdRequired: 120, ssRequired: 120, fdTotal: 0, ssTotal: 0, fdExcuseMin: 0, ssExcuseMin: 0, wahfStatus: "on-time", wahfSubmittedAt: "2026-04-02T16:00:00.000Z" },
+      { scholarId: "2023-011", scholarName: "C Scholar", cohort: sophomore, fdPct: 70, ssPct: 50, fdRequired: 120, ssRequired: 120, fdTotal: 0, ssTotal: 0, fdExcuseMin: 0, ssExcuseMin: 0, wahfStatus: "on-time", wahfSubmittedAt: "2026-04-02T16:00:00.000Z" },
+      { scholarId: "2023-012", scholarName: "D Scholar", cohort: sophomore, fdPct: 90, ssPct: 90, fdRequired: 120, ssRequired: 120, fdTotal: 0, ssTotal: 0, fdExcuseMin: 0, ssExcuseMin: 0, wahfStatus: "missing", wahfSubmittedAt: null },
     ],
     teamLeaders: [],
     pieData: { cohort2024: { total: 0, fdCompleteCount: 0, ssCompleteCount: 0, fdPercent: 0, ssPercent: 0 }, cohort2025: { total: 0, fdCompleteCount: 0, ssCompleteCount: 0, fdPercent: 0, ssPercent: 0 } },

@@ -1,10 +1,10 @@
 import type { GradeEntry } from "@/lib/types/form-log"
-import { EASTERN_TIMEZONE } from "@/lib/format/time"
+import { EASTERN_TIMEZONE, scholarYearLabel } from "@/lib/format/time"
 import type { MemoLivePageData, MemoScholarRow, ScholarFollowUpIssue, ScholarFollowUpRow } from "../types"
 
 const LOW_COMPLETION_THRESHOLD = 75
 
-const toScholarYear = (cohort: number | null) => (cohort === 2025 ? "Freshman" : "Sophomore")
+const toScholarYear = (cohort: number | null) => scholarYearLabel(cohort) ?? "—"
 
 const gradeGlanceLabel = (entry: GradeEntry) => {
   const title = [entry.course, entry.assessment].filter(Boolean).join(" · ")

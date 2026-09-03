@@ -9,6 +9,7 @@ import type {
   WeeklyMemoViewData,
 } from "../types"
 import { classifyScholarFollowUpRisk } from "./risk-classifier"
+import { scholarYearLabel } from "@/lib/format/time"
 
 const getFormStatus = (completed: number, required: number, late: boolean): FormStatus => {
   if (required <= 0 || completed >= required) return late ? "late" : "on-time"
@@ -113,7 +114,7 @@ export const assembleWeeklyMemo = (data: MemoLivePageData): WeeklyMemoViewData =
           requiredMinutes > 0 ? Math.round((completedMinutes / requiredMinutes) * 100) : 0
         return {
           scholarName: scholar.scholarName,
-          scholarYear: scholar.cohort === 2025 ? "Freshman" : "Sophomore",
+          scholarYear: scholarYearLabel(scholar.cohort) ?? "—",
           completedMinutes,
           excuseMinutes,
           requiredMinutes,

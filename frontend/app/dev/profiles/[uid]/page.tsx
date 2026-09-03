@@ -9,6 +9,7 @@ import { getWeekFetchEnd } from "@/lib/format/time";
 import { getAttendanceWeekBoard } from "@/lib/server/data";
 import { fetchFrontDeskLogs, fetchStudySessionLogs } from "@/lib/server/data";
 import { getUserByUid } from "@/lib/server/data";
+import { getRosterByUid } from "@/lib/server/data";
 import {
   getWhafFormLogsByUid,
   getMcfFormLogsByUid,
@@ -34,6 +35,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { FormsDetailTables } from "./forms-detail-tables";
+import { RosterEditForm } from "../roster-edit-form";
 
 export const metadata = {
   title: "Profile | Dev Tools",
@@ -80,6 +82,8 @@ export default async function DevProfilePage({ params, searchParams }: PageProps
     notFound();
   }
 
+  const roster = await getRosterByUid(uid);
+
   const currentCampusWeek = dateToCampusWeek(new Date());
   const weekNum = parseWeek(resolvedSearchParams.week, currentCampusWeek);
   const range = campusWeekToDateRange(weekNum);
@@ -122,6 +126,11 @@ export default async function DevProfilePage({ params, searchParams }: PageProps
           <Badge variant={isScholar ? "default" : "secondary"}>
             {user.program_role ?? "—"}
           </Badge>
+          {user.status && (
+            <Badge variant={user.status.toLowerCase() === "enrolled" ? "default" : "secondary"}>
+              {user.status}
+            </Badge>
+          )}
           {user.cohort != null && (
             <span className="text-sm text-muted-foreground">Cohort {user.cohort}</span>
           )}
@@ -130,6 +139,20 @@ export default async function DevProfilePage({ params, searchParams }: PageProps
           </span>
         </div>
       </div>
+
+      {roster && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Edit roster</CardTitle>
+            <CardDescription>
+              Developer-only write to user_roster (and profiles when a signed-in row exists).
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RosterEditForm roster={roster} />
+          </CardContent>
+        </Card>
+      )}
 
       <CampusWeekCard
         basePath={`/dev/profiles/${uid}`}

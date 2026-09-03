@@ -49,10 +49,15 @@ describe("isActingWriteRequest", () => {
     expect(isActingWriteRequest(actingReq("POST", "/api/auth/profile"))).toBe(true);
   });
 
-  it("blocks PATCH when acting", () => {
+  it("blocks PATCH when acting, including /api/dev", () => {
     expect(
       isActingWriteRequest(
         actingReq("PATCH", "/api/attendance/excuse"),
+      ),
+    ).toBe(true);
+    expect(
+      isActingWriteRequest(
+        actingReq("PATCH", "/api/dev/roster/123"),
       ),
     ).toBe(true);
   });
@@ -98,5 +103,14 @@ describe("rejectWritesWhenActing", () => {
     const next = vi.fn();
     rejectWritesWhenActing(req, res, next as NextFunction);
     expect(next).toHaveBeenCalled();
+  });
+
+  it("blocks PATCH on /api/dev/roster/:uid when acting", () => {
+    const req = actingReq("PATCH", "/api/dev/roster/123");
+    const res = mockRes();
+    const next = vi.fn();
+    rejectWritesWhenActing(req, res, next as NextFunction);
+    expect(res.statusCode).toBe(403);
+    expect(next).not.toHaveBeenCalled();
   });
 });

@@ -50,14 +50,14 @@ These are **not** on the complete-profile form. They are initialized to safe sch
 
 | Column | Initial value | How to handle later |
 |--------|---------------|---------------------|
-| `status` | `null` | Set via admin/dev tools or a future settings flow when program status is known (e.g. `active`, `inactive`). |
+| `status` | `null` | Set from `/dev/profiles` (developer roster editor) or a future settings flow. Canonical values: `enrolled` (in program), `inactive`, or `graduated`. |
 | `fd_required` | `null` | Usually synced from `user_roster` via `mergeProfileWithRoster`, or set by staff in dev profiles / roster import. Required for session-hour tracking. |
 | `ss_required` | `null` | Same as `fd_required` — study-session minutes requirement per scholar. |
 | `majors` | `[]` | Add to complete-profile form, settings edit UI, or bulk roster import when academic data is collected. |
 | `minors` | `[]` | Same as `majors`. |
 | `teams` | `[]` | Assign via roster/admin when placing scholars on teams; team leaders often have non-empty `teams`. |
 | `mentee_count` | `0` | **Team leaders only** — derived from mentee assignments on `user_roster` / `mentor_mentee`; do not invent a `profiles.mentee_uids` column. |
-| `app_role` | `null` | Promote to `team_leader` or `developer` in `user_roster` / `profiles` (admin). Controls memo access and elevated routes. |
+| `app_role` | `null` | Not editable in the app. Promote to `team_leader` or `developer` in SQL on `profiles` (and `user_roster` if you want invite copies to match). Controls memo access and elevated routes. |
 | `program_role` | `"Scholar"` | Change only if the user is not a scholar (e.g. roster pre-provision as `team_leader`); use invite/roster flows instead of self-signup. |
 
 **Mentee assignments** live on `user_roster.mentee_uids` / `mentor_mentee`, not on `profiles`. Use `GET /api/auth/mentees` for lists.

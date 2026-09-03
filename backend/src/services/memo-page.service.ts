@@ -19,8 +19,8 @@
  * - Memo sync operations (that's memo.service.ts)
  * - HTTP request/response logic
  */
-import { campusWeekToDateRange, dateToCampusWeek, getWeekFetchEnd } from "./time.service.js";
-import { fetchTeamLeaders } from "./user.service.js";
+import { campusWeekToDateRange, dateToCampusWeek, freshmanCohortYear, getWeekFetchEnd, sophomoreCohortYear } from "./time.service.js";
+import { fetchTeamLeaders, isEligibleScholar } from "./user.service.js";
 import {
   getCampusWeekAttendance,
 } from "./attendance-week.service.js";
@@ -132,16 +132,8 @@ export function buildGradeBreakdown(
   return breakdown;
 }
 
-function isScholar(role: string | null): boolean {
-  return (role ?? "").toLowerCase() === "scholar";
-}
-
 function isTeamLeader(programRole: string | null): boolean {
   return (programRole ?? "").toLowerCase() !== "scholar";
-}
-
-function hasRequiredHours(u: MemoUserRow): boolean {
-  return (u.fd_required ?? 0) > 0 || (u.ss_required ?? 0) > 0;
 }
 
 const ZERO_ATTENDANCE: CampusWeekAttendanceTotals = {
@@ -184,9 +176,11 @@ export function buildMemoScholarAttendanceRows(
   const scholars: MemoScholarAttendanceRow[] = [];
   const cohort2024 = { total: 0, fdCompleteCount: 0, ssCompleteCount: 0 };
   const cohort2025 = { total: 0, fdCompleteCount: 0, ssCompleteCount: 0 };
+  const sophomoreYear = sophomoreCohortYear();
+  const freshmanYear = freshmanCohortYear();
 
   for (const u of users) {
-    if (!isScholar(u.program_role) || !hasRequiredHours(u)) continue;
+    if (!isEligibleScholar(u)) continue;
     const fd = fdByUid.get(u.uid) ?? ZERO_ATTENDANCE;
     const study = ssByUid.get(u.uid) ?? ZERO_ATTENDANCE;
     const fdReq = u.fd_required ?? null;
@@ -215,11 +209,11 @@ export function buildMemoScholarAttendanceRows(
 
     const fdComplete = fd_pct != null && fd_pct >= 100;
     const ssComplete = ss_pct != null && ss_pct >= 100;
-    if (u.cohort === 2024) {
+    if (u.cohort === sophomoreYear) {
       cohort2024.total++;
       if (fdComplete) cohort2024.fdCompleteCount++;
       if (ssComplete) cohort2024.ssCompleteCount++;
-    } else if (u.cohort === 2025) {
+    } else if (u.cohort === freshmanYear) {
       cohort2025.total++;
       if (fdComplete) cohort2025.fdCompleteCount++;
       if (ssComplete) cohort2025.ssCompleteCount++;

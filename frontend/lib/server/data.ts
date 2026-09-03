@@ -37,6 +37,7 @@ import type {
   AttendanceWeekBoard,
   ScholarWeekExcuse,
 } from "@/lib/types/attendance-week";
+import type { RosterRow } from "@/lib/types/roster";
 import type {
   TrafficSession,
   WeekEntryCount,
@@ -76,6 +77,7 @@ export type MemoUserRow = {
   app_role: string | null;
   fd_required: number | null;
   ss_required: number | null;
+  status: string | null;
 };
 
 export type TeamLeaderRow = Omit<MemoUserRow, "app_role"> & {
@@ -111,6 +113,12 @@ export async function fetchAllUsersForMemo(): Promise<MemoUserRow[]> {
 
 export async function getUserByUid(uid: string): Promise<MemoUserRow | null> {
   return backendGet<MemoUserRow | null>(`/api/users/${encodeURIComponent(uid)}`);
+}
+
+export type { RosterRow } from "@/lib/types/roster";
+
+export async function getRosterByUid(uid: string): Promise<RosterRow | null> {
+  return backendGet<RosterRow | null>(`/api/dev/roster/${encodeURIComponent(uid)}`);
 }
 
 export async function fetchTeamLeaders(): Promise<TeamLeaderRow[]> {

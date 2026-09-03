@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest"
+import { freshmanCohortYear, sophomoreCohortYear } from "@/lib/format/time"
 import type { MemoLivePageData } from "../types"
 import { assembleWeeklyMemo } from "./weekly-memo-assembler"
+
+const freshman = freshmanCohortYear()
+const sophomore = sophomoreCohortYear()
 
 const buildMemoData = (): MemoLivePageData =>
   ({
@@ -8,7 +12,7 @@ const buildMemoData = (): MemoLivePageData =>
       {
         scholarId: "2024-001",
         scholarName: "Alice Scholar",
-        cohort: 2024,
+        cohort: freshman,
         fdPct: 95,
         ssPct: 91,
         fdRequired: 120,
@@ -23,7 +27,7 @@ const buildMemoData = (): MemoLivePageData =>
       {
         scholarId: "2023-010",
         scholarName: "Bob Scholar",
-        cohort: 2024,
+        cohort: sophomore,
         fdPct: 50,
         ssPct: 70,
         fdRequired: 120,

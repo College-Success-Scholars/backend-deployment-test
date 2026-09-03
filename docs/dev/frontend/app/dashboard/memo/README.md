@@ -28,7 +28,7 @@ The header blurb (`WEEKLY_MEMO_HEADER_BLURB` in `_lib/memo-section-guide.ts`) is
 | Scholar follow-up | **Action list** — who needs a conversation this week | Scholars with **What's missing** (Front desk, Study session, WAHF, assignment title) and **How it's missing** (hours/grade meters, WAHF submitted-at or no-submission time) |
 | Tutoring log | Sessions held vs empty sessions | Tutor report rows |
 | Recognition board | **Census** — every assignment grade parsed from this week's **WAHF** (90–100% / 70–89% / below 70%) | Scholars with parsed grades; empty band = None |
-| Full attendance detail | **Census** — hours math for everyone with required minutes, plus **overall WAHF** on-time / late / missing counts | All scholars with required hours |
+| Full attendance detail | **Census** — hours math for freshman and sophomore scholars with required minutes, plus **overall WAHF** on-time / late / missing counts | Enrolled freshman/sophomore scholars with required hours (cohort years from `FALL_SEMESTER_FIRST_DAY`) |
 
 There is no separate Form submissions accordion. WAHF totals live on attendance detail; people who have not submitted (or submitted late) live on scholar follow-up; assignment grades live on Recognition board (lows also on follow-up); WPL/MCF live on team leader performance.
 
