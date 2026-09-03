@@ -13,6 +13,7 @@ Versioned SQL for the cloud project lives here.
 ## Status
 
 - [`migrations/20260715051600_baseline.sql`](migrations/20260715051600_baseline.sql) — schema-only dump of `public` (Phase 1).
+- [`migrations/20260903033000_form_log_rls_own_or_leaders.sql`](migrations/20260903033000_form_log_rls_own_or_leaders.sql) — MCF/WPL/WAHF SELECT: own roster uid or `team_leader`/`developer` (replaces `USING (true)` / stale WAHF role names).
 - Linked remote migration history repaired (Step 2): orphans reverted; baseline marked **applied**. Local and remote agree on `20260715051600`.
 - Backend typed client + generated types: [`backend/src/supabase/`](../backend/src/supabase/) (Step 3). Regen: `npm run db:types --prefix backend`, then run backend tests (includes model↔`Database` align checks).
 - Do **not** `db push` the baseline onto prod — it is already applied as history only. Use new migration files for future DDL.

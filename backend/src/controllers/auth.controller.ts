@@ -10,7 +10,8 @@
  *
  * ## Responsibilities
  * - Define the AuthenticatedRequest interface (extends Express Request)
- * - Provide auth middleware: requireAuth, requireTeamLeaderOrAbove, requireDeveloper, requireSelfOrTeamLeader
+ * - Provide auth middleware: requireAuth, requireTeamLeaderOrAbove, requireTeamLeaderRole,
+ *   requireDeveloper, requireSelfOrTeamLeader, requireSelfScholarIdOrTeamLeader
  * - Provide auth endpoint handlers: getMe, getProfile, getMentees, getActiveSemester
  *
  * ## What belongs here
@@ -27,7 +28,14 @@ import type { Request, Response, NextFunction } from "express";
 import { getSupabaseClient, getSupabaseAuthClient, runWithToken } from "../supabase/client.js";
 import { getMenteesByMentorKey } from "../services/mentee.service.js";
 import type { ProfilesRow } from "../models/user.model.js";
-import { hasRoleAtLeast, isDeveloperProfile, isUmdEmail, mergeProfileWithRoster } from "../../../shared/dist/auth.js";
+import {
+  canAccessRequestedScholarId,
+  hasRoleAtLeast,
+  isDeveloperProfile,
+  isUmdEmail,
+  mergeProfileWithRoster,
+  parseRequestedScholarId,
+} from "../../../shared/dist/auth.js";
 import { createScholarProfile } from "../services/user.service.js";
 import { resolveEffectiveProfile } from "../services/dev-profile.service.js";
 import { rejectWritesWhenActing } from "../middleware/reject-writes-when-acting.js";
@@ -122,6 +130,19 @@ export async function requireTeamLeaderOrAbove(req: AuthenticatedRequest, res: R
 }
 
 /**
+ * Team-leader+ check when `requireAuth` already populated `req.profile`.
+ * Use this instead of `requireTeamLeaderOrAbove` on mixed routers so JWT
+ * verification does not run twice.
+ */
+export function requireTeamLeaderRole(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  if (!hasRoleAtLeast(req.profile?.app_role ?? null, "team_leader")) {
+    res.status(403).json({ error: "Forbidden: Team leader or above required" });
+    return;
+  }
+  next();
+}
+
+/**
  * Requires that the authenticated user is either:
  * 1. Accessing their own data (req.params.uid matches their student_id), or
  * 2. A team leader or above (can access any uid).
@@ -136,15 +157,31 @@ export function requireSelfOrTeamLeader(req: AuthenticatedRequest, res: Response
     return;
   }
 
-  // Team leader+ can access any uid
-  if (hasRoleAtLeast(req.profile?.app_role ?? null, "team_leader")) {
+  if (canAccessRequestedScholarId(req.profile, requestedUid)) {
     next();
     return;
   }
 
-  // Otherwise, must be accessing own data
-  const userStudentId = String(req.profile?.student_id ?? "");
-  if (requestedUid === userStudentId) {
+  res.status(403).json({ error: "Forbidden: Can only access your own data" });
+}
+
+/**
+ * Same gate as requireSelfOrTeamLeader, but the roster uid comes from the JSON
+ * body (`scholarId` or legacy `studentId`). Missing id is allowed (handler
+ * returns empty). Must run AFTER requireAuth.
+ */
+export function requireSelfScholarIdOrTeamLeader(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+) {
+  const scholarId = parseRequestedScholarId(req.body);
+  if (!scholarId) {
+    next();
+    return;
+  }
+
+  if (canAccessRequestedScholarId(req.profile, scholarId)) {
     next();
     return;
   }

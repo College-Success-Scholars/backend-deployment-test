@@ -24,7 +24,7 @@ Pure TypeScript source for the shared library. All exports are re-exported throu
 | `time-types.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/shared/time-types.ts) | TypeScript types: `CampusWeekDateRange`, `WeekDateRange` |
 | `eastern-time.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/shared/eastern-time.ts) | Timezone-safe date utilities for Eastern Time (America/New_York): parse, format, add days, get day of week, etc. |
 | `campus-calendar.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/shared/campus-calendar.ts) | Campus week calendar built from `time-config.ts` constants: `weekOf(date)` and `rangeOf(weekNum)` |
-| `auth.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/shared/auth.ts) | Auth constants and helpers: `APP_ROLE_ORDER`, `hasRoleAtLeast`, `mergeProfileWithRoster` |
+| `auth.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/shared/auth.ts) | Auth constants and helpers: `APP_ROLE_ORDER`, `hasRoleAtLeast`, `mergeProfileWithRoster`, `canAccessRequestedScholarId`, `parseRequestedScholarId` |
 
 ---
 

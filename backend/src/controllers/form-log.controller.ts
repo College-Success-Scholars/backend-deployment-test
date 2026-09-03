@@ -21,6 +21,7 @@
  */
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "./auth.controller.js";
+import { hasRoleAtLeast, parseRequestedScholarId } from "../../../shared/dist/auth.js";
 import {
   getMcfFormLogsForWeek,
   getMcfFormLogsByUid,
@@ -255,14 +256,9 @@ export async function wplByUidAndWeekWithLate(req: AuthenticatedRequest, res: Re
 // POST /api/form-logs/recent-submissions
 export async function recentSubmissions(req: AuthenticatedRequest, res: Response) {
   try {
-    const body = req.body as { scholarId?: string; studentId?: number };
-    const scholarId =
-      typeof body.scholarId === "string" && body.scholarId.trim() !== ""
-        ? body.scholarId.trim()
-        : body.studentId != null
-          ? String(body.studentId)
-          : null;
-    const data = await getRecentFormSubmissions({ scholarId });
+    const scholarId = parseRequestedScholarId(req.body);
+    const includeTeamLeaderForms = hasRoleAtLeast(req.profile?.app_role ?? null, "team_leader");
+    const data = await getRecentFormSubmissions({ scholarId, includeTeamLeaderForms });
     res.json({ data });
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : "Failed to fetch recent submissions" });

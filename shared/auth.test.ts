@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  canAccessRequestedScholarId,
   getEffectiveScholarId,
   hasRoleAtLeast,
   isUmdEmail,
   isValidUuid,
   mapTestProfileToEffectiveRow,
   mergeProfileWithRoster,
+  parseRequestedScholarId,
 } from "./auth.js";
 
 describe("isUmdEmail", () => {
@@ -106,6 +108,34 @@ describe("mapTestProfileToEffectiveRow", () => {
     expect(effective.app_role).toBeNull();
     expect(effective.id).toBe("dev-uuid");
   });
+
+  it("clears nested user_roster so developer mentees do not leak into the persona", () => {
+    const real = {
+      id: "dev-uuid",
+      student_id: "999",
+      app_role: "developer",
+      mentee_count: 3,
+      mentee_uids: ["dev-mentee-1"],
+      user_roster: {
+        mentee_count: 3,
+        mentee_uids: ["dev-mentee-1", "dev-mentee-2"],
+      },
+    };
+    const test = {
+      id: "test-profile-uuid",
+      label: "Team leader — no mentees",
+      roster_uid: "tl-no-mentees",
+      program_role: "team_leader",
+      app_role: "team_leader",
+      mentee_uids: [],
+      mentee_count: 0,
+    };
+    const effective = mapTestProfileToEffectiveRow(real, test);
+    expect(effective.user_roster).toBeNull();
+    expect(effective.mentee_count).toBe(0);
+    expect(effective.mentee_uids).toEqual([]);
+    expect(effective.app_role).toBe("team_leader");
+  });
 });
 
 describe("getEffectiveScholarId", () => {
@@ -117,6 +147,39 @@ describe("getEffectiveScholarId", () => {
   it("returns null when student_id missing", () => {
     expect(getEffectiveScholarId(null)).toBeNull();
     expect(getEffectiveScholarId({})).toBeNull();
+  });
+});
+
+describe("canAccessRequestedScholarId", () => {
+  it("allows team_leader and developer for any requested uid", () => {
+    expect(canAccessRequestedScholarId({ app_role: "team_leader" }, "other")).toBe(true);
+    expect(canAccessRequestedScholarId({ app_role: "developer" }, "other")).toBe(true);
+  });
+
+  it("allows scholars only for their own student_id", () => {
+    const scholar = { app_role: null, student_id: "12345" };
+    expect(canAccessRequestedScholarId(scholar, "12345")).toBe(true);
+    expect(canAccessRequestedScholarId(scholar, "99999")).toBe(false);
+  });
+
+  it("denies scholars with no student_id", () => {
+    expect(canAccessRequestedScholarId({ app_role: null }, "12345")).toBe(false);
+  });
+});
+
+describe("parseRequestedScholarId", () => {
+  it("prefers scholarId string over studentId", () => {
+    expect(parseRequestedScholarId({ scholarId: " 123 ", studentId: 999 })).toBe("123");
+  });
+
+  it("accepts legacy studentId", () => {
+    expect(parseRequestedScholarId({ studentId: 12345 })).toBe("12345");
+  });
+
+  it("returns null for empty or missing ids", () => {
+    expect(parseRequestedScholarId({})).toBeNull();
+    expect(parseRequestedScholarId({ scholarId: "  " })).toBeNull();
+    expect(parseRequestedScholarId(null)).toBeNull();
   });
 });
 

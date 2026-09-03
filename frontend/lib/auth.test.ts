@@ -51,6 +51,10 @@ describe("hasAssignedMentees", () => {
     expect(hasAssignedMentees({ mentee_count: 2 })).toBe(true);
   });
 
+  it("is true when top-level mentee_uids is non-empty", () => {
+    expect(hasAssignedMentees({ mentee_count: 0, mentee_uids: ["uid-1"] })).toBe(true);
+  });
+
   it("is true when nested user_roster.mentee_uids is non-empty", () => {
     expect(hasAssignedMentees({ user_roster: { mentee_uids: ["uid-1"] } })).toBe(true);
   });
@@ -63,6 +67,16 @@ describe("hasAssignedMentees", () => {
     expect(hasAssignedMentees({ mentee_count: 0, user_roster: { mentee_uids: [] } })).toBe(false);
     expect(hasAssignedMentees(null)).toBe(false);
   });
+
+  it("does not treat empty top-level mentee_uids as assigned when count is zero", () => {
+    expect(
+      hasAssignedMentees({
+        mentee_count: 0,
+        mentee_uids: [],
+        user_roster: null,
+      }),
+    ).toBe(false);
+  });
 });
 
 describe("canAccessMenteeMonitoring", () => {
@@ -72,6 +86,17 @@ describe("canAccessMenteeMonitoring", () => {
 
   it("denies team leaders without mentees", () => {
     expect(canAccessMenteeMonitoring({ app_role: "team_leader", mentee_count: 0 })).toBe(false);
+  });
+
+  it("allows team leaders with only top-level mentee_uids (test-profile shape)", () => {
+    expect(
+      canAccessMenteeMonitoring({
+        app_role: "team_leader",
+        mentee_count: 0,
+        mentee_uids: ["mentee-1"],
+        user_roster: null,
+      }),
+    ).toBe(true);
   });
 
   it("denies scholars even when mentee_count is set", () => {

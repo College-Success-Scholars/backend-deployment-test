@@ -18,11 +18,17 @@ import { ScholarDashboard } from "@/components/dashboard/roles/scholar-dashboard
 import { DefaultDashboard } from "@/components/dashboard/roles/default-dashboard";
 import { getRecentFormSubmissions } from "@/lib/server/data";
 import { getCurrentUser } from "@/lib/server/queries";
-import { resolveUserRole } from "@/lib/auth";
+import { canAccessMenteeMonitoring, resolveUserRole } from "@/lib/auth";
 
 export default async function Page() {
   const me = await getCurrentUser();
-  const role = resolveUserRole(me?.profile as { app_role?: string | null; program_role?: string | null } | null);
+  const profile = me?.profile as {
+    app_role?: string | null;
+    program_role?: string | null;
+    mentee_count?: number | null;
+    mentee_uids?: string[] | null;
+  } | null;
+  const role = resolveUserRole(profile);
 
   if (role === "scholar") {
     const entries = await getRecentFormSubmissions({
@@ -32,7 +38,7 @@ export default async function Page() {
   }
 
   if (role === "team-leader" || role === "developer") {
-    return <TeamLeaderDashboard />;
+    return <TeamLeaderDashboard showMentees={canAccessMenteeMonitoring(profile)} />;
   }
 
   return <DefaultDashboard />;

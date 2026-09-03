@@ -39,9 +39,11 @@ All routers are mounted in [`backend/src/app.ts`](https://github.com/College-Suc
 | Middleware | Who can call |
 |-----------|-------------|
 | `requireAuth` | Any authenticated user (any role) |
-| `requireTeamLeaderOrAbove` | `team_leader` or `developer` |
+| `requireTeamLeaderOrAbove` | `team_leader` or `developer` (verifies JWT) |
+| `requireTeamLeaderRole` | `team_leader` or `developer` — use after `requireAuth` |
 | `requireDeveloper` | `developer` only |
-| `requireSelfOrTeamLeader` | Own data, or `team_leader`/`developer` — use after `requireAuth` |
+| `requireSelfOrTeamLeader` | Own `:uid` (`student_id`), or `team_leader`/`developer` — use after `requireAuth` |
+| `requireSelfScholarIdOrTeamLeader` | Own body `scholarId`, or `team_leader`/`developer` — use after `requireAuth` |
 
 All auth middleware is exported from `controllers/auth.controller.ts`.
 
