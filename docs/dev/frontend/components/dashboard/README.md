@@ -20,7 +20,7 @@ Dashboard-specific components split into role home views and reusable feature wi
 | Directory | Purpose |
 |-----------|---------|
 | `roles/` | Home dashboard per `app_role` — selected by `app/dashboard/page.tsx` via `resolveUserRole()` |
-| `widgets/` | Feature widgets used inside dashboard routes (activity log, directory, …) |
+| `widgets/` | Feature widgets used inside dashboard routes (activity log, directory, …). Scholar `ActivityLog` is WAHF type + timestamp only; full payloads stay on Personal (`PersonalActivityLog`, team_leader+). |
 
 Layout chrome (`dashboard-header`, `dashboard-breadcrumb`, sidebar nav) lives in `components/layout/`, not here.
 

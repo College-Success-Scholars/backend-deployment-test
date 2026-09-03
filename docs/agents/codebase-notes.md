@@ -44,7 +44,7 @@ Important backend domains:
 
 - `session-log.*`: fetches and cleans raw check-in/out logs.
 - `session-record.*`: computes weekly minute totals, syncs records into `front_desk_records` / `study_session_records`, supports excuse updates.
-- `form-log.*`: MCF/WHAF/WPL and related aggregation endpoints.
+- `form-log.*`: MCF/WHAF/WPL and related aggregation endpoints. Week-wide / batch / stats require team_leader+; uid-scoped reads are self or team_leader+.
 - `memo.*`: memo aggregation endpoints and sync/refresh operations.
 - `traffic.*`: weekly traffic counts and session entries.
 

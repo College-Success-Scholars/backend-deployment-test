@@ -22,7 +22,7 @@ The main authenticated application. All routes here require a valid Supabase ses
 | File | Source Link | URL | Description |
 |------|-------------|-----|-------------|
 | `layout.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/layout.tsx) | `/dashboard/*` | Dashboard shell with sidebar — wraps all child pages |
-| `page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/page.tsx) | `/dashboard` | Main dashboard — renders `TeamLeaderDashboard` component (or role-appropriate variant) |
+| `page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/page.tsx) | `/dashboard` | Main dashboard — role home (`ScholarDashboard` / `TeamLeaderDashboard` / default). Scholar Activity Log is WAHF type + time only. |
 | `directory/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/directory/page.tsx) | `/dashboard/directory` | Scholar directory |
 | `events/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/events/page.tsx) | `/dashboard/events` | Program events |
 | `internship-board/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/internship-board/page.tsx) | `/dashboard/internship-board` | Internship opportunities board |

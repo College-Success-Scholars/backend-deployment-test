@@ -23,7 +23,7 @@ Express Router definitions. Each route file declares HTTP method + path combinat
 | `user.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/user.routes.ts) | `/api/users` | `requireTeamLeaderOrAbove` |
 | `session-log.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/session-log.routes.ts) | `/api/session-logs` | `requireTeamLeaderOrAbove` |
 | `session-record.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/session-record.routes.ts) | `/api/session-records` | `requireAuth` + `requireSelfOrTeamLeader` |
-| `form-log.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/form-log.routes.ts) | `/api/form-logs` | mixed (`requireAuth` / `requireTeamLeaderOrAbove`) |
+| `form-log.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/form-log.routes.ts) | `/api/form-logs` | mixed (`requireAuth` + `requireTeamLeaderRole` / `requireSelfOrTeamLeader` / `requireSelfScholarIdOrTeamLeader`) |
 | `memo.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/memo.routes.ts) | `/api/memo` | `requireTeamLeaderOrAbove` |
 | `traffic.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/traffic.routes.ts) | `/api/traffic` | `requireTeamLeaderOrAbove` |
 | `activity.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/activity.routes.ts) | `/api/daily-activity` | `requireAuth` |
@@ -39,9 +39,11 @@ All routers are mounted in [`backend/src/app.ts`](https://github.com/College-Suc
 | Middleware | Who can call |
 |-----------|-------------|
 | `requireAuth` | Any authenticated user (any role) |
-| `requireTeamLeaderOrAbove` | `team_leader` or `developer` |
+| `requireTeamLeaderOrAbove` | `team_leader` or `developer` (verifies JWT) |
+| `requireTeamLeaderRole` | `team_leader` or `developer` — use after `requireAuth` |
 | `requireDeveloper` | `developer` only |
-| `requireSelfOrTeamLeader` | Own data, or `team_leader`/`developer` — use after `requireAuth` |
+| `requireSelfOrTeamLeader` | Own `:uid` (`student_id`), or `team_leader`/`developer` — use after `requireAuth` |
+| `requireSelfScholarIdOrTeamLeader` | Own body `scholarId`, or `team_leader`/`developer` — use after `requireAuth` |
 
 All auth middleware is exported from `controllers/auth.controller.ts`.
 

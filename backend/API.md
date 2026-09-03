@@ -5,7 +5,9 @@ Base URL: `/api`
 All endpoints require a valid Supabase JWT in the `Authorization: Bearer <token>` header unless otherwise noted. Auth levels:
 
 - **requireAuth** -- Any authenticated user.
-- **requireTeamLeaderOrAbove** -- User must have `app_role` of `team_leader` or higher in the role hierarchy.
+- **requireTeamLeaderOrAbove** / **requireTeamLeaderRole** -- User must have `app_role` of `team_leader` or higher. `requireTeamLeaderRole` is the same check after `requireAuth` already ran.
+- **requireSelfOrTeamLeader** -- Own roster uid (`:uid`) or team_leader+.
+- **requireSelfScholarIdOrTeamLeader** -- Own body `scholarId` / `studentId` or team_leader+. Missing id is allowed (empty result).
 - **requireDeveloper** -- User must have `app_role` of `developer`.
 
 All error responses follow the shape `{ error: string }`.
@@ -640,13 +642,19 @@ All routes under `/api/traffic` require **requireAuth**.
 
 ## Form Logs
 
-All routes under `/api/form-logs` require **requireAuth**.
+All routes under `/api/form-logs` require **requireAuth**, then a second gate:
+
+- Week-wide, batch-by-uids, team-leader stats, and generic id lookup: **requireTeamLeaderRole**
+- uid-scoped GETs: **requireSelfOrTeamLeader**
+- `POST /recent-submissions`: **requireSelfScholarIdOrTeamLeader**
+
+Scholars may read their own submissions (dashboard Activity Log). Program-wide form data is team_leader+.
 
 ### MCF (Mentee Check-in Form)
 
 ### `GET /api/form-logs/mcf/week/:weekNum`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireTeamLeaderRole
 **Description:** Returns all MCF form log entries for a specific week.
 **Request Params:** `weekNum` (integer, >= 1)
 **Response:**
@@ -658,7 +666,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `GET /api/form-logs/mcf/uid/:uid`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireSelfOrTeamLeader
 **Description:** Returns all MCF form logs for a specific scholar/mentor UID.
 **Request Params:** `uid` (string)
 **Response:**
@@ -670,7 +678,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `GET /api/form-logs/mcf/uid/:uid/week/:weekNum`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireSelfOrTeamLeader
 **Description:** Returns MCF form logs for a specific UID and week.
 **Request Params:** `uid` (string), `weekNum` (integer, >= 1)
 **Response:**
@@ -682,7 +690,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `GET /api/form-logs/mcf/week/:weekNum/with-late`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireTeamLeaderRole
 **Description:** Returns MCF form logs for a week, including late submissions.
 **Request Params:** `weekNum` (integer, >= 1)
 **Response:**
@@ -694,7 +702,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `GET /api/form-logs/mcf/uid/:uid/with-late`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireSelfOrTeamLeader
 **Description:** Returns all MCF form logs for a UID, including late submissions.
 **Request Params:** `uid` (string)
 **Response:**
@@ -706,7 +714,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `GET /api/form-logs/mcf/uid/:uid/week/:weekNum/with-late`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireSelfOrTeamLeader
 **Description:** Returns MCF form logs for a specific UID and week, including late submissions.
 **Request Params:** `uid` (string), `weekNum` (integer, >= 1)
 **Response:**
@@ -720,7 +728,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `GET /api/form-logs/whaf/week/:weekNum`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireTeamLeaderRole
 **Description:** Returns all WHAF form log entries for a specific week.
 **Request Params:** `weekNum` (integer, >= 1)
 **Response:**
@@ -732,7 +740,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `GET /api/form-logs/whaf/uid/:uid`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireSelfOrTeamLeader
 **Description:** Returns all WHAF form logs for a specific scholar UID.
 **Request Params:** `uid` (string)
 **Response:**
@@ -744,7 +752,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `GET /api/form-logs/whaf/week/:weekNum/with-late`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireTeamLeaderRole
 **Description:** Returns WHAF form logs for a week, including late submissions.
 **Request Params:** `weekNum` (integer, >= 1)
 **Response:**
@@ -758,7 +766,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `GET /api/form-logs/wpl/week/:weekNum`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireTeamLeaderRole
 **Description:** Returns all WPL form log entries for a specific week.
 **Request Params:** `weekNum` (integer, >= 1)
 **Response:**
@@ -770,7 +778,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `GET /api/form-logs/wpl/uid/:uid`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireSelfOrTeamLeader
 **Description:** Returns all WPL form logs for a specific scholar UID.
 **Request Params:** `uid` (string)
 **Response:**
@@ -782,7 +790,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `GET /api/form-logs/wpl/uid/:uid/week/:weekNum`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireSelfOrTeamLeader
 **Description:** Returns WPL form logs for a specific UID and week.
 **Request Params:** `uid` (string), `weekNum` (integer, >= 1)
 **Response:**
@@ -794,7 +802,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `GET /api/form-logs/wpl/week/:weekNum/with-late`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireTeamLeaderRole
 **Description:** Returns WPL form logs for a week, including late submissions.
 **Request Params:** `weekNum` (integer, >= 1)
 **Response:**
@@ -806,7 +814,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `GET /api/form-logs/wpl/uid/:uid/with-late`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireSelfOrTeamLeader
 **Description:** Returns all WPL form logs for a UID, including late submissions.
 **Request Params:** `uid` (string)
 **Response:**
@@ -818,7 +826,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `GET /api/form-logs/wpl/uid/:uid/week/:weekNum/with-late`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireSelfOrTeamLeader
 **Description:** Returns WPL form logs for a specific UID and week, including late submissions.
 **Request Params:** `uid` (string), `weekNum` (integer, >= 1)
 **Response:**
@@ -832,7 +840,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `POST /api/form-logs/whaf/by-uids`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireTeamLeaderRole
 **Description:** Returns all WHAF form logs matching the given scholar UIDs.
 **Request Body:**
 ```json
@@ -847,7 +855,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `POST /api/form-logs/mcf/by-uids`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireTeamLeaderRole
 **Description:** Returns all MCF form logs matching the given UIDs. Optionally filter by `mentor_uid` or `mentee_uid`.
 **Request Body:**
 ```json
@@ -865,7 +873,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `POST /api/form-logs/wpl/by-uids`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireTeamLeaderRole
 **Description:** Returns all WPL form logs matching the given scholar UIDs.
 **Request Body:**
 ```json
@@ -880,7 +888,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `POST /api/form-logs/tutor-reports/by-uids`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireTeamLeaderRole
 **Description:** Returns all tutor report logs matching the given scholar UIDs.
 **Request Body:**
 ```json
@@ -895,7 +903,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `POST /api/form-logs/daily-activity/by-uids`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireTeamLeaderRole
 **Description:** Returns all daily scholar activity entries matching the given scholar UIDs.
 **Request Body:**
 ```json
@@ -912,8 +920,8 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `POST /api/form-logs/recent-submissions`
 
-**Auth:** requireAuth
-**Description:** Returns the most recent form submissions for a given student.
+**Auth:** requireAuth, requireSelfScholarIdOrTeamLeader
+**Description:** Returns recent form submissions for a given student. Scholars (and anyone below `team_leader`) receive **WAHF summaries only** (`id`, `formType`, `submittedAt`) — no grades and no WPL/MCF. Team leaders+ receive full WAHF/WPL/MCF payloads for the requested uid.
 **Request Body:**
 ```json
 { "scholarId": "12345" }  // optional string; legacy { "studentId": 12345 } also accepted
@@ -927,7 +935,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `POST /api/form-logs/team-leader-stats`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireTeamLeaderRole
 **Description:** Aggregates MCF, WHAF, and WPL form submission stats per team leader for a given week (includes late submissions).
 **Request Body:**
 ```json
@@ -944,7 +952,7 @@ All routes under `/api/form-logs` require **requireAuth**.
 
 ### `GET /api/form-logs/:formType/:formId`
 
-**Auth:** requireAuth
+**Auth:** requireAuth, requireTeamLeaderRole
 **Description:** Retrieves a single form log entry by type and ID. Supported types: `mcf`, `wpl`.
 **Request Params:** `formType` (`"mcf"` | `"wpl"`), `formId` (string for MCF UUID, integer for WPL)
 **Response:**

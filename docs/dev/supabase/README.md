@@ -78,6 +78,18 @@ Hand-written type drift against the baseline dump was cleared (architecture aler
 
 Domain-semantics drift (campus week vs ISO week) is a separate alert — out of scope here.
 
+### Form-log SELECT (own row or team_leader+)
+
+Baseline policies left `mcf_form_logs` / `wpl_form_logs` world-readable (`USING (true)`). WAHF compared `scholar_uid` to `auth.uid()` and listed stale roles (`teamleader`, `admin`, `staff`).
+
+Apply [`supabase/migrations/20260903033000_form_log_rls_own_or_leaders.sql`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/supabase/migrations/20260903033000_form_log_rls_own_or_leaders.sql) (`supabase db push` staging, then prod):
+
+- `roster_uid()` → `profiles.student_id` for `auth.uid()` (form tables store roster uids, not auth uuids)
+- `is_team_leader_or_above()` → `app_role IN ('team_leader', 'developer')`
+- Scholars SELECT only their own MCF (mentor or mentee uid), WPL, and WAHF rows
+
+Express `/api/form-logs` enforces the same split (week-wide = team_leader+; uid-scoped = self or team_leader+). RLS is the backstop if someone calls Supabase with a scholar JWT.
+
 ---
 
 ## Dev test profiles (Dashboard runbooks)

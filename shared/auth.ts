@@ -152,5 +152,36 @@ export function getEffectiveScholarId(
   return null;
 }
 
+type ScholarAccessProfile = {
+  app_role?: string | null;
+  student_id?: unknown;
+};
+
+/**
+ * True when the profile is team_leader+ or the requested roster uid is their own
+ * `student_id`. Used by uid-scoped form-log (and similar) gates.
+ */
+export function canAccessRequestedScholarId(
+  profile: ScholarAccessProfile | null | undefined,
+  requestedId: string,
+): boolean {
+  if (hasRoleAtLeast(profile?.app_role ?? null, "team_leader")) return true;
+  const self = getEffectiveScholarId(profile);
+  if (!self) return false;
+  return self === requestedId.trim();
+}
+
+/** Parse `scholarId` / legacy `studentId` from a JSON body. Empty or missing → null. */
+export function parseRequestedScholarId(body: unknown): string | null {
+  if (body == null || typeof body !== "object") return null;
+  const b = body as { scholarId?: unknown; studentId?: unknown };
+  if (typeof b.scholarId === "string" && b.scholarId.trim() !== "") {
+    return b.scholarId.trim();
+  }
+  if (b.studentId == null || b.studentId === "") return null;
+  const asString = String(b.studentId).trim();
+  return asString === "" ? null : asString;
+}
+
 export const DEV_ACTIVE_PROFILE_HEADER = "x-dev-active-profile";
 export const DEV_ACTIVE_PROFILE_COOKIE = "dev-active-profile";

@@ -31,10 +31,13 @@ Backend gates (see auth controller middleware):
 | Middleware | Who passes |
 |------------|------------|
 | `requireAuth` | Any authenticated user with a valid JWT |
-| `requireTeamLeaderOrAbove` | `team_leader` or `developer` |
+| `requireTeamLeaderOrAbove` | `team_leader` or `developer` (standalone; verifies JWT) |
+| `requireTeamLeaderRole` | `team_leader` or `developer` — after `requireAuth` |
+| `requireSelfOrTeamLeader` | Own `:uid` (`student_id`) or team_leader+ — after `requireAuth` |
+| `requireSelfScholarIdOrTeamLeader` | Own body `scholarId` or team_leader+ — after `requireAuth` |
 | `requireDeveloper` | `developer` only |
 
-Scholars (`program_role` scholar, often `app_role` null) get scholar nav / dashboard surfaces; team leaders get supervisory tools (e.g. Memo access where gated); developers get `/dev` tools and persona switching.
+Scholars (`program_role` scholar, often `app_role` null) get scholar nav / dashboard surfaces and **own** form submissions (uid-scoped `/api/form-logs` + Activity Log). Team leaders get supervisory tools (Memo, week-wide form logs). Developers get `/dev` tools and persona switching.
 
 Product vocabulary: [ubiquitous language](../../agents/ubiquitous_language.md).
 

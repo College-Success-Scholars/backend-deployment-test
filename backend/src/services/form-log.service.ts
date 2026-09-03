@@ -515,6 +515,36 @@ function mapWhafRow(row: WahfFormLogRow): RecentFormSubmission {
   };
 }
 
+/** Scholar home: WAHF id + timestamp only — no grades or team-leader form payloads. */
+export function mapWhafSummaryRow(row: WahfFormLogRow): RecentFormSubmission {
+  return {
+    id: `WHAF-${row.id}`,
+    formType: "WHAF",
+    submittedAt: row.created_at,
+  };
+}
+
+export function assembleRecentFormSubmissions(params: {
+  whaf: WahfFormLogRow[];
+  wpl: WplFormLogRow[];
+  mcf: McfFormLogRow[];
+  includeTeamLeaderForms: boolean;
+}): RecentFormSubmission[] {
+  if (!params.includeTeamLeaderForms) {
+    return sortByCreatedAtDesc(params.whaf).map(mapWhafSummaryRow);
+  }
+
+  return [
+    ...sortByCreatedAtDesc(params.whaf).map(mapWhafRow),
+    ...sortByCreatedAtDesc(params.wpl).map(mapWplRow),
+    ...sortByCreatedAtDesc(params.mcf).map(mapMcfRow),
+  ].sort((a, b) => {
+    const aTs = a.submittedAt ? new Date(a.submittedAt).getTime() : 0;
+    const bTs = b.submittedAt ? new Date(b.submittedAt).getTime() : 0;
+    return bTs - aTs;
+  });
+}
+
 function mapWplRow(row: WplFormLogRow): RecentFormSubmission {
   return {
     id: `WPL-${row.id}`, formType: "WPL", submittedAt: row.created_at,
@@ -536,9 +566,21 @@ function mapMcfRow(row: McfFormLogRow): RecentFormSubmission {
 export async function getRecentFormSubmissions(params: {
   profile?: ProfilesRow | null;
   scholarId?: string | null;
+  includeTeamLeaderForms?: boolean;
 }): Promise<RecentFormSubmission[]> {
   const uid = params.scholarId ?? scholarUidFromProfile(params.profile ?? null);
   if (!uid) return [];
+
+  const includeTeamLeaderForms = params.includeTeamLeaderForms === true;
+  if (!includeTeamLeaderForms) {
+    const whafAll = await getWhafFormLogsByUid(uid);
+    return assembleRecentFormSubmissions({
+      whaf: whafAll,
+      wpl: [],
+      mcf: [],
+      includeTeamLeaderForms: false,
+    });
+  }
 
   const [whafAll, wplAll, mcfAll] = await Promise.all([
     getWhafFormLogsByUid(uid),
@@ -546,13 +588,10 @@ export async function getRecentFormSubmissions(params: {
     getMcfFormLogsByUid(uid),
   ]);
 
-  return [
-    ...sortByCreatedAtDesc(whafAll).map(mapWhafRow),
-    ...sortByCreatedAtDesc(wplAll).map(mapWplRow),
-    ...sortByCreatedAtDesc(mcfAll).map(mapMcfRow),
-  ].sort((a, b) => {
-    const aTs = a.submittedAt ? new Date(a.submittedAt).getTime() : 0;
-    const bTs = b.submittedAt ? new Date(b.submittedAt).getTime() : 0;
-    return bTs - aTs;
+  return assembleRecentFormSubmissions({
+    whaf: whafAll,
+    wpl: wplAll,
+    mcf: mcfAll,
+    includeTeamLeaderForms: true,
   });
 }

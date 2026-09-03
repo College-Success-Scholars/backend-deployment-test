@@ -12,7 +12,7 @@ export function ActivityLog({ entries }: { entries: RecentFormSubmission[] }) {
           Activity Log
         </CardTitle>
         <CardDescription>
-          View your recent WHAF, WPL, and MCF submissions.
+          Your recent WAHF submissions.
         </CardDescription>
       </CardHeader>
       <ActivityLogClient entries={entries} />
