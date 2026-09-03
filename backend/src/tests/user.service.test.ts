@@ -3,6 +3,8 @@ import {
   buildScholarProfileInsertRow,
   isEligibleScholar,
   isEnrolled,
+  isGraduated,
+  isTeamLeaderForPerformance,
   overlayRosterAppRoleFromProfile,
 } from "../services/user.service.js";
 import type { RosterRow } from "../models/user.model.js";
@@ -78,6 +80,26 @@ describe("isEligibleScholar", () => {
         fd_required: 120,
         ss_required: 180,
       }),
+    ).toBe(false);
+  });
+});
+
+describe("isTeamLeaderForPerformance", () => {
+  it("includes enrolled team leaders and staff with unset status", () => {
+    expect(
+      isTeamLeaderForPerformance({ program_role: "team_leader", status: "enrolled" }),
+    ).toBe(true);
+    expect(isTeamLeaderForPerformance({ program_role: "Team Leader", status: null })).toBe(true);
+    expect(isTeamLeaderForPerformance({ program_role: "GA", status: "inactive" })).toBe(true);
+  });
+
+  it("excludes scholars and graduated roster rows", () => {
+    expect(isGraduated("Graduated")).toBe(true);
+    expect(
+      isTeamLeaderForPerformance({ program_role: "team_leader", status: "graduated" }),
+    ).toBe(false);
+    expect(
+      isTeamLeaderForPerformance({ program_role: "scholar", status: "enrolled" }),
     ).toBe(false);
   });
 });

@@ -172,7 +172,7 @@ Canonical signed-in user row (created after invite accept or complete-profile). 
 | `program_role` | `text` | Program-facing role (Scholar, Team Leader, …). |
 | `fd_required` | `integer` default `0` | Weekly front-desk minutes required. |
 | `ss_required` | `integer` default `0` | Weekly study-session minutes required. |
-| `mentee_count` | `integer` default `0` | Number of assigned mentees (team leaders). |
+| `mentee_count` | `integer` default `0` | Number of assigned mentees (team leaders). `-1` means no `mentor_mentee` row yet. |
 | `phone_number` | `text` | Contact phone. |
 | `full_name` | `text` generated | Stored `first_name \|\| ' ' \|\| last_name`; do not insert. |
 | `emails` | `text[]` | Email addresses on the profile. |
@@ -353,7 +353,7 @@ Pre-invite staging table and source of truth for roster management only. After i
 | `program_role` | `text` | Program-facing role. |
 | `fd_required` | `bigint` | Weekly front-desk minutes required. |
 | `ss_required` | `bigint` | Weekly study-session minutes required. |
-| `mentee_count` | `bigint` | Number of assigned mentees. |
+| `mentee_count` | `bigint` | Number of assigned mentees. `-1` means a team leader has no `mentor_mentee` row yet. |
 | `majors` | `text[]` | Declared majors. |
 | `minors` | `text[]` | Declared minors. |
 | `mentee_uids` | `text[]` | Assigned mentee UIDs (team leaders). |

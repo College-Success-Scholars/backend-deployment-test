@@ -30,6 +30,8 @@ Shell scripts for deployment validation and operational tasks. These run outside
 | `configure-supabase-confirm-email-template.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/configure-supabase-confirm-email-template.sh) | Patches Supabase **Confirm signup** email template so links use `token_hash` + `type` for `/auth/confirm` |
 | `ingest-user-roster.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/ingest-user-roster.sh) | Ops: stream a roster CSV into `public.user_roster` (service role prompted interactively; no PII dumps to disk) |
 | `backfill-user-roster-defaults.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/backfill-user-roster-defaults.sh) | Ops: fill blank `cohort` / `fd_required` / `ss_required` on `public.user_roster` with program defaults |
+| `sync-mentee-count-from-mentor-mentee.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/sync-mentee-count-from-mentor-mentee.sh) | Ops: set TL `mentee_count` from `mentor_mentee` (`-1` if no relationship yet) |
+| `backfill-form-logs.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/backfill-form-logs.sh) | Ops: insert Google Form CSV dumps into `public.wpl_form_logs` / `public.mcf_form_logs` |
 | `supabase-env.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/supabase-env.sh) | Sourced helper: resolves `SUPABASE_URL` and prompts for the service role key. Not executable on its own |
 
 ---
@@ -129,6 +131,15 @@ SUPABASE_ACCESS_TOKEN=... SUPABASE_PROJECT_REF=... ./scripts/configure-supabase-
 
 # Backfill for real: cohort 2026, FD 180 min/week, SS 300 min/week, Scholar rows only
 ./scripts/backfill-user-roster-defaults.sh
+
+# Sync TL mentee_count from mentor_mentee (plan only)
+./scripts/sync-mentee-count-from-mentor-mentee.sh --dry-run
+
+# Form CSV dumps → wpl_form_logs / mcf_form_logs (parse only; no network)
+./scripts/backfill-form-logs.sh --dry-run
+
+# Form CSV dumps → form log tables (prompts for service role key)
+./scripts/backfill-form-logs.sh
 ```
 
 ### `ingest-user-roster.sh`
@@ -150,7 +161,7 @@ Ops script for bulk-loading a sheet export into `public.user_roster`. Companion 
 
 `--dry-run` skips the prompt and does not POST. Stdout includes TSV reports for bad university emails (with contact fields) and null UIDs.
 
-Credential resolution is shared with `backfill-user-roster-defaults.sh` via [`scripts/supabase-env.sh`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/supabase-env.sh) (`require_supabase_url`, `require_supabase_service_role`). Source that helper in any new Supabase ops script instead of re-implementing the `.env` walk or the hidden prompt.
+Credential resolution is shared with `backfill-user-roster-defaults.sh`, `sync-mentee-count-from-mentor-mentee.sh`, and `backfill-form-logs.sh` via [`scripts/supabase-env.sh`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/supabase-env.sh) (`require_supabase_url`, `require_supabase_service_role`). Source that helper in any new Supabase ops script instead of re-implementing the `.env` walk or the hidden prompt.
 
 ### `backfill-user-roster-defaults.sh`
 
@@ -185,4 +196,56 @@ Only rows with `program_role` = `Scholar` are touched (case-insensitive); pass `
 
 # Reset requirements that were seeded as 0
 ./scripts/backfill-user-roster-defaults.sh --include-zero
+```
+
+### `sync-mentee-count-from-mentor-mentee.sh`
+
+Ops script that copies `public.mentor_mentee` onto `user_roster.mentee_count` / `mentee_uids` for team leaders (same roster rule as weekly memo: `program_role` ≠ scholar, `status` ≠ graduated). Companion helper: [`scripts/sync-mentee-count-from-mentor-mentee.py`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/sync-mentee-count-from-mentor-mentee.py).
+
+Join path: `mentor_mentee.mentor_id` → `profiles.id` → `profiles.student_id` = `user_roster.uid`. Linked `profiles.mentee_count` is patched to the same number.
+
+| Join rows for that TL | Roster `mentee_count` |
+|-----------------------|------------------------|
+| 1+ `mentor_mentee` rows | distinct mentee count; `mentee_uids` = that list |
+| none (with or without a profile) | `-1` (no relationship yet); `mentee_uids` = `{}` |
+
+Scholar rows are not touched. Repeat runs converge to a no-op. `--dry-run` prints the plan and writes nothing, but **still needs credentials** because it reads the three tables first.
+
+A team leader with a profile is expected to have at least one `mentor_mentee` row; those without one are the `-1` set. Weekly memo shows MCF as on-time for that sentinel, with small “no mentee” text next to the pill.
+
+**Credentials** — same sources as `ingest-user-roster.sh` above.
+
+```bash
+./scripts/sync-mentee-count-from-mentor-mentee.sh --dry-run
+./scripts/sync-mentee-count-from-mentor-mentee.sh
+```
+
+### `backfill-form-logs.sh`
+
+Ops script for loading a Google Forms / Sheets export into `public.wpl_form_logs` and `public.mcf_form_logs` when the live intake pipeline missed rows (expired consent, week-1 gap, etc.). Companion helper: [`scripts/backfill-form-logs.py`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/backfill-form-logs.py).
+
+Default source directory: `tmp/back fill form data/` (`wpl.csv`, `mcf.csv`). Files may be headerless positional dumps (as exported for week 1 2026–27) or headered Sheets exports.
+
+**Sensitivity**
+
+- Treat the CSVs as PII (names, emails, meeting notes). The script reads them from the path you pass and POSTs mapped rows to Supabase; it does **not** write transformed CSV/JSON/report files.
+- Secure or delete the source CSVs yourself after the run.
+
+**Behavior**
+
+- Timestamps are interpreted as `America/New_York` and stored as UTC `created_at` (campus week and late flags are derived from that timestamp, not from the unused week-number column).
+- WPL project strings like `Seminar (2 hours), TL Meeting (1 hour)` become a jsonb array of `{name, hours}` objects so Personal / memo UI can split them.
+- Matching `created_at` + uid rows already in the table are skipped, so re-running converges to a no-op unless you pass `--force`.
+- `--dry-run` prints the plan (and a sample payload) and writes nothing. It does **not** need credentials.
+
+**Credentials** — same sources as `ingest-user-roster.sh` above (URL from the shell or `backend/.env`; service role via hidden prompt only).
+
+```bash
+# Preview, then apply (default dir)
+./scripts/backfill-form-logs.sh --dry-run
+./scripts/backfill-form-logs.sh
+
+# One form type, explicit files
+./scripts/backfill-form-logs.sh --only wpl --wpl "tmp/back fill form data/wpl.csv"
+./scripts/backfill-form-logs.sh --only mcf --mcf "tmp/back fill form data/mcf.csv"
 ```

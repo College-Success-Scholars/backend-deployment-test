@@ -16,6 +16,8 @@ const getFormStatus = (completed: number, required: number, late: boolean): Form
   return completed > 0 ? "late" : "missing"
 }
 
+const hasNoMenteeAssignment = (mcfRequired: number): boolean => mcfRequired <= 0
+
 const formatWeekDateRange = (weekLabel: string) => {
   const [start, end] = weekLabel.split("-").map((part) => part.trim())
   return {
@@ -25,13 +27,17 @@ const formatWeekDateRange = (weekLabel: string) => {
 }
 
 const buildTeamLeaderRows = (data: MemoLivePageData): TeamLeaderPerformanceRow[] =>
-  data.teamLeaderFormStats.map((row) => ({
-    leaderName: row.name,
-    mcf: getFormStatus(row.mcfCompleted, row.mcfRequired, row.mcfLate),
-    wpl: getFormStatus(row.wplCompleted, row.wplRequired, row.wplLate),
-    wahf: getFormStatus(row.wahfCompleted, row.wahfRequired, row.wahfLate),
-    menteesOk: row.wahfPct >= 90 && row.wplPct >= 90 && row.mcfPct >= 90 ? ("yes" as const) : ("check" as const),
-  }))
+  data.teamLeaderFormStats.map((row) => {
+    const hasNoMentee = hasNoMenteeAssignment(row.mcfRequired)
+    return {
+      leaderName: row.name,
+      mcf: hasNoMentee ? "on-time" : getFormStatus(row.mcfCompleted, row.mcfRequired, row.mcfLate),
+      wpl: getFormStatus(row.wplCompleted, row.wplRequired, row.wplLate),
+      wahf: getFormStatus(row.wahfCompleted, row.wahfRequired, row.wahfLate),
+      menteesOk: row.wahfPct >= 90 && row.wplPct >= 90 && row.mcfPct >= 90 ? ("yes" as const) : ("check" as const),
+      hasNoMentee,
+    }
+  })
 
 const mapTutoringLogRow = (report: MemoTutorReportRow): TutoringLogRow => ({
   id: report.id,

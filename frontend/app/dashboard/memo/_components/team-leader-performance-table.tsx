@@ -49,7 +49,14 @@ const columns: DataTableColumn<TeamLeaderPerformanceRow>[] = [
     field: "mcf",
     sortable: true,
     getSortValue: (row) => STATUS_SORT_ORDER[row.mcf],
-    renderCell: (row) => renderStatus(row.mcf),
+    renderCell: (row) => (
+      <span className="inline-flex items-center gap-1.5">
+        {renderStatus(row.mcf)}
+        {row.hasNoMentee ? (
+          <span className="text-[11px] leading-none text-muted-foreground">no mentee</span>
+        ) : null}
+      </span>
+    ),
   },
   {
     id: "wpl",

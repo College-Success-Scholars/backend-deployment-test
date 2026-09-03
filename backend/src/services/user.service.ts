@@ -39,9 +39,14 @@ function uniqueNonEmptyStrings(values: string[]): string[] {
 }
 
 export const ENROLLED_STATUS = "enrolled";
+export const GRADUATED_STATUS = "graduated";
 
 export function isEnrolled(status: string | null | undefined): boolean {
   return (status ?? "").toLowerCase() === ENROLLED_STATUS;
+}
+
+export function isGraduated(status: string | null | undefined): boolean {
+  return (status ?? "").toLowerCase() === GRADUATED_STATUS;
 }
 
 export function isEligibleScholar(
@@ -51,6 +56,14 @@ export function isEligibleScholar(
   const fd = u.fd_required != null ? Number(u.fd_required) : 0;
   const ss = u.ss_required != null ? Number(u.ss_required) : 0;
   return role === "scholar" && isEnrolled(u.status) && isHourEligibleCohort(u.cohort) && (fd > 0 || ss > 0);
+}
+
+/** Memo / form-stats TLs: roster program_role is not scholar, and status is not graduated. */
+export function isTeamLeaderForPerformance(
+  u: Pick<MemoUserRow, "program_role" | "status">,
+): boolean {
+  const role = (u.program_role ?? "").toLowerCase();
+  return role !== "scholar" && !isGraduated(u.status);
 }
 
 /** Roster app_role is often unset; access control reads profiles.app_role. */
@@ -214,6 +227,7 @@ export async function getUserByUid(uid: string): Promise<MemoUserRow | null> {
   return mapMemoUserRow(data);
 }
 
+/** Non-scholar roster rows excluding graduates — feeds Memo team leader performance. */
 export async function fetchTeamLeaders(): Promise<TeamLeaderRow[]> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
@@ -235,7 +249,7 @@ export async function fetchTeamLeaders(): Promise<TeamLeaderRow[]> {
       ? r.mentee_uids.map((id) => String(id)).filter(Boolean)
       : null,
   }));
-  return rows.filter((r) => (r.program_role ?? "").toLowerCase() !== "scholar");
+  return rows.filter(isTeamLeaderForPerformance);
 }
 
 export async function fetchScholarUids(): Promise<string[]> {

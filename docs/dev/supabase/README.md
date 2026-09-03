@@ -62,7 +62,7 @@ Likely intake targets from the baseline migration (`*_form_logs`, log tables wit
 
 **Not** Google Form intake (app- or DB-derived): `front_desk_records_legacy` / `study_session_records_legacy` (frozen snapshots — do not use), `scholar_week_excuses` (TL-entered excuses, keyed by campus-week `week_start`), `daily_scholar_activity` / `scholar_weekly_stats` (aggregates), `traffic` / `traffic_weekly_summary` (kiosk + analytics), `profiles` / `user_roster` / `mentor_mentee` / `dev_test_profiles` / semester tables.
 
-When debugging empty dashboards, check whether the linked project has recent rows in the form/log tables above before assuming a missing “populate data” feature. If week 1 of a new academic year is empty, also check [Yearly rollover](#yearly-rollover) — expired Google consent is a common cause.
+When debugging empty dashboards, check whether the linked project has recent rows in the form/log tables above before assuming a missing “populate data” feature. If week 1 of a new academic year is empty, also check [Yearly rollover](#yearly-rollover) — expired Google consent is a common cause. If the Forms already have responses that never landed in Postgres, export the Sheet and load it with [`scripts/backfill-form-logs.sh`](../scripts/README.md#backfill-form-logssh) (WPL / MCF).
 
 ### Yearly rollover
 
@@ -72,6 +72,7 @@ Do this **once per academic year**, together with the `shared/time-config.ts` da
 2. **Confirm Drive location.** Forms and response Sheets belong in the **current-year CSS Drive**, not last year’s folder or a personal Drive. Prefer a Drive **move** (IDs and `viewform` URLs stay the same) over copy/recreate.
 3. **Test-submit** each form in the table above and confirm a new row in the matching Supabase table.
 4. **If a form ID changed**, update `FORM_URLS` in [`frontend/components/personal/personal-client.tsx`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/components/personal/personal-client.tsx) (WAHF / WPL / MCF) so Personal “Open form” points at this year’s forms.
+5. **Backfill missed rows.** If scholars already submitted in Google Forms while the pipeline was down, export the response Sheet (WPL / MCF) and run [`./scripts/backfill-form-logs.sh`](../scripts/README.md#backfill-form-logssh) (`--dry-run` first). Do not rebuild intake inside the app.
 
 Ask before changing intake destinations, secrets, or `time-config` dates — [Ask / don’t touch](../onboarding/ask-and-dont-touch.md).
 
