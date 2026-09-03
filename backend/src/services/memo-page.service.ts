@@ -20,7 +20,7 @@
  * - HTTP request/response logic
  */
 import { campusWeekToDateRange, dateToCampusWeek, freshmanCohortYear, getWeekFetchEnd, sophomoreCohortYear } from "./time.service.js";
-import { fetchTeamLeaders, isEligibleScholar } from "./user.service.js";
+import { fetchTeamLeaders, isEligibleScholar, isTeamLeaderForPerformance } from "./user.service.js";
 import {
   getCampusWeekAttendance,
 } from "./attendance-week.service.js";
@@ -34,6 +34,7 @@ import {
   getMcfFormLogsByUidAndWeek,
   markMcfFormLogsLate,
   buildTeamLeaderFormStatsForWeek,
+  countableFormRequired,
 } from "./form-log.service.js";
 import { getTutorReportLogsForWeek } from "./tutor-report-log.service.js";
 import type { FormLogRowWithLate, WahfFormLogRow } from "../models/form-log.model.js";
@@ -130,10 +131,6 @@ export function buildGradeBreakdown(
   breakdown.mid.sort(byPercentDesc);
   breakdown.low.sort(byPercentDesc);
   return breakdown;
-}
-
-function isTeamLeader(programRole: string | null): boolean {
-  return (programRole ?? "").toLowerCase() !== "scholar";
 }
 
 const ZERO_ATTENDANCE: CampusWeekAttendanceTotals = {
@@ -311,9 +308,9 @@ export async function getMemoPageData(weekNum: number) {
       wahfCompleted: acc.wahfCompleted + Math.min(row.wahfCompleted, row.wahfRequired),
       wahfRequired: acc.wahfRequired + row.wahfRequired,
       wahfLateCount: acc.wahfLateCount + (row.wahfLate ? 1 : 0),
-      mcfCompleted: acc.mcfCompleted + Math.min(row.mcfCompleted, row.mcfRequired),
-      mcfRequired: acc.mcfRequired + row.mcfRequired,
-      mcfLateCount: acc.mcfLateCount + (row.mcfLate ? 1 : 0),
+      mcfCompleted: acc.mcfCompleted + Math.min(row.mcfCompleted, countableFormRequired(row.mcfRequired)),
+      mcfRequired: acc.mcfRequired + countableFormRequired(row.mcfRequired),
+      mcfLateCount: acc.mcfLateCount + (countableFormRequired(row.mcfRequired) > 0 && row.mcfLate ? 1 : 0),
       wplCompleted: acc.wplCompleted + Math.min(row.wplCompleted, row.wplRequired),
       wplRequired: acc.wplRequired + row.wplRequired,
       wplLateCount: acc.wplLateCount + (row.wplLate ? 1 : 0),
@@ -346,7 +343,7 @@ export async function getMemoPageData(weekNum: number) {
   };
 
   // Team leaders MCF stats
-  const tlUsers = allUsers.filter((u) => isTeamLeader(u.program_role));
+  const tlUsers = allUsers.filter(isTeamLeaderForPerformance);
   const mcfByTlUid = new Map<string, { count: number; hasLate: boolean; latestAt: string | null }>();
   await Promise.all(
     tlUsers.map(async (u) => {

@@ -104,6 +104,8 @@ export type TeamLeaderPerformanceRow = {
   wpl: FormStatus
   wahf: FormStatus
   menteesOk: "yes" | "check"
+  /** True when roster mentee_count is ≤ 0 (including the -1 no-relationship sentinel). */
+  hasNoMentee: boolean
 }
 
 export type ScholarFollowUpIssueKind = "front-desk" | "study-session" | "grade" | "wahf"

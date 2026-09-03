@@ -8,6 +8,12 @@ import {
   requireTeamLeaderRole,
   type AuthenticatedRequest,
 } from "../controllers/auth.controller.js";
+import {
+  buildTeamLeaderFormStatsForWeek,
+  countableFormRequired,
+  NO_MENTEE_RELATIONSHIP,
+} from "../services/form-log.service.js";
+import type { FormLogRowWithLate, McfFormLogRow } from "../models/form-log.model.js";
 
 function mockRes() {
   const res = {
@@ -174,5 +180,68 @@ describe("assembleRecentFormSubmissions", () => {
       { id: "WHAF-w1", formType: "WHAF", submittedAt: "2026-09-01T12:00:00.000Z" },
     ]);
     expect(result[0]).not.toHaveProperty("assignment_grades");
+  });
+});
+
+describe("buildTeamLeaderFormStatsForWeek", () => {
+  it("keeps mentee_count -1 as required and treats it as 100% MCF", () => {
+    const rows = buildTeamLeaderFormStatsForWeek(
+      [
+        {
+          uid: "tl-1",
+          first_name: "Ada",
+          last_name: "Lovelace",
+          program_role: "Team Leader",
+          mentee_count: NO_MENTEE_RELATIONSHIP,
+        },
+      ],
+      [],
+      [],
+      [],
+    );
+    expect(rows[0]).toMatchObject({
+      scholarId: "tl-1",
+      mcfRequired: -1,
+      mcfCompleted: 0,
+      mcfPct: 100,
+      mcfLatestAt: "",
+    });
+  });
+
+  it("uses mentee_count as MCF required when the TL has assignments", () => {
+    const rows = buildTeamLeaderFormStatsForWeek(
+      [
+        {
+          uid: "tl-2",
+          first_name: "Grace",
+          last_name: "Hopper",
+          program_role: "Team Leader",
+          mentee_count: 2,
+        },
+      ],
+      [
+        {
+          mentor_uid: "tl-2",
+          mentee_uid: "s-1",
+          created_at: "2026-09-01T12:00:00.000Z",
+          isLate: false,
+        } as FormLogRowWithLate<McfFormLogRow>,
+      ],
+      [],
+      [],
+    );
+    expect(rows[0]).toMatchObject({
+      mcfRequired: 2,
+      mcfCompleted: 1,
+      mcfPct: 50,
+    });
+  });
+});
+
+describe("countableFormRequired", () => {
+  it("treats the no-relationship sentinel as zero owed", () => {
+    expect(countableFormRequired(NO_MENTEE_RELATIONSHIP)).toBe(0);
+    expect(countableFormRequired(0)).toBe(0);
+    expect(countableFormRequired(3)).toBe(3);
   });
 });

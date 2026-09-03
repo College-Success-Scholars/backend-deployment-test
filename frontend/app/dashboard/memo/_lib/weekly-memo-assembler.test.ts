@@ -124,6 +124,7 @@ describe("weekly-memo-assembler", () => {
       mcf: "missing",
       wpl: "on-time",
       wahf: "on-time",
+      hasNoMentee: false,
     })
     expect(result.scholarRows[0]).toMatchObject({
       scholarName: "Bob Scholar",
@@ -236,5 +237,39 @@ describe("weekly-memo-assembler", () => {
       [88, 71],
       [69, 40],
     ])
+  })
+
+  it("marks MCF on-time with hasNoMentee when required is the -1 sentinel", () => {
+    const result = assembleWeeklyMemo({
+      ...buildMemoData(),
+      teamLeaderFormStats: [
+        {
+          scholarId: "tl-none",
+          name: "TL None",
+          programRole: "Team Leader",
+          mcfCompleted: 0,
+          mcfRequired: -1,
+          mcfLate: false,
+          mcfPct: 100,
+          mcfLatestAt: "",
+          wplCompleted: 1,
+          wplRequired: 1,
+          wplLate: false,
+          wplPct: 100,
+          wplLatestAt: "",
+          wahfCompleted: 1,
+          wahfRequired: 1,
+          wahfLate: false,
+          wahfPct: 100,
+          wahfLatestAt: "",
+        },
+      ],
+    })
+
+    expect(result.teamLeaderRows[0]).toMatchObject({
+      leaderName: "TL None",
+      mcf: "on-time",
+      hasNoMentee: true,
+    })
   })
 })

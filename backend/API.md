@@ -178,7 +178,7 @@ All routes under `/api/users` require **requireAuth**.
 ### `GET /api/users/team-leaders`
 
 **Auth:** requireAuth
-**Description:** Returns all users with a team leader role.
+**Description:** Returns roster rows whose `program_role` is not scholar and whose `status` is not graduated (team leader performance / form stats).
 **Request:** None
 **Response:**
 ```json

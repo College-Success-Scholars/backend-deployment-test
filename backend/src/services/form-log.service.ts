@@ -348,6 +348,14 @@ export async function getWplFormLogsByUidAndWeekWithLate(uid: string, weekNum: n
 
 const NO_SUBMISSION_SENTINEL = "9999-12-31T23:59:59.999Z";
 
+/** Roster sentinel: team leader has no mentor_mentee row yet. */
+export const NO_MENTEE_RELATIONSHIP = -1;
+
+/** Required form count for totals: treat the no-relationship sentinel as zero owed. */
+export function countableFormRequired(required: number): number {
+  return Math.max(0, required);
+}
+
 type TeamLeaderInput = {
   uid: string;
   first_name: string | null;
@@ -413,7 +421,8 @@ export function buildTeamLeaderFormStatsForWeek(
     const wpl = wplByUid.get(u.uid) ?? { count: 0, hasLate: false, latestAt: "" };
     const mcf_required = menteeCount;
     const mcf_completed = mcf.count;
-    const mcf_pct = mcf_required > 0 ? Math.round((mcf_completed / mcf_required) * 100) : 100;
+    const mcfOwed = countableFormRequired(mcf_required);
+    const mcf_pct = mcfOwed > 0 ? Math.round((mcf_completed / mcfOwed) * 100) : 100;
     const whaf_required = 1;
     const whaf_completed = whaf.count;
     const whaf_pct = whaf_completed >= whaf_required ? 100 : Math.round((whaf_completed / whaf_required) * 100);
@@ -425,7 +434,7 @@ export function buildTeamLeaderFormStatsForWeek(
       name: [u.first_name, u.last_name].filter(Boolean).join(" ").trim() || u.uid,
       programRole: u.program_role,
       mcfCompleted: mcf_completed, mcfRequired: mcf_required, mcfLate: mcf.hasLate, mcfPct: mcf_pct,
-      mcfLatestAt: mcf.latestAt || (mcf_required > 0 ? NO_SUBMISSION_SENTINEL : ""),
+      mcfLatestAt: mcf.latestAt || (mcfOwed > 0 ? NO_SUBMISSION_SENTINEL : ""),
       wahfCompleted: whaf_completed, wahfRequired: whaf_required, wahfLate: whaf.hasLate, wahfPct: whaf_pct,
       wahfLatestAt: whaf.latestAt || NO_SUBMISSION_SENTINEL,
       wplCompleted: wpl_completed, wplRequired: wpl_required, wplLate: wpl.hasLate, wplPct: wpl_pct,

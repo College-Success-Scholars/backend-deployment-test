@@ -61,10 +61,10 @@ export function TeamLeadersTable({
       sortable: true,
       sortField: "mcfLatestAt",
       renderCell: (row) =>
-        row.mcfRequired === 0 ? (
+        row.mcfRequired <= 0 ? (
           <div
             className="flex items-center gap-2 rounded px-2 py-1 text-xs bg-success-muted"
-            title="MCF. No mentees (0 required). Green: ≥90%, Yellow: 75–90% or late, Red: <75%."
+            title="MCF. No mentees assigned (required ≤ 0, including -1). Treated as complete."
           >
             <span>
               <span className="whitespace-pre-line font-semibold">0</span>

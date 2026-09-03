@@ -149,11 +149,11 @@ const weeklyMemoByWeek: Record<number, WeeklyMemoViewData> = {
       },
     ],
     teamLeaderRows: sortTeamLeaders([
-      { leaderName: "Rafael Moreno", mcf: "missing", wpl: "on-time", wahf: "late", menteesOk: "check" },
-      { leaderName: "Tyler Nguyen", mcf: "submitted", wpl: "on-time", wahf: "missing", menteesOk: "yes" },
-      { leaderName: "Simone Carter", mcf: "submitted", wpl: "missing", wahf: "on-time", menteesOk: "yes" },
-      { leaderName: "Aisha Brooks", mcf: "submitted", wpl: "on-time", wahf: "on-time", menteesOk: "yes" },
-      { leaderName: "Jordan Kim", mcf: "submitted", wpl: "on-time", wahf: "on-time", menteesOk: "yes" },
+      { leaderName: "Rafael Moreno", mcf: "missing", wpl: "on-time", wahf: "late", menteesOk: "check", hasNoMentee: false },
+      { leaderName: "Tyler Nguyen", mcf: "submitted", wpl: "on-time", wahf: "missing", menteesOk: "yes", hasNoMentee: false },
+      { leaderName: "Simone Carter", mcf: "submitted", wpl: "missing", wahf: "on-time", menteesOk: "yes", hasNoMentee: false },
+      { leaderName: "Aisha Brooks", mcf: "submitted", wpl: "on-time", wahf: "on-time", menteesOk: "yes", hasNoMentee: false },
+      { leaderName: "Jordan Kim", mcf: "submitted", wpl: "on-time", wahf: "on-time", menteesOk: "yes", hasNoMentee: false },
     ]),
     scholarRows: sortScholars([
       withFollowUpIssues({
@@ -391,11 +391,11 @@ const weeklyMemoByWeek: Record<number, WeeklyMemoViewData> = {
       },
     ],
     teamLeaderRows: sortTeamLeaders([
-      { leaderName: "Simone Carter", mcf: "late", wpl: "missing", wahf: "on-time", menteesOk: "check" },
-      { leaderName: "Rafael Moreno", mcf: "submitted", wpl: "late", wahf: "missing", menteesOk: "yes" },
-      { leaderName: "Aisha Brooks", mcf: "submitted", wpl: "on-time", wahf: "on-time", menteesOk: "yes" },
-      { leaderName: "Jordan Kim", mcf: "submitted", wpl: "on-time", wahf: "on-time", menteesOk: "yes" },
-      { leaderName: "Tyler Nguyen", mcf: "submitted", wpl: "on-time", wahf: "on-time", menteesOk: "yes" },
+      { leaderName: "Simone Carter", mcf: "late", wpl: "missing", wahf: "on-time", menteesOk: "check", hasNoMentee: false },
+      { leaderName: "Rafael Moreno", mcf: "submitted", wpl: "late", wahf: "missing", menteesOk: "yes", hasNoMentee: false },
+      { leaderName: "Aisha Brooks", mcf: "submitted", wpl: "on-time", wahf: "on-time", menteesOk: "yes", hasNoMentee: false },
+      { leaderName: "Jordan Kim", mcf: "submitted", wpl: "on-time", wahf: "on-time", menteesOk: "yes", hasNoMentee: false },
+      { leaderName: "Tyler Nguyen", mcf: "submitted", wpl: "on-time", wahf: "on-time", menteesOk: "yes", hasNoMentee: false },
     ]),
     scholarRows: sortScholars([
       withFollowUpIssues({
