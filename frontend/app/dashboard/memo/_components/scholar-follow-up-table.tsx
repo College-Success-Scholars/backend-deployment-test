@@ -54,8 +54,8 @@ export function ScholarFollowUpTable({ rows }: ScholarFollowUpTableProps) {
           <TableRow className="bg-muted/30 hover:bg-muted/30">
             <TableHead className="px-4">Scholar</TableHead>
             <TableHead>TL</TableHead>
-            <TableHead>What's missing</TableHead>
-            <TableHead className="pr-4">How it's missing</TableHead>
+            <TableHead>What&apos;s missing</TableHead>
+            <TableHead className="pr-4">How it&apos;s missing</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
