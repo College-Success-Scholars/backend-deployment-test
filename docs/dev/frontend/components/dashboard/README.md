@@ -19,7 +19,7 @@ Dashboard-specific components split into role home views and reusable feature wi
 
 | Directory | Purpose |
 |-----------|---------|
-| `roles/` | Home dashboard per `app_role` — selected by `app/dashboard/page.tsx` via `resolveUserRole()` |
+| `roles/` | Wired home dashboards only — scholar, team-leader (also used for developer), and default — selected by `app/dashboard/page.tsx` via `resolveUserRole()` |
 | `widgets/` | Feature widgets used inside dashboard routes (activity log, directory, …) |
 
 Layout chrome (`dashboard-header`, `dashboard-breadcrumb`, sidebar nav) lives in `components/layout/`, not here.

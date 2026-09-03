@@ -1,4 +1,3 @@
-import { FormSubmissionsSection } from "./form-submissions-section"
 import { FullAttendanceDetailSection } from "./full-attendance-detail-section"
 import { RecognitionBoardSection } from "./recognition-board-section"
 import { ScholarFollowUpTable } from "./scholar-follow-up-table"
@@ -62,7 +61,6 @@ export async function WeeklyMemoAsyncContent({ weekParam }: WeeklyMemoAsyncConte
       <TutoringLogSection data={data.tutoringLog} />
       <RecognitionBoardSection data={data.recognitionBoard} />
       <FullAttendanceDetailSection data={data.fullAttendanceDetail} />
-      <FormSubmissionsSection data={data.formSubmissions} />
     </>
   )
 }

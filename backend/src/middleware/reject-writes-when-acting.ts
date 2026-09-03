@@ -11,10 +11,6 @@ import type { AuthenticatedRequest } from "../controllers/auth.controller.js";
 /** POST paths that mutate data (denylist). All other POSTs are reads and allowed when acting. */
 const ACTING_BLOCKED_POST_PATHS = new Set([
   "/api/auth/profile",
-  "/api/session-records/front-desk/sync",
-  "/api/session-records/front-desk/sync-all",
-  "/api/session-records/study/sync",
-  "/api/session-records/study/sync-all",
   "/api/memo/sync",
   "/api/memo/refresh-stats",
 ]);

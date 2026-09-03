@@ -25,9 +25,9 @@ For production features, build in `app/dashboard/` and shared components in `com
 | `page.tsx` | `/dev` | Dev tools home / index |
 | `form-logs/page.tsx` | `/dev/form-logs` | Browse raw MCF/WHAF/WPL form submissions |
 | `profiles/page.tsx` | `/dev/profiles` | User profile lookup by UID |
-| `profiles/[uid]/page.tsx` | `/dev/profiles/:uid` | Per-user detail: session records, logs, and form submissions |
+| `profiles/[uid]/page.tsx` | `/dev/profiles/:uid` | Per-user detail: campus-week attendance, logs, and form submissions |
 | `session-logs/page.tsx` | `/dev/session-logs` | Raw session check-in/out logs with heat map |
-| `session-records/page.tsx` | `/dev/session-records` | Aggregated weekly session records |
+| `session-records/page.tsx` | `/dev/session-records` | Retired notice — use `/dashboard/teams/*` and `/api/attendance` |
 | `traffic/page.tsx` | `/dev/traffic` | Traffic count analytics |
 
 ---

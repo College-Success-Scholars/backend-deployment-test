@@ -44,15 +44,15 @@
  *   whose number is in WEEKS_IGNORE_FORMS when computing form-based percentages, and
  *   exclude any week in WEEKS_IGNORE_SESSIONS when computing session-based percentages.
  *
- * Example (2024–25):
- *   Fall starts Aug 26 → weeks 1–16 (or so).
- *   Winter break Dec 16 – Jan 12 → that whole period = one campus week (e.g. 17).
- *   Spring Jan 13 onward → weeks 18, 19, ...
+ * Example (2026–27):
+ *   Fall starts Aug 31 → weeks 1–16 (or so).
+ *   Winter break Dec 12 – Jan 27 → that whole period = one campus week (e.g. 16).
+ *   Spring Jan 28 onward → weeks 17, 18, ...
  */
 
-export const FALL_SEMESTER_FIRST_DAY = "2025-09-01";
-export const WINTER_BREAK_FIRST_DAY = "2025-12-16";
-export const WINTER_BREAK_LAST_DAY = "2026-01-28";
+export const FALL_SEMESTER_FIRST_DAY = "2026-08-31";
+export const WINTER_BREAK_FIRST_DAY = "2026-12-12";
+export const WINTER_BREAK_LAST_DAY = "2027-01-27";
 
 /** Campus week numbers to exclude from form-related percentage calculations. */
 export const WEEKS_IGNORE_FORMS: number[] = [];

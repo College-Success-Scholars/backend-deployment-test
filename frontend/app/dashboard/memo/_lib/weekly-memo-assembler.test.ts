@@ -13,10 +13,12 @@ const buildMemoData = (): MemoLivePageData =>
         ssPct: 91,
         fdRequired: 120,
         ssRequired: 120,
-        fdTotal: 0,
-        ssTotal: 0,
+        fdTotal: 114,
+        ssTotal: 109,
         fdExcuseMin: 0,
         ssExcuseMin: 0,
+        wahfStatus: "on-time" as const,
+        wahfSubmittedAt: "2026-04-02T16:00:00.000Z",
       },
       {
         scholarId: "2023-010",
@@ -26,10 +28,12 @@ const buildMemoData = (): MemoLivePageData =>
         ssPct: 70,
         fdRequired: 120,
         ssRequired: 120,
-        fdTotal: 0,
-        ssTotal: 0,
-        fdExcuseMin: 0,
+        fdTotal: 30,
+        ssTotal: 84,
+        fdExcuseMin: 30,
         ssExcuseMin: 0,
+        wahfStatus: "missing" as const,
+        wahfSubmittedAt: null,
       },
     ],
     teamLeaders: [],
@@ -66,7 +70,11 @@ const buildMemoData = (): MemoLivePageData =>
       { id: 1, scholarId: "1", scholarName: "A", tutorName: "T", courses: [], startTime: "", endTime: "", dayOfWeek: "Mon" },
       { id: 2, scholarId: null, scholarName: "EMPTY SESSION", tutorName: "T2", courses: [], startTime: "", endTime: "", dayOfWeek: "Tue" },
     ],
-    gradeBreakdown: { low: [{ scholarName: "Bob Scholar", course: "X", assessment: "Y", grade: "60", percent: 60 }], high: [], mid: [] },
+    gradeBreakdown: {
+      high: [{ scholarName: "Alice Scholar", course: "CMSC131", assessment: "Quiz", grade: "95%", percent: 95 }],
+      mid: [{ scholarName: "Alice Scholar", course: "MATH140", assessment: "HW 4", grade: "82%", percent: 82 }],
+      low: [{ scholarName: "Bob Scholar", course: "X", assessment: "Y", grade: "60", percent: 60 }],
+    },
     wahfDonut: { total: 0, completeCount: 0, lateCount: 0, percentComplete: 0 },
     teamLeaderFormStats: [
       {
@@ -104,7 +112,7 @@ describe("weekly-memo-assembler", () => {
     expect(result.kpis).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ title: "Visits this week", primaryValue: "100" }),
-        expect.objectContaining({ title: "Front desk completion", primaryValue: "67%" }),
+        expect.objectContaining({ title: "Front desk completion", primaryValue: "73%" }),
       ])
     )
     expect(result.teamLeaderRows[0]).toMatchObject({
@@ -115,9 +123,16 @@ describe("weekly-memo-assembler", () => {
     })
     expect(result.scholarRows[0]).toMatchObject({
       scholarName: "Bob Scholar",
-      flags: ["Low front desk completion", "Low study session completion", "Low grade"],
+      flags: ["Low front desk completion", "Low study session completion", "Low grade", "Missing WAHF"],
+      issues: [
+        { kind: "front-desk", glance: "Front desk", pct: 50, requiredMinutes: 120 },
+        { kind: "study-session", glance: "Study session", pct: 70, requiredMinutes: 120 },
+        { kind: "grade", glance: "X · Y", pct: 60 },
+        { kind: "wahf", glance: "WAHF", status: "missing", submittedAtLabel: null },
+      ],
+      fdRequired: 120,
+      ssRequired: 120,
     })
-    expect(result.formSubmissions.summaries).toEqual(expect.arrayContaining([expect.objectContaining({ form: "MCF", missing: 1 })]))
     expect(result.tutoringLog).toMatchObject({
       badgeText: "1 session",
       rightLabel: "Sessions · Empty sessions",
@@ -137,5 +152,85 @@ describe("weekly-memo-assembler", () => {
         expect.objectContaining({ title: "Tutoring sessions held", secondaryText: "1 empty session" }),
       ])
     )
+  })
+
+  it("builds attendance tabs from scholar logged + excuse minutes, including zeros", () => {
+    const result = assembleWeeklyMemo(buildMemoData())
+    const fdTab = result.fullAttendanceDetail.tabs.find((tab) => tab.id === "front-desk")
+    expect(fdTab?.rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          scholarName: "Alice Scholar",
+          completedMinutes: 114,
+          excuseMinutes: 0,
+          requiredMinutes: 120,
+          completionPct: 95,
+        }),
+        expect.objectContaining({
+          scholarName: "Bob Scholar",
+          completedMinutes: 60,
+          excuseMinutes: 30,
+          requiredMinutes: 120,
+          completionPct: 50,
+        }),
+      ])
+    )
+    expect(result.fullAttendanceDetail.wahfCensus).toEqual({ onTime: 1, late: 0, missing: 1 })
+  })
+
+  it("builds a three-band WAHF grade census and leaves follow-up on low grades only", () => {
+    const result = assembleWeeklyMemo(buildMemoData())
+
+    expect(result.recognitionBoard).toEqual({
+      badgeText: "3 grades",
+      rightLabel: "90–100% · 70–89% · Below 70%",
+      bands: [
+        {
+          id: "high",
+          label: "90 – 100%",
+          entries: [{ scholarName: "Alice Scholar", course: "CMSC131", assessment: "Quiz", grade: "95%", percent: 95 }],
+        },
+        {
+          id: "mid",
+          label: "70 – 89%",
+          entries: [{ scholarName: "Alice Scholar", course: "MATH140", assessment: "HW 4", grade: "82%", percent: 82 }],
+        },
+        {
+          id: "low",
+          label: "Below 70%",
+          entries: [{ scholarName: "Bob Scholar", course: "X", assessment: "Y", grade: "60", percent: 60 }],
+        },
+      ],
+    })
+    expect(result.scholarRows[0]?.issues.filter((issue) => issue.kind === "grade")).toEqual([
+      { kind: "grade", glance: "X · Y", pct: 60 },
+    ])
+    expect(result.scholarRows.flatMap((row) => row.issues.filter((issue) => issue.kind === "grade"))).toHaveLength(1)
+  })
+
+  it("sorts recognition-board grades descending by percent within each band", () => {
+    const result = assembleWeeklyMemo({
+      ...buildMemoData(),
+      gradeBreakdown: {
+        high: [
+          { scholarName: "Zed Scholar", course: "CMSC131", assessment: "Quiz", grade: "91%", percent: 91 },
+          { scholarName: "Ann Scholar", course: "MATH140", assessment: "Exam", grade: "100%", percent: 100 },
+        ],
+        mid: [
+          { scholarName: "Ann Scholar", course: "PHYS161", assessment: "Lab", grade: "71%", percent: 71 },
+          { scholarName: "Ann Scholar", course: "ENGL101", assessment: "Essay", grade: "88%", percent: 88 },
+        ],
+        low: [
+          { scholarName: "Bob Scholar", course: "X", assessment: "Y", grade: "40", percent: 40 },
+          { scholarName: "Bob Scholar", course: "Z", assessment: "W", grade: "69", percent: 69 },
+        ],
+      },
+    })
+
+    expect(result.recognitionBoard.bands.map((band) => band.entries.map((entry) => entry.percent))).toEqual([
+      [100, 91],
+      [88, 71],
+      [69, 40],
+    ])
   })
 })

@@ -22,7 +22,7 @@ The main authenticated application. All routes here require a valid Supabase ses
 | File | Source Link | URL | Description |
 |------|-------------|-----|-------------|
 | `layout.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/layout.tsx) | `/dashboard/*` | Dashboard shell with sidebar — wraps all child pages |
-| `page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/page.tsx) | `/dashboard` | Main dashboard — renders `TeamLeaderDashboard` component (or role-appropriate variant) |
+| `page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/page.tsx) | `/dashboard` | Main dashboard — scholar, team-leader/developer, or default home via `resolveUserRole()` |
 | `directory/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/directory/page.tsx) | `/dashboard/directory` | Scholar directory |
 | `events/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/events/page.tsx) | `/dashboard/events` | Program events |
 | `internship-board/page.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/internship-board/page.tsx) | `/dashboard/internship-board` | Internship opportunities board |
@@ -48,4 +48,4 @@ The main authenticated application. All routes here require a valid Supabase ses
 - **All pages require auth** — call `requireUser()` or a role-specific guard from `lib/supabase/server.ts` at the top of every page.
 - **Layout owns the sidebar** — `layout.tsx` renders the `AppSidebar` and `SidebarProvider`. Pages must not re-render the sidebar.
 - **Data fetching in the page file** — fetch from `lib/server/data.ts` or `lib/server/api-client.ts` in the server component, pass results as props to client components.
-- **Role-based rendering** — use the user's `profile.app_role` to decide which dashboard component to render (admin, team leader, scholar, default).
+- **Role-based rendering** — use `resolveUserRole()` (`profile.app_role` / `program_role`) to pick scholar, team-leader, developer, or default. There is no admin or exec dashboard.

@@ -46,41 +46,6 @@ describe("resolveDashboardBreadcrumb", () => {
     ]);
   });
 
-  it("builds nested trails for executive routes", () => {
-    expect(resolveDashboardBreadcrumb("/dashboard/exec")).toEqual([
-      { label: "Dashboard", href: "/dashboard" },
-      { label: "Executive Dashboard" },
-    ]);
-    expect(resolveDashboardBreadcrumb("/dashboard/exec/performance")).toEqual([
-      { label: "Dashboard", href: "/dashboard" },
-      { label: "Executive Dashboard", href: "/dashboard/exec" },
-      { label: "Performance" },
-    ]);
-    expect(resolveDashboardBreadcrumb("/dashboard/exec/reports/monthly")).toEqual([
-      { label: "Dashboard", href: "/dashboard" },
-      { label: "Executive Dashboard", href: "/dashboard/exec" },
-      { label: "Reports", href: "/dashboard/exec/reports" },
-      { label: "Monthly Reports" },
-    ]);
-  });
-
-  it("builds nested trails for admin routes", () => {
-    expect(resolveDashboardBreadcrumb("/dashboard/admin")).toEqual([
-      { label: "Dashboard", href: "/dashboard" },
-      { label: "Admin Dashboard" },
-    ]);
-    expect(resolveDashboardBreadcrumb("/dashboard/admin/users")).toEqual([
-      { label: "Dashboard", href: "/dashboard" },
-      { label: "Admin Dashboard", href: "/dashboard/admin" },
-      { label: "User Management" },
-    ]);
-    expect(resolveDashboardBreadcrumb("/dashboard/admin/security")).toEqual([
-      { label: "Dashboard", href: "/dashboard" },
-      { label: "Admin Dashboard", href: "/dashboard/admin" },
-      { label: "Security" },
-    ]);
-  });
-
   it("formats unknown path segments as a title", () => {
     expect(resolveDashboardBreadcrumb("/dashboard/some-new-page")).toEqual([
       { label: "Dashboard", href: "/dashboard" },

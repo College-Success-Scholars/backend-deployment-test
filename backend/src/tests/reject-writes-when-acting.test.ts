@@ -45,11 +45,6 @@ describe("isActingWriteRequest", () => {
   });
 
   it("blocks mutation POST endpoints when acting", () => {
-    expect(
-      isActingWriteRequest(
-        actingReq("POST", "/api/session-records/front-desk/sync"),
-      ),
-    ).toBe(true);
     expect(isActingWriteRequest(actingReq("POST", "/api/memo/sync"))).toBe(true);
     expect(isActingWriteRequest(actingReq("POST", "/api/auth/profile"))).toBe(true);
   });
@@ -57,7 +52,7 @@ describe("isActingWriteRequest", () => {
   it("blocks PATCH when acting", () => {
     expect(
       isActingWriteRequest(
-        actingReq("PATCH", "/api/session-records/front-desk/excuse"),
+        actingReq("PATCH", "/api/attendance/excuse"),
       ),
     ).toBe(true);
   });
@@ -65,7 +60,7 @@ describe("isActingWriteRequest", () => {
   it("allows /api/dev POST when acting", () => {
     expect(
       isActingWriteRequest(
-        actingReq("POST", "/api/dev/session-records/front-desk/sync"),
+        actingReq("POST", "/api/dev/active-profile"),
       ),
     ).toBe(false);
   });
@@ -81,7 +76,7 @@ describe("rejectWritesWhenActing", () => {
   });
 
   it("blocks sync POST when acting", () => {
-    const req = actingReq("POST", "/api/session-records/front-desk/sync");
+    const req = actingReq("POST", "/api/memo/sync");
     const res = mockRes();
     const next = vi.fn();
     rejectWritesWhenActing(req, res, next as NextFunction);
@@ -98,7 +93,7 @@ describe("rejectWritesWhenActing", () => {
   });
 
   it("allows POST on /api/dev when acting", () => {
-    const req = actingReq("POST", "/api/dev/session-records/front-desk/sync");
+    const req = actingReq("POST", "/api/dev/active-profile");
     const res = mockRes();
     const next = vi.fn();
     rejectWritesWhenActing(req, res, next as NextFunction);

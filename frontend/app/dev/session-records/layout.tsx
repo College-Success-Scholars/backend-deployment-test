@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 
 export const metadata = {
-  title: "Session Records Test | Dev Tools",
-  description: "Test front_desk_records sync and read from lib/session-records",
+  title: "Session Records (retired) | Dev Tools",
+  description: "Session-record sync is retired; use campus-week attendance boards",
 };
 
 export default function SessionRecordsLayout({

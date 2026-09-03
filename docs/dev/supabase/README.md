@@ -14,7 +14,7 @@ Dashboard SQL Editor is **emergency / one-off ops only** — every lasting schem
 |----|--------|
 | Call Supabase from `backend/src/services/*` (`.from(…)`, `.rpc(…)`) | Deploy or invoke **Supabase Edge Functions** |
 | Keep business logic in the Express app | Put domain logic in Deno edge functions under `supabase/functions/` |
-| Read form/session log tables; sync derived records via services/RPCs | Rebuild Google Form → Postgres intake inside Next.js / Express |
+| Read form/session log tables; compute weekly minutes on read | Rebuild Google Form → Postgres intake inside Next.js / Express; sync `*_records` |
 
 Auth session management on the frontend still uses the Supabase JS client; that is not domain data access. PostgreSQL functions/triggers in migrations are fine — they are database objects, not Edge Functions.
 
@@ -38,11 +38,13 @@ Captured with `supabase db dump --linked --schema public` → [`supabase/migrati
 
 ### Inventory — tables in dump
 
-`am_pm_form_logs`, `daily_scholar_activity`, `dev_test_profiles`, `front_desk_logs`, `front_desk_records`, `mcf_form_logs`, `mentor_mentee`, `profiles`, `scholar_weekly_stats`, `semester_breaks`, `semesters`, `study_session_logs`, `study_session_records`, `traffic`, `traffic_weekly_summary`, `tutor_report_logs`, `user_roster`, `whaf_form_logs`, `wpl_form_logs`
+`am_pm_form_logs`, `daily_scholar_activity`, `dev_test_profiles`, `front_desk_logs`, `front_desk_records_legacy`, `mcf_form_logs`, `mentor_mentee`, `profiles`, `scholar_week_excuses`, `scholar_weekly_stats`, `semester_breaks`, `semesters`, `study_session_logs`, `study_session_records_legacy`, `traffic`, `traffic_weekly_summary`, `tutor_report_logs`, `user_roster`, `whaf_form_logs`, `wpl_form_logs`
+
+Column-level catalog (types + one-liners): [`public-schema.md`](public-schema.md).
 
 ### Form / log intake (Google Forms)
 
-Program staff already submit weekly and session forms via **Google Forms**, which insert into Supabase. That pipeline is **in place** — the app consumes rows; it does not own form collection.
+Program staff already submit weekly and session forms via **Google Forms**, which insert into Supabase. That pipeline is **in place** — the app consumes rows; it does not own form collection. Linked destinations (Sheets, Apps Script, webhooks) live **outside this repo**.
 
 Likely intake targets from the baseline migration (`*_form_logs`, log tables with `submitted_by_email`, and the tutoring form table):
 
@@ -56,9 +58,20 @@ Likely intake targets from the baseline migration (`*_form_logs`, log tables wit
 | `front_desk_logs` | Front-desk check-in/out style logs (`submitted_by_email`) |
 | `study_session_logs` | Study-session check-in/out style logs (`submitted_by_email`) |
 
-**Not** Google Form intake (app- or DB-derived): `front_desk_records` / `study_session_records` (synced totals), `daily_scholar_activity` / `scholar_weekly_stats` (aggregates), `traffic` / `traffic_weekly_summary` (kiosk + analytics), `profiles` / `user_roster` / `mentor_mentee` / `dev_test_profiles` / semester tables.
+**Not** Google Form intake (app- or DB-derived): `front_desk_records_legacy` / `study_session_records_legacy` (frozen snapshots — do not use), `scholar_week_excuses` (TL-entered excuses, keyed by campus-week `week_start`), `daily_scholar_activity` / `scholar_weekly_stats` (aggregates), `traffic` / `traffic_weekly_summary` (kiosk + analytics), `profiles` / `user_roster` / `mentor_mentee` / `dev_test_profiles` / semester tables.
 
-When debugging empty dashboards, check whether the linked project has recent rows in the form/log tables above before assuming a missing “populate data” feature.
+When debugging empty dashboards, check whether the linked project has recent rows in the form/log tables above before assuming a missing “populate data” feature. If week 1 of a new academic year is empty, also check [Yearly rollover](#yearly-rollover) — expired Google consent is a common cause.
+
+### Yearly rollover
+
+Do this **once per academic year**, together with the `shared/time-config.ts` date update ([Campus weeks](../onboarding/campus-weeks.md)). The in-app calendar change does **not** refresh Google’s OAuth / Apps Script consent.
+
+1. **Re-authenticate the Google Forms → Supabase pipelines.** Open each operational form’s linked destination (Apps Script, Sheets add-on, or webhook) as the owning Google account and complete the consent / “authorize” prompt so writes to the live Supabase project still succeed. Google consent for unpublished scripts typically expires on a yearly cycle.
+2. **Confirm Drive location.** Forms and response Sheets belong in the **current-year CSS Drive**, not last year’s folder or a personal Drive. Prefer a Drive **move** (IDs and `viewform` URLs stay the same) over copy/recreate.
+3. **Test-submit** each form in the table above and confirm a new row in the matching Supabase table.
+4. **If a form ID changed**, update `FORM_URLS` in [`frontend/components/personal/personal-client.tsx`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/components/personal/personal-client.tsx) (WAHF / WPL / MCF) so Personal “Open form” points at this year’s forms.
+
+Ask before changing intake destinations, secrets, or `time-config` dates — [Ask / don’t touch](../onboarding/ask-and-dont-touch.md).
 
 ### Inventory — notable RPCs / functions
 

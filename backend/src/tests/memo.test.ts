@@ -3,6 +3,12 @@ import { describe, it, expect } from "vitest";
 import { app } from "../app.js";
 import { resolveMemoDefaultWeek } from "../services/memo-default-week.js";
 
+import { buildGradeBreakdown, buildMemoScholarAttendanceRows } from "../services/memo-page.service.js";
+import { EMPTY_WEEKLY_MINUTES } from "../models/weekly-minutes.model.js";
+import type { CampusWeekAttendanceTotals } from "../models/attendance-week.model.js";
+import type { MemoUserRow } from "../models/user.model.js";
+import type { FormLogRowWithLate, WahfFormLogRow } from "../models/form-log.model.js";
+
 describe("Memo routes — auth gating", () => {
   it("allows the local dashboard origin to request a memo PDF", async () => {
     const res = await request(app)
@@ -46,5 +52,231 @@ describe("resolveMemoDefaultWeek", () => {
 
   it("returns the current week without falling back to 1", () => {
     expect(resolveMemoDefaultWeek(6)).toEqual({ status: "ok", weekNumber: 6 });
+  });
+});
+
+describe("buildMemoScholarAttendanceRows", () => {
+  const scholar: MemoUserRow = {
+    uid: "1001",
+    first_name: "Ada",
+    last_name: "Lovelace",
+    cohort: 2025,
+    program_role: "scholar",
+    app_role: "authenticated",
+    fd_required: 120,
+    ss_required: 180,
+  };
+
+  const zero: CampusWeekAttendanceTotals = {
+    minutes: EMPTY_WEEKLY_MINUTES,
+    loggedMin: 0,
+    excuseMin: 0,
+    description: null,
+  };
+
+  it("empty tickets and no excuse → zero logged and 0% completion", () => {
+    const { scholars } = buildMemoScholarAttendanceRows([scholar], new Map(), new Map());
+    expect(scholars).toHaveLength(1);
+    expect(scholars[0]).toMatchObject({
+      fdTotal: 0,
+      ssTotal: 0,
+      fdExcuseMin: 0,
+      ssExcuseMin: 0,
+      fdPct: 0,
+      ssPct: 0,
+    });
+  });
+
+  it("excuse-only scholar gets completion from scholar_week_excuses", () => {
+    const fdByUid = new Map<string, CampusWeekAttendanceTotals>([
+      ["1001", { ...zero, excuseMin: 120, description: "Sick" }],
+    ]);
+    const { scholars, cohort2025 } = buildMemoScholarAttendanceRows(
+      [scholar],
+      fdByUid,
+      new Map()
+    );
+    expect(scholars[0]?.fdTotal).toBe(0);
+    expect(scholars[0]?.fdExcuseMin).toBe(120);
+    expect(scholars[0]?.fdPct).toBe(100);
+    expect(cohort2025.fdCompleteCount).toBe(1);
+  });
+
+  it("sets WAHF status from latest form-log row for that scholar", () => {
+    const wahfRows = [
+      {
+        id: "1",
+        created_at: "2026-04-02T12:00:00.000Z",
+        scholar_uid: "1001",
+        scholar_name: "Ada Lovelace",
+        team_leader_contact: null,
+        tl_meeting_in_person: null,
+        course_changes: null,
+        assignment_grades: null,
+        missed_classes: null,
+        missed_assignments: null,
+        submitted_by_email: null,
+        course_change_details: null,
+        isLate: true,
+      },
+      {
+        id: "2",
+        created_at: "2026-04-03T12:00:00.000Z",
+        scholar_uid: "1001",
+        scholar_name: "Ada Lovelace",
+        team_leader_contact: null,
+        tl_meeting_in_person: null,
+        course_changes: null,
+        assignment_grades: null,
+        missed_classes: null,
+        missed_assignments: null,
+        submitted_by_email: null,
+        course_change_details: null,
+        isLate: false,
+      },
+    ];
+    const { scholars } = buildMemoScholarAttendanceRows([scholar], new Map(), new Map(), wahfRows);
+    expect(scholars[0]?.wahfStatus).toBe("on-time");
+    expect(scholars[0]?.wahfSubmittedAt).toBe("2026-04-03T12:00:00.000Z");
+  });
+
+  it("marks WAHF missing when the scholar has no form log", () => {
+    const { scholars } = buildMemoScholarAttendanceRows([scholar], new Map(), new Map(), []);
+    expect(scholars[0]?.wahfStatus).toBe("missing");
+    expect(scholars[0]?.wahfSubmittedAt).toBeNull();
+  });
+
+  it("marks WAHF late when the latest submission is late", () => {
+    const wahfRows = [
+      {
+        id: "1",
+        created_at: "2026-04-04T12:00:00.000Z",
+        scholar_uid: "1001",
+        scholar_name: "Ada Lovelace",
+        team_leader_contact: null,
+        tl_meeting_in_person: null,
+        course_changes: null,
+        assignment_grades: null,
+        missed_classes: null,
+        missed_assignments: null,
+        submitted_by_email: null,
+        course_change_details: null,
+        isLate: true,
+      },
+    ];
+    const { scholars } = buildMemoScholarAttendanceRows([scholar], new Map(), new Map(), wahfRows);
+    expect(scholars[0]?.wahfStatus).toBe("late");
+    expect(scholars[0]?.wahfSubmittedAt).toBe("2026-04-04T12:00:00.000Z");
+  });
+});
+
+const wahfRow = (
+  overrides: Partial<FormLogRowWithLate<WahfFormLogRow>>
+): FormLogRowWithLate<WahfFormLogRow> => ({
+  id: "1",
+  created_at: "2026-04-02T12:00:00.000Z",
+  scholar_uid: "1001",
+  scholar_name: "Ada Lovelace",
+  team_leader_contact: null,
+  tl_meeting_in_person: null,
+  course_changes: null,
+  assignment_grades: null,
+  missed_classes: null,
+  missed_assignments: null,
+  submitted_by_email: null,
+  course_change_details: null,
+  isLate: false,
+  ...overrides,
+});
+
+describe("buildGradeBreakdown", () => {
+  it("buckets parsed assignment grades into high, mid, and low bands", () => {
+    const breakdown = buildGradeBreakdown([
+      wahfRow({
+        assignment_grades: {
+          CMSC131: { Midterm: "95%", Quiz: "80%" },
+          MATH140: { Exam: "60" },
+        },
+      }),
+    ]);
+
+    expect(breakdown.high).toEqual([
+      expect.objectContaining({
+        scholarName: "Ada Lovelace",
+        course: "CMSC131",
+        assessment: "Midterm",
+        grade: "95%",
+        percent: 95,
+      }),
+    ]);
+    expect(breakdown.mid).toEqual([
+      expect.objectContaining({ course: "CMSC131", assessment: "Quiz", grade: "80%", percent: 80 }),
+    ]);
+    expect(breakdown.low).toEqual([
+      expect.objectContaining({ course: "MATH140", assessment: "Exam", grade: "60", percent: 60 }),
+    ]);
+  });
+
+  it("uses only the latest WAHF per scholar so resubmits do not duplicate", () => {
+    const breakdown = buildGradeBreakdown([
+      wahfRow({
+        id: "1",
+        created_at: "2026-04-02T12:00:00.000Z",
+        assignment_grades: { CMSC131: { Midterm: "50%" } },
+      }),
+      wahfRow({
+        id: "2",
+        created_at: "2026-04-03T12:00:00.000Z",
+        assignment_grades: { CMSC131: { Midterm: "92%" } },
+      }),
+    ]);
+
+    expect(breakdown.high).toHaveLength(1);
+    expect(breakdown.high[0]).toMatchObject({ grade: "92%", percent: 92 });
+    expect(breakdown.mid).toHaveLength(0);
+    expect(breakdown.low).toHaveLength(0);
+  });
+
+  it("sorts each band descending by percent", () => {
+    const breakdown = buildGradeBreakdown([
+      wahfRow({
+        scholar_uid: "1001",
+        scholar_name: "Zed Scholar",
+        assignment_grades: { CMSC131: { Quiz: "91%", Exam: "100%" } },
+      }),
+      wahfRow({
+        id: "2",
+        scholar_uid: "1002",
+        scholar_name: "Ann Scholar",
+        assignment_grades: { MATH140: { HW: "88%", Lab: "71%" }, PHYS161: { Quiz: "40" } },
+      }),
+    ]);
+
+    expect(breakdown.high.map((entry) => entry.percent)).toEqual([100, 91]);
+    expect(breakdown.mid.map((entry) => entry.percent)).toEqual([88, 71]);
+    expect(breakdown.low.map((entry) => entry.percent)).toEqual([40]);
+  });
+
+  it("parses grades independently per scholar", () => {
+    const breakdown = buildGradeBreakdown([
+      wahfRow({
+        scholar_uid: "1001",
+        scholar_name: "Ada Lovelace",
+        assignment_grades: { CMSC131: { Quiz: "91%" } },
+      }),
+      wahfRow({
+        id: "2",
+        scholar_uid: "1002",
+        scholar_name: "Alan Turing",
+        assignment_grades: { PHYS161: { Lab: "65%" } },
+      }),
+    ]);
+
+    expect(breakdown.high).toEqual([
+      expect.objectContaining({ scholarName: "Ada Lovelace", course: "CMSC131", percent: 91 }),
+    ]);
+    expect(breakdown.low).toEqual([
+      expect.objectContaining({ scholarName: "Alan Turing", course: "PHYS161", percent: 65 }),
+    ]);
   });
 });

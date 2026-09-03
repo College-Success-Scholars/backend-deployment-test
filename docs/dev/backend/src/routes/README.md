@@ -22,12 +22,12 @@ Express Router definitions. Each route file declares HTTP method + path combinat
 | `auth.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/auth.routes.ts) | `/api/auth` | `requireAuth` |
 | `user.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/user.routes.ts) | `/api/users` | `requireTeamLeaderOrAbove` |
 | `session-log.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/session-log.routes.ts) | `/api/session-logs` | `requireTeamLeaderOrAbove` |
-| `session-record.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/session-record.routes.ts) | `/api/session-records` | `requireAuth` + `requireSelfOrTeamLeader` |
 | `form-log.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/form-log.routes.ts) | `/api/form-logs` | mixed (`requireAuth` / `requireTeamLeaderOrAbove`) |
 | `memo.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/memo.routes.ts) | `/api/memo` | `requireTeamLeaderOrAbove` |
 | `traffic.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/traffic.routes.ts) | `/api/traffic` | `requireTeamLeaderOrAbove` |
 | `activity.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/activity.routes.ts) | `/api/daily-activity` | `requireAuth` |
 | `tutor-report-log.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/tutor-report-log.routes.ts) | `/api/tutor-reports` | `requireTeamLeaderOrAbove` |
+| `attendance.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/attendance.routes.ts) | `/api/attendance` | `requireTeamLeaderOrAbove` |
 | `dev.routes.ts` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/routes/dev.routes.ts) | `/api/dev` | `requireDeveloper` |
 
 All routers are mounted in [`backend/src/app.ts`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/backend/src/app.ts).
@@ -73,7 +73,6 @@ Route files are thin Express wiring (`export default router`). They do not have 
 | `form-log.controller` | [API](../../../../reference/api/backend/src/controllers/form-log.controller/README.md) |
 | `memo.controller` | [API](../../../../reference/api/backend/src/controllers/memo.controller/README.md) |
 | `session-log.controller` | [API](../../../../reference/api/backend/src/controllers/session-log.controller/README.md) |
-| `session-record.controller` | [API](../../../../reference/api/backend/src/controllers/session-record.controller/README.md) |
 | `traffic.controller` | [API](../../../../reference/api/backend/src/controllers/traffic.controller/README.md) |
 | `tutor-report-log.controller` | [API](../../../../reference/api/backend/src/controllers/tutor-report-log.controller/README.md) |
 | `user.controller` | [API](../../../../reference/api/backend/src/controllers/user.controller/README.md) |

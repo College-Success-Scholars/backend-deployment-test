@@ -12,6 +12,7 @@
 | [Shared](shared/README.md) | [`shared/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/shared) | Shared TypeScript utilities |
 | [Frontend](frontend/README.md) | [`frontend/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend) | Next.js 16 web app |
 | [Deployment](deployment/README.md) | Docker / Railway / Vercel / CI | Hosted topology, env wiring, smoke |
+| [IT review](it-review.md) | Current-state briefing | Product state, stack, vendors, UMD SRM proposal |
 | [Scripts](scripts/README.md) | [`scripts/`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts) | Dev/ops shell scripts |
 | [Supabase](supabase/README.md) | [`docs/dev/supabase/`](supabase/README.md) | Cloud schema scripts (test profiles) |
 | [Agent Docs](agents/README.md) | [`docs/agents/`](../agents/codebase-notes.md) | AI agent knowledge base |
@@ -136,6 +137,8 @@ npm run dev --prefix frontend   # port 3000
 The app uses a **campus week** numbering system (not ISO weeks), defined in `shared/time-config.ts`. Week 1 starts on a configurable `FALL_SEMESTER_FIRST_DAY`. Most data queries take a `weekNum` parameter (integer).
 
 This shared campus calendar is the **server-owned time frame** — use it for week bounds, navigation, and queries (including Personal and Mentee dashboards). Prefer it over `GET /api/auth/semester` / `GET /api/auth/active-semester` (and `getActiveSemester`), which should be used sparingly: when the server-owned time frame does not make sense (e.g. historical data, or the collection year has not started yet), or when a Supabase `semesters` row is required.
+
+**Yearly rollover** is more than those dates: re-authenticate the Google Forms → Supabase pipelines in the same pass (OAuth / Apps Script consent expires independently of git). See [Form / log intake — Yearly rollover](supabase/README.md#yearly-rollover).
 
 ---
 

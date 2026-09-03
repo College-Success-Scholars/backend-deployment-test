@@ -11,7 +11,6 @@ const {
   mockRecognitionBoardSection,
   mockTutoringLogSection,
   mockFullAttendanceDetailSection,
-  mockFormSubmissionsSection,
 } = vi.hoisted(() => ({
   mockGetWeeklyMemoPageData: vi.fn(),
   mockWeeklyMemoNavSync: vi.fn(() => null),
@@ -25,7 +24,6 @@ const {
   mockFullAttendanceDetailSection: vi.fn(() =>
     React.createElement("section", { "data-testid": "full-attendance-detail-section" })
   ),
-  mockFormSubmissionsSection: vi.fn(() => React.createElement("section", { "data-testid": "form-submissions-section" })),
 }))
 
 vi.mock("../_lib/memo-source", () => ({
@@ -62,10 +60,6 @@ vi.mock("./full-attendance-detail-section", () => ({
   FullAttendanceDetailSection: mockFullAttendanceDetailSection,
 }))
 
-vi.mock("./form-submissions-section", () => ({
-  FormSubmissionsSection: mockFormSubmissionsSection,
-}))
-
 vi.mock("@/components/dashboard/widgets/year-not-started-state", () => ({
   YearNotStartedState: () => React.createElement("div", { "data-testid": "year-not-started" }),
 }))
@@ -91,6 +85,8 @@ const buildMemoData = (overrides: Record<string, unknown> = {}) => ({
       ssTotal: 0,
       fdExcuseMin: 0,
       ssExcuseMin: 0,
+      wahfStatus: "on-time",
+      wahfSubmittedAt: "2026-04-02T16:00:00.000Z",
     },
     {
       scholarId: "2023-010",
@@ -104,6 +100,8 @@ const buildMemoData = (overrides: Record<string, unknown> = {}) => ({
       ssTotal: 0,
       fdExcuseMin: 0,
       ssExcuseMin: 0,
+      wahfStatus: "missing",
+      wahfSubmittedAt: null,
     },
   ],
   teamLeaders: [],
@@ -137,7 +135,11 @@ const buildMemoData = (overrides: Record<string, unknown> = {}) => ({
   trafficEntryCountForSelectedWeek: 100,
   trafficSessions: [{ id: "session-1" }],
   tutorReports: [{ id: 1, scholarId: "1", scholarName: "A", tutorName: "T", courses: [], startTime: "", endTime: "", dayOfWeek: "Mon" }],
-  gradeBreakdown: { low: [{ scholarName: "Bob Scholar", course: "X", assessment: "Y", grade: "60", percent: 60 }], high: [], mid: [] },
+  gradeBreakdown: {
+    high: [{ scholarName: "Alice Scholar", course: "CMSC131", assessment: "Quiz", grade: "95%", percent: 95 }],
+    mid: [{ scholarName: "Alice Scholar", course: "MATH140", assessment: "HW 4", grade: "82%", percent: 82 }],
+    low: [{ scholarName: "Bob Scholar", course: "X", assessment: "Y", grade: "60", percent: 60 }],
+  },
   wahfDonut: { total: 0, completeCount: 0, lateCount: 0, percentComplete: 0 },
   teamLeaderFormStats: [
     {
@@ -240,7 +242,7 @@ describe("WeeklyMemoAsyncContent", () => {
       expect.objectContaining({
         cards: expect.arrayContaining([
           expect.objectContaining({ title: "Visits this week", primaryValue: "100" }),
-          expect.objectContaining({ title: "Front desk completion", primaryValue: "67%" }),
+          expect.objectContaining({ title: "Front desk completion", primaryValue: "73%" }),
         ]),
       }),
       undefined
@@ -258,7 +260,15 @@ describe("WeeklyMemoAsyncContent", () => {
         rows: [
           expect.objectContaining({
             scholarName: "Bob Scholar",
-            flags: expect.arrayContaining(["Low front desk completion", "Low study session completion", "Low grade"]),
+            flags: expect.arrayContaining(["Low front desk completion", "Low study session completion", "Low grade", "Missing WAHF"]),
+            issues: expect.arrayContaining([
+              { kind: "front-desk", glance: "Front desk", pct: 50, requiredMinutes: 120 },
+              { kind: "study-session", glance: "Study session", pct: 70, requiredMinutes: 120 },
+              { kind: "grade", glance: "X · Y", pct: 60 },
+              { kind: "wahf", glance: "WAHF", status: "missing", submittedAtLabel: null },
+            ]),
+            fdRequired: 120,
+            ssRequired: 120,
           }),
         ],
       }),
@@ -281,7 +291,23 @@ describe("WeeklyMemoAsyncContent", () => {
     expect(mockRecognitionBoardSection).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          items: expect.arrayContaining(["Alice Scholar - Strong completion this week"]),
+          badgeText: "3 grades",
+          rightLabel: "90–100% · 70–89% · Below 70%",
+          bands: [
+            expect.objectContaining({
+              id: "high",
+              label: "90 – 100%",
+              entries: [expect.objectContaining({ scholarName: "Alice Scholar", course: "CMSC131", assessment: "Quiz" })],
+            }),
+            expect.objectContaining({
+              id: "mid",
+              entries: [expect.objectContaining({ scholarName: "Alice Scholar", course: "MATH140" })],
+            }),
+            expect.objectContaining({
+              id: "low",
+              entries: [expect.objectContaining({ scholarName: "Bob Scholar", course: "X", assessment: "Y" })],
+            }),
+          ],
         }),
       }),
       undefined
@@ -290,19 +316,11 @@ describe("WeeklyMemoAsyncContent", () => {
     expect(mockFullAttendanceDetailSection).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
+          wahfCensus: { onTime: 1, late: 0, missing: 1 },
           tabs: expect.arrayContaining([
             expect.objectContaining({ id: "front-desk" }),
             expect.objectContaining({ id: "study-sessions" }),
           ]),
-        }),
-      }),
-      undefined
-    )
-
-    expect(mockFormSubmissionsSection).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          summaries: expect.arrayContaining([expect.objectContaining({ form: "MCF", missing: 1 })]),
         }),
       }),
       undefined

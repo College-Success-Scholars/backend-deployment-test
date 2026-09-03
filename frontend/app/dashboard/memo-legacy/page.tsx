@@ -3,7 +3,6 @@ import { canAccessWeeklyMemo } from "@/lib/auth"
 import { backendGet } from "@/lib/server/api-client"
 import { getCurrentProfile } from "@/lib/server/queries"
 import { YearNotStartedState } from "@/components/dashboard/widgets/year-not-started-state"
-import { FormSubmissionsSection } from "../memo/_components/form-submissions-section"
 import { FullAttendanceDetailSection } from "../memo/_components/full-attendance-detail-section"
 import { RecognitionBoardSection } from "../memo/_components/recognition-board-section"
 import { ScholarFollowUpTable } from "../memo/_components/scholar-follow-up-table"
@@ -70,7 +69,6 @@ export default async function DashboardMemoPage({ searchParams }: PageProps) {
       <TutoringLogSection data={data.tutoringLog} />
       <RecognitionBoardSection data={data.recognitionBoard} />
       <FullAttendanceDetailSection data={data.fullAttendanceDetail} />
-      <FormSubmissionsSection data={data.formSubmissions} />
     </main>
   )
 }
