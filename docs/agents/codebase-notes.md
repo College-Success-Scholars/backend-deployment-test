@@ -46,7 +46,7 @@ Important backend domains:
 - `attendance-week.*`: campus-week boards and Memo minutes from cleaned tickets on read + excuses in `scholar_week_excuses` keyed by campus-week `week_start`. Frozen `*_records_legacy` tables are not used at runtime.
 - `weekly-minutes.*`: pure Mon–Fri rollup from paired tickets (`computeWeeklyMinutesByUid`).
 - `form-log.*`: MCF/WHAF/WPL and related aggregation endpoints.
-- `memo.*`: memo aggregation endpoints and sync/refresh operations.
+- `memo.*`: memo aggregation endpoints, sync/refresh, and weekly PDF export (`weekly-memo-pdf.service` via Puppeteer). Local Chrome: `npm run install:chrome --prefix backend`, or the system Chrome app. Docker uses Alpine `chromium`.
 - `traffic.*`: weekly traffic counts and session entries.
 
 ## Frontend how it works

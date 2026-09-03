@@ -97,8 +97,36 @@ export function weeklyMemoPdfOptions(report: WeeklyMemoReport) {
   };
 }
 
+const PDF_BROWSER_ARGS = [
+  "--font-render-hinting=none",
+  "--no-sandbox",
+  "--disable-setuid-sandbox",
+];
+
+export function weeklyMemoBrowserLaunchOptions(env: NodeJS.ProcessEnv = process.env) {
+  if (env.PUPPETEER_EXECUTABLE_PATH) {
+    return { headless: true as const, executablePath: env.PUPPETEER_EXECUTABLE_PATH, args: PDF_BROWSER_ARGS };
+  }
+  return { headless: true as const, args: PDF_BROWSER_ARGS };
+}
+
+export function isMissingBundledChrome(error: unknown): boolean {
+  return error instanceof Error && /Could not find Chrome/i.test(error.message);
+}
+
+export async function launchWeeklyMemoBrowser() {
+  const options = weeklyMemoBrowserLaunchOptions();
+  try {
+    return await puppeteer.launch(options);
+  } catch (error) {
+    if (options.executablePath || !isMissingBundledChrome(error)) throw error;
+    // npm install does not always download Chrome. Use the machine's installed Chrome.
+    return puppeteer.launch({ ...options, channel: "chrome" });
+  }
+}
+
 export async function renderWeeklyMemoPdf(report: WeeklyMemoReport): Promise<Buffer> {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await launchWeeklyMemoBrowser();
   try {
     const page = await browser.newPage();
     await page.setContent(renderWeeklyMemoHtml(report), { waitUntil: "load" });

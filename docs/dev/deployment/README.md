@@ -84,7 +84,7 @@ Server-side frontend then resolves the API as `https://<VERCEL_URL>/_/backend` w
 
 | Service | Host ports (default) | Notes |
 |---------|----------------------|--------|
-| `backend` | `3001` | Build args / env: `SUPABASE_*`, `CORS_ORIGIN` (default `http://localhost:3000`) |
+| `backend` | `3001` | Build args / env: `SUPABASE_*`, `CORS_ORIGIN` (default `http://localhost:3000`). Image installs Alpine Chromium for weekly memo PDF (`PUPPETEER_EXECUTABLE_PATH`). |
 | `frontend` | `3000` | Browser → `NEXT_PUBLIC_BACKEND_URL` (default `http://localhost:3001`); RSC → `BACKEND_URL=http://backend:3001` on the compose network |
 
 Required at compose build/run: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (root `.env` or exports).

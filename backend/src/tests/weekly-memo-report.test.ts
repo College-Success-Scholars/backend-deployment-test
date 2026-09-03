@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { createWeeklyMemoReport, type MemoPageData } from "../services/weekly-memo-report.service.js";
-import { renderWeeklyMemoHtml, weeklyMemoPdfOptions } from "../services/weekly-memo-pdf.service.js";
+import { isMissingBundledChrome, renderWeeklyMemoHtml, weeklyMemoBrowserLaunchOptions, weeklyMemoPdfOptions } from "../services/weekly-memo-pdf.service.js";
 
 function source(weekNumber: number): MemoPageData {
   return {
     selectedWeekNumber: weekNumber,
     weekLabel: `Week ${weekNumber}`,
     scholars: [
-      { scholarId: "zero", scholarName: "Zero Scholar", cohort: 2024, fdTotal: 0, ssTotal: 0, fdRequired: 60, ssRequired: 120, fdExcuseMin: 0, ssExcuseMin: 0, fdPct: 0, ssPct: 0 },
-      { scholarId: "complete", scholarName: "Complete Scholar", cohort: 2025, fdTotal: 60, ssTotal: 120, fdRequired: 60, ssRequired: 120, fdExcuseMin: 0, ssExcuseMin: 0, fdPct: 100, ssPct: 100 },
+      { scholarId: "zero", scholarName: "Zero Scholar", cohort: 2024, fdTotal: 0, ssTotal: 0, fdRequired: 60, ssRequired: 120, fdExcuseMin: 0, ssExcuseMin: 0, fdPct: 0, ssPct: 0, wahfStatus: "missing", wahfSubmittedAt: null },
+      { scholarId: "complete", scholarName: "Complete Scholar", cohort: 2025, fdTotal: 60, ssTotal: 120, fdRequired: 60, ssRequired: 120, fdExcuseMin: 0, ssExcuseMin: 0, fdPct: 100, ssPct: 100, wahfStatus: "on-time", wahfSubmittedAt: "2026-04-03T12:00:00.000Z" },
     ],
     completedStudy: [], completedFd: [], trafficWeeklyData: [], trafficEntryCountForSelectedWeek: 8, trafficSessions: [],
     tutorReports: [{ id: 1, scholarId: "n/a", scholarName: "EMPTY SESSION", tutorName: "Tutor", courses: ["Math"], startTime: "10:00", endTime: "11:00", dayOfWeek: "Mon" }],
@@ -53,5 +53,19 @@ describe("weekly memo print report", () => {
     expect(options).toMatchObject({ format: "letter", landscape: false, displayHeaderFooter: true, waitForFonts: true });
     expect(options.footerTemplate).toContain("Week 3");
     expect(options.margin).toEqual({ top: "0.75in", right: "0.75in", bottom: "0.75in", left: "0.75in" });
+  });
+
+  it("uses PUPPETEER_EXECUTABLE_PATH when set and otherwise relies on Puppeteer's bundled Chrome", () => {
+    expect(weeklyMemoBrowserLaunchOptions({ PUPPETEER_EXECUTABLE_PATH: "/usr/bin/chromium-browser" })).toMatchObject({
+      headless: true,
+      executablePath: "/usr/bin/chromium-browser",
+    });
+    expect(weeklyMemoBrowserLaunchOptions({})).not.toHaveProperty("executablePath");
+    expect(weeklyMemoBrowserLaunchOptions({}).args).toEqual(expect.arrayContaining(["--no-sandbox"]));
+  });
+
+  it("recognizes a missing bundled Chrome install", () => {
+    expect(isMissingBundledChrome(new Error("Could not find Chrome (ver. 152.0.7977.42)."))).toBe(true);
+    expect(isMissingBundledChrome(new Error("Navigation timeout"))).toBe(false);
   });
 });
