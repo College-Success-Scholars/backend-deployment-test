@@ -29,7 +29,7 @@ Shell scripts for deployment validation and operational tasks. These run outside
 | `log-agent-session.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/log-agent-session.sh) | Records an agent/AI session to `docs/agents/logs/`: who ran it, raw user prompt, stated purpose, agent response summary, and changed files |
 | `configure-supabase-confirm-email-template.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/configure-supabase-confirm-email-template.sh) | Patches Supabase **Confirm signup** email template so links use `token_hash` + `type` for `/auth/confirm` |
 | `ingest-user-roster.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/ingest-user-roster.sh) | Ops: stream a roster CSV into `public.user_roster` (service role prompted interactively; no PII dumps to disk) |
-| `backfill-user-roster-defaults.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/backfill-user-roster-defaults.sh) | Ops: fill blank `cohort` / `fd_required` / `ss_required` on `public.user_roster` with program defaults |
+| `backfill-user-roster-defaults.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/backfill-user-roster-defaults.sh) | Ops: fill blank `cohort` and role/cohort-based `fd_required` / `ss_required` on `public.user_roster` |
 | `sync-mentee-count-from-mentor-mentee.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/sync-mentee-count-from-mentor-mentee.sh) | Ops: set TL `mentee_count` from `mentor_mentee` (`-1` if no relationship yet) |
 | `backfill-form-logs.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/backfill-form-logs.sh) | Ops: insert Google Form CSV dumps into `public.wpl_form_logs` / `public.mcf_form_logs` |
 | `supabase-env.sh` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/supabase-env.sh) | Sourced helper: resolves `SUPABASE_URL` and prompts for the service role key. Not executable on its own |
@@ -129,7 +129,7 @@ SUPABASE_ACCESS_TOKEN=... SUPABASE_PROJECT_REF=... ./scripts/configure-supabase-
 # Backfill blank roster requirements (plan only — reads the roster, writes nothing)
 ./scripts/backfill-user-roster-defaults.sh --dry-run
 
-# Backfill for real: cohort 2026, FD 180 min/week, SS 300 min/week, Scholar rows only
+# Backfill for real: blank cohort → 2026; scholar hours by cohort; TLs → 0 / 0
 ./scripts/backfill-user-roster-defaults.sh
 
 # Sync TL mentee_count from mentor_mentee (plan only)
@@ -165,22 +165,23 @@ Credential resolution is shared with `backfill-user-roster-defaults.sh`, `sync-m
 
 ### `backfill-user-roster-defaults.sh`
 
-Ops script that fills the program defaults onto roster rows the CSV ingest leaves blank. Companion helper: [`scripts/backfill-user-roster-defaults.py`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/backfill-user-roster-defaults.py).
+Ops script that fills blank cohort and weekly hour requirements onto roster rows the CSV ingest leaves blank. Companion helper: [`scripts/backfill-user-roster-defaults.py`](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/scripts/backfill-user-roster-defaults.py). Columns stay in **minutes** (`user_roster.fd_required` / `ss_required`).
 
-**Defaults**
+**Role and cohort mapping**
 
-| Column | Value | Blank means |
-|--------|-------|-------------|
-| `cohort` | `2026` | `NULL` or `0` (year 0 is never a real cohort) |
-| `fd_required` | `180` | `NULL` (add `--include-zero` to also treat `0` as blank) |
-| `ss_required` | `300` | `NULL` (add `--include-zero` to also treat `0` as blank) |
+| Who | Front desk | Study session |
+|-----|------------|----------------|
+| Scholar, cohort **2025** | 2h (`120`) | 3h (`180`) |
+| Scholar, cohort **2026** (also the year filled into a blank `cohort`) | 3h (`180`) | 5h (`300`) |
+| Team Leader (`Team Leader` / `team_leader`) | `0` | `0` |
+| Scholar, any other cohort | skipped (listed in the plan; hours not invented) | same |
 
-Only rows with `program_role` = `Scholar` are touched (case-insensitive); pass `--program-role any` to include team leaders and staff. Rows with a blank `program_role` never match a role filter, so the run reports how many exist.
+Blank `cohort` is `NULL` or `0`. Blank hours are `NULL` (add `--include-zero` to also treat hour `0` as blank). Default role filter is Scholar **and** Team Leader; pass `--program-role Scholar` to skip TLs, or `--program-role any` for every row (non-scholars get `0` / `0`). Rows with a blank `program_role` never match a named role filter, so the run reports how many exist.
 
 **Behavior**
 
-- **Fills blanks only.** A column that already holds a value is left alone unless you pass `--overwrite`. Rows already matching the defaults are skipped entirely, so re-running converges to a no-op.
-- **Plan first.** Stdout lists every row and the exact `column: blank -> value` transitions, then per-column counts, before anything is written.
+- **Fills blanks only.** Hour columns that already hold a value are left alone unless you pass `--overwrite`. `--overwrite` does **not** replace an existing cohort year.
+- **Plan first.** Stdout prints an aligned table (names and roles truncated) of abbreviated `fd` / `ss` / `cohort` transitions, then per-column counts, before anything is written. Scholars with an unmapped cohort appear in a second table only when hours would have been filled.
 - Rows sharing an identical patch are collapsed into one `PATCH … ?id=in.(…)` request, so a full roster costs a handful of calls rather than one per scholar.
 - `--dry-run` prints the plan and writes nothing, but **still needs credentials** because it reads the roster first.
 
@@ -191,11 +192,11 @@ Only rows with `program_role` = `Scholar` are touched (case-insensitive); pass `
 ./scripts/backfill-user-roster-defaults.sh --dry-run
 ./scripts/backfill-user-roster-defaults.sh
 
-# Next year's cohort, everyone on the roster
-./scripts/backfill-user-roster-defaults.sh --cohort 2027 --program-role any
+# Force hours onto rows that already have a (wrong) value; 0 counts as blank
+./scripts/backfill-user-roster-defaults.sh --overwrite --include-zero
 
-# Reset requirements that were seeded as 0
-./scripts/backfill-user-roster-defaults.sh --include-zero
+# Scholars only
+./scripts/backfill-user-roster-defaults.sh --program-role Scholar
 ```
 
 ### `sync-mentee-count-from-mentor-mentee.sh`
