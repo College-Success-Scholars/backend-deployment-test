@@ -23,6 +23,8 @@ import { syncMemo, getWeeklyMemo, triggerRefreshStats } from "../services/memo.s
 import { getTrafficEntryCountForWeek } from "../services/traffic.service.js";
 import { getMemoPageData } from "../services/memo-page.service.js";
 import { resolveMemoDefaultWeek } from "../services/memo-default-week.js";
+import { getWeeklyMemoReport } from "../services/weekly-memo-report.service.js";
+import { renderWeeklyMemoPdf } from "../services/weekly-memo-pdf.service.js";
 
 function parseWeekNumberFromBody(body: { weekNumber?: number; weekNum?: number }): number | null {
   const weekNumber = body.weekNumber ?? body.weekNum;
@@ -116,6 +118,43 @@ export async function pageData(req: AuthenticatedRequest, res: Response) {
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: e instanceof Error ? e.message : "Failed to build memo page data" });
+  }
+}
+
+// GET /api/memo/pdf?weekNumber=X
+export async function pdf(req: AuthenticatedRequest, res: Response) {
+  const weekParam = (req.query.weekNumber ?? req.query.weekNum) as string | undefined;
+  let weekNumber: number;
+  if (weekParam != null && weekParam !== "") {
+    weekNumber = parseInt(weekParam, 10);
+    if (Number.isNaN(weekNumber) || weekNumber < 1) {
+      res.status(400).json({ error: "weekNumber must be a number >= 1" });
+      return;
+    }
+  } else {
+    const { dateToCampusWeek } = await import("../services/time.service.js");
+    const resolved = resolveMemoDefaultWeek(dateToCampusWeek(new Date()));
+    if (resolved.status === "year_not_started") {
+      res.status(409).json({ error: "The academic year has not started." });
+      return;
+    }
+    weekNumber = resolved.weekNumber;
+  }
+
+  try {
+    const report = await getWeeklyMemoReport(weekNumber);
+    const document = await renderWeeklyMemoPdf(report);
+    const filename = `weekly-memo-week-${weekNumber}.pdf`;
+    res.set({
+      "Cache-Control": "no-store, max-age=0",
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename=\"${filename}\"`,
+      "Content-Length": String(document.length),
+    });
+    res.send(document);
+  } catch (e) {
+    console.error(e);
+    res.status(503).json({ error: "PDF generation failed. Please try again." });
   }
 }
 

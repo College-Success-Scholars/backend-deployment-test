@@ -40,7 +40,7 @@ import { requestLogger } from "./middleware/request-logger.js";
 
 // CORS: accepts comma-separated origins via CORS_ORIGIN env var
 // e.g. "https://app.vercel.app,https://app.railway.app"
-const allowedOrigins = (process.env.CORS_ORIGIN ?? "http://localhost:3002")
+const allowedOrigins = (process.env.CORS_ORIGIN ?? "http://localhost:3000,http://localhost:3002")
   .split(",")
   .map((o) => o.trim())
   .filter(Boolean);
