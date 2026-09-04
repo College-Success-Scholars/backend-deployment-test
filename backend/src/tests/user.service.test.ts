@@ -102,6 +102,18 @@ describe("isTeamLeaderForPerformance", () => {
       isTeamLeaderForPerformance({ program_role: "scholar", status: "enrolled" }),
     ).toBe(false);
   });
+
+  it("includes Program Coordinator and excludes Coordinator", () => {
+    expect(
+      isTeamLeaderForPerformance({ program_role: "Program Coordinator", status: "enrolled" }),
+    ).toBe(true);
+    expect(
+      isTeamLeaderForPerformance({ program_role: "Coordinator", status: "enrolled" }),
+    ).toBe(false);
+    expect(
+      isTeamLeaderForPerformance({ program_role: "coordinator", status: null }),
+    ).toBe(false);
+  });
 });
 
 describe("overlayRosterAppRoleFromProfile", () => {

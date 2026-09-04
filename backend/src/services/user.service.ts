@@ -58,12 +58,17 @@ export function isEligibleScholar(
   return role === "scholar" && isEnrolled(u.status) && isHourEligibleCohort(u.cohort) && (fd > 0 || ss > 0);
 }
 
-/** Memo / form-stats TLs: roster program_role is not scholar, and status is not graduated. */
+/** Roster program_role Coordinator only — does not match Program Coordinator. */
+export function isCoordinator(programRole: string | null | undefined): boolean {
+  return (programRole ?? "").toLowerCase().trim() === "coordinator";
+}
+
+/** Memo / form-stats TLs: not scholar, not Coordinator, and status is not graduated. */
 export function isTeamLeaderForPerformance(
   u: Pick<MemoUserRow, "program_role" | "status">,
 ): boolean {
   const role = (u.program_role ?? "").toLowerCase();
-  return role !== "scholar" && !isGraduated(u.status);
+  return role !== "scholar" && !isCoordinator(role) && !isGraduated(u.status);
 }
 
 /** Roster app_role is often unset; access control reads profiles.app_role. */
@@ -227,7 +232,7 @@ export async function getUserByUid(uid: string): Promise<MemoUserRow | null> {
   return mapMemoUserRow(data);
 }
 
-/** Non-scholar roster rows excluding graduates — feeds Memo team leader performance. */
+/** Non-scholar, non-Coordinator roster rows excluding graduates — feeds Memo team leader performance. */
 export async function fetchTeamLeaders(): Promise<TeamLeaderRow[]> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
