@@ -14,7 +14,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import type { PersonalClientProps, WahfRow, McfRow, WplRow } from "@/lib/types/supabase"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import type { PersonalClientProps, WahfRow, McfRow, WplRow, MenteeRow } from "@/lib/types/supabase"
 import {
   findSubmissionForCampusWeek,
   formatCampusWeekRangeWithYear,
@@ -23,6 +30,9 @@ import {
   getGreeting,
   formatSubmittedDateTime,
   formatSubmittedDay,
+  buildMcfMenteeOptions,
+  mcfProgressLabel,
+  canBrowseMcf,
   type FormType,
   type FormStatusResult,
   type WeekOption,
@@ -60,7 +70,7 @@ type DialogState = {
   initialFormType: FormType
 } | null
 
-export function PersonalClient({ profile, wahf, mcf, wpl, currentCampusWeek }: PersonalClientProps) {
+export function PersonalClient({ profile, wahf, mcf, wpl, mentees, currentCampusWeek }: PersonalClientProps) {
   const dialogSessionRef = useRef(0)
   const [dialogState, setDialogState] = useState<DialogState>(null)
 
@@ -82,12 +92,14 @@ export function PersonalClient({ profile, wahf, mcf, wpl, currentCampusWeek }: P
     [currentCampusWeek],
   )
 
+  const menteeCount = profile.mentee_count ?? 0
+
   const currentWeekStatuses = useMemo(() => {
     if (currentCampusWeek == null) return []
     return FORM_TYPES.map((ft) =>
-      getFormStatusForWeek(ft, wahf, mcf, wpl, currentCampusWeek, currentCampusWeek),
+      getFormStatusForWeek(ft, wahf, mcf, wpl, currentCampusWeek, currentCampusWeek, menteeCount),
     )
-  }, [wahf, mcf, wpl, currentCampusWeek])
+  }, [wahf, mcf, wpl, currentCampusWeek, menteeCount])
 
   const pastWeeks = useMemo(
     () => weekOptions.filter((w) => !w.isCurrent),
@@ -148,6 +160,7 @@ export function PersonalClient({ profile, wahf, mcf, wpl, currentCampusWeek }: P
                 wahf={wahf}
                 mcf={mcf}
                 wpl={wpl}
+                menteeCount={menteeCount}
                 currentCampusWeek={currentCampusWeek}
                 onView={(formType) => openFormDialog(week.weekNum, formType)}
               />
@@ -176,6 +189,8 @@ export function PersonalClient({ profile, wahf, mcf, wpl, currentCampusWeek }: P
         wahf={wahf}
         mcf={mcf}
         wpl={wpl}
+        mentees={mentees}
+        menteeCount={menteeCount}
         currentCampusWeek={currentCampusWeek}
         onClose={() => setDialogState(null)}
         onNavigateWeek={(campusWeek) =>
@@ -200,6 +215,11 @@ function ThisWeekFormCard({
   onView: () => void
 }) {
   const { formType, status, submittedAt, daysOverdue, hoursLeft, submission } = formStatus
+  const isMcf = formType === "MCF"
+  const progress = isMcf
+    ? mcfProgressLabel(formStatus.completedCount, formStatus.requiredCount)
+    : null
+  const showView = isMcf ? canBrowseMcf(formStatus) : status === "done" && Boolean(submission)
 
   const borderClass =
     status === "done"
@@ -221,46 +241,48 @@ function ThisWeekFormCard({
 
         <Separator />
 
-        <div className="flex items-center justify-between">
-          {status === "overdue" && (
-            <>
-              <p className="text-xs font-medium text-destructive">
-                {daysOverdue} {daysOverdue === 1 ? "day" : "days"} late
-              </p>
+        <div className="flex items-center justify-between gap-2">
+          <p
+            className={`min-w-0 text-xs leading-snug ${
+              status === "overdue" ? "font-medium text-destructive" : "text-muted-foreground"
+            }`}
+          >
+            {status === "overdue"
+              ? `${progress ? `${progress} · ` : ""}${daysOverdue} ${daysOverdue === 1 ? "day" : "days"} late`
+              : status === "pending"
+                ? `${progress ? `${progress} · ` : ""}${hoursLeft > 0 ? `${hoursLeft} hrs left` : "Due soon"}`
+                : isMcf && formStatus.requiredCount <= 0
+                  ? progress
+                  : submittedAt
+                    ? `${progress ? `${progress} · ` : ""}Submitted ${formatSubmittedDateTime(submittedAt)}`
+                    : progress ?? ""}
+          </p>
+          <div className="flex shrink-0 items-center gap-2">
+            {showView ? (
+              <Button
+                size="sm"
+                variant="outline"
+                className="cursor-pointer"
+                onClick={() => onView()}
+              >
+                View <ArrowUpRight className="size-3.5" />
+              </Button>
+            ) : null}
+            {status === "overdue" ? (
               <Button size="sm" className="cursor-pointer" asChild>
                 <a href={FORM_URLS[formType]} target="_blank" rel="noopener noreferrer">
                   Submit now <ArrowUpRight className="size-3.5" />
                 </a>
               </Button>
-            </>
-          )}
-          {status === "pending" && (
-            <>
-              <p className="text-xs text-muted-foreground">
-                {hoursLeft > 0 ? `${hoursLeft} hrs left` : "Due soon"}
-              </p>
+            ) : null}
+            {status === "pending" ? (
               <Button size="sm" variant="outline" className="cursor-pointer" asChild>
                 <a href={FORM_URLS[formType]} target="_blank" rel="noopener noreferrer">
                   Submit <ArrowUpRight className="size-3.5" />
                 </a>
               </Button>
-            </>
-          )}
-          {status === "done" && submission && (
-            <>
-              <p className="text-xs text-muted-foreground leading-snug">
-                Submitted {formatSubmittedDateTime(submittedAt!)}
-              </p>
-              <Button
-                size="sm"
-                variant="outline"
-                className="cursor-pointer shrink-0"
-                onClick={() => onView()}
-              >
-                View <ArrowUpRight className="size-3.5" />
-              </Button>
-            </>
-          )}
+            ) : null}
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -277,6 +299,7 @@ function HistoryWeekBlock({
   wahf,
   mcf,
   wpl,
+  menteeCount,
   currentCampusWeek,
   onView,
 }: {
@@ -285,15 +308,16 @@ function HistoryWeekBlock({
   wahf: WahfRow[]
   mcf: McfRow[]
   wpl: WplRow[]
+  menteeCount: number
   currentCampusWeek: number | null
   onView: (formType: FormType) => void
 }) {
   const statuses = useMemo(
     () =>
       FORM_TYPES.map((ft) =>
-        getFormStatusForWeek(ft, wahf, mcf, wpl, weekNum, currentCampusWeek),
+        getFormStatusForWeek(ft, wahf, mcf, wpl, weekNum, currentCampusWeek, menteeCount),
       ),
-    [wahf, mcf, wpl, weekNum, currentCampusWeek],
+    [wahf, mcf, wpl, weekNum, currentCampusWeek, menteeCount],
   )
 
   return (
@@ -306,7 +330,7 @@ function HistoryWeekBlock({
           {statuses.map((s) => (
             <Badge
               key={s.formType}
-              variant={s.status === "missed" || s.isLate ? "destructive" : "secondary"}
+              variant={s.status === "missed" || s.isLate || (s.formType === "MCF" && s.status !== "done") ? "destructive" : "secondary"}
               className="text-[10px] px-1.5 py-0"
             >
               {s.formType}
@@ -320,7 +344,7 @@ function HistoryWeekBlock({
           <HistoryFormRow
             key={s.formType}
             formStatus={s}
-            onView={s.submission ? () => onView(s.formType) : undefined}
+            onView={s.formType === "MCF" ? (canBrowseMcf(s) ? () => onView(s.formType) : undefined) : (s.submission ? () => onView(s.formType) : undefined)}
           />
         ))}
       </Card>
@@ -340,6 +364,10 @@ function HistoryFormRow({
   onView?: () => void
 }) {
   const { formType, status, submittedAt, isLate } = formStatus
+  const isMcf = formType === "MCF"
+  const progress = isMcf
+    ? mcfProgressLabel(formStatus.completedCount, formStatus.requiredCount)
+    : null
 
   const dotColor =
     status === "done" && !isLate
@@ -349,9 +377,14 @@ function HistoryFormRow({
         : "bg-destructive"
 
   let description: string
-  if (status === "done" && submittedAt) {
+  if (isMcf && formStatus.requiredCount <= 0) {
+    description = progress ?? "No mentee assigned"
+  } else if (status === "done" && submittedAt) {
     const when = formatSubmittedDateTime(submittedAt)
-    description = isLate ? `Submitted ${when} \u00b7 late` : `Submitted ${when} \u00b7 on time`
+    const lateLabel = isLate ? `Submitted ${when} \u00b7 late` : `Submitted ${when} \u00b7 on time`
+    description = progress ? `${progress} \u00b7 ${lateLabel}` : lateLabel
+  } else if (isMcf && formStatus.completedCount > 0) {
+    description = `${progress} submitted`
   } else {
     description = "Not submitted"
   }
@@ -367,9 +400,11 @@ function HistoryFormRow({
       </div>
       <div className="flex items-center gap-2">
         {status === "missed" && (
-          <span className="text-xs font-medium text-destructive">Missed</span>
+          <span className="text-xs font-medium text-destructive">
+            {isMcf && formStatus.completedCount > 0 ? "Incomplete" : "Missed"}
+          </span>
         )}
-        {status === "done" && onView && (
+        {onView && (
           <Button size="sm" variant="outline" className="cursor-pointer" onClick={onView}>
             View
           </Button>
@@ -412,6 +447,8 @@ function FormDetailDialog({
   wahf,
   mcf,
   wpl,
+  mentees,
+  menteeCount,
   currentCampusWeek,
   onClose,
   onNavigateWeek,
@@ -421,6 +458,8 @@ function FormDetailDialog({
   wahf: WahfRow[]
   mcf: McfRow[]
   wpl: WplRow[]
+  mentees: MenteeRow[]
+  menteeCount: number
   currentCampusWeek: number | null
   onClose: () => void
   onNavigateWeek: (campusWeek: number) => void
@@ -470,6 +509,8 @@ function FormDetailDialog({
           wahf={wahf}
           mcf={mcf}
           wpl={wpl}
+          mentees={mentees}
+          menteeCount={menteeCount}
           currentCampusWeek={currentCampusWeek}
         />
       )}
@@ -488,6 +529,8 @@ function FormDetailDialogContent({
   wahf,
   mcf,
   wpl,
+  mentees,
+  menteeCount,
   currentCampusWeek,
 }: {
   campusWeek: number
@@ -500,16 +543,28 @@ function FormDetailDialogContent({
   wahf: WahfRow[]
   mcf: McfRow[]
   wpl: WplRow[]
+  mentees: MenteeRow[]
+  menteeCount: number
   currentCampusWeek: number | null
 }) {
   const [activeTab, setActiveTab] = useState<FormType>(initialFormType)
 
   const footerStatus = useMemo(() => {
-    const fs = getFormStatusForWeek(activeTab, wahf, mcf, wpl, campusWeek, currentCampusWeek)
+    const fs = getFormStatusForWeek(activeTab, wahf, mcf, wpl, campusWeek, currentCampusWeek, menteeCount)
+    if (activeTab === "MCF") {
+      const progress = mcfProgressLabel(fs.completedCount, fs.requiredCount)
+      if (fs.requiredCount <= 0) return progress
+      if (fs.status !== "done" || !fs.submittedAt) {
+        return fs.completedCount > 0 ? `${progress} submitted` : progress
+      }
+      const day = formatSubmittedDay(fs.submittedAt)
+      const when = fs.isLate ? `Submitted ${day} · late` : `Submitted ${day} · on time`
+      return `${progress} · ${when}`
+    }
     if (fs.status !== "done" || !fs.submittedAt) return "Not submitted"
     const day = formatSubmittedDay(fs.submittedAt)
     return fs.isLate ? `Submitted ${day} · late` : `Submitted ${day} · on time`
-  }, [activeTab, wahf, mcf, wpl, campusWeek, currentCampusWeek])
+  }, [activeTab, wahf, mcf, wpl, campusWeek, currentCampusWeek, menteeCount])
 
   return (
     <DialogContent className="flex h-[min(85vh,42rem)] w-full max-w-xl flex-col gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-xl [&>button]:cursor-pointer">
@@ -564,6 +619,7 @@ function FormDetailDialogContent({
           wahf={wahf}
           mcf={mcf}
           wpl={wpl}
+          mentees={mentees}
         />
       </div>
 
@@ -604,12 +660,14 @@ function FormTabBody({
   wahf,
   mcf,
   wpl,
+  mentees,
 }: {
   formType: FormType
   campusWeek: number
   wahf: WahfRow[]
   mcf: McfRow[]
   wpl: WplRow[]
+  mentees: MenteeRow[]
 }) {
   if (formType === "WAHF") {
     const row = findSubmissionForCampusWeek(wahf, campusWeek)
@@ -619,8 +677,65 @@ function FormTabBody({
     const row = findSubmissionForCampusWeek(wpl, campusWeek)
     return <WplTabBody row={row} />
   }
-  const row = findSubmissionForCampusWeek(mcf, campusWeek)
-  return <McfTabBody row={row} />
+  return <McfWeekPanel campusWeek={campusWeek} mcf={mcf} mentees={mentees} />
+}
+
+function McfWeekPanel({
+  campusWeek,
+  mcf,
+  mentees,
+}: {
+  campusWeek: number
+  mcf: McfRow[]
+  mentees: MenteeRow[]
+}) {
+  const options = useMemo(
+    () => buildMcfMenteeOptions(mentees, mcf, campusWeek),
+    [mentees, mcf, campusWeek],
+  )
+  const [selectedKey, setSelectedKey] = useState(options[0]?.key ?? "")
+
+  const selected = options.find((option) => option.key === selectedKey) ?? options[0] ?? null
+
+  if (options.length === 0) {
+    return <p className="text-sm text-muted-foreground">No mentees assigned for this week.</p>
+  }
+
+  return (
+    <div className="space-y-4">
+      {options.length >= 1 ? (
+        <div className="space-y-1.5">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Mentee
+          </p>
+          <Select
+            value={selected?.key ?? ""}
+            onValueChange={setSelectedKey}
+          >
+            <SelectTrigger className="w-full min-w-0 cursor-pointer" aria-label="Select mentee MCF">
+              <SelectValue placeholder="Select a mentee" />
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((option) => (
+                <SelectItem key={option.key} value={option.key}>
+                  {option.menteeName}
+                  {option.submission ? "" : " · missing"}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      ) : null}
+      <McfTabBody
+        row={selected?.submission ?? null}
+        emptyLabel={
+          selected
+            ? `Not submitted for ${selected.menteeName} this week.`
+            : "Not submitted for this week."
+        }
+      />
+    </div>
+  )
 }
 
 function WahfTabBody({ row }: { row: WahfRow | null }) {
@@ -776,9 +891,13 @@ function WplTabBody({ row }: { row: WplRow | null }) {
   )
 }
 
-function McfTabBody({ row }: { row: McfRow | null }) {
+function McfTabBody({ row, emptyLabel }: { row: McfRow | null; emptyLabel?: string }) {
   if (!row) {
-    return <p className="text-sm text-muted-foreground">Not submitted for this week.</p>
+    return (
+      <p className="text-sm text-muted-foreground">
+        {emptyLabel ?? "Not submitted for this week."}
+      </p>
+    )
   }
 
   const reason = row.reason_no_meeting?.trim()

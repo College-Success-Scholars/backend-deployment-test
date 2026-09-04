@@ -99,6 +99,7 @@ export interface PersonalClientProps {
   wahf: WahfRow[]
   mcf: McfRow[]
   wpl: WplRow[]
+  mentees: MenteeRow[]
   /** Campus week from `dateToCampusWeek`; null before Fall start. */
   currentCampusWeek: number | null
 }
