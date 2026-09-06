@@ -1,107 +1,94 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { BookOpen, UserCheck } from "lucide-react"
+import { requireTeamLeaderOrAbove } from "@/lib/supabase/server"
+import {
+  getStudySessionScholarsInRoom,
+  getFrontDeskScholarsInRoom,
+} from "@/lib/server/data"
+import { getStartOfDayEastern } from "@/lib/format/time"
+import { RoomPageToolbar } from "./_components/room-page-toolbar"
+import { RoomSummaryCards } from "./_components/room-summary-cards"
+import { RoomSessionPanel } from "./_components/room-session-panel"
 
-export default function RoomMonitoringPage() {
-  const roomMonitoringData = {
-    studySession: [
-      { name: "Alex Rodriguez", present: true, expectedStart: "9:00 AM" },
-      { name: "Sarah Johnson", present: false, expectedStart: "10:00 AM" },
-      { name: "Mike Chen", present: true, expectedStart: "11:00 AM" }
-    ],
-    frontDesk: [
-      { name: "Emily Davis", present: true, expectedStart: "2:00 PM" },
-      { name: "David Kim", present: false, expectedStart: "3:00 PM" }
-    ]
+export const dynamic = "force-dynamic"
+
+export default async function RoomMonitoringPage() {
+  await requireTeamLeaderOrAbove()
+
+  const now = new Date()
+  const dateRangeOpts = {
+    startDate: getStartOfDayEastern(now),
+    endDate: now,
+    asOf: now,
   }
+
+  const [studySessionRaw, frontDeskRaw] = await Promise.all([
+    getStudySessionScholarsInRoom(dateRangeOpts),
+    getFrontDeskScholarsInRoom(dateRangeOpts),
+  ])
+
+  // Pass only serializable fields to client components (omit entryTicket).
+  const toRow = (s: (typeof studySessionRaw)[number]) => ({
+    scholarId: s.scholarId,
+    scholarName: s.scholarName,
+    entryAt: s.entryAt,
+    timeInRoomMs: s.timeInRoomMs,
+    sessionType: s.sessionType ?? null,
+  })
+  const studySession = studySessionRaw.map(toRow)
+  const frontDesk = frontDeskRaw.map(toRow)
+
+  const lastUpdatedLabel =
+    now.toLocaleString("en-US", {
+      timeZone: "America/New_York",
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }) + " ET"
+
+  const uniquePresent = new Set([
+    ...studySession.map((s) => s.scholarId),
+    ...frontDesk.map((s) => s.scholarId),
+  ]).size
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Room Monitoring</h1>
-        <p className="text-muted-foreground">
-          Monitor room occupancy and scholar presence for study sessions and front desk duty
-        </p>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight">Room Monitoring</h1>
+          <p className="text-muted-foreground">
+            Live room occupancy for study sessions and front desk duty
+          </p>
+        </div>
+
+        <RoomPageToolbar isLive lastUpdatedLabel={lastUpdatedLabel} />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Study Session List */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5" />
-              Study Session
-            </CardTitle>
-            <CardDescription>
-              Scholars scheduled for study sessions
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {roomMonitoringData.studySession
-                .sort((a, b) => {
-                  // Sort absent scholars (present: false) to the top
-                  if (a.present !== b.present) {
-                    return a.present ? 1 : -1;
-                  }
-                  return 0;
-                })
-                .map((scholar, index) => (
-                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium">{scholar.name}</p>
-                    <p className="text-sm text-muted-foreground">Expected: {scholar.expectedStart}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${scholar.present ? "bg-success" : "bg-destructive"}`} />
-                    <Badge variant={scholar.present ? "default" : "secondary"}>
-                      {scholar.present ? "Present" : "Absent"}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      <RoomSummaryCards
+        totalPresent={uniquePresent}
+        studyCount={studySession.length}
+        frontDeskCount={frontDesk.length}
+      />
 
-        {/* Front Desk List */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserCheck className="h-5 w-5" />
-              Front Desk
-            </CardTitle>
-            <CardDescription>
-              Scholars scheduled for front desk duty
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {roomMonitoringData.frontDesk
-                .sort((a, b) => {
-                  // Sort absent scholars (present: false) to the top
-                  if (a.present !== b.present) {
-                    return a.present ? 1 : -1;
-                  }
-                  return 0;
-                })
-                .map((scholar, index) => (
-                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium">{scholar.name}</p>
-                    <p className="text-sm text-muted-foreground">Expected: {scholar.expectedStart}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${scholar.present ? "bg-success" : "bg-destructive"}`} />
-                    <Badge variant={scholar.present ? "default" : "secondary"}>
-                      {scholar.present ? "Present" : "Absent"}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <RoomSessionPanel
+          title="Study Session"
+          variant="study"
+          scholars={studySession}
+          showSearch
+          isLive
+          emptyMessage="No scholars in a study session at this time"
+        />
+        <RoomSessionPanel
+          title="Front Desk"
+          variant="front-desk"
+          scholars={frontDesk}
+          showSearch
+          isLive
+          emptyMessage="No scholars at front desk at this time"
+        />
       </div>
     </div>
   )
