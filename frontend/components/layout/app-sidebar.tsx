@@ -210,6 +210,11 @@ const getRoleBasedNav = (role: UserRole, showMemo: boolean, showMentees: boolean
           url: "/dashboard/personal",
           icon: User,
         },
+        {
+          title: "Room",
+          url: "/dashboard/room",
+          icon: Building,
+        },
         ...(showMentees
           ? [
               {
