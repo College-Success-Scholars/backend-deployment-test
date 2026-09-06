@@ -101,7 +101,7 @@ export const classifyScholarFollowUpRisk = (data: MemoLivePageData): ScholarFoll
       return {
         scholarName: row.scholarName,
         scholarYear: toScholarYear(row.cohort),
-        teamLeader: "Unassigned",
+        teamLeader: row.teamLeader?.trim() || "Unassigned",
         flags,
         issues,
         frontDeskPct: Math.max(0, Math.round(row.fdPct ?? 0)),

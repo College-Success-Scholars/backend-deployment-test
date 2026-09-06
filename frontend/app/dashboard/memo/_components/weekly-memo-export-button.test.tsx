@@ -38,7 +38,7 @@ describe("WeeklyMemoExportButton", () => {
     await waitFor(() => expect(onExport).toHaveBeenCalledTimes(2))
   })
 
-  it("uses the selected week in the fallback filename", () => {
-    expect(weeklyMemoPdfFilename(12)).toBe("weekly-memo-week-12.pdf")
+  it("uses the selected week and Eastern time in the fallback filename", () => {
+    expect(weeklyMemoPdfFilename(12, new Date("2026-09-04T23:39:00.000Z"))).toBe("weekly-memo-week-12-2026-09-04-1939.pdf")
   })
 })

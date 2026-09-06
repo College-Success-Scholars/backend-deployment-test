@@ -962,7 +962,7 @@ Routes under `/api/memo` require **requireTeamLeaderOrAbove** unless noted other
 ### `GET /api/memo/page-data`
 
 **Auth:** requireTeamLeaderOrAbove
-**Description:** Returns all processed data needed to render the memo page for a given week (aggregated in one call). FD/SS minutes are computed on read from cleaned tickets; excuses come from `scholar_week_excuses` (not `*_records`). Each scholar row includes `wahfStatus` (`on-time` | `late` | `missing`) and `wahfSubmittedAt` (latest weekly WAHF form-log `created_at`, or `null` if none) from that week's WAHF form logs. `gradeBreakdown` lists assignment grades parsed from the **latest WAHF per scholar** (high ≥90%, mid 70–89%, low <70%) so resubmits do not duplicate; each band is sorted by percent descending. Scholars owe WAHF only; WPL/MCF stay on team-leader form stats.
+**Description:** Returns all processed data needed to render the memo page for a given week (aggregated in one call). FD/SS minutes are computed on read from cleaned tickets; excuses come from `scholar_week_excuses` (not `*_records`). Each scholar row includes `wahfStatus` (`on-time` | `late` | `missing`) and `wahfSubmittedAt` (latest weekly WAHF form-log `created_at`, or `null` if none) from that week's WAHF form logs. `teamLeader` is the mentor display name from `mentor_mentee` (`Unassigned` when the scholar has no row). `gradeBreakdown` lists assignment grades parsed from the **latest WAHF per scholar** (high ≥90%, mid 70–89%, low <70%) so resubmits do not duplicate; each band is sorted by percent descending. Scholars owe WAHF only; WPL/MCF stay on team-leader form stats.
 **Query Params:**
 - `weekNumber` (integer >= 1; legacy `weekNum` accepted; defaults to current campus week if omitted)
 
@@ -970,6 +970,17 @@ Routes under `/api/memo` require **requireTeamLeaderOrAbove** unless noted other
 ```json
 { "data": { /* full memo page data object */ } }
 ```
+
+---
+
+### `GET /api/memo/pdf`
+
+**Auth:** requireTeamLeaderOrAbove
+**Description:** Renders the weekly memo printout as a PDF. The masthead and footer include an Eastern `Printed` timestamp. `Content-Disposition` uses `weekly-memo-week-{weekNumber}-{YYYY-MM-DD-HHmm}.pdf` in America/New_York. Response has `Cache-Control: no-store`. Returns `503` if Chromium/PDF rendering fails.
+**Query Params:**
+- `weekNumber` (integer >= 1; legacy `weekNum` accepted; defaults to current campus week if omitted)
+
+**Response:** PDF binary (`Content-Type: application/pdf`)
 
 ---
 

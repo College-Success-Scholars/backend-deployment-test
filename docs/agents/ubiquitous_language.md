@@ -28,6 +28,7 @@
 | **Campus Week** | The canonical numbered week used to select and compare weekly operational data. | Sprint week, report period |
 | **KPI card** | A metric tile showing a weekly performance indicator and optional trend/substats. | Stat box, widget |
 | **Scholar follow-up** | A prioritized scholar action-list row with **What's missing** (short labels: Front desk, Study session, WAHF, assignment title) and **How it's missing** (hours/grade meters, WAHF submitted-at or no-submission time). Healthy hours are omitted. | Student risk list, action list |
+| **Scholar WAHF** | On the weekly memo **PDF only**: snapshot on-time/late/missing counts and the Needs Attention list of missing or late scholar WAHF. The dashboard memo keeps those people on **Scholar follow-up**. Team leader WAHF is a separate PDF snapshot tile; missing or late TL WAHF names appear on **Team Leader Submissions** with WPL and MCF. | WHAF list, scholar form submissions |
 | **Recognition board** | The weekly **WAHF** assignment-grade census: every parsed grade in high (90–100%), mid (70–89%), and low (below 70%) bands. | Shout-outs, highlights |
 | **Attendance detail** | Tabular minutes-based completion details by scholar for front desk and study session requirements, plus overall WAHF on-time / late / missing counts for that roster. | Attendance table, minutes log |
 | **Team leader performance** | Weekly WPL, MCF, and WAHF compliance for Team Leaders. | TL form table |
@@ -64,7 +65,7 @@
 ## Relationships
 
 - A **Weekly Memo** is scoped to exactly one **Campus Week**.
-- A **Weekly Memo** contains multiple **KPI cards**, one **Recognition board** (**WAHF** grade census), one **Attendance detail** section (hours census + overall **WAHF** counts), and one **Team leader performance** section. Missing or late **WAHF** also appears as an **Issue** on **Scholar follow-up**.
+- A **Weekly Memo** contains multiple **KPI cards**, one **Recognition board** (**WAHF** grade census), one **Attendance detail** section (hours census + overall **WAHF** counts), and one **Team leader performance** section. Missing or late **WAHF** also appears as an **Issue** on **Scholar follow-up**. The export PDF additionally has **Scholar WAHF** and **TL WAHF** snapshot tiles; Needs Attention lists scholar WAHF names separately and folds TL WAHF into Team Leader Submissions with WPL and MCF.
 - A **Scholar** has exactly one **Primary Team Leader** per **Campus Week**, except Team Leaders do not have mentors.
 - A **Team Leader** is also a **Scholar** identity but is exempt from required front desk and study-session hours while active in the Team Leader role.
 - Every **Program member** must submit **WAHF** each **Campus Week**.
@@ -73,7 +74,7 @@
 - **WAHF** form-log status uses timezone-aware ET deadlines; **WPL** and **MCF** status is shown on **Team leader performance**, not as scholar requirements.
 - If multiple MCFs exist for one scholar in one week, the latest submitted MCF is canonical for current status.
 - Missing **MCF** is always a Team Leader compliance issue and is not by itself automatic **Scholar follow-up risk**.
-- Missing or late **WAHF** is a scholar **Issue** on **Scholar follow-up** (**What's missing** is WAHF; **How it's missing** is submitted-at from the form log, or no-submission time).
+- Missing or late **WAHF** is a scholar **Issue** on **Scholar follow-up** (**What's missing** is WAHF; **How it's missing** is submitted-at from the form log, or no-submission time). The export PDF still lists those names under **Scholar WAHF**.
 - **Scholar follow-up risk** uses a hybrid model: system-derived baseline plus Team Leader judgment.
 - **MCF support rating** of 3, 4, or 5 requires active follow-up for that week.
 - Source conflicts resolve by precedence: latest valid record, then approved admin correction, then source-of-record, with full audit history retained.

@@ -10,6 +10,8 @@ export type MemoScholarRow = {
   scholarId: string
   scholarName: string
   cohort: number | null
+  /** Display name from mentor_mentee, or "Unassigned". */
+  teamLeader: string
   fdTotal: number
   ssTotal: number
   fdRequired: number | null

@@ -21,6 +21,7 @@
  */
 import { campusWeekToDateRange, dateToCampusWeek, freshmanCohortYear, getWeekFetchEnd, sophomoreCohortYear } from "./time.service.js";
 import { fetchTeamLeaders, isEligibleScholar, isTeamLeaderForPerformance } from "./user.service.js";
+import { fetchMenteeTeamLeaderNames, teamLeaderLabelForScholar } from "./mentee.service.js";
 import {
   getCampusWeekAttendance,
 } from "./attendance-week.service.js";
@@ -144,6 +145,7 @@ export type MemoScholarAttendanceRow = {
   scholarId: string;
   scholarName: string;
   cohort: number | null;
+  teamLeader: string;
   fdTotal: number;
   ssTotal: number;
   fdRequired: number | null;
@@ -164,7 +166,8 @@ export function buildMemoScholarAttendanceRows(
   users: MemoUserRow[],
   fdByUid: Map<string, CampusWeekAttendanceTotals>,
   ssByUid: Map<string, CampusWeekAttendanceTotals>,
-  wahfRows: FormLogRowWithLate<WahfFormLogRow>[] = []
+  wahfRows: FormLogRowWithLate<WahfFormLogRow>[] = [],
+  teamLeaderByMenteeUid: Map<string, string> = new Map(),
 ): {
   scholars: MemoScholarAttendanceRow[];
   cohort2024: { total: number; fdCompleteCount: number; ssCompleteCount: number };
@@ -192,6 +195,7 @@ export function buildMemoScholarAttendanceRows(
       scholarId: u.uid,
       scholarName: name,
       cohort: u.cohort ?? null,
+      teamLeader: teamLeaderLabelForScholar(u.uid, teamLeaderByMenteeUid),
       fdTotal: fd.loggedMin,
       ssTotal: study.loggedMin,
       fdRequired: fdReq,
@@ -228,7 +232,7 @@ export function buildMemoScholarAttendanceRows(
  * 2. Fetch all data sources in parallel:
  *    - campus-week attendance (tickets + scholar_week_excuses), completed sessions,
  *      trafficWeeklyData, trafficEntryCount, trafficSessions,
- *      teamLeaders, mcf/whaf/wpl form logs (with late flags),
+ *      teamLeaders, mentor_mentee → TL names, mcf/whaf/wpl form logs (with late flags),
  *      tutorReportLogs.
  * 3. Parse assignment grades from the latest WHAF per scholar into a grade
  *    breakdown (high ≥90%, mid 70-89%, low <70%) so resubmits do not duplicate.
@@ -237,8 +241,9 @@ export function buildMemoScholarAttendanceRows(
  * 6. Aggregate form completion totals across all team leaders.
  * 7. Build scholar rows: merge FD/SS compute-on-read minutes + excuses with
  *    roster requirements, compute completion percentages, attach WAHF status
- *    and latest form-log submitted-at from form logs, and track cohort-level
- *    stats for pie charts (2024 vs 2025).
+ *    and latest form-log submitted-at from form logs, attach team-leader name
+ *    from mentor_mentee (or "Unassigned"), and track cohort-level stats for
+ *    pie charts (2024 vs 2025).
  * 8. Build team leader MCF rows: per-TL MCF count, late flag, latest date.
  * 9. Resolve tutor report scholar names and derive day-of-week.
  * 10. Return everything as a single object for the frontend to render.
@@ -257,6 +262,7 @@ export async function getMemoPageData(weekNum: number) {
     trafficEntryCountForSelectedWeek,
     trafficSessions,
     teamLeadersRaw,
+    menteeTeamLeaders,
     mcfRowsWithLate,
     whafRowsWithLate,
     wplRowsWithLate,
@@ -267,6 +273,7 @@ export async function getMemoPageData(weekNum: number) {
     getTrafficEntryCountForWeek(weekNum),
     getTrafficSessionsForWeek(weekNum),
     fetchTeamLeaders(),
+    fetchMenteeTeamLeaderNames(),
     getMcfFormLogsForWeekWithLate(weekNum),
     getWhafFormLogsForWeekWithLate(weekNum),
     getWplFormLogsForWeekWithLate(weekNum),
@@ -326,7 +333,8 @@ export async function getMemoPageData(weekNum: number) {
     allUsers,
     attendance.fdByUid,
     attendance.ssByUid,
-    whafRowsWithLate
+    whafRowsWithLate,
+    menteeTeamLeaders,
   );
 
   const pieData = {

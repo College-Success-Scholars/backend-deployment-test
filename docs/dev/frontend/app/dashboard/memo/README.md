@@ -25,12 +25,14 @@ The header blurb (`WEEKLY_MEMO_HEADER_BLURB` in `_lib/memo-section-guide.ts`) is
 |---------|-----|-------------|
 | KPI cards | Week totals: visits, mean FD/SS completion, tutoring sessions | Campus week |
 | Team leader performance | **WPL · MCF · WAHF** compliance for TLs. Missing MCF is a TL issue, not scholar follow-up. TLs with `mentee_count` ≤ 0 (including `-1`, no `mentor_mentee` row) show MCF on-time plus small “no mentee” text. | Roster `program_role` ≠ scholar / Coordinator; `status` ≠ graduated. Program Coordinator still appears. |
-| Scholar follow-up | **Action list** — who needs a conversation this week | Scholars with **What's missing** (Front desk, Study session, WAHF, assignment title) and **How it's missing** (hours/grade meters, WAHF submitted-at or no-submission time) |
+| Scholar follow-up | **Action list** — who needs a conversation this week | Scholars with **What's missing** (Front desk, Study session, WAHF, assignment title) and **How it's missing** (hours/grade meters, WAHF submitted-at or no-submission time). **TL** is the assigned mentor from `mentor_mentee` (`Unassigned` when there is no row). |
 | Tutoring log | Sessions held vs empty sessions | Tutor report rows |
 | Recognition board | **Census** — every assignment grade parsed from this week's **WAHF** (90–100% / 70–89% / below 70%) | Scholars with parsed grades; empty band = None |
 | Full attendance detail | **Census** — hours math for freshman and sophomore scholars with required minutes, plus **overall WAHF** on-time / late / missing counts | Enrolled freshman/sophomore scholars with required hours (cohort years from `FALL_SEMESTER_FIRST_DAY`) |
 
-There is no separate Form submissions accordion. WAHF totals live on attendance detail; people who have not submitted (or submitted late) live on scholar follow-up; assignment grades live on Recognition board (lows also on follow-up); WPL/MCF live on team leader performance.
+There is no separate Form submissions accordion. WAHF totals live on attendance detail; people who have not submitted (or submitted late) live on scholar follow-up; assignment grades live on Recognition board (lows also on follow-up); WPL/MCF/TL WAHF live on team leader performance.
+
+Export PDF (`weekly-memo-report.service` + `weekly-memo-pdf.service`) is a staff-meeting brief, not a restyle of this page. Snapshot tiles include print-only SVG bars (`weekly-memo-pdf-charts.ts`: stacked on-time / late / missing, cohort completion tracks). The snapshot groups scholar tiles (hours, tutoring, scholar WAHF) separately from team-leader tiles (TL WAHF, WPL, MCF). Room traffic (week trend + Mon–Fri heat map from `trafficSessions`) is its own page. Needs Attention lists scholar WAHF names separately; TL WAHF, WPL, and MCF share Team Leader Submissions. The study-session and front-desk appendix rosters are grouped by cohort and sorted by completion descending. Snapshot, Room Traffic, Needs Attention, and each appendix start on their own page. The download filename and print masthead/footer include an Eastern printed-at timestamp.
 
 ---
 
@@ -60,7 +62,7 @@ There is no separate Form submissions accordion. WAHF totals live on attendance 
 | `weekly-memo-async-content.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/weekly-memo-async-content.tsx) | Fetches page-data and renders sections |
 | `weekly-kpi-cards.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/weekly-kpi-cards.tsx) | Weekly KPI summary cards |
 | `team-leader-performance-table.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/team-leader-performance-table.tsx) | TL WPL / MCF / WAHF |
-| `scholar-follow-up-table.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/scholar-follow-up-table.tsx) | Scholars needing a conversation |
+| `scholar-follow-up-table.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/scholar-follow-up-table.tsx) | Scholars needing a conversation (hours, grades, missing/late WAHF) |
 | `full-attendance-detail-section.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/full-attendance-detail-section.tsx) | Hours census + overall WAHF counts |
 | `tutoring-log-section.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/tutoring-log-section.tsx) | Tutor sessions / empty sessions |
 | `recognition-board-section.tsx` | [source](https://github.com/College-Success-Scholars/css-atlas-v2/blob/develop/frontend/app/dashboard/memo/_components/recognition-board-section.tsx) | WAHF grade census (three bands) |
@@ -84,5 +86,6 @@ There is no separate Form submissions accordion. WAHF totals live on attendance 
 - **Assembler owns data shape** — `weekly-memo-assembler.ts` is the single place that transforms raw API data into the memo display model. Do not transform data in individual components.
 - **Test the assembler** — the assembler contains the most business logic; tests must be kept current.
 - **Risk classification is in `risk-classifier.ts`** — do not hardcode thresholds in components.
-- **Scholar forms vs TL forms** — do not show WPL/MCF as required on scholar rows. WAHF exceptions are follow-up Issues (submitted-at when a log exists); WAHF census is on attendance detail. Assignment grades from WAHF are the Recognition board census; only low grades are follow-up Issues.
+- **Scholar forms vs TL forms** — do not show WPL/MCF as required on scholar rows. WAHF exceptions are follow-up Issues (submitted-at when a log exists); WAHF census is on attendance detail. Assignment grades from WAHF are the Recognition board census; only low grades are follow-up Issues. Team leader WAHF stays on team leader performance. The export PDF still lists scholar WAHF separately from follow-up.
 - **What's missing vs how it's missing** — glance column is short labels only (no numbers). How-it's-missing uses CompletionMeter for hours/grades and a time indicator for WAHF. Do not put healthy FD/SS meters on follow-up. Hours only appear when below the classifier threshold; late/missing WAHF use form-log `created_at`, never attendance.
+- **TL column** — follow-up `teamLeader` comes from `mentor_mentee` (via `/api/memo/page-data`). Do not hardcode Unassigned except as the no-assignment fallback.

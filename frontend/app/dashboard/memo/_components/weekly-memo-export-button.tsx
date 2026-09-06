@@ -12,8 +12,18 @@ type WeeklyMemoExportButtonProps = {
   onExport?: (weekNumber: number) => Promise<void>
 }
 
-export function weeklyMemoPdfFilename(weekNumber: number) {
-  return `weekly-memo-week-${weekNumber}.pdf`
+export function weeklyMemoPdfFilename(weekNumber: number, now = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now)
+  const value = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? ""
+  return `weekly-memo-week-${weekNumber}-${value("year")}-${value("month")}-${value("day")}-${value("hour")}${value("minute")}.pdf`
 }
 
 export async function downloadWeeklyMemoPdf(weekNumber: number) {

@@ -86,6 +86,7 @@ describe("buildMemoScholarAttendanceRows", () => {
       ssExcuseMin: 0,
       fdPct: 0,
       ssPct: 0,
+      teamLeader: "Unassigned",
     });
   });
 
@@ -196,6 +197,17 @@ describe("buildMemoScholarAttendanceRows", () => {
       new Map(),
     );
     expect(scholars).toHaveLength(0);
+  });
+
+  it("attaches the mentor_mentee team-leader name", () => {
+    const { scholars } = buildMemoScholarAttendanceRows(
+      [scholar],
+      new Map(),
+      new Map(),
+      [],
+      new Map([["1001", "Ada Mentor"]]),
+    );
+    expect(scholars[0]?.teamLeader).toBe("Ada Mentor");
   });
 });
 

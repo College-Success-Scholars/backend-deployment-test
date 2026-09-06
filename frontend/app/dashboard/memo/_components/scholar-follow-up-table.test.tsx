@@ -25,8 +25,8 @@ const rows: ScholarFollowUpRow[] = [
     scholarName: "Late Scholar",
     scholarYear: "Freshman",
     teamLeader: "TL Two",
-    flags: ["Late WAHF"],
-    issues: [{ kind: "wahf", glance: "WAHF", status: "late", submittedAtLabel: "Apr 4, 8:00 AM" }],
+    flags: ["Low front desk completion"],
+    issues: [{ kind: "front-desk", glance: "Front desk", pct: 40, requiredMinutes: 120 }],
     frontDeskPct: 90,
     studySessionPct: 91,
     fdRequired: 120,
@@ -48,17 +48,17 @@ describe("ScholarFollowUpTable", () => {
     expect(html).toContain("Study session")
     expect(html).toContain("X · Y")
     expect(html).toContain("WAHF")
+    expect(html).toContain("No submission")
     expect(html).not.toContain("Front desk 50%")
     expect(html).not.toContain("X · Y 60%")
-    expect(html).not.toContain("Missing WAHF")
 
     expect(html).toContain("50%")
     expect(html).toContain("of 120 min")
     expect(html).toContain("70%")
     expect(html).toContain("60%")
-    expect(html).toContain("No submission")
-    expect(html).toContain("Apr 4, 8:00 AM")
-    expect(html).toContain("Late")
+    expect(html).toContain("40%")
     expect(html).not.toContain("90%")
+    expect(html).toContain("TL One")
+    expect(html).toContain("TL Two")
   })
 })

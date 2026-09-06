@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createWeeklyMemoReport, type MemoPageData } from "../services/weekly-memo-report.service.js";
+import { createWeeklyMemoReport, weeklyMemoPdfFilename, weeklyMemoPrintedAt, type MemoPageData } from "../services/weekly-memo-report.service.js";
+import { freshmanCohortYear, sophomoreCohortYear } from "../services/time.service.js";
 import { isMissingBundledChrome, renderWeeklyMemoHtml, weeklyMemoBrowserLaunchOptions, weeklyMemoPdfOptions } from "../services/weekly-memo-pdf.service.js";
 
 function source(weekNumber: number): MemoPageData {
@@ -7,8 +8,8 @@ function source(weekNumber: number): MemoPageData {
     selectedWeekNumber: weekNumber,
     weekLabel: `Week ${weekNumber}`,
     scholars: [
-      { scholarId: "zero", scholarName: "Zero Scholar", cohort: 2024, fdTotal: 0, ssTotal: 0, fdRequired: 60, ssRequired: 120, fdExcuseMin: 0, ssExcuseMin: 0, fdPct: 0, ssPct: 0, wahfStatus: "missing", wahfSubmittedAt: null },
-      { scholarId: "complete", scholarName: "Complete Scholar", cohort: 2025, fdTotal: 60, ssTotal: 120, fdRequired: 60, ssRequired: 120, fdExcuseMin: 0, ssExcuseMin: 0, fdPct: 100, ssPct: 100, wahfStatus: "on-time", wahfSubmittedAt: "2026-04-03T12:00:00.000Z" },
+      { scholarId: "zero", scholarName: "Zero Scholar", cohort: 2024, teamLeader: "Unassigned", fdTotal: 0, ssTotal: 0, fdRequired: 60, ssRequired: 120, fdExcuseMin: 0, ssExcuseMin: 0, fdPct: 0, ssPct: 0, wahfStatus: "missing", wahfSubmittedAt: null },
+      { scholarId: "complete", scholarName: "Complete Scholar", cohort: 2025, teamLeader: "TL One", fdTotal: 60, ssTotal: 120, fdRequired: 60, ssRequired: 120, fdExcuseMin: 0, ssExcuseMin: 0, fdPct: 100, ssPct: 100, wahfStatus: "on-time", wahfSubmittedAt: "2026-04-03T12:00:00.000Z" },
     ],
     completedStudy: [], completedFd: [], trafficWeeklyData: [], trafficEntryCountForSelectedWeek: 8, trafficSessions: [],
     tutorReports: [{ id: 1, scholarId: "n/a", scholarName: "EMPTY SESSION", tutorName: "Tutor", courses: ["Math"], startTime: "10:00", endTime: "11:00", dayOfWeek: "Mon" }],
@@ -29,9 +30,77 @@ describe("weekly memo print report", () => {
     expect(report.attention.studyCompletion).toHaveLength(1);
     expect(report.attention.lowGrades[0]?.percent).toBe(77);
     expect(report.attention.tutoringNoShows).toHaveLength(1);
-    expect(report.overview.traffic).toEqual({ thisWeek: 8, thisSemester: 0 });
+    expect(report.overview.traffic).toEqual({
+      thisWeek: 8,
+      thisSemester: 0,
+      weekly: Array.from({ length: 7 }, (_, index) => ({ week: index + 1, visits: 0 })),
+      sessions: [],
+    });
+    expect(report.frontDeskRoster.map((row) => row.completionPercent)).toEqual([100, 0]);
+    expect(report.frontDeskRoster.map((row) => row.scholarName)).toEqual(["Complete Scholar", "Zero Scholar"]);
+    expect(report.overview.submissions.wahf).toEqual({ onTime: 1, late: 0, missing: 1 });
+    expect(report.overview.submissions.tlWahf).toEqual({ onTime: 1, late: 0, missing: 0 });
+    expect(report.attention.wahf).toEqual([{ scholarName: "Zero Scholar", cohort: 2024, status: "missing" }]);
+    expect(report.attention.tlSubmissions).toEqual([{ leaderName: "Leader", issues: ["MCF missing"] }]);
     expect(report.recognition.high.map((grade) => grade.percent)).toEqual([95]);
     expect(report.recognition.mid.map((grade) => grade.percent)).toEqual([85]);
+    expect(report.printedAtSlug).toMatch(/^\d{4}-\d{2}-\d{2}-\d{4}$/);
+    expect(report.printedAtLabel).toContain("ET");
+    expect(renderWeeklyMemoHtml(report)).toContain("1 on-time, 0 late, 1 missing");
+    expect(renderWeeklyMemoHtml(report)).toContain(`Printed ${report.printedAtLabel}`);
+  });
+
+  it("sorts SS and FD appendix rosters by completion descending and groups by cohort", () => {
+    const freshman = freshmanCohortYear();
+    const sophomore = sophomoreCohortYear();
+    const data = source(7);
+    data.scholars = [
+      { ...data.scholars[0]!, scholarId: "ada", scholarName: "Ada Scholar", cohort: freshman, fdPct: 10, ssPct: 10, fdTotal: 6, ssTotal: 12 },
+      { ...data.scholars[0]!, scholarId: "zed", scholarName: "Zed Scholar", cohort: freshman, fdPct: 90, ssPct: 90, fdTotal: 54, ssTotal: 108 },
+      { ...data.scholars[1]!, scholarId: "bea", scholarName: "Bea Scholar", cohort: sophomore, fdPct: 50, ssPct: 50, fdTotal: 30, ssTotal: 60 },
+    ];
+    const report = createWeeklyMemoReport(data);
+    expect(report.studyRoster.map((row) => [row.scholarName, row.cohort, row.completionPercent])).toEqual([
+      ["Zed Scholar", freshman, 90],
+      ["Ada Scholar", freshman, 10],
+      ["Bea Scholar", sophomore, 50],
+    ]);
+    expect(report.frontDeskRoster.map((row) => row.scholarName)).toEqual(["Zed Scholar", "Ada Scholar", "Bea Scholar"]);
+    const html = renderWeeklyMemoHtml(report);
+    expect(html).toContain(`Cohort ${freshman} · Freshman`);
+    expect(html).toContain(`Cohort ${sophomore} · Sophomore`);
+    expect(html.indexOf(`Cohort ${freshman} · Freshman`)).toBeLessThan(html.indexOf(`Cohort ${sophomore} · Sophomore`));
+    expect(html).toContain("Sorted by completion, highest first, and grouped by cohort.");
+    expect(html).not.toContain("Sorted by first name");
+  });
+
+  it("stamps Eastern printed-at for the filename and printout", () => {
+    const printed = weeklyMemoPrintedAt(new Date("2026-09-04T23:39:00.000Z"));
+    expect(printed.label).toBe("Sep 4, 2026, 7:39 PM ET");
+    expect(printed.slug).toBe("2026-09-04-1939");
+    expect(weeklyMemoPdfFilename(9, printed.slug)).toBe("weekly-memo-week-9-2026-09-04-1939.pdf");
+  });
+
+  it("keeps TL form census tiles separate and folds TL WAHF into Team Leader Submissions", () => {
+    const data = source(7);
+    data.teamLeaderFormStats = [
+      { ...data.teamLeaderFormStats[0]!, name: "On Time TL", wahfCompleted: 1, wahfRequired: 1, wahfLate: false, mcfCompleted: 1, mcfRequired: 1, mcfLate: false },
+      { ...data.teamLeaderFormStats[0]!, name: "Missing WAHF TL", wahfCompleted: 0, wahfRequired: 1, wahfLate: false, mcfCompleted: 1, mcfRequired: 1, mcfLate: false },
+      { ...data.teamLeaderFormStats[0]!, name: "Late WAHF TL", wahfCompleted: 1, wahfRequired: 1, wahfLate: true, mcfCompleted: 1, mcfRequired: 1, mcfLate: false },
+    ];
+    data.formCompletionOverall = { ...data.formCompletionOverall, wahfCompleted: 2, wahfRequired: 3, wahfLateCount: 1 };
+    const report = createWeeklyMemoReport(data);
+    expect(report.overview.submissions.tlWahf).toEqual({ onTime: 1, late: 1, missing: 1 });
+    expect(report.attention.tlSubmissions).toEqual([
+      { leaderName: "Late WAHF TL", issues: ["WAHF late"] },
+      { leaderName: "Missing WAHF TL", issues: ["WAHF missing"] },
+    ]);
+    const html = renderWeeklyMemoHtml(report);
+    expect(html).toContain("TL WAHF");
+    expect(html).not.toContain("Missing or Late TL WAHF");
+    expect(html).toContain("WAHF missing");
+    expect(html).toContain("WAHF late");
+    expect(html).toContain("1 on-time, 1 late, 1 missing");
   });
 
   it("renders the printable reference structure and pagination-safe table rules", () => {
@@ -40,18 +109,50 @@ describe("weekly memo print report", () => {
     data.tutorReports = [];
     data.gradeBreakdown = { high: [], mid: [], low: [] };
     data.teamLeaderFormStats = [];
-    const html = renderWeeklyMemoHtml(createWeeklyMemoReport(data));
+    const report = createWeeklyMemoReport(data);
+    const html = renderWeeklyMemoHtml(report);
     expect(html).toContain("No study-session requirements apply this week.");
+    expect(html).toContain("No scholars have a missing or late WAHF.");
+    expect(html).toContain("No team leaders have missing or late submissions.");
+    expect(html).toContain("Scholar WAHF");
+    expect(html).toContain("TL WAHF");
+    expect(html).toContain("TL WPL");
+    expect(html).toContain("Missing or Late Scholar WAHF");
+    expect(html).not.toContain("Missing or Late TL WAHF");
+    expect(html).toContain("Team Leader Submissions");
+    expect(html).not.toContain("WAHF Submissions");
+    expect(html).toContain('data-print-chart="submission-stack"');
+    expect(html).toContain('data-print-chart="cohort-bar"');
+    expect(html).toContain('data-print-chart-id="wahf"');
+    expect(html).toContain('data-print-chart-id="tl-wahf"');
+    expect(html).toContain('data-print-chart="traffic-bar-line"');
+    expect(html).toContain('data-print-chart="traffic-heatmap"');
+    expect(html).toContain("02 &mdash; Room Traffic");
+    expect(html).toContain("03 &mdash; Needs Attention");
+    expect(html).not.toContain("02 &mdash; Needs Attention");
+    expect(html).not.toContain("mock week trend");
+    expect(html).toContain("Sorted by completion, highest first, and grouped by cohort.");
+    expect(html).toContain(`Printed ${report.printedAtLabel}`);
     expect(html).toContain("@page{size:letter;margin:.75in}");
     expect(html).toContain("thead{display:table-header-group}");
     expect(html).toContain("tr{break-inside:avoid");
+    expect(html).toContain('class="group-kicker">Scholars');
+    expect(html).toContain('class="group-kicker">Team Leaders');
+    expect(html.indexOf("Scholars")).toBeLessThan(html.indexOf("Team Leaders"));
+    expect(html.indexOf("Scholar WAHF")).toBeLessThan(html.indexOf("TL WAHF"));
     expect(html).toContain("grid-template-columns:repeat(4,1fr)");
+    expect(html).toContain("grid-template-columns:repeat(3,1fr)");
+    expect(html).toContain("aspect-ratio:640/140");
+    expect(html).toContain("aspect-ratio:640/300");
     expect(html).toContain("column-count:2");
-    expect(html).toContain("break-before:page");
-    expect(html.indexOf("Program Snapshot")).toBeLessThan(html.indexOf("Needs Attention"));
-    const options = weeklyMemoPdfOptions(createWeeklyMemoReport(data));
+    expect(html).toContain("section+section{break-before:page}");
+    expect(html.match(/class="appendix"/g)).toHaveLength(4);
+    expect(html.indexOf("Program Snapshot")).toBeLessThan(html.indexOf("Room Traffic"));
+    expect(html.indexOf("Room Traffic")).toBeLessThan(html.indexOf("Needs Attention"));
+    const options = weeklyMemoPdfOptions(report);
     expect(options).toMatchObject({ format: "letter", landscape: false, displayHeaderFooter: true, waitForFonts: true });
     expect(options.footerTemplate).toContain("Week 3");
+    expect(options.footerTemplate).toContain(`Printed ${report.printedAtLabel}`);
     expect(options.margin).toEqual({ top: "0.75in", right: "0.75in", bottom: "0.75in", left: "0.75in" });
   });
 

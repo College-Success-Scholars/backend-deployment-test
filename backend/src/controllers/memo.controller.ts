@@ -23,7 +23,7 @@ import { syncMemo, getWeeklyMemo, triggerRefreshStats } from "../services/memo.s
 import { getTrafficEntryCountForWeek } from "../services/traffic.service.js";
 import { getMemoPageData } from "../services/memo-page.service.js";
 import { resolveMemoDefaultWeek } from "../services/memo-default-week.js";
-import { getWeeklyMemoReport } from "../services/weekly-memo-report.service.js";
+import { getWeeklyMemoReport, weeklyMemoPdfFilename } from "../services/weekly-memo-report.service.js";
 import { renderWeeklyMemoPdf } from "../services/weekly-memo-pdf.service.js";
 
 function parseWeekNumberFromBody(body: { weekNumber?: number; weekNum?: number }): number | null {
@@ -144,7 +144,7 @@ export async function pdf(req: AuthenticatedRequest, res: Response) {
   try {
     const report = await getWeeklyMemoReport(weekNumber);
     const document = await renderWeeklyMemoPdf(report);
-    const filename = `weekly-memo-week-${weekNumber}.pdf`;
+    const filename = weeklyMemoPdfFilename(weekNumber, report.printedAtSlug);
     res.set({
       "Cache-Control": "no-store, max-age=0",
       "Content-Type": "application/pdf",

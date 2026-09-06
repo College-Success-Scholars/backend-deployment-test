@@ -5,7 +5,10 @@ const { getWeeklyMemoReport, renderWeeklyMemoPdf } = vi.hoisted(() => ({
   renderWeeklyMemoPdf: vi.fn(),
 }));
 
-vi.mock("../services/weekly-memo-report.service.js", () => ({ getWeeklyMemoReport }));
+vi.mock("../services/weekly-memo-report.service.js", () => ({
+  getWeeklyMemoReport,
+  weeklyMemoPdfFilename: (weekNumber: number, slug: string) => `weekly-memo-week-${weekNumber}-${slug}.pdf`,
+}));
 vi.mock("../services/weekly-memo-pdf.service.js", () => ({ renderWeeklyMemoPdf }));
 
 import { pdf } from "../controllers/memo.controller.js";
@@ -26,7 +29,7 @@ function response() {
 describe("memo PDF controller", () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    getWeeklyMemoReport.mockResolvedValue({ weekNumber: 9 });
+    getWeeklyMemoReport.mockResolvedValue({ weekNumber: 9, printedAtSlug: "2026-09-04-2039" });
     renderWeeklyMemoPdf.mockResolvedValue(Buffer.from("pdf"));
   });
 
@@ -36,7 +39,7 @@ describe("memo PDF controller", () => {
     expect(getWeeklyMemoReport).toHaveBeenCalledWith(9);
     expect(res.headers).toMatchObject({
       "Content-Type": "application/pdf",
-      "Content-Disposition": "attachment; filename=\"weekly-memo-week-9.pdf\"",
+      "Content-Disposition": "attachment; filename=\"weekly-memo-week-9-2026-09-04-2039.pdf\"",
       "Cache-Control": "no-store, max-age=0",
     });
     expect(res.body).toEqual(Buffer.from("pdf"));

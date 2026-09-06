@@ -65,7 +65,11 @@ export function ScholarFollowUpTable({ rows }: ScholarFollowUpTableProps) {
                 <div className="font-medium">{row.scholarName}</div>
                 <div className="text-muted-foreground text-xs">{row.scholarYear}</div>
               </TableCell>
-              <TableCell className="align-top text-sm">{row.teamLeader}</TableCell>
+              <TableCell
+                className={`align-top text-sm ${row.teamLeader === "Unassigned" ? "text-muted-foreground" : ""}`}
+              >
+                {row.teamLeader}
+              </TableCell>
               <TableCell className="align-top">
                 <div className="flex flex-col items-start gap-2">
                   {row.issues.map((issue, index) => (
