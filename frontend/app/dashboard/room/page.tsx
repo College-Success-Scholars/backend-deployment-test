@@ -78,7 +78,6 @@ export default async function RoomMonitoringPage() {
           variant="study"
           scholars={studySession}
           showSearch
-          isLive
           emptyMessage="No scholars in a study session at this time"
         />
         <RoomSessionPanel
@@ -86,7 +85,6 @@ export default async function RoomMonitoringPage() {
           variant="front-desk"
           scholars={frontDesk}
           showSearch
-          isLive
           emptyMessage="No scholars at front desk at this time"
         />
       </div>

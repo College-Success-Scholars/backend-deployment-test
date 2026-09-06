@@ -53,14 +53,12 @@ export function RoomSessionPanel({
   scholars,
   emptyMessage,
   showSearch = false,
-  isLive,
 }: {
   title: string
   variant: RoomSessionPanelVariant
   scholars: RoomScholarRow[]
   emptyMessage: string
   showSearch?: boolean
-  isLive: boolean
 }) {
   const Icon = PANEL_ICONS[variant]
   const [query, setQuery] = useState("")
@@ -110,12 +108,9 @@ export function RoomSessionPanel({
                   <span className="inline-flex items-center gap-1.5">
                     Duration
                     <span className="text-muted-foreground font-normal">·</span>
-                    <span className="inline-flex items-center gap-1 text-muted-foreground font-normal">
-                      <span
-                        className={`size-1.5 rounded-full ${isLive ? "bg-success" : "bg-muted-foreground"}`}
-                        aria-hidden
-                      />
-                      {isLive ? "Live" : "Fixed"}
+                    <span className="inline-flex items-center gap-1 font-normal text-success">
+                      <span className="size-1.5 rounded-full bg-success" aria-hidden />
+                      Live
                     </span>
                   </span>
                 </TableHead>
