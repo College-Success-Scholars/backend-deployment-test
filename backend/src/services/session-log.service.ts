@@ -30,6 +30,7 @@ import {
   getStartOfDayEastern,
 } from "./time.service.js";
 import { fetchScholarNamesByUids } from "./user.service.js";
+import { MAX_DATE_RANGE_DAYS } from "../utils/request-validation.js";
 import {
   DEFAULT_SESSION_CONFIG,
   SESSION_TYPE_FRONT_DESK,
@@ -60,16 +61,33 @@ import type {
 // Query limit guard
 // ---------------------------------------------------------------------------
 
+/**
+ * Guards every raw log fetch against an effectively-unbounded scan. A
+ * one-sided date (just startDate or just endDate) previously satisfied this
+ * check on its own — that still returns everyone's history back to the dawn
+ * of the table for an endDate-only query. Route-level authorization
+ * (requireTeamLeaderOrAbove) restricts *who* can call these; this restricts
+ * *how much* any one call can pull.
+ */
 function requireDateOrUidLimit(options?: {
   startDate?: Date;
   endDate?: Date;
   scholarUids?: string[];
 }): void {
-  const hasDateRange = options?.startDate != null || options?.endDate != null;
   const hasUids = (options?.scholarUids?.length ?? 0) > 0;
-  if (!hasDateRange && !hasUids) {
+  if (hasUids) return;
+
+  if (!options?.startDate || !options?.endDate) {
     throw new Error(
-      "At least one of startDate, endDate, or scholarUids (non-empty) is required to limit the search."
+      "A startDate and endDate together (or a non-empty scholarUids list) are required to limit the search."
+    );
+  }
+
+  const rangeMs = options.endDate.getTime() - options.startDate.getTime();
+  const maxRangeMs = MAX_DATE_RANGE_DAYS * 24 * 60 * 60 * 1000;
+  if (rangeMs < 0 || rangeMs > maxRangeMs) {
+    throw new Error(
+      `startDate must be <= endDate, with a range of at most ${MAX_DATE_RANGE_DAYS} days`
     );
   }
 }

@@ -13,7 +13,9 @@
  * - Filter UIDs to eligible scholars (enrolled freshman/sophomore with hours)
  * - Fetch all user UIDs, memo users, team leaders, scholar UIDs
  * - Get a single user's data by UID
- * - Developer roster get/update (dual-write profiles + mentee assignments)
+ * - Developer roster get/update (roster + profiles fields; mentee assignments
+ *   go through the replace_mentor_mentee_assignments RPC, which is the only
+ *   direct writer of mentor_mentee — see supabase/migrations/20260907000000_atomic_mentor_mentee_sync.sql)
  *
  * ## What belongs here
  * - All Supabase queries on profiles, user_roster tables
@@ -282,49 +284,52 @@ export async function getRosterByUid(uid: string): Promise<RosterRow | null> {
   return overlayRosterAppRoleFromProfile(mapped, profile?.app_role);
 }
 
+/**
+ * Atomically replaces a mentor's mentee_mentee rows via the
+ * replace_mentor_mentee_assignments RPC (one Postgres transaction — see
+ * supabase/migrations/20260907000000_atomic_mentor_mentee_sync.sql). A
+ * trigger on mentor_mentee keeps profiles.mentee_count and
+ * user_roster.mentee_count/mentee_uids in sync as part of that same
+ * transaction, so mentor_mentee is the only thing this call writes directly.
+ */
 async function replaceMentorMenteeAssignments(
   mentorProfileId: string,
   menteeUids: string[],
 ): Promise<void> {
   const supabase = getSupabaseClient();
-  const { error: deleteError } = await supabase
-    .from("mentor_mentee")
-    .delete()
-    .eq("mentor_id", mentorProfileId);
-  if (deleteError) throw deleteError;
-  if (menteeUids.length === 0) return;
-  const { error: insertError } = await supabase.from("mentor_mentee").insert(
-    menteeUids.map((mentee_uid) => ({
-      mentor_id: mentorProfileId,
-      mentee_uid,
-    })),
-  );
-  if (insertError) throw insertError;
+  const { error } = await supabase.rpc("replace_mentor_mentee_assignments", {
+    p_mentor_id: mentorProfileId,
+    p_mentee_uids: menteeUids,
+  });
+  if (error) throw error;
 }
 
 export async function updateRosterByUid(uid: string, patch: RosterPatch): Promise<RosterRow> {
   const supabase = getSupabaseClient();
-  const rosterUpdate: Database["public"]["Tables"]["user_roster"]["Update"] = { ...patch };
-  if (patch.mentee_uids !== undefined) {
-    rosterUpdate.mentee_count = patch.mentee_uids?.length ?? 0;
-  }
+  // mentee_uids/mentee_count are derived by the mentor_mentee_sync trigger —
+  // never written directly here (see replaceMentorMenteeAssignments above).
+  const { mentee_uids, ...rosterPatchFields } = patch;
+  const rosterUpdate: Database["public"]["Tables"]["user_roster"]["Update"] = { ...rosterPatchFields };
 
-  const { data, error } = await supabase
-    .from("user_roster")
-    .update(rosterUpdate)
-    .eq("uid", uid)
-    .select("*")
-    .maybeSingle();
-  if (error) throw error;
-  if (!data) {
-    const existing = await getRosterByUid(uid);
-    if (!existing) throw new Error("User not found");
-    throw new Error(
-      "Roster update blocked by RLS. Apply supabase/migrations/20260903053000_developer_write_user_roster.sql on the linked project.",
-    );
+  let mapped: RosterRow | null = null;
+  if (Object.keys(rosterUpdate).length > 0) {
+    const { data, error } = await supabase
+      .from("user_roster")
+      .update(rosterUpdate)
+      .eq("uid", uid)
+      .select("*")
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) {
+      const existing = await getRosterByUid(uid);
+      if (!existing) throw new Error("User not found");
+      throw new Error(
+        "Roster update blocked by RLS. Apply supabase/migrations/20260903053000_developer_write_user_roster.sql on the linked project.",
+      );
+    }
+    mapped = mapRosterRow(data);
+    if (!mapped) throw new Error("User not found");
   }
-  const mapped = mapRosterRow(data);
-  if (!mapped) throw new Error("User not found");
 
   const profilePatch: Database["public"]["Tables"]["profiles"]["Update"] = {};
   if (patch.first_name !== undefined) profilePatch.first_name = patch.first_name;
@@ -339,9 +344,8 @@ export async function updateRosterByUid(uid: string, patch: RosterPatch): Promis
   if (patch.minors !== undefined) profilePatch.minors = patch.minors;
   if (patch.teams !== undefined) profilePatch.teams = patch.teams;
   if (patch.email !== undefined) profilePatch.emails = patch.email ? [patch.email] : [];
-  if (patch.mentee_uids !== undefined) profilePatch.mentee_count = patch.mentee_uids?.length ?? 0;
 
-  if (Object.keys(profilePatch).length > 0 || patch.mentee_uids !== undefined) {
+  if (Object.keys(profilePatch).length > 0 || mentee_uids !== undefined) {
     const { data: profile, error: profileLookupError } = await supabase
       .from("profiles")
       .select("id")
@@ -356,10 +360,20 @@ export async function updateRosterByUid(uid: string, patch: RosterPatch): Promis
           .eq("id", profile.id);
         if (profileUpdateError) throw profileUpdateError;
       }
-      if (patch.mentee_uids !== undefined) {
-        await replaceMentorMenteeAssignments(profile.id, patch.mentee_uids ?? []);
+      if (mentee_uids !== undefined) {
+        await replaceMentorMenteeAssignments(profile.id, mentee_uids ?? []);
       }
     }
+  }
+
+  // mentee_count/mentee_uids on the roster row (if touched above) are set by
+  // the DB trigger, not by the client-supplied patch — re-fetch so the
+  // response reflects what the trigger actually computed rather than the
+  // pre-RPC snapshot.
+  if (!mapped || mentee_uids !== undefined) {
+    const refreshed = await getRosterByUid(uid);
+    if (!refreshed) throw new Error("User not found");
+    return refreshed;
   }
 
   return mapped;

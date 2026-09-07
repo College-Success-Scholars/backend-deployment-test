@@ -10,6 +10,7 @@ vi.mock("../supabase/client.js", () => ({
 
 import {
   buildShiftComplianceForScholars,
+  fetchFrontDeskLogs,
   getShiftComplianceForScholars,
   getScholarsWithValidEntryExit,
 } from "../services/session-log.service.js";
@@ -209,5 +210,76 @@ describe("getShiftComplianceForScholars", () => {
     expect(frontDeskQuery.in).toHaveBeenCalledWith("scholar_uid", ["S1", "S2"]);
     expect(studySessionQuery.in).toHaveBeenCalledTimes(1);
     expect(studySessionQuery.in).toHaveBeenCalledWith("scholar_uid", ["S1", "S2"]);
+  });
+});
+
+describe("fetchFrontDeskLogs — requireDateOrUidLimit guard", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  function mockQueryResult() {
+    const query = {
+      data: [],
+      error: null,
+      select: vi.fn(),
+      order: vi.fn(),
+      gte: vi.fn(),
+      lte: vi.fn(),
+      in: vi.fn(),
+    };
+    query.select.mockReturnValue(query);
+    query.order.mockReturnValue(query);
+    query.gte.mockReturnValue(query);
+    query.lte.mockReturnValue(query);
+    query.in.mockReturnValue(query);
+    mocks.getSupabaseClient.mockReturnValue({ from: vi.fn().mockReturnValue(query) });
+  }
+
+  it("rejects a one-sided date range with no scholarUids (previously allowed, returned unbounded history)", async () => {
+    mockQueryResult();
+    await expect(fetchFrontDeskLogs({ endDate: new Date("2026-01-01") })).rejects.toThrow(
+      /startDate and endDate together/
+    );
+  });
+
+  it("rejects a date range wider than MAX_DATE_RANGE_DAYS", async () => {
+    mockQueryResult();
+    await expect(
+      fetchFrontDeskLogs({
+        startDate: new Date("2020-01-01"),
+        endDate: new Date("2026-01-01"),
+      })
+    ).rejects.toThrow(/at most \d+ days/);
+  });
+
+  it("rejects an inverted range even when narrow", async () => {
+    mockQueryResult();
+    await expect(
+      fetchFrontDeskLogs({
+        startDate: new Date("2026-01-10"),
+        endDate: new Date("2026-01-01"),
+      })
+    ).rejects.toThrow(/startDate must be <= endDate/);
+  });
+
+  it("allows a bounded startDate+endDate pair with no scholarUids", async () => {
+    mockQueryResult();
+    await expect(
+      fetchFrontDeskLogs({
+        startDate: new Date("2026-01-01"),
+        endDate: new Date("2026-01-07"),
+      })
+    ).resolves.toEqual([]);
+  });
+
+  it("allows a non-empty scholarUids list with no date range at all", async () => {
+    mockQueryResult();
+    await expect(fetchFrontDeskLogs({ scholarUids: ["S1"] })).resolves.toEqual([]);
+  });
+
+  it("still rejects with neither a date range nor scholarUids", async () => {
+    mockQueryResult();
+    await expect(fetchFrontDeskLogs({})).rejects.toThrow(/required to limit the search/);
   });
 });

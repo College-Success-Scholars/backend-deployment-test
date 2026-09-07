@@ -883,6 +883,10 @@ export type Database = {
         Returns: boolean
       }
       is_developer: { Args: never; Returns: boolean }
+      replace_mentor_mentee_assignments: {
+        Args: { p_mentee_uids: string[]; p_mentor_id: string }
+        Returns: undefined
+      }
       safe_text_array: { Args: { val: Json }; Returns: string[] }
     }
     Enums: {
