@@ -38,6 +38,7 @@ import type {
   ScholarWeekExcuse,
 } from "@/lib/types/attendance-week";
 import type { RosterRow } from "@/lib/types/roster";
+import type { MenteeWithCompliance } from "@/lib/types/supabase";
 import type {
   TrafficSession,
   WeekEntryCount,
@@ -67,6 +68,17 @@ function dateOpts(options?: { startDate?: Date; endDate?: Date; scholarUids?: st
 // ---------------------------------------------------------------------------
 // Users
 // ---------------------------------------------------------------------------
+
+export async function fetchMenteesWithCompliance(
+  startDate: Date,
+  endDate: Date
+): Promise<MenteeWithCompliance[]> {
+  const params = new URLSearchParams({
+    startDate: startDate.toISOString(),
+    endDate: endDate.toISOString(),
+  });
+  return backendGet<MenteeWithCompliance[]>(`/api/auth/mentees/compliance?${params}`);
+}
 
 export type MemoUserRow = {
   uid: string;

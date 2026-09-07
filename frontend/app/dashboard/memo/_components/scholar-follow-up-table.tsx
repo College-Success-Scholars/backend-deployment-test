@@ -35,6 +35,9 @@ function FollowUpIssueDetail({ issue }: { issue: ScholarFollowUpIssue }) {
       {issue.requiredMinutes != null && issue.requiredMinutes > 0 ? (
         <span className="text-muted-foreground text-xs tabular-nums">of {issue.requiredMinutes} min</span>
       ) : null}
+      <span className="text-muted-foreground text-xs tabular-nums">
+        {issue.insideMinutes} min inside · {issue.outsideMinutes} min outside
+      </span>
     </div>
   )
 }

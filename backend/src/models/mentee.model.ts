@@ -1,3 +1,5 @@
+import type { ShiftComplianceByKind } from "./session-log.model.js";
+
 /**
  * @file mentee.model.ts
  * @module backend/models
@@ -18,4 +20,10 @@ export interface MenteeRow {
   last_name: string | null;
   fd_required: number | null;
   ss_required: number | null;
+}
+
+/** Mentee roster row enriched only by the compliance read operation. */
+export interface MenteeWithCompliance extends MenteeRow {
+  fdCompliance: ShiftComplianceByKind | null;
+  ssCompliance: ShiftComplianceByKind | null;
 }

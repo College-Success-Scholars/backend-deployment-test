@@ -13,7 +13,7 @@
  * - Business logic (that's controllers/memo.controller.ts)
  */
 import { Router } from "express";
-import { requireTeamLeaderOrAbove } from "../controllers/auth.controller.js";
+import { requireTeamLeaderOrAbove } from "../middleware/auth.middleware.js";
 import * as memoController from "../controllers/memo.controller.js";
 
 const router = Router();
