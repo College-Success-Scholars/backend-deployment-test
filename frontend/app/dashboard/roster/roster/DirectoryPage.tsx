@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 import { Input } from "@/components/ui/input"
 import {
@@ -10,51 +10,53 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import type { UserRole } from "@/lib/auth"
 import type { RosterScholarRow, RosterTLRow } from "./type"
+import {
+  ALL_COHORTS,
+  ALL_PROGRAM_ROLES,
+  ALL_TEAMS,
+  fetchDirectoryRoster,
+} from "./mock-user-roster"
 import { DirectoryRoster } from "./DirectoryRoster"
 
 const ALL = "all"
 
 type DirectoryPageProps = {
   viewerRole: "scholar" | "team-leader" | "developer"
-  initialRows: RosterScholarRow[] | RosterTLRow[]
 }
 
 export default function DirectoryPage({
   viewerRole,
-  initialRows,
 }: DirectoryPageProps) {
+  const [rows, setRows] = useState<RosterScholarRow[] | RosterTLRow[]>([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [team, setTeam] = useState<string>(ALL)
   const [programRole, setProgramRole] = useState<string>(ALL)
   const [cohort, setCohort] = useState<string>(ALL)
 
-  const allTeams = useMemo(
-    () => Array.from(new Set(initialRows.flatMap((row) => row.teams))).sort(),
-    [initialRows],
-  )
+  useEffect(() => {
+    let cancelled = false
 
-  const allProgramRoles = useMemo(
-    () => Array.from(new Set(initialRows.map((row) => row.programRole))).sort(),
-    [initialRows],
-  )
+    setLoading(true)
 
-  const allCohorts = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          initialRows.flatMap((row) =>
-            "cohort" in row && row.cohort != null ? [row.cohort] : [],
-          ),
-        ),
-      ).sort((a, b) => b - a),
-    [initialRows],
-  )
+    fetchDirectoryRoster(viewerRole).then((data) => {
+      if (cancelled) return
+
+      setRows(data)
+      setLoading(false)
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [viewerRole])
 
 const filtered = useMemo(() => {
   const q = search.trim().toLowerCase()
 
-  return initialRows.filter((row) => {
+  return rows.filter((row) => {
     if (team !== ALL && !row.teams.includes(team)) return false
 
     if (programRole !== ALL && row.programRole !== programRole) {
@@ -84,7 +86,7 @@ const filtered = useMemo(() => {
 
     return haystack.includes(q)
   })
-}, [initialRows, search, team, programRole, cohort])
+}, [rows, search, team, programRole, cohort])
   return (
     <div className="space-y-4">
       <div>
@@ -110,7 +112,7 @@ const filtered = useMemo(() => {
           <SelectContent>
             <SelectItem value={ALL}>All teams</SelectItem>
 
-            {allTeams.map((t) => (
+            {ALL_TEAMS.map((t) => (
               <SelectItem key={t} value={t}>
                 {t}
               </SelectItem>
@@ -126,7 +128,7 @@ const filtered = useMemo(() => {
           <SelectContent>
             <SelectItem value={ALL}>All program roles</SelectItem>
 
-            {allProgramRoles.map((r) => (
+            {ALL_PROGRAM_ROLES.map((r) => (
               <SelectItem key={r} value={r}>
                 {r}
               </SelectItem>
@@ -143,7 +145,7 @@ const filtered = useMemo(() => {
             <SelectContent>
               <SelectItem value={ALL}>All cohorts</SelectItem>
 
-              {allCohorts.map((c) => (
+              {ALL_COHORTS.map((c) => (
                 <SelectItem key={c} value={String(c)}>
                   {c}
                 </SelectItem>
@@ -153,7 +155,11 @@ const filtered = useMemo(() => {
         )}
       </div>
 
-      {viewerRole === "scholar" ? (
+      {loading ? (
+        <p className="text-muted-foreground text-sm">
+          Loading directory…
+        </p>
+      ) : viewerRole === "scholar" ? (
         <DirectoryRoster
           viewerRole="scholar"
           rows={filtered as RosterScholarRow[]}
