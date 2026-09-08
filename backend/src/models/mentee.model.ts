@@ -1,3 +1,5 @@
+import type { ShiftComplianceByKind } from "./session-log.model.js";
+
 /**
  * @file mentee.model.ts
  * @module backend/models
@@ -21,8 +23,8 @@ export interface MenteeRow {
   ss_required: number | null;
 }
 
-/** One mentee → team-leader name pair from mentor_mentee + mentor profile. */
-export type MenteeTeamLeaderRow = {
-  mentee_uid: string | null;
-  team_leader_name: string | null;
-};
+/** Mentee roster row enriched only by the compliance read operation. */
+export interface MenteeWithCompliance extends MenteeRow {
+  fdCompliance: ShiftComplianceByKind | null;
+  ssCompliance: ShiftComplianceByKind | null;
+}

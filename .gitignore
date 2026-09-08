@@ -12,5 +12,6 @@ backend/dist
 site/
 docs/dev/backend/api.md
 docs/reference/api/
-.opencode/
 openspec/
+.opencode/
+graphify-out

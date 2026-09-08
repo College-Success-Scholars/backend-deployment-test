@@ -18,7 +18,7 @@
  * - Memo assembly/aggregation logic (that's in memo.service.ts and memo-page.service.ts)
  */
 import type { Response } from "express";
-import type { AuthenticatedRequest } from "./auth.controller.js";
+import type { AuthenticatedRequest } from "../middleware/auth.middleware.js";
 import { syncMemo, getWeeklyMemo, triggerRefreshStats } from "../services/memo.service.js";
 import { getTrafficEntryCountForWeek } from "../services/traffic.service.js";
 import { getMemoPageData } from "../services/memo-page.service.js";

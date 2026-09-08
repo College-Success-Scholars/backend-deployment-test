@@ -3,11 +3,16 @@ import { describe, it, expect } from "vitest";
 import { app } from "../app.js";
 import { resolveMemoDefaultWeek } from "../services/memo-default-week.js";
 
-import { buildGradeBreakdown, buildMemoScholarAttendanceRows } from "../services/memo-page.service.js";
+import {
+  aggregateTeamLeaderMcfStats,
+  buildGradeBreakdown,
+  buildMemoScholarAttendanceRows,
+} from "../services/memo-page.service.js";
 import { EMPTY_WEEKLY_MINUTES } from "../models/weekly-minutes.model.js";
 import type { CampusWeekAttendanceTotals } from "../models/attendance-week.model.js";
 import type { MemoUserRow } from "../models/user.model.js";
-import type { FormLogRowWithLate, WahfFormLogRow } from "../models/form-log.model.js";
+import type { FormLogRowWithLate, McfFormLogRow, WahfFormLogRow } from "../models/form-log.model.js";
+import type { ScholarShiftCompliance } from "../models/session-log.model.js";
 import { freshmanCohortYear } from "../services/time.service.js";
 
 describe("Memo routes — auth gating", () => {
@@ -103,6 +108,35 @@ describe("buildMemoScholarAttendanceRows", () => {
     expect(scholars[0]?.fdExcuseMin).toBe(120);
     expect(scholars[0]?.fdPct).toBe(100);
     expect(cohort2025.fdCompleteCount).toBe(1);
+  });
+
+  it("enriches compliance without changing attendance, excuse, or completion values", () => {
+    const fdByUid = new Map<string, CampusWeekAttendanceTotals>([
+      ["1001", { ...zero, loggedMin: 90, excuseMin: 30 }],
+    ]);
+    const compliance: ScholarShiftCompliance = {
+      fdCompliance: { insideMinutes: 75, outsideMinutes: 15, noShowCount: 0, dates: [] },
+      ssCompliance: { insideMinutes: 30, outsideMinutes: 0, noShowCount: 1, dates: [] },
+    };
+
+    const { scholars } = buildMemoScholarAttendanceRows(
+      [scholar],
+      fdByUid,
+      new Map(),
+      [],
+      new Map([["1001", compliance]])
+    );
+
+    expect(scholars[0]).toMatchObject({
+      fdTotal: 90,
+      fdExcuseMin: 30,
+      fdPct: 100,
+      ssTotal: 0,
+      ssExcuseMin: 0,
+      ssPct: 0,
+      fdCompliance: { insideMinutes: 75, outsideMinutes: 15 },
+      ssCompliance: { insideMinutes: 30, outsideMinutes: 0, noShowCount: 1 },
+    });
   });
 
   it("sets WAHF status from latest form-log row for that scholar", () => {
@@ -208,6 +242,64 @@ describe("buildMemoScholarAttendanceRows", () => {
       new Map([["1001", "Ada Mentor"]]),
     );
     expect(scholars[0]?.teamLeader).toBe("Ada Mentor");
+  });
+});
+
+const mcfRow = (
+  overrides: Partial<FormLogRowWithLate<McfFormLogRow>>
+): FormLogRowWithLate<McfFormLogRow> => ({
+  id: "mcf-1",
+  created_at: "2026-04-02T12:00:00.000Z",
+  mentor_name: null,
+  mentor_uid: null,
+  mentee_name: null,
+  mentee_uid: null,
+  meeting_date: null,
+  meeting_time: null,
+  met_in_person: null,
+  reason_no_meeting: null,
+  tasks_completed: null,
+  meeting_notes: null,
+  tutoring_status: null,
+  needs_tutor: null,
+  support_rank: null,
+  submitted_by_email: null,
+  isLate: false,
+  ...overrides,
+});
+
+describe("aggregateTeamLeaderMcfStats", () => {
+  it("uses fetched weekly MCF rows with the legacy mentor-or-mentee match semantics", () => {
+    const stats = aggregateTeamLeaderMcfStats(
+      ["tl-mentor", "tl-mentee"],
+      [
+        mcfRow({
+          id: "one",
+          mentor_uid: "tl-mentor",
+          mentee_uid: "tl-mentee",
+          created_at: "2026-04-02T12:00:00.000Z",
+        }),
+        mcfRow({
+          id: "two",
+          mentor_uid: "tl-mentor",
+          mentee_uid: "tl-mentor",
+          created_at: "2026-04-04T12:00:00.000Z",
+          isLate: true,
+        }),
+        mcfRow({ id: "three", mentor_uid: "other", mentee_uid: "another" }),
+      ]
+    );
+
+    expect(stats.get("tl-mentor")).toEqual({
+      count: 2,
+      hasLate: true,
+      latestAt: "2026-04-04T12:00:00.000Z",
+    });
+    expect(stats.get("tl-mentee")).toEqual({
+      count: 1,
+      hasLate: false,
+      latestAt: "2026-04-02T12:00:00.000Z",
+    });
   });
 });
 

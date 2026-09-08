@@ -88,6 +88,8 @@ const buildMemoData = (overrides: Record<string, unknown> = {}) => ({
       ssExcuseMin: 0,
       wahfStatus: "on-time",
       wahfSubmittedAt: "2026-04-02T16:00:00.000Z",
+      fdCompliance: { insideMinutes: 114, outsideMinutes: 0, noShowCount: 0, dates: [] },
+      ssCompliance: { insideMinutes: 109, outsideMinutes: 0, noShowCount: 0, dates: [] },
     },
     {
       scholarId: "2023-010",
@@ -104,6 +106,8 @@ const buildMemoData = (overrides: Record<string, unknown> = {}) => ({
       ssExcuseMin: 0,
       wahfStatus: "missing",
       wahfSubmittedAt: null,
+      fdCompliance: { insideMinutes: 24, outsideMinutes: 6, noShowCount: 0, dates: [] },
+      ssCompliance: { insideMinutes: 40, outsideMinutes: 44, noShowCount: 0, dates: [] },
     },
   ],
   teamLeaders: [],
@@ -264,8 +268,8 @@ describe("WeeklyMemoAsyncContent", () => {
             scholarName: "Bob Scholar",
             flags: expect.arrayContaining(["Low front desk completion", "Low study session completion", "Low grade", "Missing WAHF"]),
             issues: expect.arrayContaining([
-              { kind: "front-desk", glance: "Front desk", pct: 50, requiredMinutes: 120 },
-              { kind: "study-session", glance: "Study session", pct: 70, requiredMinutes: 120 },
+              { kind: "front-desk", glance: "Front desk", pct: 50, requiredMinutes: 120, insideMinutes: 24, outsideMinutes: 6 },
+              { kind: "study-session", glance: "Study session", pct: 70, requiredMinutes: 120, insideMinutes: 40, outsideMinutes: 44 },
               { kind: "grade", glance: "X · Y", pct: 60 },
               { kind: "wahf", glance: "WAHF", status: "missing", submittedAtLabel: null },
             ]),

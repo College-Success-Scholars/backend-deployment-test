@@ -3,6 +3,7 @@ import type { TrafficSession } from "@/lib/types/traffic"
 import type { FormCompletionOverall } from "@/components/data-display/form-completion-overview-card"
 import type { MemoTutorReportRow } from "@/lib/types/tutor-report-log"
 import type { GradeBreakdown, GradeEntry, TeamLeaderFormStatsRow } from "@/lib/types/form-log"
+import type { ShiftComplianceByKind } from "@/lib/types/supabase"
 
 export type ScholarWahfStatus = "on-time" | "late" | "missing"
 
@@ -22,6 +23,8 @@ export type MemoScholarRow = {
   ssPct: number | null
   wahfStatus: ScholarWahfStatus
   wahfSubmittedAt: string | null
+  fdCompliance: ShiftComplianceByKind
+  ssCompliance: ShiftComplianceByKind
 }
 
 export type MemoTLRow = {
@@ -118,6 +121,8 @@ export type ScholarFollowUpHoursIssue = {
   glance: string
   pct: number
   requiredMinutes: number | null
+  insideMinutes: number
+  outsideMinutes: number
 }
 
 /** Grade issue: glance is the assignment title; detail is the percent. */

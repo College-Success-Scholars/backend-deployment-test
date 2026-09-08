@@ -52,6 +52,8 @@ const buildScholarFollowUpIssues = (
       glance: "Front desk",
       pct: frontDeskPct,
       requiredMinutes: row.fdRequired,
+      insideMinutes: row.fdCompliance?.insideMinutes ?? 0,
+      outsideMinutes: row.fdCompliance?.outsideMinutes ?? 0,
     })
   }
   if ((row.ssPct ?? 0) < LOW_COMPLETION_THRESHOLD) {
@@ -61,6 +63,8 @@ const buildScholarFollowUpIssues = (
       glance: "Study session",
       pct: studySessionPct,
       requiredMinutes: row.ssRequired,
+      insideMinutes: row.ssCompliance?.insideMinutes ?? 0,
+      outsideMinutes: row.ssCompliance?.outsideMinutes ?? 0,
     })
   }
 

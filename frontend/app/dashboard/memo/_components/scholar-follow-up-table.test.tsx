@@ -11,8 +11,8 @@ const rows: ScholarFollowUpRow[] = [
     teamLeader: "TL One",
     flags: ["Low front desk completion", "Low study session completion", "Low grade", "Missing WAHF"],
     issues: [
-      { kind: "front-desk", glance: "Front desk", pct: 50, requiredMinutes: 120 },
-      { kind: "study-session", glance: "Study session", pct: 70, requiredMinutes: 120 },
+      { kind: "front-desk", glance: "Front desk", pct: 50, requiredMinutes: 120, insideMinutes: 24, outsideMinutes: 6 },
+      { kind: "study-session", glance: "Study session", pct: 70, requiredMinutes: 120, insideMinutes: 40, outsideMinutes: 44 },
       { kind: "grade", glance: "X · Y", pct: 60 },
       { kind: "wahf", glance: "WAHF", status: "missing", submittedAtLabel: null },
     ],
@@ -55,6 +55,10 @@ describe("ScholarFollowUpTable", () => {
     expect(html).toContain("50%")
     expect(html).toContain("of 120 min")
     expect(html).toContain("70%")
+    expect(html).toContain("24 min inside")
+    expect(html).toContain("6 min outside")
+    expect(html).toContain("40 min inside")
+    expect(html).toContain("44 min outside")
     expect(html).toContain("60%")
     expect(html).toContain("40%")
     expect(html).not.toContain("90%")
