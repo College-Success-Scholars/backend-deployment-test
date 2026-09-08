@@ -239,6 +239,7 @@ describe("buildMemoScholarAttendanceRows", () => {
       new Map(),
       new Map(),
       [],
+      new Map(),
       new Map([["1001", "Ada Mentor"]]),
     );
     expect(scholars[0]?.teamLeader).toBe("Ada Mentor");

@@ -8,8 +8,8 @@ function source(weekNumber: number): MemoPageData {
     selectedWeekNumber: weekNumber,
     weekLabel: `Week ${weekNumber}`,
     scholars: [
-      { scholarId: "zero", scholarName: "Zero Scholar", cohort: 2024, teamLeader: "Unassigned", fdTotal: 0, ssTotal: 0, fdRequired: 60, ssRequired: 120, fdExcuseMin: 0, ssExcuseMin: 0, fdPct: 0, ssPct: 0, wahfStatus: "missing", wahfSubmittedAt: null },
-      { scholarId: "complete", scholarName: "Complete Scholar", cohort: 2025, teamLeader: "TL One", fdTotal: 60, ssTotal: 120, fdRequired: 60, ssRequired: 120, fdExcuseMin: 0, ssExcuseMin: 0, fdPct: 100, ssPct: 100, wahfStatus: "on-time", wahfSubmittedAt: "2026-04-03T12:00:00.000Z" },
+      { scholarId: "zero", scholarName: "Zero Scholar", cohort: 2024, teamLeader: "Unassigned", fdTotal: 0, ssTotal: 0, fdRequired: 60, ssRequired: 120, fdExcuseMin: 0, ssExcuseMin: 0, fdPct: 0, ssPct: 0, wahfStatus: "missing", wahfSubmittedAt: null, fdCompliance: { insideMinutes: 0, outsideMinutes: 0, noShowCount: 0, dates: [] }, ssCompliance: { insideMinutes: 0, outsideMinutes: 0, noShowCount: 0, dates: [] } },
+      { scholarId: "complete", scholarName: "Complete Scholar", cohort: 2025, teamLeader: "TL One", fdTotal: 60, ssTotal: 120, fdRequired: 60, ssRequired: 120, fdExcuseMin: 0, ssExcuseMin: 0, fdPct: 100, ssPct: 100, wahfStatus: "on-time", wahfSubmittedAt: "2026-04-03T12:00:00.000Z", fdCompliance: { insideMinutes: 0, outsideMinutes: 0, noShowCount: 0, dates: [] }, ssCompliance: { insideMinutes: 0, outsideMinutes: 0, noShowCount: 0, dates: [] } },
     ],
     completedStudy: [], completedFd: [], trafficWeeklyData: [], trafficEntryCountForSelectedWeek: 8, trafficSessions: [],
     tutorReports: [{ id: 1, scholarId: "n/a", scholarName: "EMPTY SESSION", tutorName: "Tutor", courses: ["Math"], startTime: "10:00", endTime: "11:00", dayOfWeek: "Mon" }],

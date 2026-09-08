@@ -203,7 +203,8 @@ export function buildMemoScholarAttendanceRows(
   fdByUid: Map<string, CampusWeekAttendanceTotals>,
   ssByUid: Map<string, CampusWeekAttendanceTotals>,
   wahfRows: FormLogRowWithLate<WahfFormLogRow>[] = [],
-  complianceByScholarId: Map<string, ScholarShiftCompliance> = new Map()
+  complianceByScholarId: Map<string, ScholarShiftCompliance> = new Map(),
+  teamLeaderByMenteeUid: Map<string, string> = new Map(),
 ): {
   scholars: MemoScholarAttendanceRow[];
   cohort2024: { total: number; fdCompleteCount: number; ssCompleteCount: number };
@@ -379,7 +380,8 @@ export async function getMemoPageData(weekNum: number) {
     attendance.fdByUid,
     attendance.ssByUid,
     whafRowsWithLate,
-    complianceByScholarId
+    complianceByScholarId,
+    menteeTeamLeaders,
   );
 
   const pieData = {
